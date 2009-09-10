@@ -1,4 +1,4 @@
-<SeverManagerConfiguration>
+<ServerManagerConfiguration>
 	<ProxyGroup name="sources">
 		<SourceProxy name="TxtReader" class="vtkTxtReader">
 			<StringVectorProperty

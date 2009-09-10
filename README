@@ -1,0 +1,1 @@
+*TxtReader includes a sample client side plugin to cause paraview to read in txt files as csv (comma separated values). Only for demonstration purposes of the paraview architechture, but could also later be useful. 
