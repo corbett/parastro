@@ -1,0 +1,6 @@
+<ParaViewReaders>
+	<Reader name="TxtReader"
+			extensions="txt"
+			file_description="assumes txt files are comma separated values, currently just copying the CSVReader code, later will change to be my own readers">
+	</Reader>
+<ParaViewReaders>

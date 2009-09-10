@@ -1,0 +1,12 @@
+<SeverManagerConfiguration>
+	<ProxyGroup name="sources">
+		<SourceProxy name="TxtReader" class="vtkTxtReader">
+			<StringVectorProperty
+				name="FileName"
+				command="SetFileName"
+				number_of_elements="1">
+				<FileListDomain name="files"/>
+			</StringVectorProperty>
+		</SourceProxy>
+	</ProxyGroup>
+</ServerManagerConfiguration>
