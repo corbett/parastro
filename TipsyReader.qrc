@@ -1,5 +1,5 @@
 <RCC>
 	<qresource prefix="/ParaViewResources">
-		<file>TxtReaderGUI.xml</file>
+		<file>TipsyReaderGUI.xml</file>
 	</qresource>
 </RCC>

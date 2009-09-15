@@ -1,6 +1,6 @@
 <ServerManagerConfiguration>
 	<ProxyGroup name="sources">
-		<SourceProxy name="TxtReader" class="vtkTxtReader">
+		<SourceProxy name="TipsyReader" class="vtkTipsyReader">
 			<StringVectorProperty
 				name="FileName"
 				command="SetFileName"
