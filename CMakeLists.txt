@@ -2,13 +2,23 @@ cmake_minimum_required(VERSION 2.4)
 FIND_PACKAGE(ParaView REQUIRED)
 INCLUDE(${PARAVIEW_USE_FILE})
 ####
-#now for the Tipsy binary reader
-####
+##now for the Tipsy binary reader
+#
+#
+#requires an additional library, libtipsy 
+#check out with
+#%svn co https://svn.physik.uzh.ch/repos/itp/tipsylib
+#build with
+#%make
+#may need to run
+#%ranlib libtipsy.a
+#install
+#%sudo cp libtipsa.a /usr/lib
+#######
 #define the server-side portion of the reader plugin
 ADD_PARAVIEW_PLUGIN(TipsyReaderSMPlugin "1.0"
 	SERVER_MANAGER_SOURCES vtkTipsyReader.cxx
 	SERVER_MANAGER_XML  TipsyReaderSM.xml)
-#requires an additional library, libtipsy 
 #can later do this more cleanly
 TARGET_LINK_LIBRARIES(TipsyReaderSMPlugin /usr/lib/libtipsy.a)
 #define the client-side portion of the reader plugin

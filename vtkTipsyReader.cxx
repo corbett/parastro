@@ -79,7 +79,7 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 	in >> g;
 	x[0]=g.pos[0];
 	x[1]=g.pos[1];
-	x[3]=g.pos[2];
+	x[2]=g.pos[2];
 	vtkIdType id = points->InsertNextPoint(x);
     verts->InsertNextCell(1, &id);
   }
@@ -87,7 +87,7 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 	in >> d;
 	x[0]=d.pos[0];
 	x[1]=d.pos[1];
-	x[3]=d.pos[2];
+	x[2]=d.pos[2];
 	vtkIdType id = points->InsertNextPoint(x);
     verts->InsertNextCell(1, &id);
   }
@@ -95,7 +95,7 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 	in >> s;
 	x[0]=s.pos[0];
 	x[1]=s.pos[1];
-	x[3]=s.pos[2];
+	x[2]=s.pos[2];
 	vtkIdType id = points->InsertNextPoint(x);
     verts->InsertNextCell(1, &id);
   }
