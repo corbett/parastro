@@ -10,13 +10,13 @@ ADD_PARAVIEW_PLUGIN(TipsyReaderSMPlugin "1.0"
 	SERVER_MANAGER_XML  TipsyReaderSM.xml)
 #requires an additional library, libtipsy 
 #can later do this more cleanly
-TARGET_LINK_LIBRARIES(TipsyReaderSMPlugin /Users/noname1/Documents/Research/Projects/viz/Dependencies/tipsylib/trunk/libtipsy.a)
+TARGET_LINK_LIBRARIES(TipsyReaderSMPlugin /usr/lib/libtipsy.a)
 #define the client-side portion of the reader plugin
 ADD_PARAVIEW_PLUGIN(TipsyReaderGUIPlugin "1.0"
 	GUI_RESOURCES TipsyReader.qrc)
 #requires an additional library, libtipsy 
 #can later do this more cleanly
-TARGET_LINK_LIBRARIES(TipsyReaderGUIPlugin /Users/noname1/Documents/Research/Projects/viz/Dependencies/tipsylib/trunk/libtipsy.a)
+TARGET_LINK_LIBRARIES(TipsyReaderGUIPlugin /usr/lib/libtipsy.a)
 ####
 #FOR READING TEXT FILES OF POINTS
 #Just a sample of the reader plugin architecture

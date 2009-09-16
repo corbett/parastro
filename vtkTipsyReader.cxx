@@ -1,6 +1,9 @@
 /*=========================================================================
-Modified from vtkSimplePointsReader and from Doug Potter's Tipsylib
- -christine
+Modified from vtkSimplePointsReader and from Doug Potter's Tipsylib, 
+this depends on a few header files as well as the Tipsylib library.
+
+Currently only reads in standard format Tipsy files
+@author corbett
 =========================================================================*/
 #include "ftipsy.hpp" 
 #include "vtkTipsyReader.h"
@@ -11,15 +14,13 @@ Modified from vtkSimplePointsReader and from Doug Potter's Tipsylib
 #include "vtkSmartPointer.h"
 
 //Initializing 
-//TODO: currently crashes if I try to use ifTipsy, this is because libtipsy.a is not included (likely one of the other files? )
 ifTipsy in;          // The input file
-
 TipsyHeader       h; // The header structure
 TipsyGasParticle  g; // A gas particle
 TipsyDarkParticle d; // A dark particle
 TipsyStarParticle s; // A star particle
 uint32_t i;
-vtkCxxRevisionMacro(vtkTipsyReader, "$Revision: 1.1 $");
+vtkCxxRevisionMacro(vtkTipsyReader, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkTipsyReader);
 
 //----------------------------------------------------------------------------
@@ -58,30 +59,54 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 
     // Open the tipsy standard file and abort if there is an error.
     in.open(this->FileName,"standard");
-    if ( ! in.is_open() ) {
+    if (!in.is_open()) {
 	    vtkErrorMacro("Error opening file " << this->FileName);
 	    return 0;	
     }
 
   // Allocate objects to hold points and vertex cells.
-/*
   vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
   vtkSmartPointer<vtkCellArray> verts = vtkSmartPointer<vtkCellArray>::New();
 
   // Read points from the file.
   vtkDebugMacro("Reading points from file " << this->FileName);
   double x[3];
-  while(fin >> x[0] >> x[1] >> x[2])
-    {
-    vtkIdType id = points->InsertNextPoint(x);
+  // Read the header from the input
+  in >> h;
+  // Read every particle and add their position to be displayed
+  //TODO: this code can obviously be more general; it's repeating three times, fix this
+  for( i=0; i<h.h_nSph;  i++ ) {
+	in >> g;
+	x[0]=g.pos[0];
+	x[1]=g.pos[1];
+	x[3]=g.pos[2];
+	vtkIdType id = points->InsertNextPoint(x);
     verts->InsertNextCell(1, &id);
-    }
+  }
+  for( i=0; i<h.h_nDark; i++ ) { 
+	in >> d;
+	x[0]=d.pos[0];
+	x[1]=d.pos[1];
+	x[3]=d.pos[2];
+	vtkIdType id = points->InsertNextPoint(x);
+    verts->InsertNextCell(1, &id);
+  }
+  for( i=0; i<h.h_nStar; i++) {
+	in >> s;
+	x[0]=s.pos[0];
+	x[1]=s.pos[1];
+	x[3]=s.pos[2];
+	vtkIdType id = points->InsertNextPoint(x);
+    verts->InsertNextCell(1, &id);
+  }
+  // Close the file.
+  in.close();
   vtkDebugMacro("Read " << points->GetNumberOfPoints() << " points.");
 
   // Store the points and cells in the output data object.
   vtkPolyData* output = vtkPolyData::GetData(outputVector);
   output->SetPoints(points);
   output->SetVerts(verts);
-*/
+
   return 1;
 }
