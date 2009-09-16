@@ -8,11 +8,11 @@ Currently only reads in standard format Tipsy files
 #include "ftipsy.hpp" 
 #include "vtkTipsyReader.h"
 #include "vtkCellArray.h"
+#include "vtkFloatArray.h"
 #include "vtkObjectFactory.h"
 #include "vtkPoints.h"
 #include "vtkPolyData.h"
 #include "vtkSmartPointer.h"
-
 //Initializing 
 ifTipsy in;          // The input file
 TipsyHeader       h; // The header structure
@@ -67,6 +67,7 @@ int vtkTipsyReader::RequestData(vtkInformation*,
   // Allocate objects to hold points and vertex cells.
   vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
   vtkSmartPointer<vtkCellArray> verts = vtkSmartPointer<vtkCellArray>::New();
+//  vtkSmartPointer<vtkFloatArray> scalars = vtkSmartPointer<vtkFloatArray>::New();//added this
 
   // Read points from the file.
   vtkDebugMacro("Reading points from file " << this->FileName);
@@ -82,6 +83,7 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 	x[2]=g.pos[2];
 	vtkIdType id = points->InsertNextPoint(x);
     verts->InsertNextCell(1, &id);
+//	scalars->InsertNextValue(g.mass);
   }
   for( i=0; i<h.h_nDark; i++ ) { 
 	in >> d;
@@ -90,6 +92,7 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 	x[2]=d.pos[2];
 	vtkIdType id = points->InsertNextPoint(x);
     verts->InsertNextCell(1, &id);
+//	scalars->InsertNextValue(d.mass);
   }
   for( i=0; i<h.h_nStar; i++) {
 	in >> s;
@@ -98,6 +101,7 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 	x[2]=s.pos[2];
 	vtkIdType id = points->InsertNextPoint(x);
     verts->InsertNextCell(1, &id);
+//	scalars->InsertNextValue(s.mass);
   }
   // Close the file.
   in.close();
@@ -107,6 +111,6 @@ int vtkTipsyReader::RequestData(vtkInformation*,
   vtkPolyData* output = vtkPolyData::GetData(outputVector);
   output->SetPoints(points);
   output->SetVerts(verts);
-
+//  scalars->InsertNextValue(g.mass); //doesn't work
   return 1;
 }
