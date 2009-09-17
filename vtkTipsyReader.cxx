@@ -8,7 +8,7 @@ Currently only reads in standard format Tipsy files
 #include "ftipsy.hpp" 
 #include "vtkTipsyReader.h"
 #include "vtkCellArray.h"
-#include "vtkFloatArray.h"
+#include "vtkDoubleArray.h"
 #include "vtkObjectFactory.h"
 #include "vtkPoints.h"
 #include "vtkPointData.h"
@@ -76,7 +76,7 @@ int vtkTipsyReader::RequestData(vtkInformation*,
   vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
   vtkSmartPointer<vtkCellArray> verts = vtkSmartPointer<vtkCellArray>::New();
   //mass
-  vtkSmartPointer<vtkFloatArray> mass_scalars = vtkSmartPointer<vtkFloatArray>::New();//added this
+  vtkSmartPointer<vtkDoubleArray> mass_scalars = vtkSmartPointer<vtkDoubleArray>::New();//added this
   mass_scalars->SetNumberOfComponents(1);
   mass_scalars->SetName("mass");
   mass_scalars->SetNumberOfTuples(num_particles);
