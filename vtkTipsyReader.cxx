@@ -11,6 +11,7 @@ Currently only reads in standard format Tipsy files
 #include "vtkFloatArray.h"
 #include "vtkObjectFactory.h"
 #include "vtkPoints.h"
+#include "vtkPointData.h"
 #include "vtkPolyData.h"
 #include "vtkSmartPointer.h"
 //Initializing 
@@ -64,16 +65,22 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 	    return 0;	
     }
 
-  // Allocate objects to hold points and vertex cells.
-  vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
-  vtkSmartPointer<vtkCellArray> verts = vtkSmartPointer<vtkCellArray>::New();
-//  vtkSmartPointer<vtkFloatArray> scalars = vtkSmartPointer<vtkFloatArray>::New();//added this
-
   // Read points from the file.
   vtkDebugMacro("Reading points from file " << this->FileName);
   double x[3];
   // Read the header from the input
   in >> h;
+  //Calculate the number of particles
+  int num_particles=h.h_nSph+h.h_nDark+h.h_nStar;
+  // Allocate objects to hold points and vertex cells.
+  vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
+  vtkSmartPointer<vtkCellArray> verts = vtkSmartPointer<vtkCellArray>::New();
+  //mass
+  vtkSmartPointer<vtkFloatArray> mass_scalars = vtkSmartPointer<vtkFloatArray>::New();//added this
+  mass_scalars->SetNumberOfComponents(1);
+  mass_scalars->SetName("mass");
+  mass_scalars->SetNumberOfTuples(num_particles);
+
   // Read every particle and add their position to be displayed
   //TODO: this code can obviously be more general; it's repeating three times, fix this
   for( i=0; i<h.h_nSph;  i++ ) {
@@ -83,7 +90,7 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 	x[2]=g.pos[2];
 	vtkIdType id = points->InsertNextPoint(x);
     verts->InsertNextCell(1, &id);
-//	scalars->InsertNextValue(g.mass);
+	mass_scalars->InsertNextValue(g.mass);
   }
   for( i=0; i<h.h_nDark; i++ ) { 
 	in >> d;
@@ -92,7 +99,8 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 	x[2]=d.pos[2];
 	vtkIdType id = points->InsertNextPoint(x);
     verts->InsertNextCell(1, &id);
-//	scalars->InsertNextValue(d.mass);
+	mass_scalars->InsertNextValue(d.mass);
+
   }
   for( i=0; i<h.h_nStar; i++) {
 	in >> s;
@@ -101,7 +109,7 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 	x[2]=s.pos[2];
 	vtkIdType id = points->InsertNextPoint(x);
     verts->InsertNextCell(1, &id);
-//	scalars->InsertNextValue(s.mass);
+	mass_scalars->InsertNextValue(s.mass);
   }
   // Close the file.
   in.close();
@@ -110,7 +118,7 @@ int vtkTipsyReader::RequestData(vtkInformation*,
   // Store the points and cells in the output data object.
   vtkPolyData* output = vtkPolyData::GetData(outputVector);
   output->SetPoints(points);
-  output->SetVerts(verts);
-//  scalars->InsertNextValue(g.mass); //doesn't work
+  output->SetVerts(verts); 
+  output->GetPointData()->SetScalars(mass_scalars);
   return 1;
 }
