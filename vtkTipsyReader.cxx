@@ -71,7 +71,7 @@ int vtkTipsyReader::RequestData(vtkInformation*,
   // Read the header from the input
   in >> h;
   //Calculate the number of particles
-  int num_particles=h.h_nSph+h.h_nDark+h.h_nStar;
+//  int num_particles=h.h_nSph+h.h_nDark+h.h_nStar;
   // Allocate objects to hold points and vertex cells.
   vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
   vtkSmartPointer<vtkCellArray> verts = vtkSmartPointer<vtkCellArray>::New();
@@ -79,7 +79,7 @@ int vtkTipsyReader::RequestData(vtkInformation*,
   vtkSmartPointer<vtkDoubleArray> mass_scalars = vtkSmartPointer<vtkDoubleArray>::New();//added this
   mass_scalars->SetNumberOfComponents(1);
   mass_scalars->SetName("mass");
-  mass_scalars->SetNumberOfTuples(num_particles);
+  //mass_scalars->SetNumberOfTuples(num_particles);
 
   // Read every particle and add their position to be displayed
   //TODO: this code can obviously be more general; it's repeating three times, fix this
