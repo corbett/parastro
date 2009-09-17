@@ -5,29 +5,26 @@ this depends on a few header files as well as the Tipsylib library.
 Currently only reads in standard format Tipsy files
 @author corbett
 =========================================================================*/
-#include "ftipsy.hpp" 
 #include "vtkTipsyReader.h"
-#include "vtkCellArray.h"
-#include "vtkDoubleArray.h"
 #include "vtkObjectFactory.h"
-#include "vtkPoints.h"
 #include "vtkPointData.h"
 #include "vtkPolyData.h"
+#include "vtkPoints.h"
+#include "vtkCellArray.h"
+#include "vtkDoubleArray.h"
 #include "vtkSmartPointer.h"
-//TODO: perhaps all these globals should be part of the class initialization and referenced by this->
-//Initializing for reading //TODO: 
+//Initializing for reading  
 ifTipsy in;          // The input file
 TipsyHeader       h; // The header structure
 TipsyGasParticle  g; // A gas particle
 TipsyDarkParticle d; // A dark particle
 TipsyStarParticle s; // A star particle
-// Allocate objects to hold points and vertex cells.
+//points and scalars
 vtkSmartPointer<vtkPoints> points;
 vtkSmartPointer<vtkCellArray> verts; 
-// Allocate Scalars
-//mass
 vtkSmartPointer<vtkDoubleArray> mass_scalars;
-/////
+double x[3]; //for positions
+double v[3]; //for velocities
 uint32_t i;
 vtkCxxRevisionMacro(vtkTipsyReader, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkTipsyReader);
@@ -35,8 +32,8 @@ vtkStandardNewMacro(vtkTipsyReader);
 //----------------------------------------------------------------------------
 vtkTipsyReader::vtkTipsyReader()
 {
-  this->FileName = 0;
-  this->SetNumberOfInputPorts(0);
+ this->FileName = 0;
+ this->SetNumberOfInputPorts(0);
   // Allocate objects to hold points and vertex cells.
  points = vtkSmartPointer<vtkPoints>::New();
  verts = vtkSmartPointer<vtkCellArray>::New();
@@ -63,14 +60,12 @@ void vtkTipsyReader::PrintSelf(ostream& os, vtkIndent indent)
 
 //----------------------------------------------------------------------------
 void vtkTipsyReader::ReadBaseParticle(TipsyBaseParticle& baseParticle) {
-/*  	double x[3]; //TODO: memory management
-	x[0]=baseParticle.p	os[0];
+	x[0]=baseParticle.pos[0];
 	x[1]=baseParticle.pos[1];
 	x[2]=baseParticle.pos[2];
 	vtkIdType id = points->InsertNextPoint(x);
     verts->InsertNextCell(1, &id);
 	mass_scalars->InsertNextValue(baseParticle.mass);
-	*/
 }
 
 int vtkTipsyReader::RequestData(vtkInformation*,

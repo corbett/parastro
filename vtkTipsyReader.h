@@ -9,7 +9,7 @@ Modified from vtkSimplePointsReader and from Doug Potter's Tipsylib
 #define __vtkTipsyReader_h
 
 #include "vtkPolyDataAlgorithm.h"
-#include "ftipsy.hpp" 
+#include "ftipsy.hpp"
 
 class VTK_IO_EXPORT vtkTipsyReader : public vtkPolyDataAlgorithm
 {
@@ -26,9 +26,7 @@ public:
 protected:
   vtkTipsyReader();
   ~vtkTipsyReader();
-
   char* FileName;
-
   int RequestData(vtkInformation*,
                   vtkInformationVector**,
                   vtkInformationVector*);
