@@ -9,6 +9,7 @@ Modified from vtkSimplePointsReader and from Doug Potter's Tipsylib
 #define __vtkTipsyReader_h
 
 #include "vtkPolyDataAlgorithm.h"
+#include "ftipsy.hpp" 
 
 class VTK_IO_EXPORT vtkTipsyReader : public vtkPolyDataAlgorithm
 {
@@ -34,6 +35,7 @@ protected:
 private:
   vtkTipsyReader(const vtkTipsyReader&);  // Not implemented.
   void operator=(const vtkTipsyReader&);  // Not implemented.
+  void ReadBaseParticle(TipsyBaseParticle& baseParticle);
 };
 
 #endif
