@@ -24,12 +24,15 @@ vtkSmartPointer<vtkPoints> points;
 vtkSmartPointer<vtkCellArray> verts; 
 vtkSmartPointer<vtkFloatArray> mass_scalars;
 vtkSmartPointer<vtkFloatArray> phi_scalars;
-vtkSmartPointer<vtkFloatArray> rho_scalars;        
+vtkSmartPointer<vtkFloatArray> eps_scalars;
+/*
+TODO: ADD BACK IN WHEN READY
+vtkSmartPointer<vtkFloatArray> rho_scalars;   
 vtkSmartPointer<vtkFloatArray> temp_scalars;       
 vtkSmartPointer<vtkFloatArray> hsmooth_scalars;    
 vtkSmartPointer<vtkFloatArray> metals_scalars;
-vtkSmartPointer<vtkFloatArray> eps_scalars;
 vtkSmartPointer<vtkFloatArray> tform_scalars;
+*/
 uint32_t i;
 vtkCxxRevisionMacro(vtkTipsyReader, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkTipsyReader);
@@ -53,6 +56,11 @@ vtkTipsyReader::vtkTipsyReader()
  phi_scalars = vtkSmartPointer<vtkFloatArray>::New();
  phi_scalars->SetNumberOfComponents(1);
  phi_scalars->SetName("potential");
+ //softening
+ eps_scalars = vtkSmartPointer<vtkFloatArray>::New();
+ eps_scalars->SetNumberOfComponents(1);
+ eps_scalars->SetName("softening");
+/*
  //rho
  rho_scalars = vtkSmartPointer<vtkFloatArray>::New();
  rho_scalars->SetNumberOfComponents(1);
@@ -69,14 +77,12 @@ vtkTipsyReader::vtkTipsyReader()
  metals_scalars = vtkSmartPointer<vtkFloatArray>::New();
  metals_scalars->SetNumberOfComponents(1);
  metals_scalars->SetName("metals");
- //softening
- eps_scalars = vtkSmartPointer<vtkFloatArray>::New();
- eps_scalars->SetNumberOfComponents(1);
- eps_scalars->SetName("softening");
+
  //tform
  tform_scalars = vtkSmartPointer<vtkFloatArray>::New();
  tform_scalars->SetNumberOfComponents(1);
  tform_scalars->SetName("tform");
+*/
 }
 
 //----------------------------------------------------------------------------
@@ -105,6 +111,10 @@ vtkIdType vtkTipsyReader::ReadParticle(TipsyBaseParticle& baseParticle)
 }
 
 //TODO: what to do with portions of the scalar arrays which are not set. will paraview segfault?, should these be set to some default value, if their values are not known
+//why is something which should only be dark, reading in values such as metals?, for now only enabling reading dark particles
+
+/*
+//TODO: ADD BACK IN WHEN READY
 void vtkTipsyReader::ReadGasParticle(TipsyGasParticle& gasParticle) 
 {
   vtkIdType id = ReadParticle(gasParticle);
@@ -113,14 +123,15 @@ void vtkTipsyReader::ReadGasParticle(TipsyGasParticle& gasParticle)
   hsmooth_scalars->SetValue(id, gasParticle.hsmooth);
   metals_scalars->SetValue(id, gasParticle.metals);
 }
-
+*/
 
 void vtkTipsyReader::ReadDarkParticle(TipsyDarkParticle& darkParticle) 
 {
   vtkIdType id = ReadParticle(darkParticle);
   eps_scalars->SetValue(id, darkParticle.eps);
 }
-
+/*
+//TODO: ADD BACK IN WHEN READY
 void vtkTipsyReader::ReadStarParticle(TipsyStarParticle& starParticle) 
 {
   vtkIdType id = ReadParticle(starParticle);
@@ -128,7 +139,7 @@ void vtkTipsyReader::ReadStarParticle(TipsyStarParticle& starParticle)
   metals_scalars->SetValue(id, starParticle.metals);
   tform_scalars->SetValue(id, starParticle.metals);
 }
-
+*/
 
 int vtkTipsyReader::RequestData(vtkInformation*,
                                        vtkInformationVector**,
@@ -153,29 +164,38 @@ int vtkTipsyReader::RequestData(vtkInformation*,
   // Read the header from the input
   in >> h;
   //set the number of points for each scalar array; this is necessary if I want to use InsertValue for scalars by id
-  int numberPoints = h.h_nSph+h.h_nDark+h.h_nStar;
+  int numberPoints = h.h_nDark;
   mass_scalars->SetNumberOfTuples(numberPoints);
   phi_scalars->SetNumberOfTuples(numberPoints);
+  eps_scalars->SetNumberOfTuples(numberPoints);
+/*
+ //TODO: ADD BACK IN WHEN READY
   rho_scalars->SetNumberOfTuples(numberPoints);
   temp_scalars->SetNumberOfTuples(numberPoints);
   hsmooth_scalars->SetNumberOfTuples(numberPoints);
   metals_scalars->SetNumberOfTuples(numberPoints);
-  eps_scalars->SetNumberOfTuples(numberPoints);
   tform_scalars->SetNumberOfTuples(numberPoints);
+*/
 
   // Read every particle and add their position to be displayed, as well as relevant scalars
-  for( i=0; i<h.h_nSph;  i++ ) {
-	in >> g;
-	ReadGasParticle(g);
-  }
-  for( i=0; i<h.h_nDark; i++ ) { 
+  for( i=0; i<h.h_nDark; i++ ) 
+  { 
 	in >> d;
 	ReadDarkParticle(d);
   }
-  for( i=0; i<h.h_nStar; i++) {
+/*
+ //TODO: ADD BACK IN WHEN READY
+  for( i=0; i<h.h_nSph;  i++ ) 
+  {
+	in >> g;
+	ReadGasParticle(g);
+  }
+  for( i=0; i<h.h_nStar; i++) 
+  {
 	in >> s;
 	ReadStarParticle(s);
   }
+*/
   // Close the file.
   in.close();
   
@@ -188,22 +208,27 @@ int vtkTipsyReader::RequestData(vtkInformation*,
   output->GetPointData()->SetScalars(mass_scalars); //the default scalars to be displayed
   output->GetPointData()->AddArray(phi_scalars);
   output->GetPointData()->AddArray(rho_scalars);
+  output->GetPointData()->AddArray(eps_scalars);
+/*
+//TODO: ADD BACK IN WHEN READY
   output->GetPointData()->AddArray(temp_scalars);
   output->GetPointData()->AddArray(hsmooth_scalars);
   output->GetPointData()->AddArray(metals_scalars);
-  output->GetPointData()->AddArray(eps_scalars);
   output->GetPointData()->AddArray(tform_scalars);
-
+*/
   //Memory management
   points->Delete();
   verts->Delete();
   mass_scalars->Delete();
   phi_scalars->Delete();
+  eps_scalars->Delete();
+/*
+//TODO: ADD BACK IN WHEN READY
   rho_scalars->Delete();
   temp_scalars->Delete();
   hsmooth_scalars->Delete();
   metals_scalars->Delete();
-  eps_scalars->Delete();
   tform_scalars->Delete();
+*/
   return 1;
 }
