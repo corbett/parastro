@@ -217,11 +217,13 @@ int vtkTipsyReader::RequestData(vtkInformation*,
   output->GetPointData()->AddArray(tform_scalars);
 */
   //Memory management
+/*
   points->Delete();
   verts->Delete();
   mass_scalars->Delete();
   phi_scalars->Delete();
   eps_scalars->Delete();
+*/
 /*
 //TODO: ADD BACK IN WHEN READY
   rho_scalars->Delete();
