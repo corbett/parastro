@@ -184,6 +184,7 @@ int vtkTipsyReader::RequestData(vtkInformation*,
   output->GetPointData()->SetScalars(eps_scalars);
   output->GetPointData()->SetScalars(tform_scalars);
   //Memory management
+/*
   points->Delete();
   verts->Delete();
   mass_scalars->Delete();
@@ -194,5 +195,6 @@ int vtkTipsyReader::RequestData(vtkInformation*,
   metals_scalars->Delete();
   eps_scalars->Delete();
   tform_scalars->Delete();
+*/
   return 1;
 }
