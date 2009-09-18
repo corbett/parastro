@@ -161,6 +161,11 @@ int vtkTipsyReader::RequestData(vtkInformation*,
   vtkDebugMacro("Reading points from file " << this->FileName);
   // Read the header from the input
   in >> h;
+  //set the number of points for each scalar array; this is necessary if I want to use InsertValue for scalars by id
+  int numberPoints = h.h_nSph+h.h_nDark+h.h_nStar;
+  mass_scalars->SetNumberOfTuples(numberPoints);
+  phi_scalars->SetNumberOfTuples(numberPoints);
+
   // Read every particle and add their position to be displayed, as well as relevant scalars
   for( i=0; i<h.h_nSph;  i++ ) {
 	in >> g;
@@ -176,9 +181,6 @@ int vtkTipsyReader::RequestData(vtkInformation*,
   }
   // Close the file.
   in.close();
-  //set the number of points for each scalar array //TODO: this may not be necessary?
-  mass_scalars->SetNumberOfTuples(points->GetNumberOfPoints());
-  phi_scalars->SetNumberOfTuples(points->GetNumberOfPoints());
   
   vtkDebugMacro("Read " << points->GetNumberOfPoints() << " points.");
 
