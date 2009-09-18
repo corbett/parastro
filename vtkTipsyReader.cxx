@@ -110,8 +110,8 @@ vtkIdType vtkTipsyReader::ReadParticle(TipsyBaseParticle& baseParticle)
 
 void vtkTipsyReader::ReadGasParticle(TipsyGasParticle& gasParticle) 
 {
-	/*
   vtkIdType id = ReadParticle(gasParticle);
+/*
   rho_scalars->SetValue(id, gasParticle.rho);
   temp_scalars->SetValue(id, gasParticle.temp);
   hsmooth_scalars->SetValue(id, gasParticle.hsmooth);
@@ -122,16 +122,16 @@ void vtkTipsyReader::ReadGasParticle(TipsyGasParticle& gasParticle)
 
 void vtkTipsyReader::ReadDarkParticle(TipsyDarkParticle& darkParticle) 
 {
-/*
   vtkIdType id = ReadParticle(darkParticle);
+/*
   eps_scalars->SetValue(id, darkParticle.eps);
 */
 }
 
 void vtkTipsyReader::ReadStarParticle(TipsyStarParticle& starParticle) 
 {
-/*
   vtkIdType id = ReadParticle(starParticle);
+/*
   eps_scalars->SetValue(id, starParticle.eps);
   metals_scalars->SetValue(id, starParticle.metals);
   tform_scalars->SetValue(id, starParticle.metals);
