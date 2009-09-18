@@ -103,8 +103,8 @@ vtkIdType vtkTipsyReader::ReadParticle(TipsyBaseParticle& baseParticle)
 {
   vtkIdType id = points->InsertNextPoint(baseParticle.pos[0],baseParticle.pos[1],baseParticle.pos[2]);
   verts->InsertNextCell(1, &id);
-  mass_scalars->SetValue(id,baseParticle.mass);
-  phi_scalars->SetValue(id,baseParticle.phi);
+//  mass_scalars->SetValue(id,baseParticle.mass);
+//  phi_scalars->SetValue(id,baseParticle.phi);
   return id;
 }
 
