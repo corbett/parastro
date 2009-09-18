@@ -5,6 +5,7 @@ this depends on a few header files as well as the Tipsylib library.
 Currently only reads in standard format Tipsy files
 @author corbett
 =========================================================================*/
+#include "math.h"
 #include "vtkTipsyReader.h"
 #include "vtkObjectFactory.h"
 #include "vtkPointData.h"
@@ -19,12 +20,15 @@ TipsyHeader       h; // The header structure
 TipsyGasParticle  g; // A gas particle
 TipsyDarkParticle d; // A dark particle
 TipsyStarParticle s; // A star particle
+//for velocities
+//float vel[3];
 //points, scalars, and vectors
 vtkSmartPointer<vtkPoints> points;
 vtkSmartPointer<vtkCellArray> verts; 
 vtkSmartPointer<vtkFloatArray> mass_scalars;
 vtkSmartPointer<vtkFloatArray> phi_scalars;
 vtkSmartPointer<vtkFloatArray> eps_scalars;
+vtkSmartPointer<vtkFloatArray> velocity_vectors;
 /*
 TODO: ADD BACK IN WHEN READY
 vtkSmartPointer<vtkFloatArray> rho_scalars;   
@@ -83,6 +87,11 @@ vtkTipsyReader::vtkTipsyReader()
  tform_scalars->SetNumberOfComponents(1);
  tform_scalars->SetName("tform");
 */
+ //Allocate Vectors
+ //
+ velocity_vectors = vtkSmartPointer<vtkFloatArray>::New();
+ velocity_vectors->SetNumberOfComponents(3);
+ velocity_vectors->SetName("velocity");
 }
 
 //----------------------------------------------------------------------------
@@ -103,8 +112,9 @@ void vtkTipsyReader::PrintSelf(ostream& os, vtkIndent indent)
 //----------------------------------------------------------------------------
 vtkIdType vtkTipsyReader::ReadParticle(TipsyBaseParticle& baseParticle) 
 {
-  vtkIdType id = points->InsertNextPoint(baseParticle.pos[0],baseParticle.pos[1],baseParticle.pos[2]);
+  vtkIdType id = points->InsertNextPoint(baseParticle.pos);
   verts->InsertNextCell(1, &id);
+  velocity_vectors->InsertTupleValue(id,baseParticle.vel);
   mass_scalars->InsertValue(id,baseParticle.mass);
   phi_scalars->SetValue(id,baseParticle.phi);
   return id;
@@ -168,6 +178,7 @@ int vtkTipsyReader::RequestData(vtkInformation*,
   mass_scalars->SetNumberOfTuples(numberPoints);
   phi_scalars->SetNumberOfTuples(numberPoints);
   eps_scalars->SetNumberOfTuples(numberPoints);
+velocity_vectors->SetNumberOfTuples(pow(numberPoints,3));
 /*
  //TODO: ADD BACK IN WHEN READY
   rho_scalars->SetNumberOfTuples(numberPoints);
@@ -208,6 +219,7 @@ int vtkTipsyReader::RequestData(vtkInformation*,
   output->GetPointData()->SetScalars(phi_scalars); //the default scalars to be displayed
   output->GetPointData()->AddArray(mass_scalars);
   output->GetPointData()->AddArray(eps_scalars);
+  output->GetPointData()->SetVectors(velocity_vectors); //the default vectors to be displayed
 /*
 //TODO: ADD BACK IN WHEN READY
   output->GetPointData()->AddArray(rho_scalars);
