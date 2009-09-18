@@ -205,8 +205,8 @@ int vtkTipsyReader::RequestData(vtkInformation*,
   vtkPolyData* output = vtkPolyData::GetData(outputVector);
   output->SetPoints(points);
   output->SetVerts(verts); 
-  output->GetPointData()->SetScalars(mass_scalars); //the default scalars to be displayed
-  output->GetPointData()->AddArray(phi_scalars);
+  output->GetPointData()->SetScalars(phi_scalars); //the default scalars to be displayed
+  output->GetPointData()->AddArray(mass_scalars);
   output->GetPointData()->AddArray(eps_scalars);
 /*
 //TODO: ADD BACK IN WHEN READY
@@ -216,21 +216,6 @@ int vtkTipsyReader::RequestData(vtkInformation*,
   output->GetPointData()->AddArray(metals_scalars);
   output->GetPointData()->AddArray(tform_scalars);
 */
-  //Memory management
-/*
-  points->Delete();
-  verts->Delete();
-  mass_scalars->Delete();
-  phi_scalars->Delete();
-  eps_scalars->Delete();
-*/
-/*
-//TODO: ADD BACK IN WHEN READY
-  rho_scalars->Delete();
-  temp_scalars->Delete();
-  hsmooth_scalars->Delete();
-  metals_scalars->Delete();
-  tform_scalars->Delete();
-*/
+
   return 1;
 }
