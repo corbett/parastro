@@ -177,12 +177,14 @@ int vtkTipsyReader::RequestData(vtkInformation*,
   output->SetVerts(verts); 
   output->GetPointData()->SetScalars(mass_scalars);
   output->GetPointData()->SetScalars(phi_scalars);
+/*
   output->GetPointData()->SetScalars(rho_scalars);
   output->GetPointData()->SetScalars(temp_scalars);
   output->GetPointData()->SetScalars(hsmooth_scalars);
   output->GetPointData()->SetScalars(metals_scalars);
   output->GetPointData()->SetScalars(eps_scalars);
   output->GetPointData()->SetScalars(tform_scalars);
+*/
   //Memory management
 /*
   points->Delete();
