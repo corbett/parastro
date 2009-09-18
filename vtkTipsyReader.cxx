@@ -24,12 +24,14 @@ vtkSmartPointer<vtkPoints> points;
 vtkSmartPointer<vtkCellArray> verts; 
 vtkSmartPointer<vtkFloatArray> mass_scalars;
 vtkSmartPointer<vtkFloatArray> phi_scalars;
+/*
 vtkSmartPointer<vtkFloatArray> rho_scalars;        
 vtkSmartPointer<vtkFloatArray> temp_scalars;       
 vtkSmartPointer<vtkFloatArray> hsmooth_scalars;    
 vtkSmartPointer<vtkFloatArray> metals_scalars;
 vtkSmartPointer<vtkFloatArray> eps_scalars;
 vtkSmartPointer<vtkFloatArray> tform_scalars;
+*/
 uint32_t i;
 vtkCxxRevisionMacro(vtkTipsyReader, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkTipsyReader);
@@ -53,6 +55,7 @@ vtkTipsyReader::vtkTipsyReader()
  phi_scalars = vtkSmartPointer<vtkFloatArray>::New();
  phi_scalars->SetNumberOfComponents(1);
  phi_scalars->SetName("potential");
+/*
  //rho
  rho_scalars = vtkSmartPointer<vtkFloatArray>::New();
  rho_scalars->SetNumberOfComponents(1);
@@ -77,6 +80,7 @@ vtkTipsyReader::vtkTipsyReader()
  tform_scalars = vtkSmartPointer<vtkFloatArray>::New();
  tform_scalars->SetNumberOfComponents(1);
  tform_scalars->SetName("tform");
+*/
 }
 
 //----------------------------------------------------------------------------
@@ -106,26 +110,32 @@ vtkIdType vtkTipsyReader::ReadParticle(TipsyBaseParticle& baseParticle)
 
 void vtkTipsyReader::ReadGasParticle(TipsyGasParticle& gasParticle) 
 {
+	/*
   vtkIdType id = ReadParticle(gasParticle);
   rho_scalars->SetValue(id, gasParticle.rho);
   temp_scalars->SetValue(id, gasParticle.temp);
   hsmooth_scalars->SetValue(id, gasParticle.hsmooth);
   metals_scalars->SetValue(id, gasParticle.metals);
+ */
 }
 
 
 void vtkTipsyReader::ReadDarkParticle(TipsyDarkParticle& darkParticle) 
 {
+/*
   vtkIdType id = ReadParticle(darkParticle);
   eps_scalars->SetValue(id, darkParticle.eps);
+*/
 }
 
 void vtkTipsyReader::ReadStarParticle(TipsyStarParticle& starParticle) 
 {
+/*
   vtkIdType id = ReadParticle(starParticle);
   eps_scalars->SetValue(id, starParticle.eps);
   metals_scalars->SetValue(id, starParticle.metals);
   tform_scalars->SetValue(id, starParticle.metals);
+*/
 }
 
 
@@ -168,7 +178,8 @@ int vtkTipsyReader::RequestData(vtkInformation*,
   in.close();
   //set the number of points for each scalar array //TODO: this may not be necessary?
   mass_scalars->SetNumberOfTuples(points->GetNumberOfPoints());
-
+  phi_scalars->SetNumberOfTuples(points->GetNumberOfPoints());
+  
   vtkDebugMacro("Read " << points->GetNumberOfPoints() << " points.");
 
   // Store the points and cells in the output data object.
