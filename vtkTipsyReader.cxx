@@ -178,7 +178,7 @@ int vtkTipsyReader::RequestData(vtkInformation*,
   mass_scalars->SetNumberOfTuples(numberPoints);
   phi_scalars->SetNumberOfTuples(numberPoints);
   eps_scalars->SetNumberOfTuples(numberPoints);
-velocity_vectors->SetNumberOfTuples(pow(numberPoints,3));
+  velocity_vectors->SetNumberOfTuples(numberPoints);
 /*
  //TODO: ADD BACK IN WHEN READY
   rho_scalars->SetNumberOfTuples(numberPoints);
