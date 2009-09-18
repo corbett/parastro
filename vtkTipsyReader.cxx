@@ -189,7 +189,7 @@ int vtkTipsyReader::RequestData(vtkInformation*,
   output->SetPoints(points);
   output->SetVerts(verts); 
   output->GetPointData()->SetScalars(mass_scalars);
-  output->GetPointData()->SetScalars(phi_scalars);
+  output->GetPointData()->AddArray(phi_scalars);
 /*
   output->GetPointData()->SetScalars(rho_scalars);
   output->GetPointData()->SetScalars(temp_scalars);
