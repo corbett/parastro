@@ -95,22 +95,18 @@ void vtkTipsyReader::PrintSelf(ostream& os, vtkIndent indent)
 }
 
 //----------------------------------------------------------------------------
-void vtkTipsyReader::ReadParticle(TipsyBaseParticle& baseParticle) {
+vtkIdType vtkTipsyReader::ReadParticle(TipsyBaseParticle& baseParticle) 
+{
   vtkIdType id = points->InsertNextPoint(baseParticle.pos[0],baseParticle.pos[1],baseParticle.pos[2]);
   verts->InsertNextCell(1, &id);
   mass_scalars->SetValue(id,baseParticle.mass);
   phi_scalars->SetValue(id,baseParticle.phi);
-/*
-  switch:
-  	case typeid(baseParticle) == TipsyGasParticle: //better way than typeid, pass by string? opinion of expert
-	  ReadGasParticle(id,baseParticle);
-  	case typeid(baseParticle) == TipsyDarkParticle:
-      ReadDarkParticle(id,baseParticle);
-  	case typeid(baseParticle) == TipsyStarParticle:
-  	  ReadStarParticle(id,baseParticle);
-*/
+  return id;
 }
-void vtkTipsyReader::ReadGasParticle(vtkIdType id,TipsyGasParticle& gasParticle) {
+
+void vtkTipsyReader::ReadGasParticle(TipsyGasParticle& gasParticle) 
+{
+  vtkIdType id = ReadParticle(gasParticle);
   rho_scalars->SetValue(id, gasParticle.rho);
   temp_scalars->SetValue(id, gasParticle.temp);
   hsmooth_scalars->SetValue(id, gasParticle.hsmooth);
@@ -118,11 +114,15 @@ void vtkTipsyReader::ReadGasParticle(vtkIdType id,TipsyGasParticle& gasParticle)
 }
 
 
-void vtkTipsyReader::ReadDarkParticle(vtkIdType id,TipsyDarkParticle& darkParticle) {
+void vtkTipsyReader::ReadDarkParticle(TipsyDarkParticle& darkParticle) 
+{
+  vtkIdType id = ReadParticle(darkParticle);
   eps_scalars->SetValue(id, darkParticle.eps);
 }
 
-void vtkTipsyReader::ReadStarParticle(vtkIdType id,TipsyStarParticle& starParticle) {
+void vtkTipsyReader::ReadStarParticle(TipsyStarParticle& starParticle) 
+{
+  vtkIdType id = ReadParticle(starParticle);
   eps_scalars->SetValue(id, starParticle.eps);
   metals_scalars->SetValue(id, starParticle.metals);
   tform_scalars->SetValue(id, starParticle.metals);
@@ -151,19 +151,18 @@ int vtkTipsyReader::RequestData(vtkInformation*,
   vtkDebugMacro("Reading points from file " << this->FileName);
   // Read the header from the input
   in >> h;
-  
-  // Read every particle and add their position to be displayed
+  // Read every particle and add their position to be displayed, as well as relevant scalars
   for( i=0; i<h.h_nSph;  i++ ) {
 	in >> g;
-	ReadParticle(g);
+	ReadGasParticle(g);
   }
   for( i=0; i<h.h_nDark; i++ ) { 
 	in >> d;
-	ReadParticle(d);
+	ReadDarkParticle(d);
   }
   for( i=0; i<h.h_nStar; i++) {
 	in >> s;
-	ReadParticle(s);
+	ReadStarParticle(s);
   }
   // Close the file.
   in.close();
@@ -178,7 +177,22 @@ int vtkTipsyReader::RequestData(vtkInformation*,
   output->SetVerts(verts); 
   output->GetPointData()->SetScalars(mass_scalars);
   output->GetPointData()->SetScalars(phi_scalars);
+  output->GetPointData()->SetScalars(rho_scalars);
+  output->GetPointData()->SetScalars(temp_scalars);
+  output->GetPointData()->SetScalars(hsmooth_scalars);
+  output->GetPointData()->SetScalars(metals_scalars);
+  output->GetPointData()->SetScalars(eps_scalars);
+  output->GetPointData()->SetScalars(tform_scalars);
+  //Memory management
+  points->Delete();
+  verts->Delete();
+  mass_scalars->Delete();
+  phi_scalars->Delete();
+  rho_scalars->Delete();
+  temp_scalars->Delete();
+  hsmooth_scalars->Delete();
+  metals_scalars->Delete();
+  eps_scalars->Delete();
+  tform_scalars->Delete();
   return 1;
-
-//TODO: memory management, may need to call things like mass_scalars->Delete(); points->Delete(); verts->Delete(); etc.
 }

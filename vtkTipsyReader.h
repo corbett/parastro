@@ -33,10 +33,10 @@ protected:
 private:
   vtkTipsyReader(const vtkTipsyReader&);  // Not implemented.
   void operator=(const vtkTipsyReader&);  // Not implemented.
-  void ReadParticle(TipsyBaseParticle& baseParticle); //reads variables common to all particles
-  void ReadGasParticle(vtkIdType id, TipsyGasParticle& gasParticle); //reads variables common to gas particles
-  void ReadDarkParticle(vtkIdType id, TipsyDarkParticle& darkParticle); //reads variables common to dark particles
-  void ReadStarParticle(vtkIdType id, TipsyStarParticle& starParticle); //reads variables common to star particles
+  vtkIdType ReadParticle(TipsyBaseParticle& baseParticle); //reads variables common to all particles
+  void ReadGasParticle(TipsyGasParticle& gasParticle); //reads variables common to gas particles
+  void ReadDarkParticle(TipsyDarkParticle& darkParticle); //reads variables common to dark particles
+  void ReadStarParticle(TipsyStarParticle& starParticle); //reads variables common to star particles
 };
 
 #endif
