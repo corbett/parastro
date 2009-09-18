@@ -207,10 +207,10 @@ int vtkTipsyReader::RequestData(vtkInformation*,
   output->SetVerts(verts); 
   output->GetPointData()->SetScalars(mass_scalars); //the default scalars to be displayed
   output->GetPointData()->AddArray(phi_scalars);
-  output->GetPointData()->AddArray(rho_scalars);
   output->GetPointData()->AddArray(eps_scalars);
 /*
 //TODO: ADD BACK IN WHEN READY
+  output->GetPointData()->AddArray(rho_scalars);
   output->GetPointData()->AddArray(temp_scalars);
   output->GetPointData()->AddArray(hsmooth_scalars);
   output->GetPointData()->AddArray(metals_scalars);
