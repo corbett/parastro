@@ -9,6 +9,10 @@ Modified from vtkSimplePointsReader and from Doug Potter's Tipsylib
 #define __vtkTipsyReader_h
 
 #include "vtkPolyDataAlgorithm.h"
+#include <vtkstd/vector>
+#include "vtkSmartPointer.h"
+#include "vtkFloatArray.h"
+
 #include "ftipsy.hpp"
 
 class VTK_IO_EXPORT vtkTipsyReader : public vtkPolyDataAlgorithm
@@ -33,6 +37,7 @@ protected:
 private:
   vtkTipsyReader(const vtkTipsyReader&);  // Not implemented.
   void operator=(const vtkTipsyReader&);  // Not implemented.
+//  typedef vtkstd::vector<<vtkSmartPointer<vtkFloatArray>> my_test_array;
   vtkIdType ReadParticle(TipsyBaseParticle& baseParticle); //reads variables common to all particles
   void ReadGasParticle(TipsyGasParticle& gasParticle); //reads variables common to gas particles
   void ReadDarkParticle(TipsyDarkParticle& darkParticle); //reads variables common to dark particles
