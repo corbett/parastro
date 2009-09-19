@@ -37,17 +37,17 @@ private:
 	//private variables: points, scalars, and vectors
 	vtkSmartPointer<vtkPoints> points;
 	vtkSmartPointer<vtkCellArray> verts; 
-	vtkSmartPointer<vtkFloatArray> mass_scalars;
-	vtkSmartPointer<vtkFloatArray> phi_scalars;
-	vtkSmartPointer<vtkFloatArray> eps_scalars;
-	vtkSmartPointer<vtkFloatArray> velocity_vectors;
+	vtkSmartPointer<vtkFloatArray> massScalars;
+	vtkSmartPointer<vtkFloatArray> phiScalars;
+	vtkSmartPointer<vtkFloatArray> epsScalars;
+	vtkSmartPointer<vtkFloatArray> velocityVectors;
 	/*
 	TODO: ADD BACK IN WHEN READY
-	vtkSmartPointer<vtkFloatArray> rho_scalars;   
-	vtkSmartPointer<vtkFloatArray> temp_scalars;       
-	vtkSmartPointer<vtkFloatArray> hsmooth_scalars;    
-	vtkSmartPointer<vtkFloatArray> metals_scalars;
-	vtkSmartPointer<vtkFloatArray> tform_scalars;
+	vtkSmartPointer<vtkFloatArray> rhoScalars;   
+	vtkSmartPointer<vtkFloatArray> tempScalars;       
+	vtkSmartPointer<vtkFloatArray> hsmoothScalars;    
+	vtkSmartPointer<vtkFloatArray> metalsScalars;
+	vtkSmartPointer<vtkFloatArray> tformScalars;
 	*/
 	//private functions: initialization and reading
   vtkSmartPointer<vtkFloatArray> AllocateFloatArray(int numComponents, const char* arrayName);
