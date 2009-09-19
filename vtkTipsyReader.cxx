@@ -20,23 +20,6 @@ TipsyHeader       h; // The header structure
 TipsyGasParticle  g; // A gas particle
 TipsyDarkParticle d; // A dark particle
 TipsyStarParticle s; // A star particle
-//for velocities
-//float vel[3];
-//points, scalars, and vectors
-vtkSmartPointer<vtkPoints> points;
-vtkSmartPointer<vtkCellArray> verts; 
-vtkSmartPointer<vtkFloatArray> mass_scalars;
-vtkSmartPointer<vtkFloatArray> phi_scalars;
-vtkSmartPointer<vtkFloatArray> eps_scalars;
-vtkSmartPointer<vtkFloatArray> velocity_vectors;
-/*
-TODO: ADD BACK IN WHEN READY
-vtkSmartPointer<vtkFloatArray> rho_scalars;   
-vtkSmartPointer<vtkFloatArray> temp_scalars;       
-vtkSmartPointer<vtkFloatArray> hsmooth_scalars;    
-vtkSmartPointer<vtkFloatArray> metals_scalars;
-vtkSmartPointer<vtkFloatArray> tform_scalars;
-*/
 uint32_t i;
 vtkCxxRevisionMacro(vtkTipsyReader, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkTipsyReader);
@@ -46,44 +29,21 @@ vtkTipsyReader::vtkTipsyReader()
 {
  this->FileName = 0;
  this->SetNumberOfInputPorts(0);
-
-///TODO: lots of copy and paste here, remove, but first need to figure out how exactly to deal with vtkSmartPointer template class in header file
-  // Allocate objects to hold points and vertex cells.
- points = vtkSmartPointer<vtkPoints>::New();
- verts = vtkSmartPointer<vtkCellArray>::New();
- // Allocate Scalars
- //mass
- mass_scalars = AllocateFloatArray(1,"mass");
-//potential
- phi_scalars = AllocateFloatArray(1,"potential");
- //softening
- eps_scalars = AllocateFloatArray(1,"softening");
+	// Allocate objects to hold points and vertex cells.
+ this->points = vtkSmartPointer<vtkPoints>::New();
+ this->verts = vtkSmartPointer<vtkCellArray>::New();
+ // Allocate scalars and vectors
+ this->mass_scalars = AllocateFloatArray(1,"mass");
+ this->phi_scalars = AllocateFloatArray(1,"potential");
+ this->eps_scalars = AllocateFloatArray(1,"softening");
+ this->velocity_vectors = AllocateFloatArray(3,"velocity");
 /*
- //rho
- rho_scalars = vtkSmartPointer<vtkFloatArray>::New();
- rho_scalars->SetNumberOfComponents(1);
- rho_scalars->SetName("rho");
- //temp
- temp_scalars = vtkSmartPointer<vtkFloatArray>::New();
- temp_scalars->SetNumberOfComponents(1);
- temp_scalars->SetName("temperature");
- //smooth
- hsmooth_scalars = vtkSmartPointer<vtkFloatArray>::New();
- hsmooth_scalars->SetNumberOfComponents(1);
- hsmooth_scalars->SetName("hsmooth");
- //metals
- metals_scalars = vtkSmartPointer<vtkFloatArray>::New();
- metals_scalars->SetNumberOfComponents(1);
- metals_scalars->SetName("metals");
-
- //tform
- tform_scalars = vtkSmartPointer<vtkFloatArray>::New();
- tform_scalars->SetNumberOfComponents(1);
- tform_scalars->SetName("tform");
+ rho_scalars =  AllocateFloatArray(1,"rho")
+ temp_scalars =  AllocateFloatArray(1,"temp");
+ hsmooth_scalars =  AllocateFloatArray(1,"hsmooth");
+ metals_scalars =  AllocateFloatArray(1,"metals");
+ tform_scalars =  AllocateFloatArray(1,"tform");
 */
- //Allocate Vectors
- //
- velocity_vectors = AllocateFloatArray(3,"velocity");
 }
 
 //----------------------------------------------------------------------------
@@ -104,11 +64,11 @@ void vtkTipsyReader::PrintSelf(ostream& os, vtkIndent indent)
 //----------------------------------------------------------------------------
 vtkIdType vtkTipsyReader::ReadParticle(TipsyBaseParticle& baseParticle) 
 {
-  vtkIdType id = points->InsertNextPoint(baseParticle.pos);
-  verts->InsertNextCell(1, &id);
-  velocity_vectors->InsertTupleValue(id,baseParticle.vel);
-  mass_scalars->InsertValue(id,baseParticle.mass);
-  phi_scalars->SetValue(id,baseParticle.phi);
+  vtkIdType id = this->points->InsertNextPoint(baseParticle.pos);
+  this->verts->InsertNextCell(1, &id);
+  this->velocity_vectors->InsertTupleValue(id,baseParticle.vel);
+  this->mass_scalars->InsertValue(id,baseParticle.mass);
+  this->phi_scalars->SetValue(id,baseParticle.phi);
   return id;
 }
 
@@ -129,26 +89,26 @@ vtkSmartPointer<vtkFloatArray> vtkTipsyReader::AllocateFloatArray(int numCompone
 void vtkTipsyReader::ReadGasParticle(TipsyGasParticle& gasParticle) 
 {
   vtkIdType id = ReadParticle(gasParticle);
-  rho_scalars->SetValue(id, gasParticle.rho);
-  temp_scalars->SetValue(id, gasParticle.temp);
-  hsmooth_scalars->SetValue(id, gasParticle.hsmooth);
-  metals_scalars->SetValue(id, gasParticle.metals);
+  this->rho_scalars->SetValue(id, gasParticle.rho);
+  this->temp_scalars->SetValue(id, gasParticle.temp);
+  this->hsmooth_scalars->SetValue(id, gasParticle.hsmooth);
+  this->metals_scalars->SetValue(id, gasParticle.metals);
 }
 */
 
 void vtkTipsyReader::ReadDarkParticle(TipsyDarkParticle& darkParticle) 
 {
   vtkIdType id = ReadParticle(darkParticle);
-  eps_scalars->SetValue(id, darkParticle.eps);
+  this->eps_scalars->SetValue(id, darkParticle.eps);
 }
 /*
 //TODO: ADD BACK IN WHEN READY
 void vtkTipsyReader::ReadStarParticle(TipsyStarParticle& starParticle) 
 {
   vtkIdType id = ReadParticle(starParticle);
-  eps_scalars->SetValue(id, starParticle.eps);
-  metals_scalars->SetValue(id, starParticle.metals);
-  tform_scalars->SetValue(id, starParticle.metals);
+  this->eps_scalars->SetValue(id, starParticle.eps);
+  this->metals_scalars->SetValue(id, starParticle.metals);
+  this->tform_scalars->SetValue(id, starParticle.metals);
 }
 */
 

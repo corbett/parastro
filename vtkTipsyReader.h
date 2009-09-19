@@ -10,7 +10,7 @@ Modified from vtkSimplePointsReader and from Doug Potter's Tipsylib
 #include "vtkPolyDataAlgorithm.h"
 #include "ftipsy.hpp"
 #include "vtkFloatArray.h"
-#include "vtkSmartPointer.h" // For collections
+#include "vtkSmartPointer.h"
 
 class VTK_IO_EXPORT vtkTipsyReader : public vtkPolyDataAlgorithm
 {
@@ -33,11 +33,25 @@ protected:
 private:
   vtkTipsyReader(const vtkTipsyReader&);  // Not implemented.
   void operator=(const vtkTipsyReader&);  // Not implemented.
-//The following tells the Python etc. wrappers to avoid trying to wrap the following code
-//as they fail on C++ templates
-//BTX
+	//BTX
+	//private variables: points, scalars, and vectors
+	vtkSmartPointer<vtkPoints> points;
+	vtkSmartPointer<vtkCellArray> verts; 
+	vtkSmartPointer<vtkFloatArray> mass_scalars;
+	vtkSmartPointer<vtkFloatArray> phi_scalars;
+	vtkSmartPointer<vtkFloatArray> eps_scalars;
+	vtkSmartPointer<vtkFloatArray> velocity_vectors;
+	/*
+	TODO: ADD BACK IN WHEN READY
+	vtkSmartPointer<vtkFloatArray> rho_scalars;   
+	vtkSmartPointer<vtkFloatArray> temp_scalars;       
+	vtkSmartPointer<vtkFloatArray> hsmooth_scalars;    
+	vtkSmartPointer<vtkFloatArray> metals_scalars;
+	vtkSmartPointer<vtkFloatArray> tform_scalars;
+	*/
+	//private functions: initialization and reading
   vtkSmartPointer<vtkFloatArray> AllocateFloatArray(int numComponents, const char* arrayName);
-//ETX
+	//ETX
   vtkIdType ReadParticle(TipsyBaseParticle& baseParticle); //reads variables common to all particles
   void ReadGasParticle(TipsyGasParticle& gasParticle); //reads variables common to gas particles
   void ReadDarkParticle(TipsyDarkParticle& darkParticle); //reads variables common to dark particles
