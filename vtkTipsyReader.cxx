@@ -117,7 +117,7 @@ vtkSmartPointer<vtkFloatArray> vtkTipsyReader::AllocateFloatArray(int numCompone
 {
   vtkSmartPointer<vtkFloatArray> floatArray = vtkSmartPointer<vtkFloatArray>::New();
   floatArray->SetNumberOfComponents(numComponents);
-  floatArray>SetName(arrayName);  
+  floatArray->SetName(arrayName);  
   return floatArray;
 }
 
