@@ -169,6 +169,7 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 	// the default scalars to be displayed
   output->GetPointData()->SetScalars(this->PhiScalars);
 	// the rest of the scalars
+	output->GetPointData()->AddArray(this->ParticleTypes);
   output->GetPointData()->AddArray(this->MassScalars);
   output->GetPointData()->AddArray(this->EpsScalars);
   output->GetPointData()->AddArray(this->RhoScalars);
