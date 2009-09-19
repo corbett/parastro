@@ -7,10 +7,10 @@ Modified from vtkSimplePointsReader and from Doug Potter's Tipsylib
 // here is the desciprtion
 #ifndef __vtkTipsyReader_h
 #define __vtkTipsyReader_h
-#include "vtkPolyDataAlgorithm.h"
-#include "ftipsy.hpp"
-#include "vtkFloatArray.h"
-#include "vtkSmartPointer.h"
+#include "vtkPolyDataAlgorithm.h" //needed as this class extends vtkPolyDataAlgorithm
+#include "ftipsy.hpp" //needed for functions which take Tipsy particles as arguments
+#include "vtkFloatArray.h" //needed for the functions to initialize float arrays
+#include "vtkSmartPointer.h" //needed for the functions to initialize float arrays
 
 class VTK_IO_EXPORT vtkTipsyReader : public vtkPolyDataAlgorithm
 {
@@ -35,27 +35,40 @@ private:
   void operator=(const vtkTipsyReader&);  // Not implemented.
 	//BTX
 	//private variables: points, scalars, and vectors
-	vtkSmartPointer<vtkPoints> points;
-	vtkSmartPointer<vtkCellArray> verts; 
-	vtkSmartPointer<vtkFloatArray> massScalars;
-	vtkSmartPointer<vtkFloatArray> phiScalars;
-	vtkSmartPointer<vtkFloatArray> epsScalars;
-	vtkSmartPointer<vtkFloatArray> velocityVectors;
+	vtkSmartPointer<vtkPoints> Points;
+	vtkSmartPointer<vtkCellArray> Verts; 
+	vtkSmartPointer<vtkFloatArray> MassScalars;
+	vtkSmartPointer<vtkFloatArray> PhiScalars;
+	vtkSmartPointer<vtkFloatArray> EpsScalars;
+	vtkSmartPointer<vtkFloatArray> VelocityVectors;
 	/*
 	TODO: ADD BACK IN WHEN READY
-	vtkSmartPointer<vtkFloatArray> rhoScalars;   
-	vtkSmartPointer<vtkFloatArray> tempScalars;       
-	vtkSmartPointer<vtkFloatArray> hsmoothScalars;    
-	vtkSmartPointer<vtkFloatArray> metalsScalars;
-	vtkSmartPointer<vtkFloatArray> tformScalars;
+	vtkSmartPointer<vtkFloatArray> RhoScalars;   
+	vtkSmartPointer<vtkFloatArray> TempScalars;       
+	vtkSmartPointer<vtkFloatArray> HsmoothScalars;    
+	vtkSmartPointer<vtkFloatArray> MetalsScalars;
+	vtkSmartPointer<vtkFloatArray> TformScalars;
 	*/
 	//private functions: initialization and reading
-  vtkSmartPointer<vtkFloatArray> AllocateFloatArray(int numComponents, const char* arrayName);
+	// Description:
+  // create a vtkFloatArray with the  name arrayName, number of components 
+  //numComponents and number of tuples numTuples
+  // e.g. AllocateFloatArray("density",1,100) creates a array of 100 scalar densities
+  // AllocateFloatArray("velocity",3,100) creates a array of 100 vector velocities
+  vtkSmartPointer<vtkFloatArray> AllocateFloatArray(const char* arrayName,int numComponents,int numTuples);
 	//ETX
-  vtkIdType ReadParticle(TipsyBaseParticle& baseParticle); //reads variables common to all particles
-  void ReadGasParticle(TipsyGasParticle& gasParticle); //reads variables common to gas particles
-  void ReadDarkParticle(TipsyDarkParticle& darkParticle); //reads variables common to dark particles
-  void ReadStarParticle(TipsyStarParticle& starParticle); //reads variables common to star particles
+	// Description:
+	//reads variables common to all particles
+  vtkIdType ReadParticle(TipsyBaseParticle& baseParticle); 
+	// Description:
+	//reads variables common to gas particles
+  void ReadGasParticle(TipsyGasParticle& gasParticle); 
+	// Description:
+	//reads variables common to dark particles
+  void ReadDarkParticle(TipsyDarkParticle& darkParticle); 
+	// Description:
+	//reads variables common to star particles
+  void ReadStarParticle(TipsyStarParticle& starParticle); 
 };
 
 #endif

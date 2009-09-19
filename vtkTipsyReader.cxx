@@ -30,20 +30,8 @@ vtkTipsyReader::vtkTipsyReader()
  this->FileName = 0;
  this->SetNumberOfInputPorts(0);
 	// Allocate objects to hold points and vertex cells.
- this->points = vtkSmartPointer<vtkPoints>::New();
- this->verts = vtkSmartPointer<vtkCellArray>::New();
- // Allocate scalars and vectors
- this->massScalars = AllocateFloatArray(1,"mass");
- this->phiScalars = AllocateFloatArray(1,"potential");
- this->epsScalars = AllocateFloatArray(1,"softening");
- this->velocityVectors = AllocateFloatArray(3,"velocity");
-/*
- rhoScalars =  AllocateFloatArray(1,"rho")
- tempScalars =  AllocateFloatArray(1,"temp");
- hsmoothScalars =  AllocateFloatArray(1,"hsmooth");
- metalsScalars =  AllocateFloatArray(1,"metals");
- tformScalars =  AllocateFloatArray(1,"tform");
-*/
+ this->Points = vtkSmartPointer<vtkPoints>::New();
+ this->Verts = vtkSmartPointer<vtkCellArray>::New();
 }
 
 //----------------------------------------------------------------------------
@@ -64,20 +52,20 @@ void vtkTipsyReader::PrintSelf(ostream& os, vtkIndent indent)
 //----------------------------------------------------------------------------
 vtkIdType vtkTipsyReader::ReadParticle(TipsyBaseParticle& baseParticle) 
 {
-  vtkIdType id = this->points->InsertNextPoint(baseParticle.pos);
-  this->verts->InsertNextCell(1, &id);
-  this->velocityVectors->InsertTupleValue(id,baseParticle.vel);
-  this->massScalars->InsertValue(id,baseParticle.mass);
-  this->phiScalars->SetValue(id,baseParticle.phi);
+  vtkIdType id = this->Points->InsertNextPoint(baseParticle.pos);
+  this->Verts->InsertNextCell(1, &id);
+  this->VelocityVectors->InsertTupleValue(id,baseParticle.vel);
+  this->MassScalars->InsertValue(id,baseParticle.mass);
+  this->PhiScalars->SetValue(id,baseParticle.phi);
   return id;
 }
 
-//allocates a float array for use as scalar (numComponents=1) or vector (numComponents > 1)
-vtkSmartPointer<vtkFloatArray> vtkTipsyReader::AllocateFloatArray(int numComponents, const char* arrayName)
+vtkSmartPointer<vtkFloatArray> vtkTipsyReader::AllocateFloatArray(const char* arrayName, int numComponents, int numTuples)
 {
   vtkSmartPointer<vtkFloatArray> floatArray = vtkSmartPointer<vtkFloatArray>::New();
   	floatArray->SetNumberOfComponents(numComponents);
-  	floatArray->SetName(arrayName);  
+  	floatArray->SetName(arrayName);
+		floatArray->SetNumberOfTuples(numTuples);
   return floatArray;
 }
 
@@ -89,26 +77,26 @@ vtkSmartPointer<vtkFloatArray> vtkTipsyReader::AllocateFloatArray(int numCompone
 void vtkTipsyReader::ReadGasParticle(TipsyGasParticle& gasParticle) 
 {
   vtkIdType id = ReadParticle(gasParticle);
-  this->rhoScalars->SetValue(id, gasParticle.rho);
-  this->tempScalars->SetValue(id, gasParticle.temp);
-  this->hsmoothScalars->SetValue(id, gasParticle.hsmooth);
-  this->metalsScalars->SetValue(id, gasParticle.metals);
+  this->RhoScalars->SetValue(id, gasParticle.rho);
+  this->TempScalars->SetValue(id, gasParticle.temp);
+  this->HsmoothScalars->SetValue(id, gasParticle.hsmooth);
+  this->MetalsScalars->SetValue(id, gasParticle.metals);
 }
 */
 
 void vtkTipsyReader::ReadDarkParticle(TipsyDarkParticle& darkParticle) 
 {
   vtkIdType id = ReadParticle(darkParticle);
-  this->epsScalars->SetValue(id, darkParticle.eps);
+  this->EpsScalars->SetValue(id, darkParticle.eps);
 }
 /*
 //TODO: ADD BACK IN WHEN READY
 void vtkTipsyReader::ReadStarParticle(TipsyStarParticle& starParticle) 
 {
   vtkIdType id = ReadParticle(starParticle);
-  this->epsScalars->SetValue(id, starParticle.eps);
-  this->metalsScalars->SetValue(id, starParticle.metals);
-  this->tformScalars->SetValue(id, starParticle.metals);
+  this->EpsScalars->SetValue(id, starParticle.eps);
+  this->MetalsScalars->SetValue(id, starParticle.metals);
+  this->TformScalars->SetValue(id, starParticle.metals);
 }
 */
 
@@ -135,21 +123,20 @@ int vtkTipsyReader::RequestData(vtkInformation*,
   vtkDebugMacro("Reading points from file " << this->FileName);
   // Read the header from the input
   in >> h;
-  //set the number of points for each scalar array; this is necessary if I want to use InsertValue for scalars by id
-  int numberPoints = h.h_nDark;
-  massScalars->SetNumberOfTuples(numberPoints);
-  phiScalars->SetNumberOfTuples(numberPoints);
-  epsScalars->SetNumberOfTuples(numberPoints);
-  velocityVectors->SetNumberOfTuples(numberPoints);
-/*
- //TODO: ADD BACK IN WHEN READY
-  rhoScalars->SetNumberOfTuples(numberPoints);
-  tempScalars->SetNumberOfTuples(numberPoints);
-  hsmoothScalars->SetNumberOfTuples(numberPoints);
-  metalsScalars->SetNumberOfTuples(numberPoints);
-  tformScalars->SetNumberOfTuples(numberPoints);
-*/
-
+  //Set the number of points for each scalar array; this is necessary if I want to use InsertValue for scalars by id
+  int numTuples = h.h_nDark; //TODO: will need to be changed when particles other than dark particles are read
+ 	// Allocate scalars and vectors
+ 	this->MassScalars = AllocateFloatArray("mass",1,numTuples);
+ 	this->PhiScalars = AllocateFloatArray("potential",1,numTuples);
+ 	this->EpsScalars = AllocateFloatArray("softening",1,numTuples);
+ 	this->VelocityVectors = AllocateFloatArray("velocity",3,numTuples);
+	/*
+ 	this->RhoScalars =  AllocateFloatArray("rho",1,numTuples)
+ 	this->TempScalars =  AllocateFloatArray("temp",1,numTuples);
+ 	this->HsmoothScalars =  AllocateFloatArray("hsmooth",1,numTuples);
+ 	this->MetalsScalars =  AllocateFloatArray("metals",1,numTuples);
+ 	this->TformScalars =  AllocateFloatArray("tform",1,numTuples);
+	*/
   // Read every particle and add their position to be displayed, as well as relevant scalars
   for( i=0; i<h.h_nDark; i++ ) 
   	{ 
@@ -172,23 +159,25 @@ int vtkTipsyReader::RequestData(vtkInformation*,
   // Close the file.
   in.close();
   
-  vtkDebugMacro("Read " << points->GetNumberOfPoints() << " points.");
+  vtkDebugMacro("Read " << this->Points->GetNumberOfPoints() << " points.");
 
   // Store the points and cells in the output data object.
   vtkPolyData* output = vtkPolyData::GetData(outputVector);
-  output->SetPoints(points);
-  output->SetVerts(verts); 
-  output->GetPointData()->SetScalars(phiScalars); //the default scalars to be displayed
-  output->GetPointData()->AddArray(massScalars);
-  output->GetPointData()->AddArray(epsScalars);
-  output->GetPointData()->SetVectors(velocityVectors); //the default vectors to be displayed
+  output->SetPoints(this->Points);
+  output->SetVerts(this->Verts); 
+	//the default scalars to be displayed
+  output->GetPointData()->SetScalars(this->PhiScalars); 
+  output->GetPointData()->AddArray(this->MassScalars);
+  output->GetPointData()->AddArray(this->EpsScalars);
+//the default vectors to be displayed
+  output->GetPointData()->SetVectors(this->VelocityVectors); 
 /*
 //TODO: ADD BACK IN WHEN READY
-  output->GetPointData()->AddArray(rhoScalars);
-  output->GetPointData()->AddArray(tempScalars);
-  output->GetPointData()->AddArray(hsmoothScalars);
-  output->GetPointData()->AddArray(metalsScalars);
-  output->GetPointData()->AddArray(tformScalars);
+  output->GetPointData()->AddArray(this->RhoScalars);
+  output->GetPointData()->AddArray(this->TempScalars);
+  output->GetPointData()->AddArray(this->HsmoothScalars);
+  output->GetPointData()->AddArray(this->MetalsScalars);
+  output->GetPointData()->AddArray(this->TformScalars);
 */
   return 1;
 }
