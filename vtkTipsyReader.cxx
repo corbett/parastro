@@ -13,11 +13,15 @@ Currently only reads in standard format Tipsy files
 #include "vtkPoints.h"
 #include "vtkCellArray.h"
 // Initializing for reading  
-ifTipsy in;          // The input file
-TipsyHeader       h; // The header structure
-TipsyGasParticle  g; // A gas particle
-TipsyDarkParticle d; // A dark particle
-TipsyStarParticle s; // A star particle
+// the input file
+ifTipsy in;
+// used to read in header, gas, dark, and star particles respectively
+TipsyHeader       h; 
+TipsyGasParticle  g; 
+TipsyDarkParticle d; 
+TipsyStarParticle s; 
+// Used to store which type a particle is in an int array. Later will separate 
+// each type into a separate dataset
 enum particle {STAR, DARK, GAS};
 uint32_t i;
 vtkCxxRevisionMacro(vtkTipsyReader, "$Revision: 1.0 $");
@@ -69,8 +73,6 @@ vtkSmartPointer<vtkFloatArray> vtkTipsyReader::AllocateFloatArray(const char* ar
   return floatArray;
 }
 
-//TODO: what to do with portions of the scalar arrays which are not set. will paraview segfault?, should these be set to some default value, if their values are not known
-//why is something which should only be dark, reading in values such as metals?, for now only enabling reading dark particles
 //----------------------------------------------------------------------------
 void vtkTipsyReader::ReadGasParticle(TipsyGasParticle& gasParticle) 
 {
@@ -89,7 +91,7 @@ void vtkTipsyReader::ReadDarkParticle(TipsyDarkParticle& darkParticle)
 	this->ParticleTypes->SetValue(id, DARK);
   this->EpsScalars->SetValue(id, darkParticle.eps);
 }
-//TODO: ADD BACK IN WHEN READY
+
 void vtkTipsyReader::ReadStarParticle(TipsyStarParticle& starParticle) 
 {
   vtkIdType id = ReadParticle(starParticle);
@@ -123,7 +125,7 @@ int vtkTipsyReader::RequestData(vtkInformation*,
   vtkDebugMacro("Reading points from file " << this->FileName);
   // Read the header from the input
   in >> h;
-  //Set the number of points for each scalar array; this is necessary if I want to use InsertValue for scalars by id
+  // Set the number of points for each scalar array; this is necessary if I want to use InsertValue for scalars by id
   int numTuples = h.h_nDark + h.h_nSph + h.h_nStar; //TODO: will need to be changed when particles other than dark particles are read
  	// Allocate scalars and vectors
 	// Allocate object to hold particle types
@@ -164,16 +166,17 @@ int vtkTipsyReader::RequestData(vtkInformation*,
   vtkPolyData* output = vtkPolyData::GetData(outputVector);
   output->SetPoints(this->Points);
   output->SetVerts(this->Verts); 
-	//the default scalars to be displayed
-  output->GetPointData()->SetScalars(this->PhiScalars); 
+	// the default scalars to be displayed
+  output->GetPointData()->SetScalars(this->PhiScalars);
+	// the rest of the scalars
   output->GetPointData()->AddArray(this->MassScalars);
   output->GetPointData()->AddArray(this->EpsScalars);
-//the default vectors to be displayed
-  output->GetPointData()->SetVectors(this->VelocityVectors); 
   output->GetPointData()->AddArray(this->RhoScalars);
   output->GetPointData()->AddArray(this->TempScalars);
   output->GetPointData()->AddArray(this->HsmoothScalars);
   output->GetPointData()->AddArray(this->MetalsScalars);
   output->GetPointData()->AddArray(this->TformScalars);
+//the default vectors to be displayed
+  output->GetPointData()->SetVectors(this->VelocityVectors); 
   return 1;
 }

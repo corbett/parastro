@@ -34,8 +34,11 @@ protected:
 private:
   vtkTipsyReader(const vtkTipsyReader&);  // Not implemented.
   void operator=(const vtkTipsyReader&);  // Not implemented.
+	// The BTX, ETX comments bracket the portion of the code which should not be
+	// attempted to wrap for use by python, specifically the code which uses
+	// C++ templates as this code is unable to be wrapped.
 	//BTX
-	//private variables: points, scalars, and vectors
+	// private variables: points, scalars, and vectors
 	vtkSmartPointer<vtkPoints> Points;
 	vtkSmartPointer<vtkCellArray> Verts; 
 	vtkSmartPointer<vtkIntArray> ParticleTypes;
@@ -48,26 +51,25 @@ private:
 	vtkSmartPointer<vtkFloatArray> HsmoothScalars;    
 	vtkSmartPointer<vtkFloatArray> MetalsScalars;
 	vtkSmartPointer<vtkFloatArray> TformScalars;
-	//private functions: initialization and reading
+	// private functions: initialization and reading
 	// Description:
   // create a vtkFloatArray with the  name arrayName, number of components 
-  //numComponents and number of tuples numTuples
+  // numComponents and number of tuples numTuples
   // e.g. AllocateFloatArray("density",1,100) creates a array of 100 scalar densities
   // AllocateFloatArray("velocity",3,100) creates a array of 100 vector velocities
   vtkSmartPointer<vtkFloatArray> AllocateFloatArray(const char* arrayName,int numComponents,int numTuples);
 	//ETX
 	// Description:
-	//reads variables common to all particles
+	// reads variables common to all particles
   vtkIdType ReadParticle(TipsyBaseParticle& baseParticle); 
 	// Description:
-	//reads variables common to gas particles
+	// reads variables common to gas particles
   void ReadGasParticle(TipsyGasParticle& gasParticle); 
 	// Description:
-	//reads variables common to dark particles
+	// reads variables common to dark particles
   void ReadDarkParticle(TipsyDarkParticle& darkParticle); 
 	// Description:
-	//reads variables common to star particles
+	// reads variables common to star particles
   void ReadStarParticle(TipsyStarParticle& starParticle); 
 };
-
 #endif
