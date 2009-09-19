@@ -53,17 +53,11 @@ vtkTipsyReader::vtkTipsyReader()
  verts = vtkSmartPointer<vtkCellArray>::New();
  // Allocate Scalars
  //mass
- mass_scalars = vtkSmartPointer<vtkFloatArray>::New();
- mass_scalars->SetNumberOfComponents(1);
- mass_scalars->SetName("mass");
+ mass_scalars = AllocateFloatArray(1,"mass");
 //potential
- phi_scalars = vtkSmartPointer<vtkFloatArray>::New();
- phi_scalars->SetNumberOfComponents(1);
- phi_scalars->SetName("potential");
+ phi_scalars = AllocateFloatArray(1,"potential");
  //softening
- eps_scalars = vtkSmartPointer<vtkFloatArray>::New();
- eps_scalars->SetNumberOfComponents(1);
- eps_scalars->SetName("softening");
+ eps_scalars = AllocateFloatArray(1,"softening");
 /*
  //rho
  rho_scalars = vtkSmartPointer<vtkFloatArray>::New();
@@ -89,9 +83,7 @@ vtkTipsyReader::vtkTipsyReader()
 */
  //Allocate Vectors
  //
- velocity_vectors = vtkSmartPointer<vtkFloatArray>::New();
- velocity_vectors->SetNumberOfComponents(3);
- velocity_vectors->SetName("velocity");
+ velocity_vectors = AllocateFloatArray(3,"velocity");
 }
 
 //----------------------------------------------------------------------------
@@ -118,6 +110,15 @@ vtkIdType vtkTipsyReader::ReadParticle(TipsyBaseParticle& baseParticle)
   mass_scalars->InsertValue(id,baseParticle.mass);
   phi_scalars->SetValue(id,baseParticle.phi);
   return id;
+}
+
+//allocates a float array for use as scalar (numComponents=1) or vector (numComponents > 1)
+vtkSmartPointer<vtkFloatArray> vtkTipsyReader::AllocateFloatArray(int numComponents, char* arrayName)
+{
+  vtkSmartPointer<vtkFloatArray> floatArray = vtkSmartPointer<vtkFloatArray>::New();
+  velocity_vectors->SetNumberOfComponents(numComponents);
+  velocity_vectors->SetName(arrayName);  
+  return floatArray;
 }
 
 //TODO: what to do with portions of the scalar arrays which are not set. will paraview segfault?, should these be set to some default value, if their values are not known
