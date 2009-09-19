@@ -31,8 +31,6 @@ vtkTipsyReader::vtkTipsyReader()
 	// Allocate objects to hold points and vertex cells.
  this->Points = vtkSmartPointer<vtkPoints>::New();
  this->Verts = vtkSmartPointer<vtkCellArray>::New();
-	// Allocate object to hold particle types
- this->ParticleTypes = vtkSmartPointer<vtkUnsignedIntArray>::New();
 }
 
 //----------------------------------------------------------------------------
@@ -128,6 +126,10 @@ int vtkTipsyReader::RequestData(vtkInformation*,
   //Set the number of points for each scalar array; this is necessary if I want to use InsertValue for scalars by id
   int numTuples = h.h_nDark + h.h_nSph + h.h_nStar; //TODO: will need to be changed when particles other than dark particles are read
  	// Allocate scalars and vectors
+	// Allocate object to hold particle types
+ 	this->ParticleTypes = vtkSmartPointer<vtkIntArray>::New();
+		ParticleTypes->SetName("particle type");
+		ParticleTypes->SetNumberOfTuples(numTuples);
  	this->MassScalars = AllocateFloatArray("mass",1,numTuples);
  	this->PhiScalars = AllocateFloatArray("potential",1,numTuples);
  	this->EpsScalars = AllocateFloatArray("softening",1,numTuples);

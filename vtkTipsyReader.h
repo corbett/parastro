@@ -11,7 +11,7 @@ Modified from vtkSimplePointsReader and from Doug Potter's Tipsylib
 #include "ftipsy.hpp" // needed for functions which take Tipsy particles as arguments
 #include "vtkSmartPointer.h" // needed for the functions to initialize arrays
 #include "vtkFloatArray.h" // needed for the functions to initialize float arrays
-#include "vtkUnsignedIntArray.h" // needed for functions to initialize unsigned int arrays
+#include "vtkIntArray.h" // needed for functions to initialize unsigned int arrays
 
 class VTK_IO_EXPORT vtkTipsyReader : public vtkPolyDataAlgorithm
 {
@@ -38,7 +38,7 @@ private:
 	//private variables: points, scalars, and vectors
 	vtkSmartPointer<vtkPoints> Points;
 	vtkSmartPointer<vtkCellArray> Verts; 
-	vtkSmartPointer<vtkUnsignedIntArray> ParticleTypes;
+	vtkSmartPointer<vtkIntArray> ParticleTypes;
 	vtkSmartPointer<vtkFloatArray> MassScalars;
 	vtkSmartPointer<vtkFloatArray> PhiScalars;
 	vtkSmartPointer<vtkFloatArray> EpsScalars;
