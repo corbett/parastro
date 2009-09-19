@@ -116,8 +116,8 @@ vtkIdType vtkTipsyReader::ReadParticle(TipsyBaseParticle& baseParticle)
 vtkSmartPointer<vtkFloatArray> vtkTipsyReader::AllocateFloatArray(int numComponents, char* arrayName)
 {
   vtkSmartPointer<vtkFloatArray> floatArray = vtkSmartPointer<vtkFloatArray>::New();
-  velocity_vectors->SetNumberOfComponents(numComponents);
-  velocity_vectors->SetName(arrayName);  
+  floatArray->SetNumberOfComponents(numComponents);
+  floatArray>SetName(arrayName);  
   return floatArray;
 }
 
