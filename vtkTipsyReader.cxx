@@ -12,14 +12,13 @@ Currently only reads in standard format Tipsy files
 #include "vtkPolyData.h"
 #include "vtkPoints.h"
 #include "vtkCellArray.h"
-#include "vtkFloatArray.h"
-#include "vtkSmartPointer.h"
-//Initializing for reading  
+// Initializing for reading  
 ifTipsy in;          // The input file
 TipsyHeader       h; // The header structure
 TipsyGasParticle  g; // A gas particle
 TipsyDarkParticle d; // A dark particle
 TipsyStarParticle s; // A star particle
+enum particle {STAR, DARK, GAS};
 uint32_t i;
 vtkCxxRevisionMacro(vtkTipsyReader, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkTipsyReader);
@@ -32,6 +31,8 @@ vtkTipsyReader::vtkTipsyReader()
 	// Allocate objects to hold points and vertex cells.
  this->Points = vtkSmartPointer<vtkPoints>::New();
  this->Verts = vtkSmartPointer<vtkCellArray>::New();
+	// Allocate object to hold particle types
+ this->ParticleTypes = vtkSmartPointer<vtkUnsignedIntArray>::New();
 }
 
 //----------------------------------------------------------------------------
@@ -60,6 +61,7 @@ vtkIdType vtkTipsyReader::ReadParticle(TipsyBaseParticle& baseParticle)
   return id;
 }
 
+//----------------------------------------------------------------------------
 vtkSmartPointer<vtkFloatArray> vtkTipsyReader::AllocateFloatArray(const char* arrayName, int numComponents, int numTuples)
 {
   vtkSmartPointer<vtkFloatArray> floatArray = vtkSmartPointer<vtkFloatArray>::New();
@@ -71,30 +73,35 @@ vtkSmartPointer<vtkFloatArray> vtkTipsyReader::AllocateFloatArray(const char* ar
 
 //TODO: what to do with portions of the scalar arrays which are not set. will paraview segfault?, should these be set to some default value, if their values are not known
 //why is something which should only be dark, reading in values such as metals?, for now only enabling reading dark particles
-
+//----------------------------------------------------------------------------
 void vtkTipsyReader::ReadGasParticle(TipsyGasParticle& gasParticle) 
 {
   vtkIdType id = ReadParticle(gasParticle);
+	this->ParticleTypes->SetValue(id, GAS);
   this->RhoScalars->SetValue(id, gasParticle.rho);
   this->TempScalars->SetValue(id, gasParticle.temp);
   this->HsmoothScalars->SetValue(id, gasParticle.hsmooth);
   this->MetalsScalars->SetValue(id, gasParticle.metals);
 }
 
+//----------------------------------------------------------------------------
 void vtkTipsyReader::ReadDarkParticle(TipsyDarkParticle& darkParticle) 
 {
   vtkIdType id = ReadParticle(darkParticle);
+	this->ParticleTypes->SetValue(id, DARK);
   this->EpsScalars->SetValue(id, darkParticle.eps);
 }
 //TODO: ADD BACK IN WHEN READY
 void vtkTipsyReader::ReadStarParticle(TipsyStarParticle& starParticle) 
 {
   vtkIdType id = ReadParticle(starParticle);
+	this->ParticleTypes->SetValue(id, STAR);
   this->EpsScalars->SetValue(id, starParticle.eps);
   this->MetalsScalars->SetValue(id, starParticle.metals);
   this->TformScalars->SetValue(id, starParticle.metals);
 }
 
+//----------------------------------------------------------------------------
 int vtkTipsyReader::RequestData(vtkInformation*,
                                        vtkInformationVector**,
                                        vtkInformationVector* outputVector)
