@@ -177,7 +177,7 @@ int vtkTipsyReader::RequestData(vtkInformation*,
   output->GetPointData()->AddArray(this->HsmoothScalars);
   output->GetPointData()->AddArray(this->MetalsScalars);
   output->GetPointData()->AddArray(this->TformScalars);
-//the default vectors to be displayed
+	// the default vectors to be displayed
   output->GetPointData()->SetVectors(this->VelocityVectors); 
   return 1;
 }
