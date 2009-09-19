@@ -36,7 +36,7 @@ private:
 //The following tells the Python etc. wrappers to avoid trying to wrap the following code
 //as they fail on C++ templates
 //BTX
-  vtkSmartPointer<vtkFloatArray> AllocateFloatArray(int numComponents, char* arrayName);
+  vtkSmartPointer<vtkFloatArray> AllocateFloatArray(int numComponents, const char* arrayName);
 //ETX
   vtkIdType ReadParticle(TipsyBaseParticle& baseParticle); //reads variables common to all particles
   void ReadGasParticle(TipsyGasParticle& gasParticle); //reads variables common to gas particles

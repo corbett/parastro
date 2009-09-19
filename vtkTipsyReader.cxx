@@ -113,7 +113,7 @@ vtkIdType vtkTipsyReader::ReadParticle(TipsyBaseParticle& baseParticle)
 }
 
 //allocates a float array for use as scalar (numComponents=1) or vector (numComponents > 1)
-vtkSmartPointer<vtkFloatArray> vtkTipsyReader::AllocateFloatArray(int numComponents, char* arrayName)
+vtkSmartPointer<vtkFloatArray> vtkTipsyReader::AllocateFloatArray(int numComponents, const char* arrayName)
 {
   vtkSmartPointer<vtkFloatArray> floatArray = vtkSmartPointer<vtkFloatArray>::New();
   floatArray->SetNumberOfComponents(numComponents);
