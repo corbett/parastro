@@ -1,6 +1,6 @@
 <ParaViewReaders>
 	<Reader name="TipsyReader"
 			extensions="std"
-			file_description="reads in a tipsy binary, currently just the points">
+			file_description="Tipsy Binary">
 	</Reader>
 </ParaViewReaders>
