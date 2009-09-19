@@ -72,8 +72,6 @@ vtkSmartPointer<vtkFloatArray> vtkTipsyReader::AllocateFloatArray(const char* ar
 //TODO: what to do with portions of the scalar arrays which are not set. will paraview segfault?, should these be set to some default value, if their values are not known
 //why is something which should only be dark, reading in values such as metals?, for now only enabling reading dark particles
 
-/*
-//TODO: ADD BACK IN WHEN READY
 void vtkTipsyReader::ReadGasParticle(TipsyGasParticle& gasParticle) 
 {
   vtkIdType id = ReadParticle(gasParticle);
@@ -82,14 +80,12 @@ void vtkTipsyReader::ReadGasParticle(TipsyGasParticle& gasParticle)
   this->HsmoothScalars->SetValue(id, gasParticle.hsmooth);
   this->MetalsScalars->SetValue(id, gasParticle.metals);
 }
-*/
 
 void vtkTipsyReader::ReadDarkParticle(TipsyDarkParticle& darkParticle) 
 {
   vtkIdType id = ReadParticle(darkParticle);
   this->EpsScalars->SetValue(id, darkParticle.eps);
 }
-/*
 //TODO: ADD BACK IN WHEN READY
 void vtkTipsyReader::ReadStarParticle(TipsyStarParticle& starParticle) 
 {
@@ -98,7 +94,6 @@ void vtkTipsyReader::ReadStarParticle(TipsyStarParticle& starParticle)
   this->MetalsScalars->SetValue(id, starParticle.metals);
   this->TformScalars->SetValue(id, starParticle.metals);
 }
-*/
 
 int vtkTipsyReader::RequestData(vtkInformation*,
                                        vtkInformationVector**,
@@ -124,27 +119,23 @@ int vtkTipsyReader::RequestData(vtkInformation*,
   // Read the header from the input
   in >> h;
   //Set the number of points for each scalar array; this is necessary if I want to use InsertValue for scalars by id
-  int numTuples = h.h_nDark; //TODO: will need to be changed when particles other than dark particles are read
+  int numTuples = h.h_nDark + h.h_nSph + h.h_nStar; //TODO: will need to be changed when particles other than dark particles are read
  	// Allocate scalars and vectors
  	this->MassScalars = AllocateFloatArray("mass",1,numTuples);
  	this->PhiScalars = AllocateFloatArray("potential",1,numTuples);
  	this->EpsScalars = AllocateFloatArray("softening",1,numTuples);
  	this->VelocityVectors = AllocateFloatArray("velocity",3,numTuples);
-	/*
- 	this->RhoScalars =  AllocateFloatArray("rho",1,numTuples)
+	this->RhoScalars =  AllocateFloatArray("rho",1,numTuples);
  	this->TempScalars =  AllocateFloatArray("temp",1,numTuples);
  	this->HsmoothScalars =  AllocateFloatArray("hsmooth",1,numTuples);
  	this->MetalsScalars =  AllocateFloatArray("metals",1,numTuples);
  	this->TformScalars =  AllocateFloatArray("tform",1,numTuples);
-	*/
   // Read every particle and add their position to be displayed, as well as relevant scalars
   for( i=0; i<h.h_nDark; i++ ) 
   	{ 
 			in >> d;
 			ReadDarkParticle(d);
   	}
-/*
- //TODO: ADD BACK IN WHEN READY
   for( i=0; i<h.h_nSph;  i++ ) 
   	{
 			in >> g;
@@ -155,7 +146,6 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 			in >> s;
 			ReadStarParticle(s);
   	}
-*/
   // Close the file.
   in.close();
   
@@ -171,13 +161,10 @@ int vtkTipsyReader::RequestData(vtkInformation*,
   output->GetPointData()->AddArray(this->EpsScalars);
 //the default vectors to be displayed
   output->GetPointData()->SetVectors(this->VelocityVectors); 
-/*
-//TODO: ADD BACK IN WHEN READY
   output->GetPointData()->AddArray(this->RhoScalars);
   output->GetPointData()->AddArray(this->TempScalars);
   output->GetPointData()->AddArray(this->HsmoothScalars);
   output->GetPointData()->AddArray(this->MetalsScalars);
   output->GetPointData()->AddArray(this->TformScalars);
-*/
   return 1;
 }

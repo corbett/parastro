@@ -41,14 +41,11 @@ private:
 	vtkSmartPointer<vtkFloatArray> PhiScalars;
 	vtkSmartPointer<vtkFloatArray> EpsScalars;
 	vtkSmartPointer<vtkFloatArray> VelocityVectors;
-	/*
-	TODO: ADD BACK IN WHEN READY
 	vtkSmartPointer<vtkFloatArray> RhoScalars;   
 	vtkSmartPointer<vtkFloatArray> TempScalars;       
 	vtkSmartPointer<vtkFloatArray> HsmoothScalars;    
 	vtkSmartPointer<vtkFloatArray> MetalsScalars;
 	vtkSmartPointer<vtkFloatArray> TformScalars;
-	*/
 	//private functions: initialization and reading
 	// Description:
   // create a vtkFloatArray with the  name arrayName, number of components 
