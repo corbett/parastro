@@ -71,7 +71,7 @@ SourceToolbarActions::SourceToolbarActions(QObject* p) : QActionGroup(p)
   //find moments
 	//TODO: add functionality
   a = new QAction(icon, "Find moments", this);
-  a->setData("BoxSource");
+  a->setData("WaveletSource");
   this->addAction(a);
   //extract smooth density
 	//TODO: add functionality
