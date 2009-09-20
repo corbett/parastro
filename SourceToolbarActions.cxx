@@ -60,23 +60,23 @@ SourceToolbarActions::SourceToolbarActions(QObject* p) : QActionGroup(p)
   this->addAction(a);
   //profile	
 	//TODO: add functionality
-  a = new QAction(icon, "profile", this);
-  a->setData("SphereSource");
+  a = new QAction(icon, "Generate Profiles", this);
+  a->setData("LineSource");
   this->addAction(a);
   //halo finding
 	//TODO: add functionality
-  a = new QAction(icon, "find halos", this);
-  a->setData("SphereSource");
+  a = new QAction(icon, "Find halos", this);
+  a->setData("CylinderSource");
   this->addAction(a);
   //find moments
 	//TODO: add functionality
-  a = new QAction(icon, "find moments", this);
-  a->setData("SphereSource");
+  a = new QAction(icon, "Find moments", this);
+  a->setData("BoxSource");
   this->addAction(a);
   //extract smooth density
 	//TODO: add functionality
-  a = new QAction(icon, "extract smooth density", this);
-  a->setData("SphereSource");
+  a = new QAction(icon, "Extract smooth density", this);
+  a->setData("ConeSource");
   this->addAction(a);
 	//----------------
   QObject::connect(this, SIGNAL(triggered(QAction*)), this, SLOT(onAction(QAction*)));
