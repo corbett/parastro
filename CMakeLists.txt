@@ -1,53 +1,33 @@
 cmake_minimum_required(VERSION 2.4)
 FIND_PACKAGE(ParaView REQUIRED)
 INCLUDE(${PARAVIEW_USE_FILE})
-
-
-############
-#Menu bar
+###############
+#AstroViz plugin
+#INCLUDES
+# o Tipsy binary reader
+# o AstroViz menu, menu options
 ###
-# We need to wrap for Qt stuff such as signals/slots etc. to work correctly.
+#AstroViz Menu bar
 QT4_WRAP_CPP(MOC_SRCS_MENU SourceToolbarActions.h)
 ADD_PARAVIEW_ACTION_GROUP(IFACES_MENU IFACE_SRCS_MENU 
                         CLASS_NAME SourceToolbarActions
                         GROUP_NAME "MenuBar/ParaViz")
-
-#ADD_PARAVIEW_PLUGIN(MenuToolbar "1.0"
-#	GUI_INTERFACES ${IFACES_MENU}
-#	SOURCES ${MOC_SRCS_MENU} ${IFACE_SRCS_MENU} 
-#	SourceToolbarActions.cxx)
-###########
-
-###############
-#Tipsy binary reader
-#requires an additional library, libtipsy 
-#check out with
-#%svn co https://svn.physik.uzh.ch/repos/itp/tipsylib
-#build with
-#%make
-#may need to run
-#%ranlib libtipsy.a
-#install
-#%sudo cp libtipsa.a /usr/lib
-###
-#define the server-side portion of the reader plugin
-ADD_PARAVIEW_PLUGIN(TipsyReaderSMPlugin "1.0"
+#define the server-side portion of the AstroViz plugin
+ADD_PARAVIEW_PLUGIN(AstroVizSMPlugin "1.0"
 	SERVER_MANAGER_SOURCES vtkTipsyReader.cxx
 	SERVER_MANAGER_XML  TipsyReaderSM.xml)
-#can later do this more cleanly
-TARGET_LINK_LIBRARIES(TipsyReaderSMPlugin /usr/lib/libtipsy.a)
-#define the client-side portion of the reader plugin
-#the bottom two were added for menu bar
-ADD_PARAVIEW_PLUGIN(TipsyReaderGUIPlugin "1.0"
-	GUI_RESOURCES TipsyReader.qrc
-	GUI_INTERFACES ${IFACES_MENU}
-	SOURCES ${MOC_SRCS_MENU} ${IFACE_SRCS_MENU} 
-	SourceToolbarActions.cxx)
-#requires an additional library, libtipsy 
-#can later do this more cleanly
-TARGET_LINK_LIBRARIES(TipsyReaderGUIPlugin /usr/lib/libtipsy.a)
+TARGET_LINK_LIBRARIES(AstroVizSMPlugin /usr/lib/libtipsy.a) #can later do this more cleanly
+#define the client-side portion of the AstroViz plugin
+ADD_PARAVIEW_PLUGIN(AstroVizGUIPlugin "1.0"
+	GUI_RESOURCES TipsyReader.qrc #for Tipsy Binary reader
+	GUI_INTERFACES ${IFACES_MENU} #for AstroViz menu
+	SOURCES ${MOC_SRCS_MENU} ${IFACE_SRCS_MENU}  #for AstroViz
+	SourceToolbarActions.cxx) #for menu
+TARGET_LINK_LIBRARIES(AstroVizGUIPlugin /usr/lib/libtipsy.a) 	#can later do this more cleanly
 #################
 
+######################
+# Below are samples/playing around for possible later inclusion in AstroViz
 ##########
 #FOR READING TEXT FILES OF POINTS
 #Just a sample of the reader plugin architecture
@@ -78,18 +58,3 @@ TARGET_LINK_LIBRARIES(TipsyReaderGUIPlugin /usr/lib/libtipsy.a)
 #                  SOURCES ${MOC_SRCS} ${IFACE_SRCS} 
 #                  SourceToolbarActions.cxx)
 #############
-
-############
-#Menu bar
-###
-# We need to wrap for Qt stuff such as signals/slots etc. to work correctly.
-#QT4_WRAP_CPP(MOC_SRCS_MENU SourceToolbarActions.h
-#ADD_PARAVIEW_ACTION_GROUP(IFACES_MENU IFACE_SRCS_MENU 
-#                        CLASS_NAME SourceToolbarActions
-#                        GROUP_NAME "MenuBar/ParaViz")
-#
-#ADD_PARAVIEW_PLUGIN(MenuToolbar "1.0"
-#	GUI_INTERFACES ${IFACES_MENU}
-#	SOURCES ${MOC_SRCS_MENU} ${IFACE_SRCS_MENU} 
-#	SourceToolbarActions.cxx)
-###########
