@@ -1,5 +1,5 @@
 /*=========================================================================
-
+   author: corbett. Modifying the original file for my purposes
    Program: ParaView
    Module:    $RCSfile: SourceToolbarActions.cxx,v $
 
@@ -43,14 +43,42 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 SourceToolbarActions::SourceToolbarActions(QObject* p) : QActionGroup(p)
 {
-  // let's use a Qt icon (we could make our own)
+	//TODO: add my own icon
   QIcon icon = qApp->style()->standardIcon(QStyle::SP_MessageBoxCritical);
+	//--------------
+	//MENU ITEMS
+	//--------------
+	//Sphere around COM
+	//TODO: add functionality
   QAction* a = new QAction(icon, "Sphere around COM", this);
   a->setData("SphereSource");
   this->addAction(a);
+	//Sphere around most bound
+	//TODO: add functionality
   a = new QAction(icon, "Sphere around most bound", this);
   a->setData("SphereSource");
   this->addAction(a);
+  //profile	
+	//TODO: add functionality
+  a = new QAction(icon, "profile", this);
+  a->setData("SphereSource");
+  this->addAction(a);
+  //halo finding
+	//TODO: add functionality
+  a = new QAction(icon, "find halos", this);
+  a->setData("SphereSource");
+  this->addAction(a);
+  //find moments
+	//TODO: add functionality
+  a = new QAction(icon, "find moments", this);
+  a->setData("SphereSource");
+  this->addAction(a);
+  //extract smooth density
+	//TODO: add functionality
+  a = new QAction(icon, "extract smooth density", this);
+  a->setData("SphereSource");
+  this->addAction(a);
+	//----------------
   QObject::connect(this, SIGNAL(triggered(QAction*)), this, SLOT(onAction(QAction*)));
 }
 
