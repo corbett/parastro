@@ -11,7 +11,7 @@ INCLUDE(${PARAVIEW_USE_FILE})
 QT4_WRAP_CPP(MOC_SRCS_MENU SourceToolbarActions.h)
 ADD_PARAVIEW_ACTION_GROUP(IFACES_MENU IFACE_SRCS_MENU 
                         CLASS_NAME SourceToolbarActions
-                        GROUP_NAME "MenuBar/ParaViz")
+                        GROUP_NAME "MenuBar/AstroViz")
 #define the server-side portion of the AstroViz plugin
 ADD_PARAVIEW_PLUGIN(AstroVizSMPlugin "1.0"
 	SERVER_MANAGER_SOURCES vtkTipsyReader.cxx

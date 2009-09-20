@@ -45,11 +45,11 @@ SourceToolbarActions::SourceToolbarActions(QObject* p) : QActionGroup(p)
 {
   // let's use a Qt icon (we could make our own)
   QIcon icon = qApp->style()->standardIcon(QStyle::SP_MessageBoxCritical);
-  QAction* a = new QAction(icon, "Create Sphere", this);
+  QAction* a = new QAction(icon, "Sphere around COM", this);
   a->setData("SphereSource");
   this->addAction(a);
-  a = new QAction(icon, "Create Cylinder", this);
-  a->setData("CylinderSource");
+  a = new QAction(icon, "Sphere around most bound", this);
+  a->setData("SphereSource");
   this->addAction(a);
   QObject::connect(this, SIGNAL(triggered(QAction*)), this, SLOT(onAction(QAction*)));
 }
