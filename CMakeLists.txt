@@ -12,18 +12,21 @@ QT4_WRAP_CPP(MOC_SRCS_MENU SourceToolbarActions.h)
 ADD_PARAVIEW_ACTION_GROUP(IFACES_MENU IFACE_SRCS_MENU 
                         CLASS_NAME SourceToolbarActions
                         GROUP_NAME "MenuBar/AstroViz")
+#removed, integrated into one single plugin as recommended by ParaView list
 #define the server-side portion of the AstroViz plugin
-ADD_PARAVIEW_PLUGIN(AstroVizSMPlugin "1.0"
-	SERVER_MANAGER_SOURCES vtkTipsyReader.cxx
-	SERVER_MANAGER_XML  TipsyReaderSM.xml)
-TARGET_LINK_LIBRARIES(AstroVizSMPlugin /usr/lib/libtipsy.a) #can later do this more cleanly
+#ADD_PARAVIEW_PLUGIN(AstroVizSMPlugin "1.0"
+#	SERVER_MANAGER_SOURCES vtkTipsyReader.cxx
+#	SERVER_MANAGER_XML  TipsyReaderSM.xml)
+#TARGET_LINK_LIBRARIES(AstroVizSMPlugin /usr/lib/libtipsy.a) #can later do this more cleanly
 #define the client-side portion of the AstroViz plugin
-ADD_PARAVIEW_PLUGIN(AstroVizGUIPlugin "1.0"
+ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.0"
+	SERVER_MANAGER_SOURCES vtkTipsyReader.cxx #for server manager side
+	SERVER_MANAGER_XML  TipsyReaderSM.xml #for server manager side
 	GUI_RESOURCES TipsyReader.qrc #for Tipsy Binary reader
 	GUI_INTERFACES ${IFACES_MENU} #for AstroViz menu
 	SOURCES ${MOC_SRCS_MENU} ${IFACE_SRCS_MENU}  #for AstroViz
 	SourceToolbarActions.cxx) #for menu
-TARGET_LINK_LIBRARIES(AstroVizGUIPlugin /usr/lib/libtipsy.a) 	#can later do this more cleanly
+TARGET_LINK_LIBRARIES(AstroVizPlugin /usr/lib/libtipsy.a) 	#can later do this more cleanly
 #################
 
 ######################
