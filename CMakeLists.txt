@@ -12,14 +12,12 @@ QT4_WRAP_CPP(MOC_SRCS_MENU SourceToolbarActions.h)
 ADD_PARAVIEW_ACTION_GROUP(IFACES_MENU IFACE_SRCS_MENU 
                         CLASS_NAME SourceToolbarActions
                         GROUP_NAME "MenuBar/AstroViz")
-ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.0"
-	SERVER_MANAGER_SOURCES vtkTipsyReader.cxx #for server manager side
-	SERVER_MANAGER_XML  TipsyReaderSM.xml #for server manager side
+ADD_PARAVIEW_PLUGIN(AstroVizGUIPlugin "1.0"
 	GUI_RESOURCES TipsyReader.qrc #for Tipsy Binary reader
 	GUI_INTERFACES ${IFACES_MENU} #for AstroViz menu
 	SOURCES ${MOC_SRCS_MENU} ${IFACE_SRCS_MENU}  #for AstroViz
 	SourceToolbarActions.cxx) #for menu
-TARGET_LINK_LIBRARIES(AstroVizPlugin /usr/lib/libtipsy.a) 	#can later do this more cleanly
+TARGET_LINK_LIBRARIES(AstroVizGUIPlugin /usr/lib/libtipsy.a) 	#can later do this more cleanly
 #################
 
 ######################
