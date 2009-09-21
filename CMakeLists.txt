@@ -12,13 +12,6 @@ QT4_WRAP_CPP(MOC_SRCS_MENU SourceToolbarActions.h)
 ADD_PARAVIEW_ACTION_GROUP(IFACES_MENU IFACE_SRCS_MENU 
                         CLASS_NAME SourceToolbarActions
                         GROUP_NAME "MenuBar/AstroViz")
-#removed, integrated into one single plugin as recommended by ParaView list
-#define the server-side portion of the AstroViz plugin
-#ADD_PARAVIEW_PLUGIN(AstroVizSMPlugin "1.0"
-#	SERVER_MANAGER_SOURCES vtkTipsyReader.cxx
-#	SERVER_MANAGER_XML  TipsyReaderSM.xml)
-#TARGET_LINK_LIBRARIES(AstroVizSMPlugin /usr/lib/libtipsy.a) #can later do this more cleanly
-#define the client-side portion of the AstroViz plugin
 ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.0"
 	SERVER_MANAGER_SOURCES vtkTipsyReader.cxx #for server manager side
 	SERVER_MANAGER_XML  TipsyReaderSM.xml #for server manager side
