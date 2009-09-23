@@ -25,9 +25,10 @@ TARGET_LINK_LIBRARIES(AstroVizPlugin /usr/lib/libtipsy.a) 	#can later do this mo
 
 ######################
 # Below are samples/playing around for possible later inclusion in AstroViz
+######################
 ##########
-#FOR READING TEXT FILES OF POINTS
-#Just a sample of the reader plugin architecture
+# For reading text files of points
+# Just a sample of the reader plugin architecture
 ###
 ##define the server-side portion of the reader plugin
 ##vtkTxtReader.cxx is just a copy of vtkDelimitedTextReader in the plugin ##directory (same as is used by CSV)
@@ -40,7 +41,7 @@ TARGET_LINK_LIBRARIES(AstroVizPlugin /usr/lib/libtipsy.a) 	#can later do this mo
 ###########
 
 ###########
-#For the toolbar
+# For a toolbar
 ###
 ## We need to wrap for Qt stuff such as signals/slots etc. to work correctly.
 #QT4_WRAP_CPP(MOC_SRCS SourceToolbarActions.h)
@@ -55,3 +56,15 @@ TARGET_LINK_LIBRARIES(AstroVizPlugin /usr/lib/libtipsy.a) 	#can later do this mo
 #                  SOURCES ${MOC_SRCS} ${IFACE_SRCS} 
 #                  SourceToolbarActions.cxx)
 #############
+
+############
+# For a graphics filter
+# just a sample of the architecture
+####
+ADD_PARAVIEW_PLUGIN(
+  AstroVizFilters                 #<--Name for the plugin
+ "1.0"                        #<--Version string
+  SERVER_MANAGER_XML ShrinkFilterSM.xml  #<-- server manager xml
+  SERVER_MANAGER_SOURCES vtkShrinkFilter.cxx #<-- source files for the new classes
+	GUI_RESOURCE_FILES AstroVizFilterMenu.xml #<-- adds a new menu of filters
+)

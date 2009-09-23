@@ -1,0 +1,27 @@
+<ServerManagerConfiguration>
+  <!-- This is the server manager configuration XML. It defines the interface to
+       a new filter. As a rule of thumb, try to locate the configuration for
+       a filter already in ParaView (in Servers/ServerManager/Resources/*.xml)
+       that matches your filter and then model your xml on it -->
+  <ProxyGroup name="filters">
+   <SourceProxy name="ShrinkFilter" class="vtkShrinkFilter" label="ShrinkFilter">
+     <Documentation
+        long_help="A simple graphics filter which shrinks all cells of an input data set in order to visualize the structure of each cell."
+        short_help="Shrinks all cells of input dataset.">
+		More documentation can be listed here
+     </Documentation>
+     <InputProperty
+        name="Input"
+        command="SetInputConnection">
+           <ProxyGroupDomain name="groups">
+             <Group name="sources"/>
+             <Group name="filters"/>
+           </ProxyGroupDomain>
+           <DataTypeDomain name="input_type">
+             <DataType value="vtkDataSet"/>
+           </DataTypeDomain>
+      </InputProperty>
+   </SourceProxy>
+ </ProxyGroup>
+</ServerManagerConfiguration>
+
