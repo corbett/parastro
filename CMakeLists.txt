@@ -14,12 +14,12 @@ ADD_PARAVIEW_ACTION_GROUP(IFACES_MENU IFACE_SRCS_MENU
                         GROUP_NAME "MenuBar/AstroViz")
 #define the client-side portion of the AstroViz plugin
 ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.0"
-	SERVER_MANAGER_SOURCES vtkTipsyReader.cxx #for server
-	SERVER_MANAGER_XML  TipsyReaderSM.xml #for server
-	GUI_RESOURCES TipsyReader.qrc #for Tipsy Binary reader
-	GUI_INTERFACES ${IFACES_MENU} #for AstroViz menu
-	SOURCES ${MOC_SRCS_MENU} ${IFACE_SRCS_MENU}  #for AstroViz
-	SourceToolbarActions.cxx) #for menu
+	SERVER_MANAGER_SOURCES vtkTipsyReader.cxx #<-- for server
+	SERVER_MANAGER_XML  TipsyReaderSM.xml #<-- for server
+	GUI_RESOURCES TipsyReader.qrc #<-- for Tipsy Binary reader
+	GUI_INTERFACES ${IFACES_MENU} #<-- for AstroViz menu
+	SOURCES ${MOC_SRCS_MENU} ${IFACE_SRCS_MENU}  #<-- for AstroViz
+	SourceToolbarActions.cxx) #<-- for menu
 TARGET_LINK_LIBRARIES(AstroVizPlugin /usr/lib/libtipsy.a) 	#can later do this more cleanly
 #################
 
@@ -59,11 +59,9 @@ TARGET_LINK_LIBRARIES(AstroVizPlugin /usr/lib/libtipsy.a) 	#can later do this mo
 
 ############
 # For a graphics filter
-# just a sample of the architecture
+# just a sample of the architecture for a filter plugin
 ####
-ADD_PARAVIEW_PLUGIN(
-  AstroVizFilters                 #<--Name for the plugin
- "1.0"                        #<--Version string
+ADD_PARAVIEW_PLUGIN(AstroVizFilters "1.0"
   SERVER_MANAGER_XML ShrinkFilterSM.xml  #<-- server manager xml
   SERVER_MANAGER_SOURCES vtkShrinkFilter.cxx #<-- source files for the new classes
 	GUI_RESOURCE_FILES AstroVizFilterMenu.xml #<-- adds a new menu of filters

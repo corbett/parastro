@@ -31,6 +31,7 @@ vtkStandardNewMacro(vtkTipsyReader);
 vtkTipsyReader::vtkTipsyReader()
 {
  this->FileName = 0;
+ this->MarkFileName = 0;
  this->SetNumberOfInputPorts(0);
 	// Allocate objects to hold points and vertex cells.
  this->Points = vtkSmartPointer<vtkPoints>::New();
@@ -41,6 +42,7 @@ vtkTipsyReader::vtkTipsyReader()
 vtkTipsyReader::~vtkTipsyReader()
 {
   this->SetFileName(0);
+  this->SetMarkFileName(0);
 }
 
 //----------------------------------------------------------------------------

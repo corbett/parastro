@@ -10,6 +10,15 @@
 					Reads in points from ascii file.
 				</Documentation>
 			</StringVectorProperty>
+			<StringVectorProperty
+				name="FileName"
+				command="SetMarkFileName"
+				number_of_elements="1">
+				<FileListDomain name="files"/>
+				<Documentation>
+					Reads in points from ascii file.
+				</Documentation>
+			</StringVectorProperty>
 		</SourceProxy>
 	</ProxyGroup>
 </ServerManagerConfiguration>

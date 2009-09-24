@@ -23,11 +23,16 @@ public:
   // Set/Get the name of the file from which to read points.
   vtkSetStringMacro(FileName);
   vtkGetStringMacro(FileName);
+  // Description:
+  // Set/Get the name of the file from which to read the marked points.
+  vtkSetStringMacro(MarkFileName);
+  vtkGetStringMacro(MarkFileName);
 
 protected:
   vtkTipsyReader();
   ~vtkTipsyReader();
   char* FileName;
+	char* MarkFileName;
   int RequestData(vtkInformation*,
                   vtkInformationVector**,
                   vtkInformationVector*);
