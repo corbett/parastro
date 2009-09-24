@@ -42,8 +42,12 @@ private:
 	// The BTX, ETX comments bracket the portion of the code which should not be
 	// attempted to wrap for use by python, specifically the code which uses
 	// C++ templates as this code is unable to be wrapped.
-	//BTX
 	// private variables: points, scalars, and vectors
+	int numDark;
+	int numGas;
+	int numStar;
+	int numBodies;
+	//BTX
 	vtkSmartPointer<vtkPoints> Points;
 	vtkSmartPointer<vtkCellArray> Verts; 
 	vtkSmartPointer<vtkIntArray> ParticleTypes;
@@ -76,5 +80,14 @@ private:
 	// Description:
 	// reads variables common to star particles
   void ReadStarParticle(TipsyStarParticle& starParticle); 
+	// Description:
+	// reads in an array of the indices of marked particles from a file, returns 0 if unsucessful, 1 otherwise
+	int ReadMarkedParticleIndices();
+	// Description:
+	// allocates all vtk arrays for Tipsy variables
+	void AllocateAllTipsyVariableArrays();
+	// Description:
+	// stores the data read in a vtkPolyData output vector
+	void StoreDataRead(vtkInformationVector* outputVector);
 };
 #endif

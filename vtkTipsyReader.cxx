@@ -14,12 +14,14 @@ Currently only reads in standard format Tipsy files
 #include "vtkCellArray.h"
 // Initializing for reading  
 // the input file
-ifTipsy in;
+ifTipsy tipsyIn;
 // used to read in header, gas, dark, and star particles respectively
 TipsyHeader       h; 
 TipsyGasParticle  g; 
 TipsyDarkParticle d; 
 TipsyStarParticle s; 
+//int, if 0 not marked, if 1 marked
+int MarkedParticle;
 // Used to store which type a particle is in an int array. Later will separate 
 // each type into a separate dataset
 enum particle {STAR, DARK, GAS};
@@ -31,8 +33,8 @@ vtkStandardNewMacro(vtkTipsyReader);
 vtkTipsyReader::vtkTipsyReader()
 {
  this->FileName = 0;
- this->MarkFileName = 0;
- this->SetNumberOfInputPorts(0); // consumes a mark file
+ this->MarkFileName = 0; // this file is optional
+ this->SetNumberOfInputPorts(0); 
 	// Allocate objects to hold points and vertex cells.
  this->Points = vtkSmartPointer<vtkPoints>::New();
  this->Verts = vtkSmartPointer<vtkCellArray>::New();
@@ -50,8 +52,9 @@ void vtkTipsyReader::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os,indent);
   os << indent << "FileName: "
-     << (this->FileName ? this->FileName : "(none)") << "\n";
-
+     << (this->FileName ? this->FileName : "(none)") << "\n"
+		 << indent << "MarkFileName: "
+     << (this->MarkFileName ? this->MarkFileName : "(none)") << "\n";
 }
 
 //----------------------------------------------------------------------------
@@ -63,6 +66,44 @@ vtkIdType vtkTipsyReader::ReadParticle(TipsyBaseParticle& baseParticle)
   this->MassScalars->InsertValue(id,baseParticle.mass);
   this->PhiScalars->SetValue(id,baseParticle.phi);
   return id;
+}
+
+//----------------------------------------------------------------------------
+void vtkTipsyReader::AllocateAllTipsyVariableArrays()
+{
+	this->ParticleTypes = vtkSmartPointer<vtkIntArray>::New();
+		ParticleTypes->SetName("particle type");
+		ParticleTypes->SetNumberOfTuples(this->numBodies);
+ 	this->MassScalars = AllocateFloatArray("mass",1,this->numBodies);
+ 	this->PhiScalars = AllocateFloatArray("potential",1,this->numBodies);
+ 	this->EpsScalars = AllocateFloatArray("softening",1,this->numBodies);
+ 	this->VelocityVectors = AllocateFloatArray("velocity",3,this->numBodies);
+	this->RhoScalars =  AllocateFloatArray("rho",1,this->numBodies);
+ 	this->TempScalars =  AllocateFloatArray("temp",1,this->numBodies);
+ 	this->HsmoothScalars =  AllocateFloatArray("hsmooth",1,this->numBodies);
+ 	this->MetalsScalars =  AllocateFloatArray("metals",1,this->numBodies);
+ 	this->TformScalars =  AllocateFloatArray("tform",1,this->numBodies);
+}
+
+void vtkTipsyReader::StoreDataRead(vtkInformationVector* outputVector)
+{
+  // Store the points and cells in the output data object.
+  vtkPolyData* output = vtkPolyData::GetData(outputVector);
+  output->SetPoints(this->Points);
+  output->SetVerts(this->Verts); 
+	// the default scalars to be displayed
+  output->GetPointData()->SetScalars(this->PhiScalars);
+	// the rest of the scalars
+	output->GetPointData()->AddArray(this->ParticleTypes);
+  output->GetPointData()->AddArray(this->MassScalars);
+  output->GetPointData()->AddArray(this->EpsScalars);
+  output->GetPointData()->AddArray(this->RhoScalars);
+  output->GetPointData()->AddArray(this->TempScalars);
+  output->GetPointData()->AddArray(this->HsmoothScalars);
+  output->GetPointData()->AddArray(this->MetalsScalars);
+  output->GetPointData()->AddArray(this->TformScalars);
+	// the default vectors to be displayed
+  output->GetPointData()->SetVectors(this->VelocityVectors); 
 }
 
 //----------------------------------------------------------------------------
@@ -103,6 +144,35 @@ void vtkTipsyReader::ReadStarParticle(TipsyStarParticle& starParticle)
   this->TformScalars->SetValue(id, starParticle.metals);
 }
 
+int vtkTipsyReader::ReadMarkedParticleIndices()
+{
+	ifstream fin(this->MarkFileName);
+	if(!fin)
+ 		{
+ 		vtkErrorMacro("Error opening marked particle file: " << this->FileName << " please specify a valid mark file or none at all. For now reading all particles.");
+		return 0;
+ 		}
+	else
+	{
+	int mfIndex,mfBodies,mfGas,mfStar,mfDark;
+	//first line
+	if(fin >> mfBodies >> mfGas >> mfStar)
+		{
+	 	mfDark=mfBodies-mfGas-mfStar;
+		if(mfBodies!=this->numBodies || mfDark!=this->numDark || mfGas!=this->numGas || mfStar !=this->numStar)
+	 		{
+	 		vtkErrorMacro("Error opening marked particle file, wrong format, number of particles do not match Tipsy file " << this->FileName << " please specify a valid mark file or none at all. For now reading all particles.");
+	 		return 0;
+	 		}
+		else
+			{
+			//read in the file, note the marked particles
+			//TODO: read here
+			return 1;
+			}
+	 	}
+	}
+}
 //----------------------------------------------------------------------------
 int vtkTipsyReader::RequestData(vtkInformation*,
                                        vtkInformationVector**,
@@ -114,72 +184,55 @@ int vtkTipsyReader::RequestData(vtkInformation*,
     vtkErrorMacro("A FileName must be specified.");
     return 0;
     }
-
-    // Open the tipsy standard file and abort if there is an error.
-    in.open(this->FileName,"standard");
-    if (!in.is_open()) 
-			{
-	    vtkErrorMacro("Error opening file " << this->FileName);
-	    return 0;	
-    	}
-
+	// Open the tipsy standard file and abort if there is an error.
+  tipsyIn.open(this->FileName,"standard");
+  if (!tipsyIn.is_open()) 
+		{
+	  vtkErrorMacro("Error opening file " << this->FileName);
+	  return 0;	
+    }
+	//All the following is to handle marked particles
+	//	Open the marked file is one is specified and abort if there is an error
   // Read points from the file.
   vtkDebugMacro("Reading points from file " << this->FileName);
   // Read the header from the input
-  in >> h;
+  tipsyIn >> h;
   // Set the number of points for each scalar array; this is necessary if I want to use InsertValue for scalars by id
-  int numTuples = h.h_nDark + h.h_nSph + h.h_nStar; //TODO: will need to be changed when particles other than dark particles are read
- 	// Allocate scalars and vectors
-	// Allocate object to hold particle types
- 	this->ParticleTypes = vtkSmartPointer<vtkIntArray>::New();
-		ParticleTypes->SetName("particle type");
-		ParticleTypes->SetNumberOfTuples(numTuples);
- 	this->MassScalars = AllocateFloatArray("mass",1,numTuples);
- 	this->PhiScalars = AllocateFloatArray("potential",1,numTuples);
- 	this->EpsScalars = AllocateFloatArray("softening",1,numTuples);
- 	this->VelocityVectors = AllocateFloatArray("velocity",3,numTuples);
-	this->RhoScalars =  AllocateFloatArray("rho",1,numTuples);
- 	this->TempScalars =  AllocateFloatArray("temp",1,numTuples);
- 	this->HsmoothScalars =  AllocateFloatArray("hsmooth",1,numTuples);
- 	this->MetalsScalars =  AllocateFloatArray("metals",1,numTuples);
- 	this->TformScalars =  AllocateFloatArray("tform",1,numTuples);
+	this->numDark=h.h_nDark;
+	this->numGas=h.h_nSph;
+	this->numStar=h.h_nStar;
+	this->numBodies=this->numDark+this->numGas+this->numStar;
+	if(this->MarkFileName)
+	{
+		  vtkDebugMacro("Reading marked point indices from file " << this->MarkFileName);
+			//TODO: this needs to actually read the marked indices into an array
+			//todo: need to actually care if it returns 0
+			ReadMarkedParticleIndices();
+	}
+ 	// Allocate vtk scalars and vector arrays to hold particle data
+	AllocateAllTipsyVariableArrays();
   // Read every particle and add their position to be displayed, as well as relevant scalars
-  for( i=0; i<h.h_nDark; i++ ) 
+	//TODO: this needs to actually consider the array of marked particles if it exists
+  for( i=0; i<this->numDark; i++ ) 
   	{ 
-			in >> d;
+			tipsyIn >> d;
 			ReadDarkParticle(d);
   	}
-  for( i=0; i<h.h_nSph;  i++ ) 
+  for( i=0; i<this->numGas; i++ ) 
   	{
-			in >> g;
+			tipsyIn >> g;
 			ReadGasParticle(g);
   	}
-  for( i=0; i<h.h_nStar; i++) 
+  for( i=0; i<this->numStar; i++) 
   	{
-			in >> s;
+			tipsyIn >> s;
 			ReadStarParticle(s);
   	}
   // Close the file.
-  in.close();
-  
+  tipsyIn.close();
+	//Storing the data in the output vector
+	StoreDataRead(outputVector);  
   vtkDebugMacro("Read " << this->Points->GetNumberOfPoints() << " points.");
 
-  // Store the points and cells in the output data object.
-  vtkPolyData* output = vtkPolyData::GetData(outputVector);
-  output->SetPoints(this->Points);
-  output->SetVerts(this->Verts); 
-	// the default scalars to be displayed
-  output->GetPointData()->SetScalars(this->PhiScalars);
-	// the rest of the scalars
-	output->GetPointData()->AddArray(this->ParticleTypes);
-  output->GetPointData()->AddArray(this->MassScalars);
-  output->GetPointData()->AddArray(this->EpsScalars);
-  output->GetPointData()->AddArray(this->RhoScalars);
-  output->GetPointData()->AddArray(this->TempScalars);
-  output->GetPointData()->AddArray(this->HsmoothScalars);
-  output->GetPointData()->AddArray(this->MetalsScalars);
-  output->GetPointData()->AddArray(this->TformScalars);
-	// the default vectors to be displayed
-  output->GetPointData()->SetVectors(this->VelocityVectors); 
-  return 1;
+ 	return 1;
 }
