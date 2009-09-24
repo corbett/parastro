@@ -32,7 +32,7 @@ vtkTipsyReader::vtkTipsyReader()
 {
  this->FileName = 0;
  this->MarkFileName = 0;
- this->SetNumberOfInputPorts(0);
+ this->SetNumberOfInputPorts(1); // consumes a mark file
 	// Allocate objects to hold points and vertex cells.
  this->Points = vtkSmartPointer<vtkPoints>::New();
  this->Verts = vtkSmartPointer<vtkCellArray>::New();

@@ -11,12 +11,12 @@
 				</Documentation>
 			</StringVectorProperty>
 			<StringVectorProperty
-				name="FileName"
+				name="MarkFileName"
 				command="SetMarkFileName"
 				number_of_elements="1">
 				<FileListDomain name="files"/>
 				<Documentation>
-					Reads in points from ascii file.
+					Reads in mark points from ascii file.
 				</Documentation>
 			</StringVectorProperty>
 		</SourceProxy>
