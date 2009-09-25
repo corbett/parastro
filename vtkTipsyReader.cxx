@@ -5,7 +5,8 @@ this depends on a few header files as well as the Tipsylib library.
 Currently only reads in standard format Tipsy files
 @author corbett
 =========================================================================*/
-#include "math.h"
+#include <math.h>
+#include <assert.h>
 #include "vtkTipsyReader.h"
 #include "vtkObjectFactory.h"
 #include "vtkPointData.h"
