@@ -94,7 +94,14 @@ private:
 	// Description:
 	// stores the data read in a vtkPolyData output vector
 	void StoreDataRead(vtkInformationVector* outputVector);
+	// Description:
+	// Reads the tipsy header. Must be called after the tipsy file is opened, but before any marked particle file is attempted to be open
+	void ReadTipsyHeader();
+	// Description:
+	// Reads all particles from the tipsy file
 	void ReadAllParticles();
+	// Description:
+	// Reads only Marked particles from the tipsy file. Must be called after function ReadMarkedParticleIndices.
 	void ReadMarkedParticles();
 };
 #endif
