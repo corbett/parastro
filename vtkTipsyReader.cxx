@@ -198,7 +198,7 @@ int vtkTipsyReader::ReadMarkedParticleIndices()
 	if(!markInFile)
  		{
  		vtkErrorMacro("Error opening marked particle file: " 
-									<< this->FileName 
+									<< this->MarkFileName 
 									<< " please specify a valid mark file or none at all. For now reading all particles.");
 		return 0;
  		}
@@ -211,8 +211,8 @@ int vtkTipsyReader::ReadMarkedParticleIndices()
 	 		mfDark=mfBodies-mfGas-mfStar;
 			if(mfBodies!=this->numBodies || mfDark!=this->numDark || mfGas!=this->numGas || mfStar !=this->numStar)
 	 			{
-	 			vtkErrorMacro("Error opening marked particle file, wrong format, number of particles do not match Tipsy file " 
-											<< this->FileName 
+	 			vtkErrorMacro("Error opening marked particle file, wrong format, number of particles do not match Tipsy file: " 
+											<< this->MarkFileName 
 											<< " please specify a valid mark file or none at all. For now reading all particles.");
 	 			return 0;
 	 			}
