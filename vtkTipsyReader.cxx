@@ -12,14 +12,6 @@ Currently only reads in standard format Tipsy files
 #include "vtkPolyData.h"
 #include "vtkPoints.h"
 #include "vtkCellArray.h"
-// Initializing for reading  
-// the input file
-ifTipsy tipsyInFile;
-// used to read in header, gas, dark, and star particles respectively
-TipsyHeader       h; 
-TipsyGasParticle  g; 
-TipsyDarkParticle d; 
-TipsyStarParticle s; 
 // Used to store which type a particle is in an int array. Later will separate 
 // each type into a separate dataset
 enum particle {STAR, DARK, GAS};
@@ -36,7 +28,6 @@ vtkTipsyReader::vtkTipsyReader()
 	// Allocate objects to hold points and vertex cells.
  	this->Points = vtkSmartPointer<vtkPoints>::New();
  	this->Verts = vtkSmartPointer<vtkCellArray>::New();
-//	this->MarkedParticleIndices = queue<int>();
 }
 
 //----------------------------------------------------------------------------
@@ -86,6 +77,7 @@ void vtkTipsyReader::AllocateAllTipsyVariableArrays()
 
 void vtkTipsyReader::StoreDataRead(vtkInformationVector* outputVector)
 {
+	//each array allocated in AllocateAllTipsyVariableArrays should be stored here
   // Store the points and cells in the output data object.
   vtkPolyData* output = vtkPolyData::GetData(outputVector);
   output->SetPoints(this->Points);
@@ -115,6 +107,60 @@ vtkSmartPointer<vtkFloatArray> vtkTipsyReader::AllocateFloatArray(const char* ar
   return floatArray;
 }
 
+//----------------------------------------------------------------------------
+void vtkTipsyReader::ReadTipsyHeader()
+{
+	// Initializing for reading  
+	TipsyHeader       h; 
+	// Reading in the header
+  this->tipsyInFile >> h;
+  // Set the number of points for each scalar array; this is necessary if I want to use InsertValue for scalars by id
+	this->numDark=h.h_nDark;
+	this->numGas=h.h_nSph;
+	this->numStar=h.h_nStar;
+	this->numBodies=this->numDark+this->numGas+this->numStar;
+}
+//----------------------------------------------------------------------------
+void vtkTipsyReader::ReadAllParticles()
+{
+	//allocate local variables for reading
+	TipsyGasParticle  g; 
+	TipsyDarkParticle d; 
+	TipsyStarParticle s;
+	// Allocate vtk scalars and vector arrays to hold particle data
+	AllocateAllTipsyVariableArrays(); 	
+	for( i=0; i<this->numDark; i++ ) 
+  	{ 
+		this->tipsyInFile >> d;
+		ReadDarkParticle(d);
+  	}
+  for( i=0; i<this->numGas; i++ ) 
+  	{
+		this->tipsyInFile >> g;
+		ReadGasParticle(g);
+  	}
+  for( i=0; i<this->numStar; i++) 
+  	{
+		this->tipsyInFile >> s;
+		ReadStarParticle(s);
+  	}
+}
+
+//----------------------------------------------------------------------------
+void vtkTipsyReader::ReadMarkedParticles()
+{
+	vtkErrorMacro("function to read only marked particles not yet implemented, for now reading all particles.");
+	ReadAllParticles();
+	/*
+	//allocate local variables for reading
+	TipsyGasParticle  g; 
+	TipsyDarkParticle d; 
+	TipsyStarParticle s;
+	// Allocate vtk scalars and vector arrays to hold particle data
+	AllocateAllTipsyVariableArrays(); 	
+	//TODO:Implement
+	*/
+}
 //----------------------------------------------------------------------------
 void vtkTipsyReader::ReadGasParticle(TipsyGasParticle& gasParticle) 
 {
@@ -160,20 +206,20 @@ int vtkTipsyReader::ReadMarkedParticleIndices()
 	 		mfDark=mfBodies-mfGas-mfStar;
 			if(mfBodies!=this->numBodies || mfDark!=this->numDark || mfGas!=this->numGas || mfStar !=this->numStar)
 	 			{
-	 				vtkErrorMacro("Error opening marked particle file, wrong format, number of particles do not match Tipsy file " << this->FileName << " please specify a valid mark file or none at all. For now reading all particles.");
-	 				return 0;
+	 			vtkErrorMacro("Error opening marked particle file, wrong format, number of particles do not match Tipsy file " << this->FileName << " please specify a valid mark file or none at all. For now reading all particles.");
+	 			return 0;
 	 			}
 		else
 			{
 			while(markInFile >> mfIndex)
 				{
 				//read in the file, note the marked particles
-				//TODO: read here. code above is tested so it makes it to this point at least without crashing.
-				//insert the next marked particle index into the array keeping track
+				//insert the next marked particle index into the array keeping track of the total number of marked particles
 				this->MarkedParticleIndices.push(mfIndex);
 				this->totalMark++;
 				}
 			//done reading
+			//TODO: set total bodies to total mark
 			return 1;
 			}
 	 	}
@@ -184,6 +230,13 @@ int vtkTipsyReader::RequestData(vtkInformation*,
                                        vtkInformationVector**,
                                        vtkInformationVector* outputVector)
 {
+	/*
+	* Reads a file, optionally only the marked particles from the file, in the following order:
+	* 1. Open Tipsy binary
+	* 2. Read Tipsy header (tells us the number of particles of each type we are dealing with)
+	* 3. Read mark file indices from marked particle file, if there is one
+	* 4. Read either marked particles only or all particles
+	*/
   // Make sure we have a file to read.
   if(!this->FileName)
     {
@@ -191,54 +244,37 @@ int vtkTipsyReader::RequestData(vtkInformation*,
     return 0;
     }
 	// Open the tipsy standard file and abort if there is an error.
-  tipsyInFile.open(this->FileName,"standard");
-  if (!tipsyInFile.is_open()) 
+  this->tipsyInFile.open(this->FileName,"standard");
+  if (!this->tipsyInFile.is_open()) 
 		{
 	  vtkErrorMacro("Error opening file " << this->FileName);
 	  return 0;	
     }
-	//All the following is to handle marked particles
-	//	Open the marked file is one is specified and abort if there is an error
-  // Read points from the file.
-  vtkDebugMacro("Reading points from file " << this->FileName);
   // Read the header from the input
-  tipsyInFile >> h;
-  // Set the number of points for each scalar array; this is necessary if I want to use InsertValue for scalars by id
-	this->numDark=h.h_nDark;
-	this->numGas=h.h_nSph;
-	this->numStar=h.h_nStar;
-	this->numBodies=this->numDark+this->numGas+this->numStar;
+	ReadTipsyHeader();
+	// Next considering whether to read in a mark file, and if so whether that reading was a success 
+	int readMarkFile;
 	if(this->MarkFileName) //TODO: even when empty this is returning true and trying to read.
-	{
-		  vtkDebugMacro("Reading marked point indices from file " << this->MarkFileName);
-			//TODO: this needs to actually read the marked indices into an array
-			//todo: need to actually care if it returns 0
-			ReadMarkedParticleIndices();
-	}
- 	// Allocate vtk scalars and vector arrays to hold particle data
-	AllocateAllTipsyVariableArrays();
+		{
+		vtkDebugMacro("Reading marked point indices from file " << this->MarkFileName);
+		readMarkFile=ReadMarkedParticleIndices();
+		}
   // Read every particle and add their position to be displayed, as well as relevant scalars
-	//TODO: this needs to actually consider the array of marked particles if it exists
-  for( i=0; i<this->numDark; i++ ) 
-  	{ 
-			tipsyInFile >> d;
-			ReadDarkParticle(d);
-  	}
-  for( i=0; i<this->numGas; i++ ) 
-  	{
-			tipsyInFile >> g;
-			ReadGasParticle(g);
-  	}
-  for( i=0; i<this->numStar; i++) 
-  	{
-			tipsyInFile >> s;
-			ReadStarParticle(s);
-  	}
-  // Close the file.
-  tipsyInFile.close();
+	if (readMarkFile)
+		{
+		vtkDebugMacro("Reading only the marked points in file " << this->MarkFileName << " from file " << this->FileName);
+		ReadMarkedParticles(); 
+		}
+	else 
+		{
+		vtkDebugMacro("Reading all points from file " << this->FileName);
+		ReadAllParticles();
+		}
+  // Close the tipsy file.
+  this->tipsyInFile.close();
 	//Storing the data in the output vector
 	StoreDataRead(outputVector);  
+	//Done reading
   vtkDebugMacro("Read " << this->Points->GetNumberOfPoints() << " points.");
-
  	return 1;
 }

@@ -50,6 +50,7 @@ private:
 	int numStar;
 	int numBodies;
 	int totalMark;
+	ifTipsy tipsyInFile;
 	//BTX
 	vtkSmartPointer<vtkPoints> Points;
 	vtkSmartPointer<vtkCellArray> Verts; 
@@ -93,5 +94,7 @@ private:
 	// Description:
 	// stores the data read in a vtkPolyData output vector
 	void StoreDataRead(vtkInformationVector* outputVector);
+	void ReadAllParticles();
+	void ReadMarkedParticles();
 };
 #endif
