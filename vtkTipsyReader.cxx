@@ -266,15 +266,15 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 	ReadTipsyHeader();
 	// Next considering whether to read in a mark file, and if so whether that reading was a success 
 	int readMarkFile;
-	if(this->MarkFileName) //if they are not equal, then we have a unique MarkFile
+	if(!strcmp(this->MarkFileName,""))//want to fix case where it is reading a file even if this->MarkFileName is the empty string
 		{
-		vtkErrorMacro("Reading marked point indices from file " << this->MarkFileName);
+		vtkErrorMacro("Reading marked point indices from file:" << this->MarkFileName);
 		readMarkFile=ReadMarkedParticleIndices();
 		}
   // Read every particle and add their position to be displayed, as well as relevant scalars
 	if (readMarkFile)
 		{
-		vtkErrorMacro("Reading only the marked points in file " << this->MarkFileName << " from file " << this->FileName);
+		vtkErrorMacro("Reading only the marked points in file: " << this->MarkFileName << " from file " << this->FileName);
 		ReadMarkedParticles(); 
 		}
 	else 
