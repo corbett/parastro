@@ -7,6 +7,7 @@ Currently only reads in standard format Tipsy files
 =========================================================================*/
 #include <math.h>
 #include <assert.h>
+#include <cstring>
 #include "vtkTipsyReader.h"
 #include "vtkObjectFactory.h"
 #include "vtkPointData.h"
@@ -267,6 +268,7 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 	// Next considering whether to read in a mark file, and if so whether that reading was a success 
 	int readMarkFile;
 	if(!strcmp(this->MarkFileName,""))//want to fix case where it is reading a file even if this->MarkFileName is the empty string
+	//TODO: this is still fucking up, fix
 		{
 		vtkErrorMacro("Reading marked point indices from file:" << this->MarkFileName);
 		readMarkFile=ReadMarkedParticleIndices();

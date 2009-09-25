@@ -13,7 +13,9 @@ Modified from vtkSimplePointsReader and from Doug Potter's Tipsylib
 #include "vtkFloatArray.h" // needed for the functions to initialize float arrays
 #include "vtkIntArray.h" // needed for functions to initialize unsigned int arrays
 #include <queue> //needed for FIFO queue used to store marked particles
+
 using std::queue;
+
 
 class VTK_IO_EXPORT vtkTipsyReader : public vtkPolyDataAlgorithm
 {
