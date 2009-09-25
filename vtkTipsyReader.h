@@ -49,7 +49,6 @@ private:
 	int numGas;
 	int numStar;
 	int numBodies;
-	int totalMark;
 	ifTipsy tipsyInFile;
 	//BTX
 	vtkSmartPointer<vtkPoints> Points;
@@ -74,17 +73,11 @@ private:
   vtkSmartPointer<vtkFloatArray> AllocateFloatArray(const char* arrayName,int numComponents,int numTuples);
 	//ETX
 	// Description:
+	// reads in a particle (either gas, dark or star as appropriate) from the tipsy in file of this class
+  vtkIdType ReadParticle(); 
+	// Description:
 	// reads variables common to all particles
-  vtkIdType ReadParticle(TipsyBaseParticle& baseParticle); 
-	// Description:
-	// reads variables common to gas particles
-  void ReadGasParticle(TipsyGasParticle& gasParticle); 
-	// Description:
-	// reads variables common to dark particles
-  void ReadDarkParticle(TipsyDarkParticle& darkParticle); 
-	// Description:
-	// reads variables common to star particles
-  void ReadStarParticle(TipsyStarParticle& starParticle); 
+  vtkIdType ReadBaseParticle(TipsyBaseParticle& b); 
 	// Description:
 	// reads in an array of the indices of marked particles from a file, returns 0 if unsucessful, 1 otherwise
 	int ReadMarkedParticleIndices();
