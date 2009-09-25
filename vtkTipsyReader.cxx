@@ -272,7 +272,7 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 		readMarkFile=ReadMarkedParticleIndices();
 		}
   // Read every particle and add their position to be displayed, as well as relevant scalars
-	if (readMarkFile)
+	if (readMarkFile==1)
 		{
 		vtkDebugMacro("Reading only the marked points in file " << this->MarkFileName << " from file " << this->FileName);
 		ReadMarkedParticles(); 
