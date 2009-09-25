@@ -12,6 +12,8 @@ Modified from vtkSimplePointsReader and from Doug Potter's Tipsylib
 #include "vtkSmartPointer.h" // needed for the functions to initialize arrays
 #include "vtkFloatArray.h" // needed for the functions to initialize float arrays
 #include "vtkIntArray.h" // needed for functions to initialize unsigned int arrays
+#include <queue> //needed for FIFO queue used to store marked particles
+using std::queue;
 
 class VTK_IO_EXPORT vtkTipsyReader : public vtkPolyDataAlgorithm
 {
@@ -47,6 +49,7 @@ private:
 	int numGas;
 	int numStar;
 	int numBodies;
+	int totalMark;
 	//BTX
 	vtkSmartPointer<vtkPoints> Points;
 	vtkSmartPointer<vtkCellArray> Verts; 
@@ -60,6 +63,7 @@ private:
 	vtkSmartPointer<vtkFloatArray> HsmoothScalars;    
 	vtkSmartPointer<vtkFloatArray> MetalsScalars;
 	vtkSmartPointer<vtkFloatArray> TformScalars;
+	queue<int> MarkedParticleIndices;
 	// private functions: initialization and reading
 	// Description:
   // create a vtkFloatArray with the  name arrayName, number of components 

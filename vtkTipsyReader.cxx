@@ -20,8 +20,6 @@ TipsyHeader       h;
 TipsyGasParticle  g; 
 TipsyDarkParticle d; 
 TipsyStarParticle s; 
-//int, if 0 not marked, if 1 marked
-int MarkedParticle;
 // Used to store which type a particle is in an int array. Later will separate 
 // each type into a separate dataset
 enum particle {STAR, DARK, GAS};
@@ -32,12 +30,13 @@ vtkStandardNewMacro(vtkTipsyReader);
 //----------------------------------------------------------------------------
 vtkTipsyReader::vtkTipsyReader()
 {
- this->FileName = 0;
- this->MarkFileName = 0; // this file is optional
- this->SetNumberOfInputPorts(0); 
+	this->FileName = 0;
+  this->MarkFileName = 0; // this file is optional
+  this->SetNumberOfInputPorts(0); 
 	// Allocate objects to hold points and vertex cells.
- this->Points = vtkSmartPointer<vtkPoints>::New();
- this->Verts = vtkSmartPointer<vtkCellArray>::New();
+ 	this->Points = vtkSmartPointer<vtkPoints>::New();
+ 	this->Verts = vtkSmartPointer<vtkCellArray>::New();
+//	this->MarkedParticleIndices = queue<int>();
 }
 
 //----------------------------------------------------------------------------
@@ -170,7 +169,9 @@ int vtkTipsyReader::ReadMarkedParticleIndices()
 				{
 				//read in the file, note the marked particles
 				//TODO: read here. code above is tested so it makes it to this point at least without crashing.
-				vtkErrorMacro("read mark");
+				//insert the next marked particle index into the array keeping track
+				this->MarkedParticleIndices.push(mfIndex);
+				this->totalMark++;
 				}
 			//done reading
 			return 1;
