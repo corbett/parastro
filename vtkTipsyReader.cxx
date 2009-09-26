@@ -169,6 +169,7 @@ int vtkTipsyReader::ReadAllParticles()
 	AllocateAllTipsyVariableArrays();
 	for( i=0; i<this->numDark+this->numGas+this->numStar; i++ ) 
   	{ 
+		vtkErrorMacro("reading particle...");
 		ReadParticle();
   	}
 	return 1;
@@ -312,7 +313,6 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 	if(readParticles)
 		{
 		// Storing the data in the output vector
-		vtkErrorMacro("read particles " << readParticles << " storing data in the output vector");
 		StoreDataRead(outputVector);  
   	vtkDebugMacro("Read " << this->Points->GetNumberOfPoints() << " points.");
  		return 1;
