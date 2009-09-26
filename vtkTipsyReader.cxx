@@ -309,10 +309,10 @@ int vtkTipsyReader::RequestData(vtkInformation*,
   // Close the tipsy file.
   this->tipsyInFile.close();
 	// If reading was succesful, store the data
-	vtkErrorMacro("read particles " << readParticles);
 	if(readParticles)
 		{
 		// Storing the data in the output vector
+		vtkErrorMacro("read particles " << readParticles << " storing data in the output vector");
 		StoreDataRead(outputVector);  
   	vtkDebugMacro("Read " << this->Points->GetNumberOfPoints() << " points.");
  		return 1;
