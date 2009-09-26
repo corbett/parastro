@@ -94,9 +94,9 @@ private:
 	void ReadTipsyHeader();
 	// Description:
 	// Reads all particles from the tipsy file
-	void ReadAllParticles();
+	int ReadAllParticles();
 	// Description:
 	// Reads only Marked particles from the tipsy file. Must be called after function ReadMarkedParticleIndices.
-	void ReadMarkedParticles();
+	int ReadMarkedParticles();
 };
 #endif
