@@ -309,6 +309,7 @@ int vtkTipsyReader::RequestData(vtkInformation*,
   // Close the tipsy file.
   this->tipsyInFile.close();
 	// If reading was succesful, store the data
+	vtkErrorMacro("read particles " << readParticles);
 	if(readParticles)
 		{
 		// Storing the data in the output vector
