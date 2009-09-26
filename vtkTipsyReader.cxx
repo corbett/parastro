@@ -163,20 +163,18 @@ void vtkTipsyReader::ReadTipsyHeader()
 	this->numBodies=this->numDark+this->numGas+this->numStar;
 }
 //----------------------------------------------------------------------------
-int vtkTipsyReader::ReadAllParticles()
+void vtkTipsyReader::ReadAllParticles()
 {
 	// Allocates vtk scalars and vector arrays to hold particle data, 
 	AllocateAllTipsyVariableArrays();
-	 for(int i=0; i<this->numDark+this->numGas+this->numStar; i++ ) 
-  	{
-		vtkErrorMacro("reading particle...");
+	for( i=0; i<this->numDark+this->numGas+this->numStar; i++ ) 
+  	{ 
 		ReadParticle();
   	}
-	return 1;
 }
 
 //----------------------------------------------------------------------------
-int vtkTipsyReader::ReadMarkedParticles()
+void vtkTipsyReader::ReadMarkedParticles()
 {
 	// Allocates vtk scalars and vector arrays to hold particle data, 
 	// As marked file was read, only allocates this->numBodies which now equals the number of marked particles
@@ -204,13 +202,12 @@ int vtkTipsyReader::ReadMarkedParticles()
 				}
 			else
 				{
-				vtkErrorMacro("A marked particle index is greater than the number of particles in the file, unable to read");
-				return 0;
+				vtkErrorMacro("A marked particle index is greater than the number of particles in the file, unable to read")	
+				break;
 				}
 			// reading in the particle
 			ReadParticle();
 		}
-		return 1;
 }
 
 //----------------------------------------------------------------------------
@@ -267,11 +264,10 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 {
 	/*
 	* Reads a file, optionally only the marked particles from the file, in the following order:
-	* 1. Open Tipsy binary.
-	* 2. Read Tipsy header (tells us the number of particles of each type we are dealing with).
-	* 3. Read mark file indices from marked particle file, if there is one.
-	* 4. Read either marked particles only or all particles.
-	* 5. Store the data.
+	* 1. Open Tipsy binary
+	* 2. Read Tipsy header (tells us the number of particles of each type we are dealing with)
+	* 3. Read mark file indices from marked particle file, if there is one
+	* 4. Read either marked particles only or all particles
 	*/
   // Make sure we have a file to read.
   if(!this->FileName)
@@ -288,9 +284,8 @@ int vtkTipsyReader::RequestData(vtkInformation*,
     }
   // Read the header from the input
 	ReadTipsyHeader();
- 	// Variables to help determine if reading is a success
-	int readMarkFile,readParticles;
-	// Next considering whether to read in a mark file,
+	// Next considering whether to read in a mark file, and if so whether that reading was a success 
+	int readMarkFile;
 	if(strcmp(this->MarkFileName,"")!=0)
 		{
 		vtkDebugMacro("Reading marked point indices from file:" << this->MarkFileName);
@@ -300,26 +295,18 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 	if (readMarkFile)
 		{
 		vtkDebugMacro("Reading only the marked points in file: " << this->MarkFileName << " from file " << this->FileName);
-		readParticles=ReadMarkedParticles(); 
+		ReadMarkedParticles(); 
 		}
 	else 
 		{
 		vtkDebugMacro("Reading all points from file " << this->FileName);
-		readParticles=ReadAllParticles();
+		ReadAllParticles();
 		}
   // Close the tipsy file.
   this->tipsyInFile.close();
-	// If reading was succesful, store the data
-	if(readParticles)
-		{
-		// Storing the data in the output vector
-		StoreDataRead(outputVector);  
-  	vtkDebugMacro("Read " << this->Points->GetNumberOfPoints() << " points.");
- 		return 1;
-		}
-	else
-		{
-		vtkErrorMacro("Was unable to read in the particles, please pick a valid tipsy binary, and if applicable a valid mark file");
-		return 0;
-		}
+	// Storing the data in the output vector
+	StoreDataRead(outputVector);  
+	// Read Successfully
+  vtkDebugMacro("Read " << this->Points->GetNumberOfPoints() << " points.");
+ 	return 1;
 }

@@ -36,7 +36,7 @@ protected:
   vtkTipsyReader();
   ~vtkTipsyReader();
   char* FileName;
-	char* MarkFileName;
+	char MarkFileName;
   int RequestData(vtkInformation*,
                   vtkInformationVector**,
                   vtkInformationVector*);
@@ -94,9 +94,9 @@ private:
 	void ReadTipsyHeader();
 	// Description:
 	// Reads all particles from the tipsy file
-	int ReadAllParticles();
+	void ReadAllParticles();
 	// Description:
 	// Reads only Marked particles from the tipsy file. Must be called after function ReadMarkedParticleIndices.
-	int ReadMarkedParticles();
+	void ReadMarkedParticles();
 };
 #endif
