@@ -185,18 +185,17 @@ void vtkTipsyReader::ReadMarkedParticles()
 			nextMarkedParticleIndex=this->MarkedParticleIndices.front();
 			this->MarkedParticleIndices.pop();
 			// navigating to the next marked particle
-			//less than or equal to check as arrays in marked particle file begin at 1, not 0
-			if(nextMarkedParticleIndex <= this->numGas)
+			if(nextMarkedParticleIndex < this->numGas)
 				{
 				//we are seeking a gas particle
 				this->tipsyInFile.seekg(tipsypos(tipsypos::gas,nextMarkedParticleIndex));	
 				}
-			else if (nextMarkedParticleIndex <= this->numDark+this->numGas)
+			else if (nextMarkedParticleIndex < this->numDark+this->numGas)
 				{
 				//we are seeking a dark particle
 				this->tipsyInFile.seekg(tipsypos(tipsypos::dark,nextMarkedParticleIndex));	
 				}
-			else if (nextMarkedParticleIndex <= this->numDark+this->numGas+this->numStar)
+			else if (nextMarkedParticleIndex < this->numDark+this->numGas+this->numStar)
 				{
 				//we are seeking a star particle
 				this->tipsyInFile.seekg(tipsypos(tipsypos::star,nextMarkedParticleIndex));	
@@ -245,7 +244,8 @@ int vtkTipsyReader::ReadMarkedParticleIndices()
 				while(markInFile >> mfIndex)
 					{
 					// Insert the next marked particle index into the array keeping track of the total number of marked particles
-					this->MarkedParticleIndices.push(mfIndex);
+					//subtracting one as arrays in marked particle file begin at 1, not 0
+					this->MarkedParticleIndices.push(mfIndex-1);
 					this->numBodies++;
 					}
 				// closing file
