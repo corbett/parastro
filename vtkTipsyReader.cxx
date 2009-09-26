@@ -167,8 +167,8 @@ int vtkTipsyReader::ReadAllParticles()
 {
 	// Allocates vtk scalars and vector arrays to hold particle data, 
 	AllocateAllTipsyVariableArrays();
-	for( i=0; i<this->numDark+this->numGas+this->numStar; i++ ) 
-  	{ 
+	 for(int i=0; i<this->numDark+this->numGas+this->numStar; i++ ) 
+  	{
 		vtkErrorMacro("reading particle...");
 		ReadParticle();
   	}
