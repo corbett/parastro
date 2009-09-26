@@ -183,9 +183,25 @@ void vtkTipsyReader::ReadMarkedParticles()
   while(!this->MarkedParticleIndices.empty())
 		{
 			nextMarkedParticleIndex=this->MarkedParticleIndices.front();
-			this->MarkedParticleIndices.pop(); 
+			this->MarkedParticleIndices.pop();
 			// navigating to the next marked particle
-			this->tipsyInFile.seekg(tipsypos(tipsypos::particle,nextMarkedParticleIndex));
+			if(nextMarkedParticleIndex < this->numGas)
+				{
+				this->tipsyInFile.seekg(tipsypos(tipsypos::gas,nextMarkedParticleIndex));	
+				}
+			else if (nextMarkedParticleIndex < this->numDark+this->numGas)
+				{
+				this->tipsyInFile.seekg(tipsypos(tipsypos::dark,nextMarkedParticleIndex));	
+				}
+			else if (nextMarkedParticleIndex < this->numDark+this->numGas+this->numStar)
+				{
+				this->tipsyInFile.seekg(tipsypos(tipsypos::star,nextMarkedParticleIndex));	
+				}
+			else
+				{
+				vtkErrorMacro("A marked particle index is greater than the number of particles in the file, unable to read")	
+				break;
+				}
 			// reading in the particle
 			ReadParticle();
 		}
@@ -251,7 +267,7 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 	*/
   // Make sure we have a file to read.
   if(!this->FileName)
-    {
+	  {
     vtkErrorMacro("A FileName must be specified.");
     return 0;
     }
