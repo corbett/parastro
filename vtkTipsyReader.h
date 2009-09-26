@@ -36,7 +36,7 @@ protected:
   vtkTipsyReader();
   ~vtkTipsyReader();
   char* FileName;
-	char MarkFileName;
+	char* MarkFileName;
   int RequestData(vtkInformation*,
                   vtkInformationVector**,
                   vtkInformationVector*);
