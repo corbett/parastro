@@ -266,10 +266,11 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 {
 	/*
 	* Reads a file, optionally only the marked particles from the file, in the following order:
-	* 1. Open Tipsy binary
-	* 2. Read Tipsy header (tells us the number of particles of each type we are dealing with)
-	* 3. Read mark file indices from marked particle file, if there is one
-	* 4. Read either marked particles only or all particles
+	* 1. Open Tipsy binary.
+	* 2. Read Tipsy header (tells us the number of particles of each type we are dealing with).
+	* 3. Read mark file indices from marked particle file, if there is one.
+	* 4. Read either marked particles only or all particles.
+	* 5. Store the data.
 	*/
   // Make sure we have a file to read.
   if(!this->FileName)
@@ -286,7 +287,7 @@ int vtkTipsyReader::RequestData(vtkInformation*,
     }
   // Read the header from the input
 	ReadTipsyHeader();
- 	//and if so whether that reading was a success 
+ 	// Variables to help determine if reading is a success
 	int readMarkFile,readParticles;
 	// Next considering whether to read in a mark file,
 	if(strcmp(this->MarkFileName,"")!=0)
