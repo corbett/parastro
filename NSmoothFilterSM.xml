@@ -21,6 +21,15 @@
              <DataType value="vtkDataSet"/>
            </DataTypeDomain>
       </InputProperty>
+	  <IntVectorProperty
+			name="NeighborNumber"
+			command="SetNeighborNumber"
+			number_of_elements="1"
+			default_values="50">
+			<Documentation>
+				Sets the neighbor number to smooth over (default value is 50).
+			</Documentation>
+	  </IntVectorProperty>
    </SourceProxy>
  </ProxyGroup>
 </ServerManagerConfiguration>
