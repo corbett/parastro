@@ -97,14 +97,14 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 	kdTree->FindClosestNPoints(2,nextPoint,closestNPoints);
 	vtkErrorMacro("found " << closestNPoints->GetNumberOfIds() << " closest points");
 		//looping over the closestNPoints
-	/*
 	for(int j = 0; j < closestNPoints->GetNumberOfIds(); ++j)
 	{
 	neighborPointId=closestNPoints->GetId(j);
-	outputPointData->SetActiveScalars("mass");
-	outputPointData->GetTuple(neighborPointId);
+	output->GetPoints()->GetPoint(neighborPointId,neighborPoint);
+	vtkErrorMacro("the " << j <<"th nearest point coordiates are (" << neighborPoint[0] << "," << neighborPoint[1] << "," << neighborPoint[2] << ")");
+//	outputPointData->SetActiveScalars("mass");
+//	outputPointData->GetTuple(neighborPointId);
 	}
-*/		
 		//finding the average of each property we are interested in by dividing by #closestNPoints
 		//the volume is a sphere around nextPoint with radius of the last in the list of the closestNpoints
 		//so 4/3 pi r^3 where r=sqrt((nextPoint->x-nextPoint->x)^2+(nextPoint->y-nextPoint->y)^2+(nextPoint->z-nextPoint->z)^2)
