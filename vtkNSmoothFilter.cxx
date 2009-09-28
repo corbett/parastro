@@ -92,7 +92,7 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 	output->GetPoints()->GetPoint(id,nextPoint);
 	vtkErrorMacro("next point is " << nextPoint[0] << ","<< nextPoint[1] << ","<< nextPoint[2]);
 	neighborPointId = kdTree->FindClosestPoint(nextPoint,dist);
-	closestPoint=output->GetPoints()->GetPoint(neighborPointId);		
+	output->GetPoints()->GetPoint(neighborPointId,closestPoint);		
 	vtkErrorMacro("the nearest point coordiates are (" << closestPoint[0] << "," << closestPoint[1] << "," << closestPoint[2] << ") which is a distace " << dist << " away ");
 		
 //		kdTree->FindClosestNPoints(this->NeighborNumber,nextPoint,closestNPoints);
