@@ -78,24 +78,21 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 	//Looping through the points
 	//Will need these variables in the loop
 	/*
-	vtkIdList* closestNPoints;
 	vtkPointData* outputPointData=output->GetPointData();
 	*/
   vtkDebugMacro("2. Calculating the smoothed quantities we are interested in.");
 	//Will need this frequently in the loop
 	vtkIdType neighborPointId;
-	double nextPoint[3];
-	double closestPoint[3];
-	double dist;
+	double nextPoint[3],neighborPoint[3];
+	vtkIdList* closestNPoints;
 	for(int id = 0; id < output->GetPoints()->GetNumberOfPoints(); ++id)
 	{
 	output->GetPoints()->GetPoint(id,nextPoint);
 	vtkErrorMacro("next point is " << nextPoint[0] << ","<< nextPoint[1] << ","<< nextPoint[2]);
 	neighborPointId = kdTree->FindClosestPoint(nextPoint,dist);
-	output->GetPoints()->GetPoint(neighborPointId,closestPoint);		
-	vtkErrorMacro("the nearest point coordiates are (" << closestPoint[0] << "," << closestPoint[1] << "," << closestPoint[2] << ") which is a distace " << dist << " away ");
-		
-//		kdTree->FindClosestNPoints(this->NeighborNumber,nextPoint,closestNPoints);
+	output->GetPoints()->GetPoint(neighborPointId,neighborPoint);		
+	vtkErrorMacro("the nearest point coordiates are (" << neighborPoint[0] << "," << neighborPoint[1] << "," << neighborPoint[2] << ") which is a distace " << dist << " away ");
+	kdTree->FindClosestNPoints(2,nextPoint,closestNPoints);
 		//looping over the closestNPoints
 		/*	
 		for(size_t j = 0; j < closestNPoints->GetNumberOfIds(); ++j)
