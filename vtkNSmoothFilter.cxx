@@ -74,44 +74,39 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 		kdTree->BuildLocatorFromPoints(output);
 	//testing out the kdtree
 	//TODO: this doesn't give the right distance
-/*
-	double dist;
-	vtkIdType nearby = kdTree->FindClosestPoint(0,0,0,dist);
-	vtkErrorMacro("closest point to 0,0,0 has id " << nearby);	
-	vtkErrorMacro("it is distance " << dist << " away");	
-	double closestPoint[3];
-	output->GetPoints()->GetPoint(nearby,closestPoint);
-	vtkErrorMacro("it's coordiates are " << closestPoint[0] << "," << closestPoint[1] << "," << closestPoint[2]);
-*/
 	//TODO:Initializing the smoothed data arrays we will need
 	//Looping through the points
 	//Will need these variables in the loop
-/*
-	vtkIdType neighborPointId;
-	double nextPoint[3];
+	/*
 	vtkIdList* closestNPoints;
+	vtkPointData* outputPointData=output->GetPointData();
+	*/
   vtkDebugMacro("2. Calculating the smoothed quantities we are interested in.");
 	//Will need this frequently in the loop
-//	vtkPointData* outputPointData=output->GetPointData();
+	vtkIdType neighborPointId;
+	double nextPoint[3],closestPoint[3], dist;
 	for(int id = 0; id < output->GetPoints()->GetNumberOfPoints(); ++id)
 	{
-				output->GetPoints()->GetPoint(id,nextPoint);
-		vtkErrorMacro("next point is " << nextPoint[0] << ","<< nextPoint[1] << ","<< nextPoint[2]);
+	output->GetPoints()->GetPoint(id,nextPoint);
+	vtkErrorMacro("next point is " << nextPoint[0] << ","<< nextPoint[1] << ","<< nextPoint[2]);
+	neighborPointId = kdTree->FindClosestPoint(0,0,0,dist);
+	output->GetPoints()->GetPoint(neighborPointId,closestPoint);		
+	vtkErrorMacro("the nearest point coordiates are ()" << closestPoint[0] << "," << closestPoint[1] << "," << closestPoint[2] << ") which is a distace " << dist << " away ");
+		
 //		kdTree->FindClosestNPoints(this->NeighborNumber,nextPoint,closestNPoints);
 		//looping over the closestNPoints
-		
+		/*	
 		for(size_t j = 0; j < closestNPoints->GetNumberOfIds(); ++j)
 		{
 			neighborPointId=closestNPoints->GetId(j);
 			outputPointData->SetActiveScalars("mass");
 			outputPointData->GetTuple(neighborPointId);
 		}
-		
+		*/
 		//finding the average of each property we are interested in by dividing by #closestNPoints
 		//the volume is a sphere around nextPoint with radius of the last in the list of the closestNpoints
 		//so 4/3 pi r^3 where r=sqrt((nextPoint->x-nextPoint->x)^2+(nextPoint->y-nextPoint->y)^2+(nextPoint->z-nextPoint->z)^2)
 	}
-	*/
 	vtkDebugMacro("3. Storing smoothed quantities in output.");
 	// Finally, some memory management
   output->Squeeze();
