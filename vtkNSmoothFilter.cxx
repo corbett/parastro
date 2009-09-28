@@ -83,7 +83,7 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
   vtkDebugMacro("2. Calculating the smoothed quantities we are interested in.");
 	//Will need this frequently in the loop
 	vtkIdType neighborPointId;
-	double nextPoint[3],neighborPoint[3];
+	double nextPoint[3],neighborPoint[3],dist;
 	vtkIdList* closestNPoints;
 	for(int id = 0; id < output->GetPoints()->GetNumberOfPoints(); ++id)
 	{
