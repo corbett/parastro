@@ -94,7 +94,7 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 			double mass[1];
 			output->GetPointData()->SetActiveScalars("mass");
 			output->GetPointData()->GetScalars()->GetTuple(neighborPointId,mass);
-			vtkErrorMacro("it has mass " << mass);
+			vtkErrorMacro("it has mass " << mass[0]);
 			}
 		//finding the average of each property we are interested in by dividing by #closestNPoints
 		//the volume is a sphere around nextPoint with radius of the last in the list of the closestNpoints
