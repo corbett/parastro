@@ -76,9 +76,9 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 	vtkDebugMacro("1b. Allocating arrays to store our smoothed values.");
 	// allocating an array to store the smoothed mass
 	vtkSmartPointer<vtkDoubleArray> smoothedMassArray = vtkSmartPointer<vtkDoubleArray>::New();
-  	smoothedMassArray->SetNumberOfComponents(output->GetPoints()->GetNumberOfPoints());
+  	smoothedMassArray->SetNumberOfComponents(1);
   	smoothedMassArray->SetName("smoothed mass");
-		smoothedMassArray->SetNumberOfTuples(1);
+		smoothedMassArray->SetNumberOfTuples(output->GetPoints()->GetNumberOfPoints());
   vtkDebugMacro("2. Calculating the smoothed quantities we are interested in.");
 	for(int id = 0; id < output->GetPoints()->GetNumberOfPoints(); ++id)
 		{
