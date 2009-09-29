@@ -162,7 +162,7 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 	vtkDebugMacro("3. Storing smoothed quantities in output.");
 	//storing the output vector in the output
 	output->GetPointData()->AddArray(smoothedMassArray);
-//	output->GetPointData()->AddArray(smoothedDensityArray);
+	output->GetPointData()->AddArray(smoothedDensityArray);
 	// Finally, some memory management
   output->Squeeze();
   vtkDebugMacro("4. Smoothing calculation sucessful, deleting Kd tree.");
