@@ -10,10 +10,8 @@ Modified from vtkSimplePointsReader and from Doug Potter's Tipsylib
 #include "vtkPolyDataAlgorithm.h" // needed as this class extends vtkPolyDataAlgorithm
 #include "ftipsy.hpp" // needed for functions which take Tipsy particles as arguments
 #include "vtkSmartPointer.h" // needed for the functions to initialize arrays
-#include "vtkFloatArray.h" // needed for the functions to initialize float arrays
-#include "vtkIntArray.h" // needed for functions to initialize unsigned int arrays
-#include <queue> //needed for FIFO queue used to store marked particles
-
+#include "vtkPolyData.h" // needed as most helper functions modify output
+#include <queue> // needed for FIFO queue used to store marked particles
 using std::queue;
 
 class VTK_IO_EXPORT vtkTipsyReader : public vtkPolyDataAlgorithm
@@ -50,20 +48,7 @@ private:
 	int numGas;
 	int numStar;
 	int numBodies;
-	ifTipsy tipsyInFile;
 	//BTX
-	vtkSmartPointer<vtkPoints> Points;
-	vtkSmartPointer<vtkCellArray> Verts; 
-	vtkSmartPointer<vtkIntArray> ParticleTypes;
-	vtkSmartPointer<vtkFloatArray> MassScalars;
-	vtkSmartPointer<vtkFloatArray> PhiScalars;
-	vtkSmartPointer<vtkFloatArray> EpsScalars;
-	vtkSmartPointer<vtkFloatArray> VelocityVectors;
-	vtkSmartPointer<vtkFloatArray> RhoScalars;   
-	vtkSmartPointer<vtkFloatArray> TempScalars;       
-	vtkSmartPointer<vtkFloatArray> HsmoothScalars;    
-	vtkSmartPointer<vtkFloatArray> MetalsScalars;
-	vtkSmartPointer<vtkFloatArray> TformScalars;
 	queue<int> MarkedParticleIndices;
 	// private functions: initialization and reading
 	// Description:
@@ -72,6 +57,7 @@ private:
   // e.g. AllocateFloatArray<vtkFloatArray>("density",1,100) creates a array of 100 scalar float densities
   // AllocateFloatArray<vtkFloatArray>("velocity",3,100) creates a array of 100 vector float velocities
 	template <class T> vtkSmartPointer<T> AllocateDataArray(const char* arrayName, int numComponents, int numTuples);
+	template <class T> void SetDataValue(const char* arrayName, vtkIdType id, T data);
 	//ETX
 	// Description:
 	// reads in a particle (either gas, dark or star as appropriate) from the tipsy in file of this class
@@ -85,9 +71,6 @@ private:
 	// Description:
 	// allocates all vtk arrays for Tipsy variables
 	void AllocateAllTipsyVariableArrays();
-	// Description:
-	// stores the data read in a vtkPolyData output vector
-	void StoreDataRead(vtkInformationVector* outputVector);
 	// Description:
 	// Reads the tipsy header. Must be called after the tipsy file is opened, but before any marked particle file is attempted to be open
 	void ReadTipsyHeader();

@@ -26,8 +26,6 @@ vtkStandardNewMacro(vtkNSmoothFilter);
 vtkNSmoothFilter::vtkNSmoothFilter()
 {
   this->NeighborNumber = 50; //default
-//  this->GetInformation()->Set(vtkAlgorithm::PRESERVES_RANGES(), 1);
-// this->GetInformation()->Set(vtkAlgorithm::PRESERVES_BOUNDS(), 1);
 }
 
 //----------------------------------------------------------------------------
