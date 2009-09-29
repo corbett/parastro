@@ -11,7 +11,7 @@
 #include "vtkObjectFactory.h"
 #include "vtkPointData.h"
 #include "vtkSmartPointer.h"
-#include "vtkKdTree.h"
+#include "vtkPKdTree.h"
 #include "vtkPolyData.h"
 #include "vtkPoints.h"
 #include "vtkGenericPointIterator.h"
@@ -73,7 +73,7 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
   output->CopyAttributes(input);
 	// Building the Kd tree
   vtkDebugMacro("1a. Building Kd tree.");
-	vtkSmartPointer<vtkKdTree> pointTree = vtkSmartPointer<vtkKdTree>::New();
+	vtkSmartPointer<vtkPKdTree> pointTree = vtkSmartPointer<vtkPKdTree>::New();
 		pointTree->BuildLocatorFromPoints(output);
 	vtkDebugMacro("1b. Allocating arrays to store our smoothed values.");
 	// allocating an array to store the smoothed mass
