@@ -129,15 +129,18 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 			output->GetPointData()->GetScalars()->GetTuple(neighborPointId,mass);
 			// taking log to help stay off loss of precision
 			totalMass+=log(mass[0]); 
+			// storing the smoothed mass in the output vector
+			double smoothedMass=totalMass/(closestNPoints->GetNumberOfIds());
+			// taking the exp to reverse the log, and also converting back to float precision
+			vtkDebugMacro("smoothed mass is " << static_cast<float>(exp(smoothedMass))); 
+		  smoothedMassArray->SetValue(id, static_cast<float>(exp(smoothedMass)));			
 			//done with the last point's mass, and totalMass calculation, on to the portion of the code concerning the volume
-			
 			// finding the average of each property we are interested in by dividing by #closestNPoints
 			// now calculating the radial distance from the last point to the center point to which it is a neighbor
 			double radialDistance=sqrt(pow(nextPoint[0]-neighborPoint[0],2)+pow(nextPoint[1]-neighborPoint[1],2)+pow(nextPoint[2]-neighborPoint[2],2));
 			// the volume is a sphere around nextPoint with radius of the last in the list of the closestNpoints
 			// so 4/3 pi r^3 where r=sqrt((nextPoint->x-nextPoint->x)^2+(nextPoint->y-nextPoint->y)^2+(nextPoint->z-nextPoint->z)^2)
 			double neighborhoodVolume=4./3 * M_PI * pow(radialDistance,3);
-
 			double smoothedDensity;
 			if(neighborhoodVolume!=0)
 				{
@@ -146,11 +149,6 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 			vtkDebugMacro("smoothed density is " << static_cast<float>(smoothedDensity)); 
 			smoothedDensityArray->SetValue(neighborPointId,static_cast<float>(smoothedDensity));
 
-			// storing the smoothed mass in the output vector
-			double smoothedMass=totalMass/(closestNPoints->GetNumberOfIds());
-			// taking the exp to reverse the log, and also converting back to float precision
-			vtkDebugMacro("smoothed mass is " << static_cast<float>(exp(smoothedMass))); 
-		  smoothedMassArray->SetValue(id, static_cast<float>(exp(smoothedMass)));			
 			}
 		else
 			{
