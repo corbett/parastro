@@ -102,7 +102,7 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 			float totalMass=0;
 			// closestNPoints is ordered by distance, so the last is the radius we want to calculate the volume with
 			// thus, only loop up to the second to last
-			for(int j = 0; j < closestNPoints->GetNumberOfIds(); ++j)
+			for(int j = 0; j < closestNPoints->GetNumberOfIds()-1; ++j)
 //			for(int j = 0; j < closestNPoints->GetNumberOfIds() -1 ; ++j) // right now going to the end of the array. TODO: add back in
 				{
 				double neighborPoint[3];
@@ -118,8 +118,6 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 				totalMass+=static_cast<float>(log(mass[0])); 
 				}
 			
-			//now for the last point
-			/*
 			double neighborPoint[3];
 			vtkIdType neighborPointId = closestNPoints->GetId(closestNPoints->GetNumberOfIds()-1);
 			output->GetPoints()->GetPoint(neighborPointId,neighborPoint);
@@ -131,9 +129,8 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 			output->GetPointData()->GetScalars()->GetTuple(neighborPointId,mass);
 			// taking log to help stay off loss of precision
 			totalMass+=log(mass[0]); 
-			//done with the last point			
-
-			*/
+			//done with the last point
+			
 /*
 			// finding the average of each property we are interested in by dividing by #closestNPoints
 			// now calculating the radial distance from the last point to the center point to which it is a neighbor
