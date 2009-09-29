@@ -82,9 +82,9 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
   	smoothedMassArray->SetName("smoothed mass");
 		smoothedMassArray->SetNumberOfTuples(output->GetPoints()->GetNumberOfPoints());
 	vtkSmartPointer<vtkFloatArray> smoothedDensityArray = vtkSmartPointer<vtkFloatArray>::New();
-  	smoothedMassArray->SetNumberOfComponents(1);
-  	smoothedMassArray->SetName("smoothed density");
-		smoothedMassArray->SetNumberOfTuples(output->GetPoints()->GetNumberOfPoints());
+  	smoothedDensityArray->SetNumberOfComponents(1);
+  	smoothedDensityArray->SetName("smoothed density");
+		smoothedDensityArray->SetNumberOfTuples(output->GetPoints()->GetNumberOfPoints());
   vtkDebugMacro("2. Calculating the smoothed quantities we are interested in.");
 	for(int id = 0; id < output->GetPoints()->GetNumberOfPoints(); ++id)
 		{
@@ -116,7 +116,7 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 				// taking log to help stay off loss of precision
 				totalMass+=static_cast<float>(log(mass[0])); 
 				}
-			//now for the last one
+			//now for the last point
 			double neighborPoint[3];
 			vtkIdType neighborPointId = closestNPoints->GetId(closestNPoints->GetNumberOfIds()-1);
 			output->GetPoints()->GetPoint(neighborPointId,neighborPoint);
@@ -128,8 +128,10 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 			output->GetPointData()->GetScalars()->GetTuple(neighborPointId,mass);
 			// taking log to help stay off loss of precision
 			totalMass+=log(mass[0]); 
+			//done with the last point			
 			// storing the smoothed mass in the output vector
 			double smoothedMass=totalMass/(closestNPoints->GetNumberOfIds());
+			smoothedMassArray->SetValue(neighborPointId,static_cast<float>(smoothedMass));
 /*
 			// finding the average of each property we are interested in by dividing by #closestNPoints
 			// now calculating the radial distance from the last point to the center point to which it is a neighbor
