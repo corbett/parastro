@@ -117,6 +117,7 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 				totalMass+=static_cast<float>(log(mass[0])); 
 				}
 			//now for the last one
+			/*
 			double neighborPoint[3];
 			vtkIdType neighborPointId = closestNPoints->GetId(closestNPoints->GetNumberOfIds()-1);
 			output->GetPoints()->GetPoint(neighborPointId,neighborPoint);
@@ -140,10 +141,10 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 				}
 			vtkDebugMacro("smoothed mass is " << static_cast<float>(exp(smoothedMass))); 
 			vtkDebugMacro("smoothed density is " << static_cast<float>(smoothedDensity)); 
-			
+ 			*/
 			// taking the exp to reverse the log, and also converting back to float precision
 		  smoothedMassArray->SetValue(id, static_cast<float>(exp(smoothedMass))); 
-			smoothedDensityArray->SetValue(id,static_cast<float>(smoothedDensity));
+			smoothedDensityArray->SetValue(id,static_cast<float>(0));
 			// finding the average of each property we are interested in by dividing by #closestNPoints
 			// the volume is a sphere around nextPoint with radius of the last in the list of the closestNpoints
 			// so 4/3 pi r^3 where r=sqrt((nextPoint->x-nextPoint->x)^2+(nextPoint->y-nextPoint->y)^2+(nextPoint->z-nextPoint->z)^2)
