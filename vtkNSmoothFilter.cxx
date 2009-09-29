@@ -144,7 +144,7 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 			double smoothedDensity;
 			if(neighborhoodVolume!=0)
 				{
-				smoothedDensity=smoothedMass/neighborhoodVolume;
+				smoothedDensity=static_cast<float>(exp(smoothedMass))/neighborhoodVolume;
 				}
 			vtkDebugMacro("smoothed density is " << static_cast<float>(smoothedDensity)); 
 			smoothedDensityArray->SetValue(neighborPointId,static_cast<float>(smoothedDensity));
