@@ -24,13 +24,13 @@
 #ifndef __vtkNSmoothFilter_h
 #define __vtkNSmoothFilter_h
 
-#include "vtkPolyDataAlgorithm.h"
+#include "vtkPointSetAlgorithm.h"
 
-class VTK_GRAPHICS_EXPORT vtkNSmoothFilter : public vtkPolyDataAlgorithm
+class VTK_GRAPHICS_EXPORT vtkNSmoothFilter : public vtkPointSetAlgorithm
 {
 public:
   static vtkNSmoothFilter *New();
-  vtkTypeRevisionMacro(vtkNSmoothFilter,vtkPolyDataAlgorithm);
+  vtkTypeRevisionMacro(vtkNSmoothFilter,vtkPointSetAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent);
 
   // Description:

@@ -12,7 +12,7 @@
 #include "vtkPointData.h"
 #include "vtkSmartPointer.h"
 #include "vtkPKdTree.h"
-#include "vtkPolyData.h"
+#include "vtkPointSet.h"
 #include "vtkPoints.h"
 #include "vtkGenericPointIterator.h"
 #include "vtkFloatArray.h"
@@ -47,7 +47,7 @@ int vtkNSmoothFilter::FillInputPortInformation(int, vtkInformation* info)
 {
   // This filter uses the vtkDataSet cell traversal methods so it
   // suppors any data set type as input.
-  info->Set(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), "vtkPolyData");
+  info->Set(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), "vtkPointSet");
   return 1;
 }
 
@@ -57,8 +57,8 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
                                  vtkInformationVector* outputVector)
 {
   // Get input and output data.
-  vtkPolyData* input = vtkPolyData::GetData(inputVector[0]);
-  vtkPolyData* output = vtkPolyData::GetData(outputVector);
+  vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
+  vtkPointSet* output = vtkPointSet::GetData(outputVector);
   // Outline of this filter:
 	// 1. Build Kd tree
 	// 2. Go through each point in output
