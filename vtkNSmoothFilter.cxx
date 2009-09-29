@@ -78,16 +78,11 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 		double nextPoint[3]; 
 		output->GetPoints()->GetPoint(id,nextPoint);
 		vtkDebugMacro("next point is " << nextPoint[0] << ","<< nextPoint[1] << ","<< nextPoint[2]);
-		/*
-		neighborPointId = pointTree->FindClosestPoint(nextPoint,dist);
-		output->GetPoints()->GetPoint(neighborPointId,neighborPoint);		
-		vtkErrorMacro("the nearest point coordiates are (" << neighborPoint[0] << "," << neighborPoint[1] << "," << neighborPoint[2] << ") which is a distace " << dist << " away ");
-		*/
 		//finding the closest N points
 		vtkDebugMacro("2. Finding the closeset N points");
 		vtkSmartPointer<vtkIdList> closestNPoints = vtkSmartPointer<vtkIdList>::New();
-		pointTree->FindClosestNPoints(2,nextPoint,closestNPoints);
-		vtkDebugMacro("found " << closestNPoints->GetNumberOfIds() << " closest points");
+		pointTree->FindClosestNPoints(this->NeighborNumber,nextPoint,closestNPoints);
+		vtkErrorMacro("found " << closestNPoints->GetNumberOfIds() << " closest points");
 		//looping over the closestNPoints
 		for(int j = 0; j < closestNPoints->GetNumberOfIds(); ++j)
 			{
