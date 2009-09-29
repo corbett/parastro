@@ -153,7 +153,7 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 			double smoothedMass=totalMass/(closestNPoints->GetNumberOfIds());
 			// taking the exp to reverse the log, and also converting back to float precision
 			vtkDebugMacro("smoothed mass is " << static_cast<float>(exp(smoothedMass))); 
-		  smoothedMassArray->SetValue(neighborPointId, static_cast<float>(exp(smoothedMass)));			
+		  smoothedMassArray->SetValue(id, static_cast<float>(exp(smoothedMass)));			
 			}
 		else
 			{
