@@ -116,6 +116,7 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 				// taking log to help stay off loss of precision
 				totalMass+=static_cast<float>(log(mass[0])); 
 				}
+			
 			//now for the last point
 			double neighborPoint[3];
 			vtkIdType neighborPointId = closestNPoints->GetId(closestNPoints->GetNumberOfIds()-1);
@@ -131,7 +132,10 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 			//done with the last point			
 			// storing the smoothed mass in the output vector
 			double smoothedMass=totalMass/(closestNPoints->GetNumberOfIds());
-			smoothedMassArray->SetValue(neighborPointId,static_cast<float>(smoothedMass));
+			// taking the exp to reverse the log, and also converting back to float precision
+			vtkDebugMacro("smoothed mass is " << static_cast<float>(exp(smoothedMass))); 
+		  smoothedMassArray->SetValue(neighborPointId, static_cast<float>(exp(smoothedMass))); 
+			
 /*
 			// finding the average of each property we are interested in by dividing by #closestNPoints
 			// now calculating the radial distance from the last point to the center point to which it is a neighbor
@@ -147,9 +151,6 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 			vtkDebugMacro("smoothed density is " << static_cast<float>(smoothedDensity)); 
 			smoothedDensityArray->SetValue(neighborPointId,static_cast<float>(smoothedDensity));
 */ 			
-			// taking the exp to reverse the log, and also converting back to float precision
-			vtkDebugMacro("smoothed mass is " << static_cast<float>(exp(smoothedMass))); 
-		  smoothedMassArray->SetValue(neighborPointId, static_cast<float>(exp(smoothedMass))); 
 			
 			}
 		else
