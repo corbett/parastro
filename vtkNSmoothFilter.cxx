@@ -89,7 +89,7 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 		vtkDebugMacro("2. Finding the closeset N points");
 		vtkSmartPointer<vtkIdList> closestNPoints = vtkSmartPointer<vtkIdList>::New();
 		pointTree->FindClosestNPoints(this->NeighborNumber,nextPoint,closestNPoints);
-		vtkErrorMacro("found " << closestNPoints->GetNumberOfIds() << " closest points");
+		vtkDebugMacro("found " << closestNPoints->GetNumberOfIds() << " closest points");
 		// looping over the closestNPoints, only if we have more neighbors than ourselves
 		if(closestNPoints->GetNumberOfIds()>0)
 			{
@@ -104,11 +104,11 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 				double mass[1];
 				output->GetPointData()->SetActiveScalars("mass");
 				output->GetPointData()->GetScalars()->GetTuple(neighborPointId,mass);
-				vtkDebugMacro("it has mass " << mass[0]);
 				totalMass+=mass[1];
 				}
 			//storing the smoothed mass in the output vector
 			double smoothedMass=totalMass/closestNPoints->GetNumberOfIds();
+			vtkDebugMacro("smoothed mass is " << smoothedMass);
 		  smoothedMassArray->SetValue(id, smoothedMass);
 			//finding the average of each property we are interested in by dividing by #closestNPoints
 			//the volume is a sphere around nextPoint with radius of the last in the list of the closestNpoints
