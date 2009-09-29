@@ -129,6 +129,9 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 			output->GetPointData()->GetScalars()->GetTuple(neighborPointId,mass);
 			// taking log to help stay off loss of precision
 			totalMass+=log(mass[0]); 
+			// finding the average of each property we are interested in by dividing by #closestNPoints
+			// the volume is a sphere around nextPoint with radius of the last in the list of the closestNpoints
+			// so 4/3 pi r^3 where r=sqrt((nextPoint->x-nextPoint->x)^2+(nextPoint->y-nextPoint->y)^2+(nextPoint->z-nextPoint->z)^2)
 			//now calculating the radial distance from the last point to the center point to which it is a neighbor
 			double radialDistance=sqrt(pow(nextPoint[0]-neighborPoint[0],2)+pow(nextPoint[1]-neighborPoint[1],2)+pow(nextPoint[2]-neighborPoint[2],2));
 			double neighborhoodVolume=4./3 * M_PI * pow(radialDistance,3);
@@ -141,13 +144,11 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 				}
 			vtkDebugMacro("smoothed mass is " << static_cast<float>(exp(smoothedMass))); 
 			vtkDebugMacro("smoothed density is " << static_cast<float>(smoothedDensity)); 
- 			*/
+ 			
 			// taking the exp to reverse the log, and also converting back to float precision
-		  smoothedMassArray->SetValue(id, static_cast<float>(exp(smoothedMass))); 
-			smoothedDensityArray->SetValue(id,static_cast<float>(0));
-			// finding the average of each property we are interested in by dividing by #closestNPoints
-			// the volume is a sphere around nextPoint with radius of the last in the list of the closestNpoints
-			// so 4/3 pi r^3 where r=sqrt((nextPoint->x-nextPoint->x)^2+(nextPoint->y-nextPoint->y)^2+(nextPoint->z-nextPoint->z)^2)
+		  smoothedMassArray->SetValue(neighborPointId, static_cast<float>(exp(smoothedMass))); 
+			smoothedDensityArray->SetValue(neighborPointId,static_cast<float>(smoothedDensity));
+			*/
 			}
 		else
 			{
