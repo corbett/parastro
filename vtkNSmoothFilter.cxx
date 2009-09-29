@@ -90,8 +90,11 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 			vtkIdType neighborPointId = closestNPoints->GetId(j);
 			output->GetPoints()->GetPoint(neighborPointId,neighborPoint);
 			vtkErrorMacro("the " << j <<"th nearest point coordiates are (" << neighborPoint[0] << "," << neighborPoint[1] << "," << neighborPoint[2] << ")");
-		//	outputPointData->SetActiveScalars("mass");
-	//	outputPointData->GetTuple(neighborPointId);
+			//extracting the mass
+			double mass[1];
+			output->GetPointData()->SetActiveScalars("mass");
+			output->GetPointData()->GetScalars()->GetTuple(neighborPointId,mass);
+			vtkErrorMacro("it has mass " << mass);
 			}
 		//finding the average of each property we are interested in by dividing by #closestNPoints
 		//the volume is a sphere around nextPoint with radius of the last in the list of the closestNpoints

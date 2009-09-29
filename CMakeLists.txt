@@ -20,7 +20,7 @@ ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.0"
 	GUI_INTERFACES ${IFACES_MENU} #<-- for AstroViz menu
 	SOURCES ${MOC_SRCS_MENU} ${IFACE_SRCS_MENU}  #<-- for AstroViz
 	SourceToolbarActions.cxx) #<-- for menu
-TARGET_LINK_LIBRARIES(AstroVizPlugin /usr/lib/libtipsy.a) 	#can later do this more cleanly
+TARGET_LINK_LIBRARIES(AstroVizPlugin /usr/lib/libtipsy.a) 	#<-- can later do this more cleanly
 #################
 
 ######################
