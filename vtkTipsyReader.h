@@ -16,7 +16,6 @@ Modified from vtkSimplePointsReader and from Doug Potter's Tipsylib
 
 using std::queue;
 
-
 class VTK_IO_EXPORT vtkTipsyReader : public vtkPolyDataAlgorithm
 {
 public:
@@ -73,6 +72,12 @@ private:
   // e.g. AllocateFloatArray("density",1,100) creates a array of 100 scalar densities
   // AllocateFloatArray("velocity",3,100) creates a array of 100 vector velocities
   vtkSmartPointer<vtkFloatArray> AllocateFloatArray(const char* arrayName,int numComponents,int numTuples);
+	// Description:
+  // create a vtkDataArray with the  name arrayName, number of components 
+  // numComponents and number of tuples numTuples of type TYPE={INT,FLOAT,DOUBLE}
+  // e.g. AllocateFloatArray(INT,"density",1,100) creates a array of 100 scalar densities
+  // AllocateFloatArray(FLOAT,"velocity",3,100) creates a array of 100 vector velocities
+	template <class T> vtkSmartPointer<T> AllocateDataArray(const char* arrayName, int numComponents, int numTuples);
 	//ETX
 	// Description:
 	// reads in a particle (either gas, dark or star as appropriate) from the tipsy in file of this class

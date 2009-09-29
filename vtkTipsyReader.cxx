@@ -16,6 +16,7 @@ Currently only reads in standard format Tipsy files
 // Used to store which type a particle is in an int array. Later will separate 
 // each type into a separate dataset
 enum particle {STAR, DARK, GAS};
+
 uint32_t i;
 vtkCxxRevisionMacro(vtkTipsyReader, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkTipsyReader);
@@ -103,9 +104,7 @@ vtkIdType vtkTipsyReader::ReadParticle()
 //----------------------------------------------------------------------------
 void vtkTipsyReader::AllocateAllTipsyVariableArrays()
 {
-	this->ParticleTypes = vtkSmartPointer<vtkIntArray>::New();
-		ParticleTypes->SetName("particle type");
-		ParticleTypes->SetNumberOfTuples(this->numBodies);
+	this->ParticleTypes = AllocateDataArray<vtkIntArray>("particle types",1,this->numBodies);
  	this->MassScalars = AllocateFloatArray("mass",1,this->numBodies);
  	this->PhiScalars = AllocateFloatArray("potential",1,this->numBodies);
  	this->EpsScalars = AllocateFloatArray("softening",1,this->numBodies);
@@ -147,6 +146,15 @@ vtkSmartPointer<vtkFloatArray> vtkTipsyReader::AllocateFloatArray(const char* ar
   	floatArray->SetName(arrayName);
 		floatArray->SetNumberOfTuples(numTuples);
   return floatArray;
+}
+
+template <class T> vtkSmartPointer<T> vtkTipsyReader::AllocateDataArray(const char* arrayName, int numComponents, int numTuples)
+{
+	vtkSmartPointer<T> dataArray=vtkSmartPointer<T>::New();
+  dataArray->SetNumberOfComponents(numComponents);
+  dataArray->SetName(arrayName);
+	dataArray->SetNumberOfTuples(numTuples);
+  return dataArray;
 }
 
 //----------------------------------------------------------------------------
