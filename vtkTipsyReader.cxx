@@ -105,15 +105,15 @@ vtkIdType vtkTipsyReader::ReadParticle()
 void vtkTipsyReader::AllocateAllTipsyVariableArrays()
 {
 	this->ParticleTypes = AllocateDataArray<vtkIntArray>("particle types",1,this->numBodies);
- 	this->MassScalars = AllocateFloatArray("mass",1,this->numBodies);
- 	this->PhiScalars = AllocateFloatArray("potential",1,this->numBodies);
- 	this->EpsScalars = AllocateFloatArray("softening",1,this->numBodies);
- 	this->VelocityVectors = AllocateFloatArray("velocity",3,this->numBodies);
-	this->RhoScalars =  AllocateFloatArray("rho",1,this->numBodies);
- 	this->TempScalars =  AllocateFloatArray("temp",1,this->numBodies);
- 	this->HsmoothScalars =  AllocateFloatArray("hsmooth",1,this->numBodies);
- 	this->MetalsScalars =  AllocateFloatArray("metals",1,this->numBodies);
- 	this->TformScalars =  AllocateFloatArray("tform",1,this->numBodies);
+ 	this->MassScalars = AllocateDataArray<vtkFloatArray>("mass",1,this->numBodies);
+ 	this->PhiScalars = AllocateDataArray<vtkFloatArray>("potential",1,this->numBodies);
+ 	this->EpsScalars = AllocateDataArray<vtkFloatArray>("softening",1,this->numBodies);
+ 	this->VelocityVectors = AllocateDataArray<vtkFloatArray>("velocity",3,this->numBodies);
+	this->RhoScalars =  AllocateDataArray<vtkFloatArray>("rho",1,this->numBodies);
+ 	this->TempScalars =  AllocateDataArray<vtkFloatArray>("temp",1,this->numBodies);
+ 	this->HsmoothScalars =  AllocateDataArray<vtkFloatArray>("hsmooth",1,this->numBodies);
+ 	this->MetalsScalars =  AllocateDataArray<vtkFloatArray>("metals",1,this->numBodies);
+ 	this->TformScalars =  AllocateDataArray<vtkFloatArray>("tform",1,this->numBodies);
 }
 
 void vtkTipsyReader::StoreDataRead(vtkInformationVector* outputVector)
@@ -139,15 +139,6 @@ void vtkTipsyReader::StoreDataRead(vtkInformationVector* outputVector)
 }
 
 //----------------------------------------------------------------------------
-vtkSmartPointer<vtkFloatArray> vtkTipsyReader::AllocateFloatArray(const char* arrayName, int numComponents, int numTuples)
-{
-  vtkSmartPointer<vtkFloatArray> floatArray = vtkSmartPointer<vtkFloatArray>::New();
-  	floatArray->SetNumberOfComponents(numComponents);
-  	floatArray->SetName(arrayName);
-		floatArray->SetNumberOfTuples(numTuples);
-  return floatArray;
-}
-
 template <class T> vtkSmartPointer<T> vtkTipsyReader::AllocateDataArray(const char* arrayName, int numComponents, int numTuples)
 {
 	vtkSmartPointer<T> dataArray=vtkSmartPointer<T>::New();

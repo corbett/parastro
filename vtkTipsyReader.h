@@ -67,16 +67,10 @@ private:
 	queue<int> MarkedParticleIndices;
 	// private functions: initialization and reading
 	// Description:
-  // create a vtkFloatArray with the  name arrayName, number of components 
-  // numComponents and number of tuples numTuples
-  // e.g. AllocateFloatArray("density",1,100) creates a array of 100 scalar densities
-  // AllocateFloatArray("velocity",3,100) creates a array of 100 vector velocities
-  vtkSmartPointer<vtkFloatArray> AllocateFloatArray(const char* arrayName,int numComponents,int numTuples);
-	// Description:
   // create a vtkDataArray with the  name arrayName, number of components 
-  // numComponents and number of tuples numTuples of type TYPE={INT,FLOAT,DOUBLE}
-  // e.g. AllocateFloatArray(INT,"density",1,100) creates a array of 100 scalar densities
-  // AllocateFloatArray(FLOAT,"velocity",3,100) creates a array of 100 vector velocities
+  // numComponents and number of tuples numTuples of type T
+  // e.g. AllocateFloatArray<vtkFloatArray>("density",1,100) creates a array of 100 scalar float densities
+  // AllocateFloatArray<vtkFloatArray>("velocity",3,100) creates a array of 100 vector float velocities
 	template <class T> vtkSmartPointer<T> AllocateDataArray(const char* arrayName, int numComponents, int numTuples);
 	//ETX
 	// Description:
