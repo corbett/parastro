@@ -123,8 +123,7 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 			// extracting the mass
 			// has to be double as this version of VTK doesn't have GetTuple function which operates with float
 			double mass[1]; 
-			output->GetPointData()->SetActiveScalars("mass");
-			output->GetPointData()->GetScalars()->GetTuple(neighborPointId,mass);
+			output->GetPointData()->GetArray("mass")->GetTuple(neighborPointId,mass);
 			// taking log to help stay off loss of precision
 			totalMass+=log(mass[0]); 
 			// storing the smoothed mass in the output vector
