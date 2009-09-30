@@ -22,10 +22,11 @@ ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.0"
 	GUI_INTERFACES ${IFACES_MENU} #<-- for AstroViz menu
 	SOURCES ${MOC_SRCS_MENU} ${IFACE_SRCS_MENU}  #<-- for AstroViz
 	SourceToolbarActions.cxx) #<-- for menu
-# for helper functions often used
-ADD_LIBRARY(AstroVizHelpers PolyDataHelpers.cxx)
-SET_TARGET_PROPERTIES(AstroVizHelpers PROPERTIES COMPILE_FLAGS "-fPIC")
-TARGET_LINK_LIBRARIES(AstroVizPlugin AstroVizHelpers)
+
+# for helper functions often used-removing for now
+#ADD_LIBRARY(AstroVizHelpers SHARED PolyDataHelpers.cxx)
+#SET_TARGET_PROPERTIES(AstroVizHelpers PROPERTIES COMPILE_FLAGS "-fPIC")
+#TARGET_LINK_LIBRARIES(AstroVizPlugin AstroVizHelpers)
 
 # for the Tipsy reader plugin, a build of Doug Potter's tipsylib. 
 # Removing this for now
