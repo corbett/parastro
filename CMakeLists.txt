@@ -2,10 +2,12 @@ cmake_minimum_required(VERSION 2.4)
 FIND_PACKAGE(ParaView REQUIRED)
 INCLUDE(${PARAVIEW_USE_FILE})
 ###############
-#AstroViz plugin
-#INCLUDES
-# o Tipsy binary reader
-# o AstroViz menu, menu options
+# AstroViz plugin
+# INCLUDES
+#   o Tipsy binary reader
+#   o AstroViz menu, menu options
+#   o smoothing filter
+#	  o color bars equivalent to thos available in tipsy
 ###
 #AstroViz Menu bar
 QT4_WRAP_CPP(MOC_SRCS_MENU SourceToolbarActions.h)
@@ -14,7 +16,7 @@ ADD_PARAVIEW_ACTION_GROUP(IFACES_MENU IFACE_SRCS_MENU
                         GROUP_NAME "MenuBar/AstroViz")
 #define the client-side portion of the AstroViz plugin
 ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.0"
-	SERVER_MANAGER_SOURCES vtkTipsyReader.cxx#<-- for server
+	SERVER_MANAGER_SOURCES vtkTipsyReader.cxx #<-- for server
 	SERVER_MANAGER_XML  TipsyReaderSM.xml #<-- for server
 	GUI_RESOURCES TipsyReader.qrc #<-- for Tipsy Binary reader
 	GUI_INTERFACES ${IFACES_MENU} #<-- for AstroViz menu
@@ -28,7 +30,10 @@ ADD_LIBRARY(TipsyHelpers tipsylib/adapter.cpp tipsylib/binner.cpp
 						tipsylib/ftipsy.cpp tipsylib/native.cpp 
 						tipsylib/standard.cpp tipsylib/zstream.cpp 
 						tipsylib/vtipsy.cpp)
+SET_TARGET_PROPERTIES(TipsyHelpers PROPERTIES COMPILE_FLAGS "-fPIC")
 TARGET_LINK_LIBRARIES(AstroVizPlugin TipsyHelpers)
+
+
 
 ######################
 # Below are samples/playing around for possible later inclusion in AstroViz
