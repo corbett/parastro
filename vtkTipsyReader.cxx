@@ -2,7 +2,7 @@
 Modified from vtkSimplePointsReader and from Doug Potter's Tipsylib, 
 this depends on a few header files as well as the Tipsylib library.
 
-Currently only reads in standard format Tipsy files
+Only reads in standard format Tipsy files.
 @author corbett
 =========================================================================*/
 #include <math.h>
@@ -14,7 +14,7 @@ Currently only reads in standard format Tipsy files
 #include "vtkPoints.h"
 #include "vtkCellArray.h"
 #include "vtkFloatArray.h" 
-#include "vtkIntArray.h" 
+#include "vtkIntArray.h"
 // Used to store which type a particle is in an int array. Later will separate 
 // each type into a separate dataset
 vtkCxxRevisionMacro(vtkTipsyReader, "$Revision: 1.0 $");
@@ -204,40 +204,17 @@ void vtkTipsyReader::AllocateAllTipsyVariableArrays(TipsyHeader& tipsyHeader,vtk
   output->SetPoints(vtkSmartPointer<vtkPoints>::New());
   output->SetVerts(vtkSmartPointer<vtkCellArray>::New()); 
 	// the default scalars to be displayed
-  output->GetPointData()->SetScalars(AllocateDataArray<vtkFloatArray>("potential",1,tipsyHeader.h_nBodies));
+  AllocateDataArray(output,"potential",1,tipsyHeader.h_nBodies);
 	// the rest of the scalars
-  output->GetPointData()->AddArray(AllocateDataArray<vtkFloatArray>("mass",1,tipsyHeader.h_nBodies));
-  output->GetPointData()->AddArray(AllocateDataArray<vtkFloatArray>("eps",1,tipsyHeader.h_nBodies));
-  output->GetPointData()->AddArray(AllocateDataArray<vtkFloatArray>("rho",1,tipsyHeader.h_nBodies));
-  output->GetPointData()->AddArray(AllocateDataArray<vtkFloatArray>("hsmooth",1,tipsyHeader.h_nBodies));
-  output->GetPointData()->AddArray(AllocateDataArray<vtkFloatArray>("temperature",1,tipsyHeader.h_nBodies));
-  output->GetPointData()->AddArray(AllocateDataArray<vtkFloatArray>("metals",1,tipsyHeader.h_nBodies));
-  output->GetPointData()->AddArray(AllocateDataArray<vtkFloatArray>("tform",1,tipsyHeader.h_nBodies));
+  AllocateDataArray(output,"mass",1,tipsyHeader.h_nBodies);
+  AllocateDataArray(output,"eps",1,tipsyHeader.h_nBodies);
+  AllocateDataArray(output,"rho",1,tipsyHeader.h_nBodies);
+  AllocateDataArray(output,"hsmooth",1,tipsyHeader.h_nBodies);
+  AllocateDataArray(output,"temperature",1,tipsyHeader.h_nBodies);
+  AllocateDataArray(output,"metals",1,tipsyHeader.h_nBodies);
+  AllocateDataArray(output,"tform",1,tipsyHeader.h_nBodies);
 	// the default vectors to be displayed
-  output->GetPointData()->SetVectors(AllocateDataArray<vtkFloatArray>("velocity",3,tipsyHeader.h_nBodies));
-}
-
-//----------------------------------------------------------------------------
-template <class T> vtkSmartPointer<T> vtkTipsyReader::AllocateDataArray(const char* arrayName, int numComponents, int numTuples)
-{
-	vtkSmartPointer<T> dataArray=vtkSmartPointer<T>::New();
-  	dataArray->SetNumberOfComponents(numComponents);
-  	dataArray->SetName(arrayName);
-		dataArray->SetNumberOfTuples(numTuples);
-  return dataArray;
-}
-//----------------------------------------------------------------------------
-vtkIdType vtkTipsyReader::SetPointValue(vtkPolyData* output,float pos[3])
-{
-	vtkIdType id=output->GetPoints()->InsertNextPoint(pos);
-	output->GetVerts()->InsertNextCell(1, &id);
-	return id;
-}
-
-//----------------------------------------------------------------------------
-void vtkTipsyReader::SetDataValue(vtkPolyData* output, const char* arrayName, vtkIdType& id,float* data)
-{
-	output->GetPointData()->GetArray(arrayName)->SetTuple(id,data);
+  AllocateDataArray(output,"velocity",3,tipsyHeader.h_nBodies);
 }
 
 //----------------------------------------------------------------------------

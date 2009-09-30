@@ -8,9 +8,10 @@ Modified from vtkSimplePointsReader and from Doug Potter's Tipsylib
 #ifndef __vtkTipsyReader_h
 #define __vtkTipsyReader_h
 #include "vtkPolyDataAlgorithm.h" // needed as this class extends vtkPolyDataAlgorithm
-#include "ftipsy.hpp" // needed for functions which take Tipsy particles as arguments
+#include "tipsylib/ftipsy.hpp" // needed for functions which take Tipsy particles as arguments
 #include "vtkSmartPointer.h" // needed for the functions to initialize arrays
 #include "vtkPolyData.h" // needed as most helper functions modify output which is vtkPolyData
+#include "PolyDataHelpers.h" // needed as some functions depend upon
 #include <queue> // needed for FIFO queue used to store marked particles
 using std::queue;
 class VTK_IO_EXPORT vtkTipsyReader : public vtkPolyDataAlgorithm
@@ -63,23 +64,10 @@ private:
 	// reads in an array of the indices of marked particles from a file, returns a queue of marked particles
 	// which is empty if reading was unsucessful.
 	queue<int> ReadMarkedParticleIndices(TipsyHeader& tipsyHeader,ifTipsy& tipsyInfile);
+	//ETX
 	/* Helper functions for storing data in output vector*/
 	// Description:
 	// allocates all vtk arrays for Tipsy variables and places them in the output vector
 	void AllocateAllTipsyVariableArrays(TipsyHeader& tipsyHeader,vtkPolyData* output);
-	// Description:
-  // create a vtkDataArray with the  name arrayName, number of components 
-  // numComponents and number of tuples numTuples of type T
-  // e.g. AllocateFloatArray<vtkFloatArray>("density",1,100) creates a array of 100 scalar float densities
-  // AllocateFloatArray<vtkFloatArray>("velocity",3,100) creates a array of 100 vector float velocities
-	template <class T> vtkSmartPointer<T> AllocateDataArray(const char* arrayName, int numComponents, int numTuples);
-	//ETX
-	// Description:
-  // sets the point vertices in the output vector, assigning the point a unique id
-	// and places one point per cell
-	vtkIdType SetPointValue(vtkPolyData* output,float pos[3]);
-	// Description:
-  // sets the data value in the output vector in array arrayName at position id to data.
-	void SetDataValue(vtkPolyData* output, const char* arrayName, vtkIdType& id,float* data);
 };
 #endif

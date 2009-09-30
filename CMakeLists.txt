@@ -14,14 +14,21 @@ ADD_PARAVIEW_ACTION_GROUP(IFACES_MENU IFACE_SRCS_MENU
                         GROUP_NAME "MenuBar/AstroViz")
 #define the client-side portion of the AstroViz plugin
 ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.0"
-	SERVER_MANAGER_SOURCES vtkTipsyReader.cxx #<-- for server
+	SERVER_MANAGER_SOURCES vtkTipsyReader.cxx#<-- for server
 	SERVER_MANAGER_XML  TipsyReaderSM.xml #<-- for server
 	GUI_RESOURCES TipsyReader.qrc #<-- for Tipsy Binary reader
 	GUI_INTERFACES ${IFACES_MENU} #<-- for AstroViz menu
 	SOURCES ${MOC_SRCS_MENU} ${IFACE_SRCS_MENU}  #<-- for AstroViz
 	SourceToolbarActions.cxx) #<-- for menu
-TARGET_LINK_LIBRARIES(AstroVizPlugin /usr/lib/libtipsy.a) 	#<-- can later do this more cleanly
-#################
+# for helper functions often used
+ADD_LIBRARY(AstroVizHelpers PolyDataHelpers.cxx)
+TARGET_LINK_LIBRARIES(AstroVizPlugin AstroVizHelpers)
+# for the Tipsy reader plugin, a build of Doug Potter's tipsylib
+ADD_LIBRARY(TipsyHelpers tipsylib/adapter.cpp tipsylib/binner.cpp 
+						tipsylib/ftipsy.cpp tipsylib/native.cpp 
+						tipsylib/standard.cpp tipsylib/zstream.cpp 
+						tipsylib/vtipsy.cpp)
+TARGET_LINK_LIBRARIES(AstroVizPlugin TipsyHelpers)
 
 ######################
 # Below are samples/playing around for possible later inclusion in AstroViz
