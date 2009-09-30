@@ -223,7 +223,7 @@ void vtkTipsyReader::AllocateDataArray(vtkPolyData* output, const char* arrayNam
   	dataArray->SetNumberOfComponents(numComponents);
   	dataArray->SetName(arrayName);
 		dataArray->SetNumberOfTuples(numTuples);
-  output->GetPointData()->SetScalars(dataArray);
+  output->GetPointData()->AddArray(dataArray);
 }
 //----------------------------------------------------------------------------
 vtkIdType vtkTipsyReader::SetPointValue(vtkPolyData* output,float pos[3])
