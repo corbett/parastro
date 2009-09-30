@@ -65,7 +65,8 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 	//		o calculate smoothed quantities
 	// 		o add to their respective arrays.
 	// 3. Add the arrays of smoothed varaibles to the output
-  // First copying the input to the output, as the output will be identical to the input, with some additional properties
+  // First copying the input to the output, as the output will be 
+	// identical to the input, with some additional properties
 	// copies the point positions
   output->CopyStructure(input);
 	// copies the point attributes
@@ -76,65 +77,86 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 		pointTree->BuildLocatorFromPoints(output);
 	vtkDebugMacro("1b. Allocating arrays to store our smoothed values.");
 	// allocating an arrays for each of our smoothed values
- 	AllocateDataArray(output,"smoothed mass",1,output->GetPoints()->GetNumberOfPoints());
-	AllocateDataArray(output,"smoothed density",1,output->GetPoints()->GetNumberOfPoints());
+ 	AllocateDataArray(output,"smoothed mass", \
+										1,output->GetPoints()->GetNumberOfPoints());
+	AllocateDataArray(output,"smoothed density", \
+										1,output->GetPoints()->GetNumberOfPoints());
 	/*
 	//TODO: add these later
-	AllocateDataArray(output,"smoothed velocity",3,output->GetPoints()->GetNumberOfPoints());
-	AllocateDataArray(output,"smoothed speed",1,output->GetPoints()->GetNumberOfPoints());
+	AllocateDataArray(output,"smoothed velocity", \
+		3,output->GetPoints()->GetNumberOfPoints());
+	AllocateDataArray(output,"smoothed  speed",\
+		1,output->GetPoints()->GetNumberOfPoints());
 	*/
-  vtkDebugMacro("2. Calculating the smoothed quantities we are interested in.");
+  vtkDebugMacro("2. Calculating the smoothed quantities \
+									we are interested in.");
 	for(int id = 0; id < output->GetPoints()->GetNumberOfPoints(); ++id)
 		{
-		double nextPoint[3]; 
-		output->GetPoints()->GetPoint(id,nextPoint);
-		vtkDebugMacro("next point is " << nextPoint[0] << ","<< nextPoint[1] << ","<< nextPoint[2]);
+		double* nextPoint=GetPoint(output,id);
+		vtkDebugMacro("next point is " << nextPoint[0] << "," \
+									<< nextPoint[1] << ","<< nextPoint[2]);
 		// finding the closest N points
 		vtkDebugMacro("2. Finding the closeset N points");
-		vtkSmartPointer<vtkIdList> closestNPoints = vtkSmartPointer<vtkIdList>::New();
-		pointTree->FindClosestNPoints(this->NeighborNumber,nextPoint,closestNPoints);
-		vtkDebugMacro("found " << closestNPoints->GetNumberOfIds() << " closest points");
-		// looping over the closestNPoints, only if we have more neighbors than ourselves
+		vtkSmartPointer<vtkIdList> closestNPoints = \
+			vtkSmartPointer<vtkIdList>::New();
+		pointTree->FindClosestNPoints(this->NeighborNumber,\
+																	nextPoint,closestNPoints);
+		vtkDebugMacro("found " << closestNPoints->GetNumberOfIds() \
+									<< " closest points");
+		// looping over the closestNPoints, 
+		// only if we have more neighbors than ourselves
 		if(closestNPoints->GetNumberOfIds()>0)
 			{
 			float totalMass=0;
-			// closestNPoints is ordered by distance, so the last is the radius we want to calculate the volume with
+			// closestNPoints is ordered by distance, so the last is 
+			// the radius we want to calculate the volume with
 			// thus, only loop up to the second to last
 			for(int j = 0; j < closestNPoints->GetNumberOfIds()-1; ++j)
-//			for(int j = 0; j < closestNPoints->GetNumberOfIds() -1 ; ++j) // right now going to the end of the array. TODO: add back in
 				{
-				double neighborPoint[3];
 				vtkIdType neighborPointId = closestNPoints->GetId(j);
-				output->GetPoints()->GetPoint(neighborPointId,neighborPoint);
-				vtkDebugMacro("the " << j <<"th nearest point coordiates are (" << neighborPoint[0] << "," << neighborPoint[1] << "," << neighborPoint[2] << ")");
+				double* neighborPoint=GetPoint(output,neighborPointId);
+				vtkDebugMacro("the " << j <<"th nearest point coordiates are (" \
+				 							<< neighborPoint[0] << "," << neighborPoint[1] \
+				 							<< "," << neighborPoint[2] << ")");
 				// extracting the mass
-				// has to be double as this version of VTK doesn't have GetTuple function which operates with float
-				double mass[1];
-				GetDataValue(output,"mass",neighborPointId,mass);
+				// has to be double as this version of VTK doesn't have 
+				// GetTuple function which operates with float
+				double* mass=GetDataValue(output,"mass",neighborPointId);
 				// taking log to help stay off loss of precision
 				totalMass+=static_cast<float>(log(mass[0])); 
 				}
-			double neighborPoint[3];
-			vtkIdType neighborPointId = closestNPoints->GetId(closestNPoints->GetNumberOfIds()-1);
-			output->GetPoints()->GetPoint(neighborPointId,neighborPoint);
-			vtkDebugMacro("the " << closestNPoints->GetNumberOfIds()-1 <<"th nearest point coordiates are (" << neighborPoint[0] << "," << neighborPoint[1] << "," << neighborPoint[2] << ")");
+			vtkIdType neighborPointId = 
+									closestNPoints->GetId(closestNPoints->GetNumberOfIds()-1);
+			double* neighborPoint=GetPoint(output,neighborPointId);
+			vtkDebugMacro("the " << closestNPoints->GetNumberOfIds()-1  \
+										<<"th nearest point coordiates are (" \
+										<< neighborPoint[0] << "," << neighborPoint[1] \
+										<< "," << neighborPoint[2] << ")");
 			// extracting the mass
-			// has to be double as this version of VTK doesn't have GetTuple function which operates with float
-			double mass[1]; 
-			GetDataValue(output,"mass",neighborPointId,mass);
+			// has to be double as this version of VTK doesn't have 
+			// GetTuple function which operates with float
+			double* mass=GetDataValue(output,"mass",neighborPointId);
 			// taking log to help stay off loss of precision
 			totalMass+=static_cast<float>(log(mass[0])); 
 			// storing the smoothed mass in the output vector
 			float smoothedMass=exp(totalMass/(closestNPoints->GetNumberOfIds()));
-			// taking the exp to reverse the log, and also converting back to float precision
+			// taking the exp to reverse the log, and also converting back to 
+			// float precision
 			vtkDebugMacro("smoothed mass is " << smoothedMass); 
 			SetDataValue(output,"smoothed mass",id,&smoothedMass);
-			//done with the last point's mass, and totalMass calculation, on to the portion of the code concerning the volume
-			// finding the average of each property we are interested in by dividing by #closestNPoints
-			// now calculating the radial distance from the last point to the center point to which it is a neighbor
-			float radialDistance=static_cast<float>(sqrt(pow(nextPoint[0]-neighborPoint[0],2)+pow(nextPoint[1]-neighborPoint[1],2)+pow(nextPoint[2]-neighborPoint[2],2)));
-			// the volume is a sphere around nextPoint with radius of the last in the list of the closestNpoints
-			// so 4/3 pi r^3 where r=sqrt((nextPoint->x-nextPoint->x)^2+(nextPoint->y-nextPoint->y)^2+(nextPoint->z-nextPoint->z)^2)
+			//done with the last point's mass, and totalMass calculation, 
+			//on to the portion of the code concerning the volume
+			// finding the average of each property we are interested in by 
+			// dividing by #closestNPoints
+			// now calculating the radial distance from the last point to the
+			// center point to which it is a neighbor
+			float radialDistance=static_cast<float>(sqrt( \
+							pow(nextPoint[0]-neighborPoint[0],2) \
+							+pow(nextPoint[1]-neighborPoint[1],2) \
+							+pow(nextPoint[2]-neighborPoint[2],2)));
+			// the volume is a sphere around nextPoint with radius of the 
+			// last in the list of the closestNpoints
+			// so 4/3 pi r^3 where 
 			float neighborhoodVolume=4./3 * M_PI * pow(radialDistance,3);
 			float smoothedDensity;
 			if(neighborhoodVolume!=0)
@@ -143,13 +165,14 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 				}
 			vtkDebugMacro("smoothed density is " << smoothedDensity); 
 			//storing the smooth density
-			SetDataValue(output,"smoothed density",neighborPointId,&smoothedDensity);
+			SetDataValue(output,"smoothed density",\
+				neighborPointId,&smoothedDensity);
 			}
 		else
 			{
-			//This point has no neighbors, so smoothed mass is identicle to this point's mass, and smoothed density is meaningless
-			double mass[1];
-			GetDataValue(output,"mass",id,mass);
+			// This point has no neighbors, so smoothed mass is identicle to 
+			// this point's mass, and smoothed density is meaningless
+			double* mass=GetDataValue(output,"mass",id);
 			float floatmass = static_cast<float>(mass[0]);
 			SetDataValue(output,"smoothed mass",id,&floatmass);
 			}

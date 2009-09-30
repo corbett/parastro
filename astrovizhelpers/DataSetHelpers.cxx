@@ -4,9 +4,11 @@
 #include "vtkFloatArray.h"
 #include "vtkSmartPointer.h"
 //----------------------------------------------------------------------------
-void AllocateDataArray(vtkPointSet* output, const char* arrayName, int numComponents, int numTuples)
+void AllocateDataArray(vtkPointSet* output, const char* arrayName,\
+ 			int numComponents, int numTuples)
 {
-	vtkSmartPointer<vtkFloatArray> dataArray=vtkSmartPointer<vtkFloatArray>::New();
+	vtkSmartPointer<vtkFloatArray> dataArray=\
+		vtkSmartPointer<vtkFloatArray>::New();
   	dataArray->SetNumberOfComponents(numComponents);
   	dataArray->SetName(arrayName);
 		dataArray->SetNumberOfTuples(numTuples);
@@ -21,12 +23,24 @@ vtkIdType SetPointValue(vtkPolyData* output,float pos[3])
 }
 
 //----------------------------------------------------------------------------
-void SetDataValue(vtkPointSet* output, const char* arrayName, vtkIdType& id,float* data)
+double* GetPoint(vtkPointSet* output,vtkIdType& id)
+{
+	double* nextPoint; 
+	output->GetPoints()->GetPoint(id,nextPoint);
+	return nextPoint;
+}
+
+//----------------------------------------------------------------------------
+void SetDataValue(vtkPointSet* output, const char* arrayName,\
+			vtkIdType& id,float* data)
 {
 	output->GetPointData()->GetArray(arrayName)->SetTuple(id,data);
 }
 
-void GetDataValue(vtkPointSet* output, const char* arrayName, vtkIdType& id,double* data)
+double* GetDataValue(vtkPointSet* output, const char* arrayName,\
+ 					vtkIdType& id)
 {
+	double* data;
 	output->GetPointData()->GetArray(arrayName)->GetTuple(id,data);
+	return data;
 }

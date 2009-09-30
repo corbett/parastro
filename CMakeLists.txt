@@ -58,7 +58,8 @@ TARGET_LINK_LIBRARIES(AstroVizPlugin TipsyHelpers)
 ###
 ## We need to wrap for Qt stuff such as signals/slots etc. to work correctly.
 #QT4_WRAP_CPP(MOC_SRCS SourceToolbarActions.h)
-## This is a macro for adding QActionGroup subclasses automatically as toolbars.
+## This is a macro for adding QActionGroup subclasses automatically
+# as toolbars.
 #ADD_PARAVIEW_ACTION_GROUP(IFACES IFACE_SRCS 
 #                        CLASS_NAME SourceToolbarActions
 #                        GROUP_NAME "ToolBar/SourceToolbar")
