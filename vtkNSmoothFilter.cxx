@@ -17,6 +17,7 @@
 #include "vtkGenericPointIterator.h"
 #include "vtkFloatArray.h"
 #include "vtkDataArray.h"
+#include "astrovizhelpers/PolyDataHelpers.h"
 #include <cmath>
 
 vtkCxxRevisionMacro(vtkNSmoothFilter, "$Revision: 1.72 $");

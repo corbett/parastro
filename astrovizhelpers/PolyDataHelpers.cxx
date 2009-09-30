@@ -4,7 +4,7 @@
 #include "vtkFloatArray.h"
 #include "vtkSmartPointer.h"
 //----------------------------------------------------------------------------
-void AllocateDataArray(vtkPolyData* output, const char* arrayName, int numComponents, int numTuples)
+void AllocateDataArray(vtkPointSet* output, const char* arrayName, int numComponents, int numTuples)
 {
 	vtkSmartPointer<vtkFloatArray> dataArray=vtkSmartPointer<vtkFloatArray>::New();
   	dataArray->SetNumberOfComponents(numComponents);

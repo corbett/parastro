@@ -1,4 +1,5 @@
 #include "vtkPolyData.h"
+#include "vtkPointSet.h"
 #include "vtkSmartPointer.h"
 // Description:
 // sets the point vertices in the output vector, assigning the point a unique id
@@ -16,4 +17,4 @@ void GetDataValue(vtkPolyData* output, const char* arrayName, vtkIdType& id,doub
 // numComponents and number of tuples numTuples of type T
 // e.g. AllocateFloatArray("density",1,100) creates a array of 100 scalar float densities
 // AllocateFloatArray("velocity",3,100) creates a array of 100 vector float velocities
-void AllocateDataArray(vtkPolyData* output, const char* arrayName, int numComponents, int numTuples);
+void AllocateDataArray(vtkPointSet* output, const char* arrayName, int numComponents, int numTuples);
