@@ -25,6 +25,7 @@ ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.0"
 # for helper functions often used
 ADD_LIBRARY(AstroVizHelpers PolyDataHelpers.cxx)
 TARGET_LINK_LIBRARIES(AstroVizPlugin AstroVizHelpers)
+SET_TARGET_PROPERTIES(AstroVizHelpers PROPERTIES COMPILE_FLAGS "-fPIC")
 # for the Tipsy reader plugin, a build of Doug Potter's tipsylib
 ADD_LIBRARY(TipsyHelpers tipsylib/adapter.cpp tipsylib/binner.cpp 
 						tipsylib/ftipsy.cpp tipsylib/native.cpp 
