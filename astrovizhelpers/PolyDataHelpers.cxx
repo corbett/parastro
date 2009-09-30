@@ -10,7 +10,7 @@ void AllocateDataArray(vtkPolyData* output, const char* arrayName, int numCompon
   	dataArray->SetNumberOfComponents(numComponents);
   	dataArray->SetName(arrayName);
 		dataArray->SetNumberOfTuples(numTuples);
-  output->GetPointData()->SetScalars(dataArray);
+  output->GetPointData()->AddArray(dataArray);
 }
 //----------------------------------------------------------------------------
 vtkIdType SetPointValue(vtkPolyData* output,float pos[3])
