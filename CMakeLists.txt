@@ -79,3 +79,4 @@ ADD_PARAVIEW_PLUGIN(AstroVizFilters "1.0"
   SERVER_MANAGER_SOURCES vtkNSmoothFilter.cxx #<-- source files for the new classes
 	GUI_RESOURCE_FILES AstroVizFilterMenu.xml #<-- adds a new menu of filters
 )
+TARGET_LINK_LIBRARIES(AstroVizFilters AstroVizHelpers)
