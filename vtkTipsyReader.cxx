@@ -15,7 +15,7 @@ Only reads in standard format Tipsy files.
 #include "vtkCellArray.h"
 #include "vtkFloatArray.h" 
 #include "vtkIntArray.h"
-#include "astrovizhelpers/PolyDataHelpers.h"
+#include "astrovizhelpers/DataSetHelpers.h"
 // Used to store which type a particle is in an int array. Later will separate 
 // each type into a separate dataset
 vtkCxxRevisionMacro(vtkTipsyReader, "$Revision: 1.0 $");

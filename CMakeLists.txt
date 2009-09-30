@@ -24,7 +24,7 @@ ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.0"
 	SourceToolbarActions.cxx) #<-- for menu
 
 # for helper functions often used-removing for now
-ADD_LIBRARY(AstroVizHelpers astrovizhelpers/PolyDataHelpers.cxx)
+ADD_LIBRARY(AstroVizHelpers astrovizhelpers/DataSetHelpers.cxx)
 SET_TARGET_PROPERTIES(AstroVizHelpers PROPERTIES COMPILE_FLAGS "-fPIC")
 TARGET_LINK_LIBRARIES(AstroVizPlugin AstroVizHelpers)
 
