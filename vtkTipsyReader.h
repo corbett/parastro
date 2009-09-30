@@ -10,10 +10,9 @@ Modified from vtkSimplePointsReader and from Doug Potter's Tipsylib
 #include "vtkPolyDataAlgorithm.h" // needed as this class extends vtkPolyDataAlgorithm
 #include "ftipsy.hpp" // needed for functions which take Tipsy particles as arguments
 #include "vtkSmartPointer.h" // needed for the functions to initialize arrays
-#include "vtkPolyData.h" // needed as most helper functions modify output
+#include "vtkPolyData.h" // needed as most helper functions modify output which is vtkPolyData
 #include <queue> // needed for FIFO queue used to store marked particles
 using std::queue;
-
 class VTK_IO_EXPORT vtkTipsyReader : public vtkPolyDataAlgorithm
 {
 public:
@@ -40,45 +39,47 @@ protected:
 private:
   vtkTipsyReader(const vtkTipsyReader&);  // Not implemented.
   void operator=(const vtkTipsyReader&);  // Not implemented.
+	/* Help functions for reading */
+	// Description:
+	// Reads the tipsy header. 
+	TipsyHeader ReadTipsyHeader(ifTipsy& tipsyInfile);
+	// Description:
+	// Reads all particles from the tipsy file
+	void ReadAllParticles(TipsyHeader& tipsyHeader,ifTipsy& tipsyInfile,vtkPolyData* output);
+	// Description:
+	// reads in a particle (either gas, dark or star as appropriate) from the tipsy in file of this class
+	vtkIdType ReadParticle(ifTipsy& tipsyInFile,vtkPolyData* output);
+	// Description:
+	// reads variables common to all particles
+	vtkIdType ReadBaseParticle(vtkPolyData* output, TipsyBaseParticle& b);
 	// The BTX, ETX comments bracket the portion of the code which should not be
 	// attempted to wrap for use by python, specifically the code which uses
-	// C++ templates as this code is unable to be wrapped.
-	// private variables: points, scalars, and vectors
-	int numDark;
-	int numGas;
-	int numStar;
-	int numBodies;
+	// C++ templates as this code is unable to be wrapped. DO NOT REMOVE.
 	//BTX
-	queue<int> MarkedParticleIndices;
-	// private functions: initialization and reading
+	// Description:
+	// Reads only Marked particles from the tipsy file. Must be called after function ReadMarkedParticleIndices.
+	void ReadMarkedParticles(queue<int> markedParticleIndices,TipsyHeader& tipsyHeader,ifTipsy& tipsyInfile,vtkPolyData* output);
+	// Description:
+	// reads in an array of the indices of marked particles from a file, returns a queue of marked particles
+	// which is empty if reading was unsucessful.
+	queue<int> ReadMarkedParticleIndices(TipsyHeader& tipsyHeader,ifTipsy& tipsyInfile);
+	/* Helper functions for storing data in output vector*/
+	// Description:
+	// allocates all vtk arrays for Tipsy variables and places them in the output vector
+	void AllocateAllTipsyVariableArrays(TipsyHeader& tipsyHeader,vtkPolyData* output);
 	// Description:
   // create a vtkDataArray with the  name arrayName, number of components 
   // numComponents and number of tuples numTuples of type T
   // e.g. AllocateFloatArray<vtkFloatArray>("density",1,100) creates a array of 100 scalar float densities
   // AllocateFloatArray<vtkFloatArray>("velocity",3,100) creates a array of 100 vector float velocities
 	template <class T> vtkSmartPointer<T> AllocateDataArray(const char* arrayName, int numComponents, int numTuples);
-	template <class T> void SetDataValue(const char* arrayName, vtkIdType id, T data);
+	// Description:
+  // sets the data value in the output vector in array arrayName at position id to data.
+	template <class T> void SetDataValue(vtkPolyData* output, const char* arrayName, vtkIdType& id, T data);
 	//ETX
 	// Description:
-	// reads in a particle (either gas, dark or star as appropriate) from the tipsy in file of this class
-  vtkIdType ReadParticle(); 
-	// Description:
-	// reads variables common to all particles
-  vtkIdType ReadBaseParticle(TipsyBaseParticle& b); 
-	// Description:
-	// reads in an array of the indices of marked particles from a file, returns 0 if unsucessful, 1 otherwise
-	int ReadMarkedParticleIndices();
-	// Description:
-	// allocates all vtk arrays for Tipsy variables
-	void AllocateAllTipsyVariableArrays();
-	// Description:
-	// Reads the tipsy header. Must be called after the tipsy file is opened, but before any marked particle file is attempted to be open
-	void ReadTipsyHeader();
-	// Description:
-	// Reads all particles from the tipsy file
-	void ReadAllParticles();
-	// Description:
-	// Reads only Marked particles from the tipsy file. Must be called after function ReadMarkedParticleIndices.
-	void ReadMarkedParticles();
+  // sets the point vertices in the output vector, assigning the point a unique id
+	// and places one point per cell
+	vtkIdType SetPointValue(vtkPolyData* output,float pos[3]);
 };
 #endif
