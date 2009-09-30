@@ -17,7 +17,6 @@ Currently only reads in standard format Tipsy files
 #include "vtkIntArray.h" 
 // Used to store which type a particle is in an int array. Later will separate 
 // each type into a separate dataset
-enum particle {STAR, DARK, GAS};
 vtkCxxRevisionMacro(vtkTipsyReader, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkTipsyReader);
 
@@ -164,25 +163,22 @@ vtkIdType vtkTipsyReader::ReadParticle(ifTipsy& tipsyInfile,vtkPolyData* output)
    case tipsypos::gas:
      tipsyInfile >> g;
      id=ReadBaseParticle(output,g);
-     SetDataValue(output,"particle",id,GAS);
-     SetDataValue(output,"rho",id,g.rho);
-     SetDataValue(output,"temperature",id,g.temp);
-     SetDataValue(output,"hsmooth",id,g.hsmooth);
-     SetDataValue(output,"metals",id,g.metals);
+     SetDataValue(output,"rho",id,&g.rho);
+     SetDataValue(output,"temperature",id,&g.temp);
+     SetDataValue(output,"hsmooth",id,&g.hsmooth);
+     SetDataValue(output,"metals",id,&g.metals);
      break;
    case tipsypos::dark:
      tipsyInfile >> d;
      id=ReadBaseParticle(output,d);
-     SetDataValue(output,"particle",id,DARK);
-     SetDataValue(output,"eps",id,d.eps);
+     SetDataValue(output,"eps",id,&d.eps);
      break;
    case tipsypos::star:
      tipsyInfile >> s;
      id=ReadBaseParticle(output,s);
-     SetDataValue(output,"particle",id,STAR);
-     SetDataValue(output,"eps",id,s.eps);
-     SetDataValue(output,"metals",id,s.metals);
-     SetDataValue(output,"tform",id,s.tform);
+     SetDataValue(output,"eps",id,&s.eps);
+     SetDataValue(output,"metals",id,&s.metals);
+     SetDataValue(output,"tform",id,&s.tform);
      break;
    default:
      assert(0);
@@ -196,8 +192,8 @@ vtkIdType vtkTipsyReader::ReadBaseParticle(vtkPolyData* output, TipsyBaseParticl
 {
 	vtkIdType id = SetPointValue(output,b.pos);
 	SetDataValue(output,"velocity",id,b.vel);
-  SetDataValue(output,"mass",id,b.mass);
-	SetDataValue(output,"potential",id,b.phi);
+  SetDataValue(output,"mass",id,&b.mass);
+	SetDataValue(output,"potential",id,&b.phi);
 	return id;
 }
 
@@ -210,7 +206,6 @@ void vtkTipsyReader::AllocateAllTipsyVariableArrays(TipsyHeader& tipsyHeader,vtk
 	// the default scalars to be displayed
   output->GetPointData()->SetScalars(AllocateDataArray<vtkFloatArray>("potential",1,tipsyHeader.h_nBodies));
 	// the rest of the scalars
-	output->GetPointData()->AddArray(AllocateDataArray<vtkIntArray>("particle",1,tipsyHeader.h_nBodies));
   output->GetPointData()->AddArray(AllocateDataArray<vtkFloatArray>("mass",1,tipsyHeader.h_nBodies));
   output->GetPointData()->AddArray(AllocateDataArray<vtkFloatArray>("eps",1,tipsyHeader.h_nBodies));
   output->GetPointData()->AddArray(AllocateDataArray<vtkFloatArray>("rho",1,tipsyHeader.h_nBodies));
@@ -226,9 +221,9 @@ void vtkTipsyReader::AllocateAllTipsyVariableArrays(TipsyHeader& tipsyHeader,vtk
 template <class T> vtkSmartPointer<T> vtkTipsyReader::AllocateDataArray(const char* arrayName, int numComponents, int numTuples)
 {
 	vtkSmartPointer<T> dataArray=vtkSmartPointer<T>::New();
-  dataArray->SetNumberOfComponents(numComponents);
-  dataArray->SetName(arrayName);
-	dataArray->SetNumberOfTuples(numTuples);
+  	dataArray->SetNumberOfComponents(numComponents);
+  	dataArray->SetName(arrayName);
+		dataArray->SetNumberOfTuples(numTuples);
   return dataArray;
 }
 //----------------------------------------------------------------------------
@@ -240,10 +235,9 @@ vtkIdType vtkTipsyReader::SetPointValue(vtkPolyData* output,float pos[3])
 }
 
 //----------------------------------------------------------------------------
-template <class T> void vtkTipsyReader::SetDataValue(vtkPolyData* output, const char* arrayName, vtkIdType& id, T data)
+void vtkTipsyReader::SetDataValue(vtkPolyData* output, const char* arrayName, vtkIdType& id,float* data)
 {
-	//TODO: implement
-//	output->GetPointData()->GetArray(arrayName)->SetTuple(id,data);
+	output->GetPointData()->GetArray(arrayName)->SetTuple(id,data);
 }
 
 //----------------------------------------------------------------------------
