@@ -35,7 +35,7 @@ TARGET_LINK_LIBRARIES(AstroVizPlugin AstroVizHelpers)
 #						tipsylib/vtipsy.cpp)
 #SET_TARGET_PROPERTIES(TipsyHelpers PROPERTIES COMPILE_FLAGS "-fPIC")
 #TARGET_LINK_LIBRARIES(AstroVizPlugin TipsyHelpers)
-TARGET_LINK_LIBRARIES(AstroVizPlugin /usr/local/libtipsy.a)
+TARGET_LINK_LIBRARIES(AstroVizPlugin /usr/lib/libtipsy.a)
 
 
 ######################
