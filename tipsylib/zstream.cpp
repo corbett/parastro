@@ -1,5 +1,6 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
 /* Doug Potter - 06/06/06 */
+#include <cstring>
 #include <assert.h>
 #include "zstream.hpp"
 #include <iostream>

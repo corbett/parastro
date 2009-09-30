@@ -5,7 +5,7 @@
  *
  */
 
-
+#include <cstring>
 #include <assert.h>
 #include <iostream>
 #include <netinet/in.h> // ntohl

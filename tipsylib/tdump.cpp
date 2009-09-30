@@ -4,6 +4,7 @@
  *  @author Doug Potter
  */
 
+#include <stdlib.h>
 #include <iostream>
 #include <iomanip>
 #include <getopt.h>

@@ -1,7 +1,7 @@
 /*  This example program will convert a native format tipsy file
  *  into a standard format file.
  */
-
+#include <stdlib.h>
 #include "ftipsy.hpp"
 
 int main( int argc, char *argv[] ) {

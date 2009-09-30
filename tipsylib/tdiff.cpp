@@ -1,5 +1,6 @@
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
 
+#include <stdlib.h>
 #include <iostream>
 #include <iomanip>
 #include <math.h>

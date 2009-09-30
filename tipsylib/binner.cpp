@@ -3,7 +3,7 @@
  *  @brief Bin Particles
  *  @author Doug Potter
  */
-
+#include <stdlib.h>
 #include <iostream>
 #include <math.h>
 #include <assert.h>
