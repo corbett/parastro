@@ -24,9 +24,9 @@ ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.0"
 	SourceToolbarActions.cxx) #<-- for menu
 
 # for helper functions often used-removing for now
-#ADD_LIBRARY(AstroVizHelpers SHARED PolyDataHelpers.cxx)
-#SET_TARGET_PROPERTIES(AstroVizHelpers PROPERTIES COMPILE_FLAGS "-fPIC")
-#TARGET_LINK_LIBRARIES(AstroVizPlugin AstroVizHelpers)
+ADD_LIBRARY(AstroVizHelpers astrovizhelpers/PolyDataHelpers.cxx)
+SET_TARGET_PROPERTIES(AstroVizHelpers PROPERTIES COMPILE_FLAGS "-fPIC")
+TARGET_LINK_LIBRARIES(AstroVizPlugin AstroVizHelpers)
 
 # for the Tipsy reader plugin, a build of Doug Potter's tipsylib. 
 ADD_LIBRARY(TipsyHelpers tipsylib/adapter.cpp tipsylib/binner.cpp 
@@ -35,8 +35,6 @@ ADD_LIBRARY(TipsyHelpers tipsylib/adapter.cpp tipsylib/binner.cpp
 						tipsylib/vtipsy.cpp)
 SET_TARGET_PROPERTIES(TipsyHelpers PROPERTIES COMPILE_FLAGS "-fPIC")
 TARGET_LINK_LIBRARIES(AstroVizPlugin TipsyHelpers)
-#TARGET_LINK_LIBRARIES(AstroVizPlugin /usr/lib/libtipsy.a)
-
 
 ######################
 # Below are samples/playing around for possible later inclusion in AstroViz

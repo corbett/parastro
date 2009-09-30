@@ -15,6 +15,7 @@ Only reads in standard format Tipsy files.
 #include "vtkCellArray.h"
 #include "vtkFloatArray.h" 
 #include "vtkIntArray.h"
+#include "astrovizhelpers/PolyDataHelpers.h"
 // Used to store which type a particle is in an int array. Later will separate 
 // each type into a separate dataset
 vtkCxxRevisionMacro(vtkTipsyReader, "$Revision: 1.0 $");
@@ -216,6 +217,7 @@ void vtkTipsyReader::AllocateAllTipsyVariableArrays(TipsyHeader& tipsyHeader,vtk
 	// the default vectors to be displayed
   AllocateDataArray(output,"velocity",3,tipsyHeader.h_nBodies);
 }
+/*
 //----------------------------------------------------------------------------
 void vtkTipsyReader::AllocateDataArray(vtkPolyData* output, const char* arrayName, int numComponents, int numTuples)
 {
@@ -243,7 +245,7 @@ void vtkTipsyReader::GetDataValue(vtkPolyData* output, const char* arrayName, vt
 {
 	output->GetPointData()->GetArray(arrayName)->GetTuple(id,data);
 }
-
+*/
 //----------------------------------------------------------------------------
 int vtkTipsyReader::RequestData(vtkInformation*,
                                        vtkInformationVector**,
