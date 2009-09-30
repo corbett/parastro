@@ -7,11 +7,11 @@
 vtkIdType SetPointValue(vtkPolyData* output,float pos[3]);
 // Description:
 // sets the data value in the output vector in array arrayName at position id to data.
-void SetDataValue(vtkPolyData* output, const char* arrayName, vtkIdType& id,float* data);
+void SetDataValue(vtkPointSet* output, const char* arrayName, vtkIdType& id,float* data);
 // Description:
 // points the double* data to the value in the output vector in array arrayName at position id
 // would like to be float, but the version of vtk I am working with does not support 
-void GetDataValue(vtkPolyData* output, const char* arrayName, vtkIdType& id,double* data);
+void GetDataValue(vtkPointSet* output, const char* arrayName, vtkIdType& id,double* data);
 // Description:
 // create a vtkDataArray with the  name arrayName, number of components 
 // numComponents and number of tuples numTuples of type T

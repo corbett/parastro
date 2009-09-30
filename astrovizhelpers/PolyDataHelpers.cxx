@@ -21,12 +21,12 @@ vtkIdType SetPointValue(vtkPolyData* output,float pos[3])
 }
 
 //----------------------------------------------------------------------------
-void SetDataValue(vtkPolyData* output, const char* arrayName, vtkIdType& id,float* data)
+void SetDataValue(vtkPointSet* output, const char* arrayName, vtkIdType& id,float* data)
 {
 	output->GetPointData()->GetArray(arrayName)->SetTuple(id,data);
 }
 
-void GetDataValue(vtkPolyData* output, const char* arrayName, vtkIdType& id,double* data)
+void GetDataValue(vtkPointSet* output, const char* arrayName, vtkIdType& id,double* data)
 {
 	output->GetPointData()->GetArray(arrayName)->GetTuple(id,data);
 }
