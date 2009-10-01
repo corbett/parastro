@@ -49,12 +49,16 @@ protected:
   virtual int RequestData(vtkInformation*,
                           vtkInformationVector**,
                           vtkInformationVector*);
-
   int NeighborNumber;
 
 private:
   vtkNSmoothFilter(const vtkNSmoothFilter&);  // Not implemented.
   void operator=(const vtkNSmoothFilter&);  // Not implemented.
+	// Description:
+	// calculates the density by taking 4/3 pi r^3 to be the volume
+	// where r=dist(pointOne,pointTwo), and diving the smoothed mass
+	// which is the average mass in that volume by the volume
+	float CalculateDensity(double pointOne[3],double pointTwo[3], float& smoothedMass);
 };
 
 #endif

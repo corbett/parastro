@@ -25,7 +25,7 @@ vtkIdType SetPointValue(vtkPolyData* output,float pos[3])
 //----------------------------------------------------------------------------
 double* GetPoint(vtkPointSet* output,vtkIdType& id)
 {
-	double* nextPoint; 
+	double* nextPoint=new double[3]; 
 	output->GetPoints()->GetPoint(id,nextPoint);
 	return nextPoint;
 }
@@ -40,7 +40,7 @@ void SetDataValue(vtkPointSet* output, const char* arrayName,\
 double* GetDataValue(vtkPointSet* output, const char* arrayName,\
  					vtkIdType& id)
 {
-	double* data;
+	double* data=new double[3];
 	output->GetPointData()->GetArray(arrayName)->GetTuple(id,data);
 	return data;
 }

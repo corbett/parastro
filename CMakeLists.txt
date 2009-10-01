@@ -29,12 +29,14 @@ SET_TARGET_PROPERTIES(AstroVizHelpers PROPERTIES COMPILE_FLAGS "-fPIC")
 TARGET_LINK_LIBRARIES(AstroVizPlugin AstroVizHelpers)
 
 # for the Tipsy reader plugin, a build of Doug Potter's tipsylib. 
-ADD_LIBRARY(TipsyHelpers tipsylib/adapter.cpp tipsylib/binner.cpp 
-						tipsylib/ftipsy.cpp tipsylib/native.cpp 
-						tipsylib/standard.cpp tipsylib/zstream.cpp 
-						tipsylib/vtipsy.cpp)
-SET_TARGET_PROPERTIES(TipsyHelpers PROPERTIES COMPILE_FLAGS "-fPIC")
-TARGET_LINK_LIBRARIES(AstroVizPlugin TipsyHelpers)
+#ADD_LIBRARY(TipsyHelpers tipsylib/adapter.cpp tipsylib/binner.cpp 
+#						tipsylib/ftipsy.cpp tipsylib/native.cpp 
+#						tipsylib/standard.cpp tipsylib/zstream.cpp 
+#						tipsylib/vtipsy.cpp)
+#SET_TARGET_PROPERTIES(TipsyHelpers PROPERTIES COMPILE_FLAGS "-fPIC")
+# still need to work on cross-platform library build
+# the above works on linux, but not on mac
+TARGET_LINK_LIBRARIES(AstroVizPlugin /usr/lib/libtipsy.a)
 
 ######################
 # Below are samples/playing around for possible later inclusion in AstroViz
