@@ -4,7 +4,7 @@
        a filter already in ParaView (in Servers/ServerManager/Resources/*.xml)
        that matches your filter and then model your xml on it -->
   <ProxyGroup name="filters">
-   <SourceProxy name="NSmoothFilter" class="vtkNSmoothFilter" label="NSmoothFilter">
+   <SourceProxy name="Neighbor Smooth" class="vtkNSmoothFilter" label="Neighbor Smooth">
      <Documentation
         long_help="Find smoothed variable value by averaging over N nearest neighbors (default 50). For those variables which need a volume to be computed (e.g. density) consider the volume as sphere around point with radius of the outermost neighbor point."
         short_help="Find smoothed variable value.">

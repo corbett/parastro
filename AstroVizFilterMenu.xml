@@ -1,7 +1,8 @@
 <ParaViewFilters>
    <Category name="AstroViz" menu_label="&amp;AstroViz Analysis">
      <!-- adds a new category and then adds our addition filters to it -->
-     <Filter name="NSmoothFilter" />
+     <Filter name="Neighbor Smooth" />
      <Filter name="ExtractHistogram" />
+     <Filter name="Center Of Mass" />
    </Category>
  </ParaViewFilters>

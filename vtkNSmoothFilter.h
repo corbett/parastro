@@ -1,23 +1,26 @@
 /*=========================================================================
 
-  Program:   Visualization Toolkit
-  Module:    $RCSfile: vtkNSmoothFilter.h,v $
+		Program:   AstroViz plugin for ParaView
+		Module:    $RCSfile: vtkNSmoothFilter.h,v $
 
-  Copyright (c) Ken Martin, Will Schroeder, Bill Lorensen
-  All rights reserved.
-  See Copyright.txt or http://www.kitware.com/Copyright.htm for details.
+		Copyright (c) Christine Corbett Moran
+		All rights reserved.
+   
+	This software is distributed WITHOUT ANY WARRANTY; without even
+  the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+  PURPOSE.  See the above copyright notice for more information.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-     PURPOSE.  See the above copyright notice for more information.
 
 =========================================================================*/
 // .NAME vtkNSmoothFilter - shrink cells composing an arbitrary data set
 // .SECTION Description
 // vtkNSmoothFilter 
-// Build a Kd tree, then find the N nearest neighbors (as specified by NeighborNumber) 
-// average over them to find smoothed variable value. For those variables which need a volume to be computed
-// consider the volume as sphere around point with radius of the outermost neighbor point.
+// Build a Kd tree, then find the N nearest neighbors 
+// (as specified by NeighborNumber) 
+// average over them to find smoothed variable value. For those 
+// variables which need a volume to be computed
+// consider the volume as sphere around point with radius of the
+// outermost neighbor point.
 // .SECTION See Also
 // vtkKdTree
 

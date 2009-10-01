@@ -30,11 +30,6 @@ public:
   vtkTypeRevisionMacro(vtkCenterOfMassFilter,vtkPointSetAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent);
 
-  // Description:
-  // Get/Set the number of neighbors to search
-  vtkSetMacro(NeighborNumber, int);
-  vtkGetMacro(NeighborNumber, int);
-
 protected:
   vtkCenterOfMassFilter();
   ~vtkCenterOfMassFilter();
@@ -46,16 +41,11 @@ protected:
   virtual int RequestData(vtkInformation*,
                           vtkInformationVector**,
                           vtkInformationVector*);
-  int NeighborNumber;
 
 private:
   vtkCenterOfMassFilter(const vtkCenterOfMassFilter&);  // Not implemented.
   void operator=(const vtkCenterOfMassFilter&);  // Not implemented.
-	// Description:
-	// calculates the density by taking 4/3 pi r^3 to be the volume
-	// where r=dist(pointOne,pointTwo), and diving the smoothed mass
-	// which is the average mass in that volume by the volume
-	float CalculateDensity(double pointOne[3],double pointTwo[3], float& smoothedMass);
+	double* CalculateWeightedMass(double& mass,double* point);
 };
 
 #endif

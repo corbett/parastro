@@ -189,6 +189,5 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 		}
 	// Finally, some memory management
   output->Squeeze();
-  vtkDebugMacro("4. Smoothing calculation sucessful, deleting Kd tree.");
   return 1;
 }

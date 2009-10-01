@@ -78,8 +78,8 @@ TARGET_LINK_LIBRARIES(AstroVizPlugin /usr/lib/libtipsy.a)
 # just a sample of the architecture for a filter plugin
 ####
 ADD_PARAVIEW_PLUGIN(AstroVizFilters "1.0"
-  SERVER_MANAGER_XML NSmoothFilterSM.xml  #<-- server manager xml
-  SERVER_MANAGER_SOURCES vtkNSmoothFilter.cxx #<-- source files for the new classes
+  SERVER_MANAGER_XML NSmoothFilterSM.xml  CenterOfMassFilter.xml#<-- server manager xml
+  SERVER_MANAGER_SOURCES vtkNSmoothFilter.cxx vtkCenterOfMassFilter.cxx #<-- source files for the new classes
 	GUI_RESOURCE_FILES AstroVizFilterMenu.xml #<-- adds a new menu of filters
 )
 TARGET_LINK_LIBRARIES(AstroVizFilters AstroVizHelpers)
