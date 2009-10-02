@@ -59,7 +59,7 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
   // Get input and output data.
   vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
   vtkPolyData* output = vtkPolyData::GetData(outputVector);
-	double totalMass,totalWeightedMass[3];
+	double totalLogMass,totalLogWeightedMass[3];
   vtkDebugMacro("2. Calculating the quantities \
 									we are interested in.");
 	for(int nextPointId = 0;\
@@ -78,8 +78,8 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 		// updating the mass and the weighted mass
 		for(int i = 0; i < 3; ++i)
 		{
-			totalMass+=mass[0];
-			totalWeightedMass[i]+=weightedMass[i];
+			totalLogMass+=mass[0];
+			totalLogWeightedMass[i]+=weightedMass[i];
 		}
 		// Finally, some memory management
 		delete [] weightedMass;
@@ -89,11 +89,15 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 	// calculating the result
 	// our final data is in float, as Tipsy's data is stored in float
 	float centerOfMass[3];
-	if(totalMass!=0)
+	if(totalLogMass!=0)
 		{
 		for(int i = 0; i < 3; ++i)
 			{
-			centerOfMass[i]=static_cast<float>(totalWeightedMass[i]/totalMass);
+			// taking the exp to reverse the log
+			// casting to float to be the same precision as other Tipsy
+			// variables.	
+			centerOfMass[i]=\
+				static_cast<float>(exp(totalLogWeightedMass[i]/totalLogMass));
 			vtkDebugMacro("center of mass is " << centerOfMass[i]);
 			}
 		}
