@@ -40,7 +40,7 @@ int vtkCenterOfMassFilter::FillInputPortInformation(int, vtkInformation* info)
   return 1;
 }
 
-double* vtkCenterOfMassFilter::CalculateWeightedMass(double& mass,\
+float* vtkCenterOfMassFilter::CalculateWeightedMass(double& mass,\
 																double* point)
 {
 	double* weightedMass = new double[3];
