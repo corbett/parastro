@@ -2,6 +2,7 @@
 #include "vtkPointData.h"
 #include "vtkCellArray.h"
 #include "vtkFloatArray.h"
+#include "vtkDoubleArray.h"
 #include "vtkSmartPointer.h"
 //----------------------------------------------------------------------------
 void AllocateDataArray(vtkPointSet* output, const char* arrayName,\
@@ -9,6 +10,17 @@ void AllocateDataArray(vtkPointSet* output, const char* arrayName,\
 {
 	vtkSmartPointer<vtkFloatArray> dataArray=\
 		vtkSmartPointer<vtkFloatArray>::New();
+  	dataArray->SetNumberOfComponents(numComponents);
+  	dataArray->SetName(arrayName);
+		dataArray->SetNumberOfTuples(numTuples);
+  output->GetPointData()->AddArray(dataArray);
+}
+
+void AllocateDoubleDataArray(vtkPointSet* output, const char* arrayName,\
+ 			int numComponents, int numTuples)
+{
+	vtkSmartPointer<vtkDoubleArray> dataArray=\
+		vtkSmartPointer<vtkDoubleArray>::New();
   	dataArray->SetNumberOfComponents(numComponents);
   	dataArray->SetName(arrayName);
 		dataArray->SetNumberOfTuples(numTuples);
@@ -32,13 +44,13 @@ double* GetPoint(vtkPointSet* output,vtkIdType id)
 
 //----------------------------------------------------------------------------
 void SetDataValue(vtkPointSet* output, const char* arrayName,\
-			vtkIdType id,float* data)
+			vtkIdType id,float data[])
 {
 	output->GetPointData()->GetArray(arrayName)->SetTuple(id,data);
 }
 //----------------------------------------------------------------------------
 void SetDataValue(vtkPointSet* output, const char* arrayName,\
-			vtkIdType id,double* data)
+			vtkIdType id,double data[])
 {
 	output->GetPointData()->GetArray(arrayName)->SetTuple(id,data);
 }
