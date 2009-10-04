@@ -61,7 +61,7 @@ private:
 	// calculates the density by taking 4/3 pi r^3 to be the volume
 	// where r=dist(pointOne,pointTwo), and diving the smoothed mass
 	// which is the average mass in that volume by the volume
-	float CalculateDensity(double pointOne[3],double pointTwo[3], float& smoothedMass);
+	double CalculateDensity(double pointOne[],double pointTwo[], float smoothedMass);
 };
 
 #endif

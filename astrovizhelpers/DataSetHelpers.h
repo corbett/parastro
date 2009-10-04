@@ -12,17 +12,17 @@
 // Description:
 // sets the point vertices in the output vector, assigning the point 
 // a unique id and places one point per cell
-vtkIdType SetPointValue(vtkPolyData* output,float pos[3]);
+vtkIdType SetPointValue(vtkPolyData* output,float pos[]);
 // Description:
 // sets the data value in the output vector in array arrayName at 
 // position id to data.
 void SetDataValue(vtkPointSet* output, const char* arrayName,\
-			vtkIdType& id,float* data);
+			vtkIdType id,float* data);
 // Description:
 // points the double* data to the value in the output vector in array arrayName at position id
 // would like to be float, but the version of vtk I am working with does not support 
 double* GetDataValue(vtkPointSet* output, const char* arrayName,\
- 					vtkIdType& id);
+ 					vtkIdType id);
 // Description:
 // create a vtkDataArray with the  name arrayName, number of components 
 // numComponents and number of tuples numTuples of type T
@@ -35,6 +35,10 @@ void AllocateDataArray(vtkPointSet* output, const char* arrayName,\
 // Description:
 // returns a pointer to the point's coordinates in output which corresponds 
 // to this id
-double* GetPoint(vtkPointSet* output,vtkIdType& id);
+double* GetPoint(vtkPointSet* output,vtkIdType id);
+// Description:
+// returns a pointer to the point's coordinates in output which corresponds 
+// to this id
+void SetDataValue(vtkPointSet* output, const char* arrayName,vtkIdType id,double* data);
 
 

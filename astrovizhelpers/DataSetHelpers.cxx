@@ -15,7 +15,7 @@ void AllocateDataArray(vtkPointSet* output, const char* arrayName,\
   output->GetPointData()->AddArray(dataArray);
 }
 //----------------------------------------------------------------------------
-vtkIdType SetPointValue(vtkPolyData* output,float pos[3])
+vtkIdType SetPointValue(vtkPolyData* output,float pos[])
 {
 	vtkIdType id=output->GetPoints()->InsertNextPoint(pos);
 	output->GetVerts()->InsertNextCell(1, &id);
@@ -23,7 +23,7 @@ vtkIdType SetPointValue(vtkPolyData* output,float pos[3])
 }
 
 //----------------------------------------------------------------------------
-double* GetPoint(vtkPointSet* output,vtkIdType& id)
+double* GetPoint(vtkPointSet* output,vtkIdType id)
 {
 	double* nextPoint=new double[3]; 
 	output->GetPoints()->GetPoint(id,nextPoint);
@@ -32,13 +32,19 @@ double* GetPoint(vtkPointSet* output,vtkIdType& id)
 
 //----------------------------------------------------------------------------
 void SetDataValue(vtkPointSet* output, const char* arrayName,\
-			vtkIdType& id,float* data)
+			vtkIdType id,float* data)
 {
 	output->GetPointData()->GetArray(arrayName)->SetTuple(id,data);
 }
-
+//----------------------------------------------------------------------------
+void SetDataValue(vtkPointSet* output, const char* arrayName,\
+			vtkIdType id,double* data)
+{
+	output->GetPointData()->GetArray(arrayName)->SetTuple(id,data);
+}
+//----------------------------------------------------------------------------
 double* GetDataValue(vtkPointSet* output, const char* arrayName,\
- 					vtkIdType& id)
+ 					vtkIdType id)
 {
 	double* data=new double[3];
 	output->GetPointData()->GetArray(arrayName)->GetTuple(id,data);

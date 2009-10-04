@@ -51,20 +51,19 @@ int vtkNSmoothFilter::FillInputPortInformation(int, vtkInformation* info)
 }
 
 //----------------------------------------------------------------------------
-float vtkNSmoothFilter::CalculateDensity(double pointOne[3],\
-													double pointTwo[3], float& smoothedMass)
+double vtkNSmoothFilter::CalculateDensity(double pointOne[],\
+													double pointTwo[], float smoothedMass)
 {
 	// now calculating the radial distance from the last point to the
   // center point to which it is a neighbor
-	float radialDistance=static_cast<float>(sqrt( \
-					pow(pointOne[0]-pointTwo[0],2) \
+	double radialDistance=sqrt(pow(pointOne[0]-pointTwo[0],2) \
 					+pow(pointOne[1]-pointTwo[1],2) \
-					+pow(pointOne[2]-pointTwo[2],2)));
+					+pow(pointOne[2]-pointTwo[2],2));
 	// the volume is a sphere around nextPoint with radius of the 
 	// last in the list of the closestNpoints
 	// so 4/3 pi r^3 where 
-	float neighborhoodVolume=4./3 * M_PI * pow(radialDistance,3);
-	float smoothedDensity;
+	double neighborhoodVolume=4./3 * M_PI * pow(radialDistance,3);
+	double smoothedDensity;
 	if(neighborhoodVolume!=0)
 		{
 		smoothedDensity=smoothedMass/neighborhoodVolume;
@@ -166,8 +165,8 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 			vtkIdType lastNeighborPointGlobalId = \
 									closestNPoints->GetId(closestNPoints->GetNumberOfIds()-1);
 			double* lastNeighborPoint=GetPoint(output,lastNeighborPointGlobalId);		
-			float smoothedDensity= \
-							CalculateDensity(nextPoint,lastNeighborPoint,smoothedMass);
+			double smoothedDensity=\
+			 				CalculateDensity(nextPoint,lastNeighborPoint,smoothedMass);
 			vtkDebugMacro("smoothed density is " << smoothedDensity); 
 			//storing the smooth density
 			SetDataValue(output,"smoothed density",nextPointId,&smoothedDensity);
@@ -179,8 +178,8 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 			// This point has no neighbors, so smoothed mass is identicle to 
 			// this point's mass, and smoothed density is meaningless
 			double* mass=GetDataValue(output,"mass",nextPointId);
-			float floatmass = static_cast<float>(mass[0]);
-			SetDataValue(output,"smoothed mass",nextPointId,&floatmass);
+			//data value takes in float
+			SetDataValue(output,"smoothed mass",nextPointId,mass);
 			// Finally, some memory management
 			delete [] mass;
 			}
