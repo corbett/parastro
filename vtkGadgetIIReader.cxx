@@ -48,7 +48,7 @@ struct particle_data
   float  Rho, U, Temp, Ne;
 	} *P;
 int *Id;
-double  Time, Redshift;
+double  Time, Redshift; 
 //----------------------------------------------------------------------------
 vtkGadgetIIReader::vtkGadgetIIReader()
 {

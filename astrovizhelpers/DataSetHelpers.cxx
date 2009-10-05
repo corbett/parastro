@@ -26,6 +26,7 @@ void AllocateDoubleDataArray(vtkPointSet* output, const char* arrayName,\
 		dataArray->SetNumberOfTuples(numTuples);
   output->GetPointData()->AddArray(dataArray);
 }
+
 //----------------------------------------------------------------------------
 vtkIdType SetPointValue(vtkPolyData* output,float pos[])
 {

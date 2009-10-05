@@ -16,9 +16,9 @@ ADD_PARAVIEW_ACTION_GROUP(IFACES_MENU IFACE_SRCS_MENU
                         GROUP_NAME "MenuBar/AstroViz")
 #define the client-side portion of the AstroViz plugin
 ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.0"
-	SERVER_MANAGER_SOURCES vtkTipsyReader.cxx vtkGadgetIIReader.cxx #<-- for server
-	SERVER_MANAGER_XML  TipsyReaderSM.xml GadgetIIReaderSM.xml #<-- for server
-	GUI_RESOURCES TipsyReader.qrc GadgetIIReader.qrc #<-- for Tipsy Binary reader
+	SERVER_MANAGER_SOURCES vtkTipsyReader.cxx #<-- for server
+	SERVER_MANAGER_XML  TipsyReaderSM.xml #<-- for server
+	GUI_RESOURCES TipsyReader.qrc  #<-- for Tipsy Binary reader
 	GUI_INTERFACES ${IFACES_MENU} #<-- for AstroViz menu
 	SOURCES ${MOC_SRCS_MENU} ${IFACE_SRCS_MENU}  #<-- for AstroViz
 	SourceToolbarActions.cxx) #<-- for menu
@@ -78,8 +78,8 @@ TARGET_LINK_LIBRARIES(AstroVizPlugin /usr/lib/libtipsy.a)
 # just a sample of the architecture for a filter plugin
 ####
 ADD_PARAVIEW_PLUGIN(AstroVizFilters "1.0"
-  SERVER_MANAGER_XML NSmoothFilterSM.xml  CenterOfMassFilter.xml#<-- server manager xml
-  SERVER_MANAGER_SOURCES vtkNSmoothFilter.cxx vtkCenterOfMassFilter.cxx #<-- source files for the new classes
+  SERVER_MANAGER_XML NSmoothFilterSM.xml  CenterOfMassFilter.xml MassFunctionFilter.xml#<-- server manager xml
+  SERVER_MANAGER_SOURCES vtkNSmoothFilter.cxx vtkCenterOfMassFilter.cxx vtkMassFunctionFilter.cxx #<-- source files for the new classes
 	GUI_RESOURCE_FILES AstroVizFilterMenu.xml #<-- adds a new menu of filters
 )
 TARGET_LINK_LIBRARIES(AstroVizFilters AstroVizHelpers)

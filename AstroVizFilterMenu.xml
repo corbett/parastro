@@ -4,5 +4,6 @@
      <Filter name="Neighbor Smooth" />
      <Filter name="ExtractHistogram" />
      <Filter name="Center Of Mass" />
+	 <Filter name="Mass Function Filter" />
    </Category>
  </ParaViewFilters>
