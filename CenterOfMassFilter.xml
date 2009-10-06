@@ -21,12 +21,6 @@
              <DataType value="vtkDataSet"/>
            </DataTypeDomain>
       </InputProperty>
-      <Hints>
-      <!-- View can be used to specify the preferred view for the proxy -->
-      <View type="XYPlotView" />
-      <!-- Temporary hint to allow the output of this filter to be plotted -->
-      <Plotable />
-    </Hints>
    </SourceProxy>
  </ProxyGroup>
 </ServerManagerConfiguration>
