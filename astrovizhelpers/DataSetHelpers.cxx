@@ -3,6 +3,7 @@
 #include "vtkCellArray.h"
 #include "vtkFloatArray.h"
 #include "vtkDoubleArray.h"
+#include "vtkIntArray.h"
 #include "vtkSmartPointer.h"
 //----------------------------------------------------------------------------
 void AllocateDataArray(vtkPointSet* output, const char* arrayName,\
@@ -15,7 +16,7 @@ void AllocateDataArray(vtkPointSet* output, const char* arrayName,\
 		dataArray->SetNumberOfTuples(numTuples);
   output->GetPointData()->AddArray(dataArray);
 }
-
+//----------------------------------------------------------------------------
 void AllocateDoubleDataArray(vtkPointSet* output, const char* arrayName,\
  			int numComponents, int numTuples)
 {

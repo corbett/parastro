@@ -54,10 +54,9 @@ int vtkMassFunctionFilter::RequestData(vtkInformation*,
   // Get input and output data.
   vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
   vtkTable* output = this->GetOutput();
-	vtkSmartPointer<vtkDoubleArray> XArray=vtkSmartPointer<vtkDoubleArray>::New();
-  	XArray->SetNumberOfComponents(1);
-		XArray->SetNumberOfTuples(input->GetPoints()->GetNumberOfPoints());
-		XArray->SetName("ids");
+
+	vtkSmartPointer<vtkFloatArray> XArray=vtkSmartPointer<vtkFloatArray>::New();
+		XArray->DeepCopy(input->GetPointData()->GetArray("mass"));
 	vtkSmartPointer<vtkIntArray> dataValues=vtkSmartPointer<vtkIntArray>::New();
   	dataValues->SetNumberOfComponents(1);
 		dataValues->SetNumberOfTuples(input->GetPoints()->GetNumberOfPoints());	
@@ -66,7 +65,7 @@ int vtkMassFunctionFilter::RequestData(vtkInformation*,
 	 		nextPointId < input->GetPoints()->GetNumberOfPoints();\
 	 		++nextPointId)
 		{
-		XArray->InsertValue(nextPointId,nextPointId);
+//		XArray->InsertValue(nextPointId,nextPointId);
 		dataValues->InsertValue(nextPointId,pow(nextPointId,2));
 		}
 	// Updating the output

@@ -38,10 +38,9 @@ void AllocateDataArray(vtkPointSet* output, const char* arrayName,\
 // numComponents and number of tuples numTuples of type T
 // e.g. AllocateDoubleDataArray("density",1,100) creates a array of 100 
 // scalar double densities
-// previously made this a template class, but that doesn't play nice
-// with wrappers
 void AllocateDoubleDataArray(vtkPointSet* output, const char* arrayName,\
 	int numComponents, int numTuples);
+
 // Description:
 // returns a pointer to the point's coordinates in output which corresponds 
 // to this id
