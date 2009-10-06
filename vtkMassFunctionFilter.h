@@ -18,30 +18,37 @@
 #ifndef __vtkMassFunctionFilter_h
 #define __vtkMassFunctionFilter_h
 
-#include "vtkRectilinearGridAlgorithm.h"
+#include "vtkTableAlgorithm.h"
 
-class VTK_GRAPHICS_EXPORT vtkMassFunctionFilter : public vtkRectilinearGridAlgorithm
+class VTK_EXPORT vtkMassFunctionFilter : public vtkTableAlgorithm
 {
 public:
-  static vtkMassFunctionFilter *New();
-  vtkTypeRevisionMacro(vtkMassFunctionFilter,vtkRectilinearGridAlgorithm);
+  static vtkMassFunctionFilter* New();
+  vtkTypeRevisionMacro(vtkMassFunctionFilter, vtkTableAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent);
 
+//BTX
 protected:
   vtkMassFunctionFilter();
   ~vtkMassFunctionFilter();
 
-  // Override to specify support for any vtkDataSet input type.
   virtual int FillInputPortInformation(int port, vtkInformation* info);
 
-  // Main implementation.
-  virtual int RequestData(vtkInformation*,
-                          vtkInformationVector**,
+  // Description:
+  // This is called within ProcessRequest when a request asks the algorithm
+  // to do its work. This is the method you should override to do whatever the
+  // algorithm is designed to do. This happens during the fourth pass in the
+  // pipeline execution process.
+  virtual int RequestData(vtkInformation*, 
+                          vtkInformationVector**, 
                           vtkInformationVector*);
 
 private:
-  vtkMassFunctionFilter(const vtkMassFunctionFilter&);  // Not implemented.
-  void operator=(const vtkMassFunctionFilter&);  // Not implemented.
+  vtkMassFunctionFilter(const vtkMassFunctionFilter&); // Not implemented
+  void operator=(const vtkMassFunctionFilter&); // Not implemented
+//ETX
 };
 
 #endif
+
+

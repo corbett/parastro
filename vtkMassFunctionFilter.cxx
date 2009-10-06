@@ -12,6 +12,7 @@
 #include "vtkIntArray.h"
 #include "astrovizhelpers/DataSetHelpers.h"
 #include "vtkCellData.h"
+#include "vtkTable.h"
 #include <cmath>
 
 vtkCxxRevisionMacro(vtkMassFunctionFilter, "$Revision: 1.72 $");
@@ -52,28 +53,11 @@ int vtkMassFunctionFilter::RequestData(vtkInformation*,
 {
   // Get input and output data.
   vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
-  vtkRectilinearGrid* output = vtkRectilinearGrid::GetData(outputVector);
-	// Setting the dimensions of this to be equal to our number of points,
-	// in X, and equal to 1 in the Y and Z directions,
-	// as these are dummy arrays.
-		output->SetDimensions(input->GetPoints()->GetNumberOfPoints(),1,1);
-		output->SetWholeExtent(0,input->GetPoints()->GetNumberOfPoints(),\
-													 0,0,\
-													 0,0);
-	// Allocate the arrays for the X,Y, and Z coordinates, and inserts a 
-	// single value for the dummy arrays, as well as allocate the array  
-	// for the scalar data
+  vtkTable* output = this->GetOutput();
 	vtkSmartPointer<vtkDoubleArray> XArray=vtkSmartPointer<vtkDoubleArray>::New();
   	XArray->SetNumberOfComponents(1);
 		XArray->SetNumberOfTuples(input->GetPoints()->GetNumberOfPoints());
-	vtkSmartPointer<vtkDoubleArray> DummyYArray=vtkSmartPointer<vtkDoubleArray>::New();
-  	DummyYArray->SetNumberOfComponents(1);
-		DummyYArray->SetNumberOfTuples(1);
-		DummyYArray->InsertValue(0,0.0);
-	vtkSmartPointer<vtkDoubleArray> DummyZArray=vtkSmartPointer<vtkDoubleArray>::New();
-  	DummyZArray->SetNumberOfComponents(1);	
-		DummyZArray->SetNumberOfTuples(1);
-		DummyZArray->InsertValue(0,0.0);
+		XArray->SetName("ids");
 	vtkSmartPointer<vtkIntArray> dataValues=vtkSmartPointer<vtkIntArray>::New();
   	dataValues->SetNumberOfComponents(1);
 		dataValues->SetNumberOfTuples(input->GetPoints()->GetNumberOfPoints());	
@@ -86,9 +70,7 @@ int vtkMassFunctionFilter::RequestData(vtkInformation*,
 		dataValues->InsertValue(nextPointId,pow(nextPointId,2));
 		}
 	// Updating the output
-	output->SetXCoordinates(XArray);
-	output->SetYCoordinates(DummyYArray);
-	output->SetZCoordinates(DummyZArray);
-	output->GetPointData()->SetScalars(dataValues);
+	output->AddColumn(XArray);
+	output->AddColumn(dataValues);
 	return 1;
 }
