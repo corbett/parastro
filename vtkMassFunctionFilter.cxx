@@ -13,6 +13,7 @@
 #include "astrovizhelpers/DataSetHelpers.h"
 #include "vtkCellData.h"
 #include "vtkTable.h"
+#include "vtkSortDataArray.h"
 #include <cmath>
 
 vtkCxxRevisionMacro(vtkMassFunctionFilter, "$Revision: 1.72 $");
@@ -58,15 +59,15 @@ int vtkMassFunctionFilter::RequestData(vtkInformation*,
 	vtkSmartPointer<vtkFloatArray> XArray=vtkSmartPointer<vtkFloatArray>::New();
 		XArray->DeepCopy(input->GetPointData()->GetArray("mass"));
 		XArray->SetName("mass");
+		vtkSortDataArray::Sort(XArray);
 	vtkSmartPointer<vtkIntArray> dataValues=vtkSmartPointer<vtkIntArray>::New();
   	dataValues->SetNumberOfComponents(1);
 		dataValues->SetNumberOfTuples(input->GetPoints()->GetNumberOfPoints());	
-		dataValues->SetName("data values");		
+		dataValues->SetName("N(particles>=mass)");		
 	for(int nextPointId = 0;\
 	 		nextPointId < input->GetPoints()->GetNumberOfPoints();\
 	 		++nextPointId)
 		{
-//		XArray->InsertValue(nextPointId,nextPointId);
 		dataValues->InsertValue(nextPointId,pow(nextPointId,2));
 		}
 	// Updating the output
