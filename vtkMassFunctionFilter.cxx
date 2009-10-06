@@ -57,6 +57,7 @@ int vtkMassFunctionFilter::RequestData(vtkInformation*,
 
 	vtkSmartPointer<vtkFloatArray> XArray=vtkSmartPointer<vtkFloatArray>::New();
 		XArray->DeepCopy(input->GetPointData()->GetArray("mass"));
+		XArray->SetName("mass");
 	vtkSmartPointer<vtkIntArray> dataValues=vtkSmartPointer<vtkIntArray>::New();
   	dataValues->SetNumberOfComponents(1);
 		dataValues->SetNumberOfTuples(input->GetPoints()->GetNumberOfPoints());	
