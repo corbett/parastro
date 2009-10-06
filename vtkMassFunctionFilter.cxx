@@ -14,7 +14,6 @@
 #include "vtkCellData.h"
 #include "vtkTable.h"
 #include "vtkSortDataArray.h"
-#include <cmath>
 
 vtkCxxRevisionMacro(vtkMassFunctionFilter, "$Revision: 1.72 $");
 vtkStandardNewMacro(vtkMassFunctionFilter);
@@ -68,7 +67,7 @@ int vtkMassFunctionFilter::RequestData(vtkInformation*,
 	 		nextPointId < input->GetPoints()->GetNumberOfPoints();\
 	 		++nextPointId)
 		{
-		dataValues->InsertValue(nextPointId,pow(nextPointId,2));
+		dataValues->InsertValue(nextPointId,nextPointId);
 		}
 	// Updating the output
 	output->AddColumn(XArray);
