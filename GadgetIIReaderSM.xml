@@ -1,5 +1,5 @@
 <ServerManagerConfiguration>
-	<ProxyGroup name="GadgetIIReader">
+	<ProxyGroup name="sources">
 		<SourceProxy name="GadgetIIReader" class="vtkGadgetIIReader">
 			<StringVectorProperty
 				name="FileName"

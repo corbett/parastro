@@ -16,9 +16,9 @@ ADD_PARAVIEW_ACTION_GROUP(IFACES_MENU IFACE_SRCS_MENU
                         GROUP_NAME "MenuBar/AstroViz")
 #define the client-side portion of the AstroViz plugin
 ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.0"
-	SERVER_MANAGER_SOURCES vtkTipsyReader.cxx #<-- for server
-	SERVER_MANAGER_XML  TipsyReaderSM.xml #<-- for server
-	GUI_RESOURCES TipsyReader.qrc  #<-- for Tipsy Binary reader
+	SERVER_MANAGER_SOURCES vtkTipsyReader.cxx vtkGadgetIIReader.cxx #<-- for server
+	SERVER_MANAGER_XML  TipsyReaderSM.xml GadgetIIReaderSM.xml #<-- for server
+	GUI_RESOURCES TipsyReader.qrc GadgetIIReader.qrc  #<-- for Tipsy Binary reader
 	GUI_INTERFACES ${IFACES_MENU} #<-- for AstroViz menu
 	SOURCES ${MOC_SRCS_MENU} ${IFACE_SRCS_MENU}  #<-- for AstroViz
 	SourceToolbarActions.cxx) #<-- for menu

@@ -89,7 +89,6 @@ int vtkGadgetIIReader::ReadSnapshot(FILE* gadgetInFile,\
   fread(&dummy, sizeof(dummy), 1, gadgetInFile);
   fread(&header1, sizeof(header1), 1, gadgetInFile);
   fread(&dummy, sizeof(dummy), 1, gadgetInFile);
-
 	for(k=0, NumPart=0, ntot_withmasses=0; k<5; k++)
  		{
   	NumPart+= header1.npart[k];
@@ -103,8 +102,8 @@ int vtkGadgetIIReader::ReadSnapshot(FILE* gadgetInFile,\
 	    ntot_withmasses+= header1.npart[k];
 			}
 		}
-
   SKIP;
+
   for(k=0,pc_new=pc;k<6;k++)
 		{
 	  for(n=0;n<header1.npart[k];n++)
@@ -114,6 +113,8 @@ int vtkGadgetIIReader::ReadSnapshot(FILE* gadgetInFile,\
 	    }
 		}
   SKIP;
+//continue uncommenting there is a segfault someplace
+/*
 
   SKIP;
   for(k=0,pc_new=pc;k<6;k++)
@@ -201,6 +202,8 @@ int vtkGadgetIIReader::ReadSnapshot(FILE* gadgetInFile,\
 	}
   Time= header1.time;
   Redshift= header1.time;
+	*/
+}
 }
 
 
