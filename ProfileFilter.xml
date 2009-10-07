@@ -1,0 +1,33 @@
+<ServerManagerConfiguration>
+  <!-- This is the server manager configuration XML. It defines the interface to
+       a new filter. As a rule of thumb, try to locate the configuration for
+       a filter already in ParaView (in Servers/ServerManager/Resources/*.xml)
+       that matches your filter and then model your xml on it -->
+  <ProxyGroup name="filters">
+   <SourceProxy name="Profile Filter" class="vtkProfileFilter" label="Profile Filter">
+     <Documentation
+        long_help="Calculates various physical profiles as a func-
+		       tion of radius"
+        short_help="physical profile">
+     </Documentation>
+     <InputProperty
+        name="Input"
+        command="SetInputConnection">
+           <ProxyGroupDomain name="groups">
+             <Group name="sources"/>
+             <Group name="filters"/>
+           </ProxyGroupDomain>
+           <DataTypeDomain name="input_type">
+             <DataType value="vtkDataSet"/>
+           </DataTypeDomain>
+      </InputProperty>
+      <Hints>
+      <!-- View can be used to specify the preferred view for the proxy -->
+      <View type="XYPlotView" />
+      <!-- Temporary hint to allow the output of this filter to be plotted -->
+      <Plotable />
+      </Hints>
+   </SourceProxy>
+ </ProxyGroup>
+</ServerManagerConfiguration>
+
