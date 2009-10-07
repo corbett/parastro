@@ -19,15 +19,6 @@
 					If set, only particles specified in the marked file are read in.
 				</Documentation>
 			</StringVectorProperty>
-			<StringVectorProperty
-				name="AttributeFile "
-				command="SetAttributeFile"
-				number_of_elements="1">
-				<FileListDomain name="attribute files"/>
-				<Documentation>
-					If set, read in the desired attribute from the file specified.
-				</Documentation>
-			</StringVectorProperty>
 		</SourceProxy>
 	</ProxyGroup>
 </ServerManagerConfiguration>
