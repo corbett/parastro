@@ -55,11 +55,6 @@ private:
 	// reads in a particle (either gas, dark or star as appropriate) from the tipsy in file of this class
 	vtkIdType ReadParticle(ifTipsy& tipsyInFile,vtkPolyData* output);
 	// Description:
-	// reads in a particle (either gas, dark or star as appropriate) from 
-	// the tipsy in file of this class, also reads in files from an
-	// attribute array specified by the user
-	vtkIdType ReadParticle(ifstream& attributeInFile,ifTipsy& tipsyInfile,vtkPolyData* output);
-	// Description:
 	// reads variables common to all particles
 	vtkIdType ReadBaseParticle(vtkPolyData* output, TipsyBaseParticle& b);
 	// The BTX, ETX comments bracket the portion of the code which should not be

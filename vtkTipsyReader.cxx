@@ -161,26 +161,7 @@ void vtkTipsyReader::ReadMarkedParticles(\
 				break;
 				}
 			// reading in the particle
-			// if we have an additional attribute array read this
-			if(this->AttributeFileName)
-				{
-					ifstream attributeInFile(this->AttributeFileName);
-					if(!attributeInFile)
-				 		{
-				 		vtkErrorMacro("Error opening attribute file,\
-				 									reading file with out attributes: " 
-													<< this->AttributeFileName);
-						ReadParticle(tipsyInfile,output);
-				 		}
-					else
-					{
-					ReadParticle(attributeInFile,tipsyInfile,output);
-					}
-				}
-			else
-				{
-					ReadParticle(tipsyInfile,output);
-				}
+			ReadParticle(tipsyInfile,output);
 		}
 }
 
@@ -221,13 +202,7 @@ vtkIdType vtkTipsyReader::ReadParticle(ifTipsy& tipsyInfile,\
     }
   return id;
 }
-//----------------------------------------------------------------------------
-vtkIdType vtkTipsyReader::ReadParticle(ifstream& attributeInFile,\
-														ifTipsy& tipsyInfile,vtkPolyData* output)
-{
-	// overloaded, todo READ ATTRIBUTE PARTICLEFILE HERE
-	return this->ReadParticle(tipsyInfile,output);
-}
+
 
 //----------------------------------------------------------------------------
 vtkIdType vtkTipsyReader::ReadBaseParticle(vtkPolyData* output,\
