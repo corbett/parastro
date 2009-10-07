@@ -21,7 +21,6 @@ vtkStandardNewMacro(vtkProfileFilter);
 //----------------------------------------------------------------------------
 vtkProfileFilter::vtkProfileFilter()
 {
-	this->SetBinInfo();
 }
 
 //----------------------------------------------------------------------------
@@ -45,16 +44,34 @@ int vtkProfileFilter::FillInputPortInformation(int, vtkInformation* info)
 }
 
 //----------------------------------------------------------------------------
-void vtkProfileFilter::SetBinInfo()
+void vtkProfileFilter::GetBinInfo(vtkPointSet* input, double* binLowerBound,\
+												double* binUpperBound, double* binWidth)
 {
 	// TODO: implement
-	this->BinLowerBound=1;
-	this->BinUpperBound=10;
-	this->BinWidth=.33;
+	double bounds[6];
+	// calculating the bounds of this pointset
+	// later this will be the virial radius calculation
+	input->GetPoints()->ComputeBounds();
+	input->GetPoints()->GetBounds(bounds);
+	double xMax=bounds[1];
+	double yMax=bounds[3];
+	double zMax=bounds[5];
+	vtkErrorMacro("bounds info is "\
+								<< xMax << " " \
+								<< yMax << " "\
+								<< zMax);
+	// setting the upper bounds appropriately
+	double upperBounds[3]={xMax,yMax,zMax};
+	*binLowerBound=1;
+	*binUpperBound=log(ComputeRadialDistance(this->Center,upperBounds));
+	*binWidth=.33;
 }
 
 //----------------------------------------------------------------------------
-int vtkProfileFilter::GetBinNum(double point[])
+int vtkProfileFilter::GetBinNum(double point[],
+																double binLowerBound,\
+																double binUpperBound,\
+																double binWidth)
 {
 	//TODO: implement
 	return 0;
@@ -69,6 +86,12 @@ int vtkProfileFilter::RequestData(vtkInformation*,
   vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
   vtkTable* output = this->GetOutput();	
 	// Allocate data structures
+	double binLowerBound,binUpperBound,binWidth;
+	this->GetBinInfo(input,&binLowerBound,&binUpperBound,&binWidth);
+	vtkErrorMacro("bin info is "\
+								<< binLowerBound << " " \
+								<< binUpperBound << " "\
+								<< binWidth);
 	// TODO: dummy allocation
 	vtkSmartPointer<vtkFloatArray> XArray=vtkSmartPointer<vtkFloatArray>::New();
 		XArray->DeepCopy(input->GetPointData()->GetArray("mass"));
@@ -78,7 +101,8 @@ int vtkProfileFilter::RequestData(vtkInformation*,
 	 		++nextPointId)
 		{
 			double* nextPoint=GetPoint(input,nextPointId);
-			int binNum=this->GetBinNum(nextPoint);
+			int binNum=this->GetBinNum(nextPoint,\
+																 binLowerBound,binUpperBound,binWidth);
 			// Finally some memory management
 			delete [] nextPoint;
 		}

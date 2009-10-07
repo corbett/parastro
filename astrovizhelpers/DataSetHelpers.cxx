@@ -5,6 +5,7 @@
 #include "vtkDoubleArray.h"
 #include "vtkIntArray.h"
 #include "vtkSmartPointer.h"
+#include <cmath>
 //----------------------------------------------------------------------------
 void AllocateDataArray(vtkPointSet* output, const char* arrayName,\
  			int numComponents, int numTuples)
@@ -44,6 +45,7 @@ double* GetPoint(vtkPointSet* output,vtkIdType id)
 	return nextPoint;
 }
 
+
 //----------------------------------------------------------------------------
 void SetDataValue(vtkPointSet* output, const char* arrayName,\
 			vtkIdType id,float data[])
@@ -63,4 +65,11 @@ double* GetDataValue(vtkPointSet* output, const char* arrayName,\
 	double* data=new double[3];
 	output->GetPointData()->GetArray(arrayName)->GetTuple(id,data);
 	return data;
+}
+//----------------------------------------------------------------------------
+double ComputeRadialDistance(double pointOne[],double pointTwo[])
+{
+	return sqrt(pow(pointOne[0]-pointTwo[0],2) \
+					+pow(pointOne[1]-pointTwo[1],2) \
+					+pow(pointOne[2]-pointTwo[2],2));
 }

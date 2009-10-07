@@ -19,6 +19,7 @@
 #define __vtkProfileFilter_h
 
 #include "vtkTableAlgorithm.h"
+#include "vtkPointSet.h" // need for private function which takes this as arg
 
 class VTK_EXPORT vtkProfileFilter : public vtkTableAlgorithm
 {
@@ -69,13 +70,12 @@ private:
 	// Description:
 	// from the set properties at input, set the BinLowerBound,
 	// BinUpperBound, and BinWidth
-	void SetBinInfo();
+	void GetBinInfo(vtkPointSet* input, double* binLowerBound, double* binUpperBound, double* binWidth);
 	// Description:
 	// From the properties BinLowerBound, BinUpperBound, and BinWidth
-	// set in the constructor, calculate the bin number this point belongs
+	// calculate the bin number this point belongs
 	// to
-	int GetBinNum(double point[]);
-	
+	int GetBinNum(double point[],double binLowerBound,double binUpperBound,double binWidth);
 //ETX
 };
 
