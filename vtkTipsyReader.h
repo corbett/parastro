@@ -27,12 +27,17 @@ public:
   // Set/Get the name of the file from which to read the marked points.
   vtkSetStringMacro(MarkFileName);
   vtkGetStringMacro(MarkFileName);
+  // Description:
+  // Set/Get the name of the file from which to get additional attributes
+  vtkSetStringMacro(AttributeFileName);
+  vtkGetStringMacro(AttributeFileName);
 
 protected:
   vtkTipsyReader();
   ~vtkTipsyReader();
   char* FileName;
 	char* MarkFileName;
+	char* AttributeFileName;
   int RequestData(vtkInformation*,
                   vtkInformationVector**,
                   vtkInformationVector*);
@@ -49,6 +54,11 @@ private:
 	// Description:
 	// reads in a particle (either gas, dark or star as appropriate) from the tipsy in file of this class
 	vtkIdType ReadParticle(ifTipsy& tipsyInFile,vtkPolyData* output);
+	// Description:
+	// reads in a particle (either gas, dark or star as appropriate) from 
+	// the tipsy in file of this class, also reads in files from an
+	// attribute array specified by the user
+	vtkIdType ReadParticle(ifstream& attributeInFile,ifTipsy& tipsyInfile,vtkPolyData* output);
 	// Description:
 	// reads variables common to all particles
 	vtkIdType ReadBaseParticle(vtkPolyData* output, TipsyBaseParticle& b);
