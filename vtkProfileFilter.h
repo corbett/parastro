@@ -26,12 +26,23 @@ public:
   static vtkProfileFilter* New();
   vtkTypeRevisionMacro(vtkProfileFilter, vtkTableAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent);
+  // Description:
+  // Get/Set the density parameter
+  vtkSetMacro(Delta, double);
+  vtkGetMacro(Delta, double);
+  // Description:
+  // Get/Set the number of bins
+  vtkSetMacro(NumberBins, int);
+  vtkGetMacro(NumberBins, int);
+  // Description:
+  // Get/Set the number of bins
+  vtkSetVector3Macro(Center,double);
+  vtkGetVectorMacro(Center,double,3);
 
 //BTX
 protected:
   vtkProfileFilter();
   ~vtkProfileFilter();
-
   virtual int FillInputPortInformation(int port, vtkInformation* info);
 
   // Description:
@@ -42,6 +53,9 @@ protected:
   virtual int RequestData(vtkInformation*, 
                           vtkInformationVector**, 
                           vtkInformationVector*);
+	double Delta;
+	int NumberBins;
+	double Center[3];
 
 private:
   vtkProfileFilter(const vtkProfileFilter&); // Not implemented

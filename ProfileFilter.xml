@@ -21,6 +21,33 @@
              <DataType value="vtkDataSet"/>
            </DataTypeDomain>
       </InputProperty>
+	  <DoubleVectorProperty
+			name="Delta"
+			command="SetDelta"
+			number_of_elements="1"
+			default_values="1">
+			<Documentation>
+			Set the density parameter
+			</Documentation>
+	  </DoubleVectorProperty>
+	  <IntVectorProperty
+			name="NumberBins"
+			command="SetNumberBins"
+			number_of_elements="1"
+			default_values="30">
+			<Documentation>
+				Sets the number of bins to use.
+			</Documentation>
+	  </IntVectorProperty>
+	  <DoubleVectorProperty
+			name="Center"
+			command="SetCenter"
+			number_of_elements="3"
+			default_values="0 0 0">
+			<Documentation>
+				Set the center from which to search.
+			</Documentation>
+	  </DoubleVectorProperty>
       <Hints>
       <!-- View can be used to specify the preferred view for the proxy -->
       <!-- <View type="XYPlotView" /> -->
