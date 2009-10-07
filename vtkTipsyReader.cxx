@@ -25,7 +25,7 @@ vtkTipsyReader::vtkTipsyReader()
 {
   this->FileName = 0;
   this->MarkFileName = 0; // this file is optional
-	this->AttributeFileName = 0; // this file is also optional
+	this->AttributeFile = 0; // this file is also optional
   this->SetNumberOfInputPorts(0); 
 }
 
@@ -34,7 +34,7 @@ vtkTipsyReader::~vtkTipsyReader()
 {
   this->SetFileName(0);
   this->SetMarkFileName(0);
-  this->SetAttributeFileName(0);
+  this->SetAttributeFile(0);
 }
 
 //----------------------------------------------------------------------------

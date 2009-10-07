@@ -20,8 +20,8 @@
 				</Documentation>
 			</StringVectorProperty>
 			<StringVectorProperty
-				name="AttributeFileName"
-				command="SetAttributeFileName"
+				name="AttributeFile "
+				command="SetAttributeFile"
 				number_of_elements="1">
 				<FileListDomain name="files"/>
 				<Documentation>

@@ -29,15 +29,15 @@ public:
   vtkGetStringMacro(MarkFileName);
   // Description:
   // Set/Get the name of the file from which to get additional attributes
-  vtkSetStringMacro(AttributeFileName);
-  vtkGetStringMacro(AttributeFileName);
+  vtkSetStringMacro(AttributeFile);
+  vtkGetStringMacro(AttributeFile);
 
 protected:
   vtkTipsyReader();
   ~vtkTipsyReader();
   char* FileName;
 	char* MarkFileName;
-	char* AttributeFileName;
+	char* AttributeFile;
   int RequestData(vtkInformation*,
                   vtkInformationVector**,
                   vtkInformationVector*);
