@@ -21,6 +21,7 @@ vtkStandardNewMacro(vtkProfileFilter);
 //----------------------------------------------------------------------------
 vtkProfileFilter::vtkProfileFilter()
 {
+	this->SetBinInfo();
 }
 
 //----------------------------------------------------------------------------
@@ -43,8 +44,21 @@ int vtkProfileFilter::FillInputPortInformation(int, vtkInformation* info)
   return 1;
 }
 
+//----------------------------------------------------------------------------
+void vtkProfileFilter::SetBinInfo()
+{
+	// TODO: implement
+	this->BinLowerBound=1;
+	this->BinUpperBound=10;
+	this->BinWidth=.33;
+}
 
-
+//----------------------------------------------------------------------------
+int vtkProfileFilter::GetBinNum(double point[])
+{
+	//TODO: implement
+	return 0;
+}
 
 //----------------------------------------------------------------------------
 int vtkProfileFilter::RequestData(vtkInformation*,
@@ -53,24 +67,23 @@ int vtkProfileFilter::RequestData(vtkInformation*,
 {
   // Get input and output data.
   vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
-  vtkTable* output = this->GetOutput();
-
+  vtkTable* output = this->GetOutput();	
+	// Allocate data structures
+	// TODO: dummy allocation
 	vtkSmartPointer<vtkFloatArray> XArray=vtkSmartPointer<vtkFloatArray>::New();
 		XArray->DeepCopy(input->GetPointData()->GetArray("mass"));
 		XArray->SetName("mass");
-		vtkSortDataArray::Sort(XArray);
-	vtkSmartPointer<vtkIntArray> dataValues=vtkSmartPointer<vtkIntArray>::New();
-  	dataValues->SetNumberOfComponents(1);
-		dataValues->SetNumberOfTuples(input->GetPoints()->GetNumberOfPoints());	
-		dataValues->SetName("N(particles>=mass)");		
 	for(int nextPointId = 0;\
 	 		nextPointId < input->GetPoints()->GetNumberOfPoints();\
 	 		++nextPointId)
 		{
-		dataValues->InsertValue(nextPointId,nextPointId);
+			double* nextPoint=GetPoint(input,nextPointId);
+			int binNum=this->GetBinNum(nextPoint);
+			// Finally some memory management
+			delete [] nextPoint;
 		}
 	// Updating the output
+	// TODO: dummy output
 	output->AddColumn(XArray);
-	output->AddColumn(dataValues);
 	return 1;
 }

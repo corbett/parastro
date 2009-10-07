@@ -53,13 +53,29 @@ protected:
   virtual int RequestData(vtkInformation*, 
                           vtkInformationVector**, 
                           vtkInformationVector*);
+	// Set in GUI, with defaults
 	double Delta;
 	int NumberBins;
 	double Center[3];
+	// Set in constructor
+	double BinLowerBound;
+	double BinUpperBound;
+	// TODO: implement
+	double BinWidth;
 
 private:
   vtkProfileFilter(const vtkProfileFilter&); // Not implemented
   void operator=(const vtkProfileFilter&); // Not implemented
+	// Description:
+	// from the set properties at input, set the BinLowerBound,
+	// BinUpperBound, and BinWidth
+	void SetBinInfo();
+	// Description:
+	// From the properties BinLowerBound, BinUpperBound, and BinWidth
+	// set in the constructor, calculate the bin number this point belongs
+	// to
+	int GetBinNum(double point[]);
+	
 //ETX
 };
 
