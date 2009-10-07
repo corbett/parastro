@@ -56,7 +56,7 @@ void vtkProfileFilter::GetBinInfo(vtkPointSet* input, double* binLowerBound,\
 	double xMax=bounds[1];
 	double yMax=bounds[3];
 	double zMax=bounds[5];
-	vtkErrorMacro("bounds info is "\
+	vtkDebugMacro("bounds info is "\
 								<< xMax << " " \
 								<< yMax << " "\
 								<< zMax);
@@ -88,7 +88,7 @@ int vtkProfileFilter::RequestData(vtkInformation*,
 	// Allocate data structures
 	double binLowerBound,binUpperBound,binWidth;
 	this->GetBinInfo(input,&binLowerBound,&binUpperBound,&binWidth);
-	vtkErrorMacro("bin info is "\
+	vtkDebugMacro("bin info is "\
 								<< binLowerBound << " " \
 								<< binUpperBound << " "\
 								<< binWidth);
