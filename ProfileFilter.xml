@@ -30,15 +30,6 @@
 			Set the density parameter
 			</Documentation>
 	  </DoubleVectorProperty>
-	  <IntVectorProperty
-			name="NumberBins"
-			command="SetNumberBins"
-			number_of_elements="1"
-			default_values="30">
-			<Documentation>
-				Sets the number of bins to use.
-			</Documentation>
-	  </IntVectorProperty>
 	  <DoubleVectorProperty
 			name="Center"
 			command="SetCenter"
@@ -93,7 +84,7 @@
      <IntVectorProperty name="BinCount" 
         command="SetBinCount" 
         number_of_elements="1" 
-        default_values="10">
+        default_values="30">
         <IntRangeDomain name="range" min="1" max="256"/>
         <Documentation>
           The value of this property specifies the number of bins for the histogram.

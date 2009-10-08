@@ -33,10 +33,6 @@ public:
   vtkGetMacro(Delta, double);
   // Description:
   // Get/Set the number of bins
-  vtkSetMacro(NumberBins, int);
-  vtkGetMacro(NumberBins, int);
-  // Description:
-  // Get/Set the number of bins
   vtkSetVector3Macro(Center,double);
   vtkGetVectorMacro(Center,double,3);
 
@@ -56,26 +52,12 @@ protected:
                           vtkInformationVector*);
 	// Set in GUI, with defaults
 	double Delta;
-	int NumberBins;
 	double Center[3];
-	// Set in constructor
-	double BinLowerBound;
-	double BinUpperBound;
-	// TODO: implement
-	double BinWidth;
 
 private:
   vtkProfileFilter(const vtkProfileFilter&); // Not implemented
   void operator=(const vtkProfileFilter&); // Not implemented
-	// Description:
-	// from the set properties at input, set the BinLowerBound,
-	// BinUpperBound, and BinWidth
-	void GetBinInfo(vtkPointSet* input, double* binLowerBound, double* binUpperBound, double* binWidth);
-	// Description:
-	// From the properties BinLowerBound, BinUpperBound, and BinWidth
-	// calculate the bin number this point belongs
-	// to
-	int GetBinNum(double point[],double binLowerBound,double binUpperBound,double binWidth);
+
 //ETX
 };
 

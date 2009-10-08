@@ -44,54 +44,17 @@ int vtkProfileFilter::FillInputPortInformation(int, vtkInformation* info)
 }
 
 //----------------------------------------------------------------------------
-void vtkProfileFilter::GetBinInfo(vtkPointSet* input, double* binLowerBound,\
-												double* binUpperBound, double* binWidth)
+int vtkProfileFilter::RequestData(vtkInformation *request,\
+																	vtkInformationVector **inputVector,\
+																	vtkInformationVector *outputVector)
 {
-	// TODO: implement
-	double bounds[6];
-	// calculating the bounds of this pointset
-	// later this will be the virial radius calculation
-	input->GetPoints()->ComputeBounds();
-	input->GetPoints()->GetBounds(bounds);
-	double xMax=bounds[1];
-	double yMax=bounds[3];
-	double zMax=bounds[5];
-	vtkDebugMacro("bounds info is "\
-								<< xMax << " " \
-								<< yMax << " "\
-								<< zMax);
-	// setting the upper bounds appropriately
-	double upperBounds[3]={xMax,yMax,zMax};
-	*binLowerBound=1;
-	*binUpperBound=log(ComputeRadialDistance(this->Center,upperBounds));
-	*binWidth=.33;
-}
-
-//----------------------------------------------------------------------------
-int vtkProfileFilter::GetBinNum(double point[],
-																double binLowerBound,\
-																double binUpperBound,\
-																double binWidth)
-{
-	//TODO: implement
-	return 0;
-}
-
-//----------------------------------------------------------------------------
-int vtkProfileFilter::RequestData(vtkInformation*,
-                                 vtkInformationVector** inputVector,
-                                 vtkInformationVector* outputVector)
-{
+	//Just calling the superclass as a test
+	this->Superclass::RequestData(request,inputVector,outputVector);
+	/*
   // Get input and output data.
   vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
   vtkTable* output = this->GetOutput();	
 	// Allocate data structures
-	double binLowerBound,binUpperBound,binWidth;
-	this->GetBinInfo(input,&binLowerBound,&binUpperBound,&binWidth);
-	vtkDebugMacro("bin info is "\
-								<< binLowerBound << " " \
-								<< binUpperBound << " "\
-								<< binWidth);
 	// TODO: dummy allocation
 	vtkSmartPointer<vtkFloatArray> XArray=vtkSmartPointer<vtkFloatArray>::New();
 		XArray->DeepCopy(input->GetPointData()->GetArray("mass"));
@@ -110,4 +73,5 @@ int vtkProfileFilter::RequestData(vtkInformation*,
 	// TODO: dummy output
 	output->AddColumn(XArray);
 	return 1;
+	*/
 }
