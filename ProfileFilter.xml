@@ -56,7 +56,6 @@
 				Set the center from which to search.
 			</Documentation>
 	  </DoubleVectorProperty>
-	
      <StringVectorProperty
          name="SelectInputArray" 
          command="SetInputArrayToProcess" 
