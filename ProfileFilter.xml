@@ -16,7 +16,7 @@
             <Group name="filters"/>
           </ProxyGroupDomain>
           <DataTypeDomain name="input_type">
-            <DataType value="vtkDataSet"/>
+            <DataType value="vtkPointSet"/>
           </DataTypeDomain>
           <InputArrayDomain name="input_array">
              <RequiredProperties>

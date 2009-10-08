@@ -42,12 +42,13 @@ int vtkProfileFilter::RequestData(vtkInformation *request,\
 																	vtkInformationVector **inputVector,\
 																	vtkInformationVector *outputVector)
 {
+	// If we should bin by radius, first calculated add the radii to outputdata
+  vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
+  vtkTable* output = this->GetOutput();		
 	//Just calling the superclass as a test
 	vtkExtractHistogram::RequestData(request,inputVector,outputVector);
 	/*
   // Get input and output data.
-  vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
-  vtkTable* output = this->GetOutput();	
 	// Allocate data structures
 	// TODO: dummy allocation
 	vtkSmartPointer<vtkFloatArray> XArray=vtkSmartPointer<vtkFloatArray>::New();
