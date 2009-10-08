@@ -46,6 +46,7 @@ int vtkProfileFilter::RequestData(vtkInformation *request,\
 	// to outputdata
 	if(this->BinByRadius)
 		{
+		vtkErrorMacro("bin by radius=true");
 		// getting the input and output
 		// according to paraview's pipeline architecture
 		// I am *not* supposed to modify the input
