@@ -21,6 +21,8 @@ vtkStandardNewMacro(vtkProfileFilter);
 //----------------------------------------------------------------------------
 vtkProfileFilter::vtkProfileFilter():vtkExtractHistogram()
 {
+	this->SetCalculateAverages(1); // no longer taking this in as an option
+																 // may later actually disable
 }
 
 //----------------------------------------------------------------------------
