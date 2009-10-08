@@ -117,7 +117,7 @@ void vtkTipsyReader::ReadAllParticles(TipsyHeader& tipsyHeader,\
 {
 	// Allocates vtk scalars and vector arrays to hold particle data, 
 	AllocateAllTipsyVariableArrays(tipsyHeader,output);
-	for(float i=0; i<tipsyHeader.h_nBodies; i++)  // we could have many bodies
+	for(int i=0; i<tipsyHeader.h_nBodies; i++)  // we could have many bodies
   	{ 
 			ReadParticle(tipsyInfile,output);
   	}
