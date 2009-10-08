@@ -10,17 +10,24 @@
 		       tion of radius"
         short_help="physical profile">
      </Documentation>
-     <InputProperty
-        name="Input"
-        command="SetInputConnection">
-           <ProxyGroupDomain name="groups">
-             <Group name="sources"/>
-             <Group name="filters"/>
-           </ProxyGroupDomain>
-           <DataTypeDomain name="input_type">
-             <DataType value="vtkDataSet"/>
-           </DataTypeDomain>
-      </InputProperty>
+     <InputProperty name="Input" command="SetInputConnection">
+          <ProxyGroupDomain name="groups">
+            <Group name="sources"/>
+            <Group name="filters"/>
+          </ProxyGroupDomain>
+          <DataTypeDomain name="input_type">
+            <DataType value="vtkDataSet"/>
+          </DataTypeDomain>
+          <InputArrayDomain name="input_array">
+             <RequiredProperties>
+                <Property name="SelectInputArray" 
+                          function="FieldDataSelection"/>
+             </RequiredProperties>
+          </InputArrayDomain>
+          <Documentation>
+            This property specifies the input to the Profile filter.
+          </Documentation>
+     </InputProperty>
 	  <DoubleVectorProperty
 			name="Delta"
 			command="SetDelta"
@@ -40,25 +47,6 @@
 			</Documentation>
 	  </DoubleVectorProperty>
 	
-     <InputProperty name="Input" command="SetInputConnection">
-          <ProxyGroupDomain name="groups">
-            <Group name="sources"/>
-            <Group name="filters"/>
-          </ProxyGroupDomain>
-          <DataTypeDomain name="input_type">
-            <DataType value="vtkDataSet"/>
-          </DataTypeDomain>
-          <InputArrayDomain name="input_array">
-             <RequiredProperties>
-                <Property name="SelectInputArray" 
-                          function="FieldDataSelection"/>
-             </RequiredProperties>
-          </InputArrayDomain>
-          <Documentation>
-            This property specifies the input to the Histogram filter.
-          </Documentation>
-     </InputProperty>
-
      <StringVectorProperty
          name="SelectInputArray" 
          command="SetInputArrayToProcess" 

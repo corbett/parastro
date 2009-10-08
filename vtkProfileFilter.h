@@ -19,7 +19,6 @@
 #define __vtkProfileFilter_h
 
 #include "vtkExtractHistogram.h"
-#include "vtkPointSet.h" // need for private function which takes this as arg
 
 class VTK_EXPORT vtkProfileFilter : public vtkExtractHistogram
 {
