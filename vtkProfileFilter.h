@@ -35,6 +35,11 @@ public:
   vtkSetVector3Macro(Center,double);
   vtkGetVectorMacro(Center,double,3);
 
+  // Description:
+  // Get/Set whether the bins are by radius
+  vtkSetMacro(BinByRadius, int);
+  vtkGetMacro(BinByRadius, int);
+
 //BTX
 protected:
   vtkProfileFilter();
@@ -50,6 +55,7 @@ protected:
 	// Set in GUI, with defaults
 	double Delta;
 	double Center[3];
+	int BinByRadius;
 
 private:
   vtkProfileFilter(const vtkProfileFilter&); // Not implemented

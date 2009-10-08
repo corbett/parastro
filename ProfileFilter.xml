@@ -28,6 +28,16 @@
             This property specifies the input to the Profile filter.
           </Documentation>
      </InputProperty>
+     <IntVectorProperty 
+        name="BinByRadius" 
+        command="SetBinByRadius" 
+        number_of_elements="1"
+        default_values="1" > 
+       <BooleanDomain name="bool"/>
+       <Documentation>
+         If the value of this property is 1, then the bins are by radius up to the virial radius.
+       </Documentation>
+     </IntVectorProperty>
 	  <DoubleVectorProperty
 			name="Delta"
 			command="SetDelta"
