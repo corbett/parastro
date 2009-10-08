@@ -40,8 +40,6 @@ public:
 protected:
   vtkProfileFilter();
   ~vtkProfileFilter();
-  virtual int FillInputPortInformation(int port, vtkInformation* info);
-
   // Description:
   // This is called within ProcessRequest when a request asks the algorithm
   // to do its work. This is the method you should override to do whatever the

@@ -31,17 +31,9 @@ vtkProfileFilter::~vtkProfileFilter()
 //----------------------------------------------------------------------------
 void vtkProfileFilter::PrintSelf(ostream& os, vtkIndent indent)
 {
-  this->Superclass::PrintSelf(os,indent);
+  vtkExtractHistogram::PrintSelf(os,indent);
 }
 
-//----------------------------------------------------------------------------
-int vtkProfileFilter::FillInputPortInformation(int, vtkInformation* info)
-{
-  // This filter uses the vtkDataSet cell traversal methods so it
-  // suppors any data set type as input.
-  info->Set(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), "vtkPointSet");
-  return 1;
-}
 
 //----------------------------------------------------------------------------
 int vtkProfileFilter::RequestData(vtkInformation *request,\
