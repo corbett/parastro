@@ -42,38 +42,38 @@ int vtkProfileFilter::RequestData(vtkInformation *request,\
 																	vtkInformationVector **inputVector,\
 																	vtkInformationVector *outputVector)
 {
-	// If we should bin by radius, first calculated add the radii to outputdata
+	// If we should bin by radius, first calculate and add the radii 
+	// to outputdata
 	if(this->BinByRadius)
 		{
+		// getting the input and output
+		// according to paraview's pipeline architecture
+		// I am *not* supposed to modify the input
+		// breaking the law here 
+		// TODO: change the strategy. modify the inputVector instead
   	vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
- 		vtkTable* output = this->GetOutput();
-		for(int i = 0; i < input->GetPoints()->GetNumberOfPoints(); ++i)
+		// intializing the radii array
+		vtkSmartPointer<vtkFloatArray> radiiArray=\
+																		vtkSmartPointer<vtkFloatArray>::New();
+			radiiArray->SetName("radii from center");
+			radiiArray->SetNumberOfComponents(1);
+			radiiArray->SetNumberOfTuples(input->GetPoints()->GetNumberOfPoints());
+		double* nextPoint; // need for the loop
+		for(int nextPointId = 0;\
+		 		nextPointId < input->GetPoints()->GetNumberOfPoints();
+		 		++nextPointId)
 			{
-				//TODO write
+				nextPoint=GetPoint(input,nextPointId);
+				float radius=\
+						static_cast<float>(ComputeRadialDistance(nextPoint,this->Center));
+				radiiArray->InsertValue(nextPointId,radius);
 			}
+		// finally adding the new radius vector to our output 
+		input->GetPointData()->AddArray(radiiArray);
+		// and finally finally some memory management
+		delete [] nextPoint;
 		}
-	//Just calling the superclass as a test
+	// Just calling the superclass for now
 	vtkExtractHistogram::RequestData(request,inputVector,outputVector);
-	/*
-  // Get input and output data.
-	// Allocate data structures
-	// TODO: dummy allocation
-	vtkSmartPointer<vtkFloatArray> XArray=vtkSmartPointer<vtkFloatArray>::New();
-		XArray->DeepCopy(input->GetPointData()->GetArray("mass"));
-		XArray->SetName("mass");
-	for(int nextPointId = 0;\
-	 		nextPointId < input->GetPoints()->GetNumberOfPoints();\
-	 		++nextPointId)
-		{
-			double* nextPoint=GetPoint(input,nextPointId);
-			int binNum=this->GetBinNum(nextPoint,\
-																 binLowerBound,binUpperBound,binWidth);
-			// Finally some memory management
-			delete [] nextPoint;
-		}
-	// Updating the output
-	// TODO: dummy output
-	output->AddColumn(XArray);
 	return 1;
-	*/
 }
