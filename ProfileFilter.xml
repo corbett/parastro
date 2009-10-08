@@ -35,7 +35,7 @@
         default_values="1" > 
        <BooleanDomain name="bool"/>
        <Documentation>
-         If the value of this property is 1, then the bins are by radius up to the virial radius.
+         If the value of this property is 1, then the bins are by radius up to the virial radius, otherwise they are binned by the quantity selected in the scalar array.
        </Documentation>
      </IntVectorProperty>
 	  <DoubleVectorProperty
@@ -75,7 +75,7 @@
             </RequiredProperties>
           </FieldDataDomain>
           <Documentation>
-            This property indicates the name of the array from which to compute the histogram.
+            This property indicates the name of the array from which to compute the histogram, if Bin By Radius is not selected.
           </Documentation>
      </StringVectorProperty>
 
