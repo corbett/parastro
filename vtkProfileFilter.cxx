@@ -19,7 +19,7 @@ vtkCxxRevisionMacro(vtkProfileFilter, "$Revision: 1.72 $");
 vtkStandardNewMacro(vtkProfileFilter);
 
 //----------------------------------------------------------------------------
-vtkProfileFilter::vtkProfileFilter():vtkPExtractHistogram()
+vtkProfileFilter::vtkProfileFilter():vtkExtractHistogram()
 {
 }
 
@@ -49,7 +49,7 @@ int vtkProfileFilter::RequestData(vtkInformation *request,\
 																	vtkInformationVector *outputVector)
 {
 	//Just calling the superclass as a test
-	vtkPExtractHistogram::RequestData(request,inputVector,outputVector);
+	vtkExtractHistogram::RequestData(request,inputVector,outputVector);
 	/*
   // Get input and output data.
   vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);

@@ -18,14 +18,14 @@
 #ifndef __vtkProfileFilter_h
 #define __vtkProfileFilter_h
 
-#include "vtkPExtractHistogram.h"
+#include "vtkExtractHistogram.h"
 #include "vtkPointSet.h" // need for private function which takes this as arg
 
-class VTK_EXPORT vtkProfileFilter : public vtkPExtractHistogram
+class VTK_EXPORT vtkProfileFilter : public vtkExtractHistogram
 {
 public:
   static vtkProfileFilter* New();
-  vtkTypeRevisionMacro(vtkProfileFilter, vtkPExtractHistogram);
+  vtkTypeRevisionMacro(vtkProfileFilter, vtkExtractHistogram);
   void PrintSelf(ostream& os, vtkIndent indent);
   // Description:
   // Get/Set the density parameter
