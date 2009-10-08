@@ -71,6 +71,8 @@ int vtkProfileFilter::RequestData(vtkInformation *request,\
 		// finally adding the new radius vector to our output 
 		input->GetPointData()->AddArray(radiiArray);
 		// and finally finally some memory management
+		// setting the input array to process to be radii
+		this->SetInputArrayToProcess(0,0,0,0,"radii from center");
 		delete [] nextPoint;
 		}
 	// Just calling the superclass for now
