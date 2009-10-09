@@ -133,7 +133,7 @@ int vtkProfileFilter::RequestData(vtkInformation *request,\
 		float binNumberTotal = \
 		 				output->GetValueByName(rowId,"bin_values").ToFloat();
 		totalNumber+=binNumberTotal;
-		output->SetValueByName(rowId,"cumulative number",binNumberTotal);
+		output->SetValueByName(rowId,"cumulative number",totalNumber);
 		
 		// we can only compute circular velocity and density if we bin by radius
 		if(this->BinByRadius)
