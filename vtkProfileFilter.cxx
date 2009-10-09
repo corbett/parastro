@@ -94,7 +94,8 @@ int vtkProfileFilter::RequestData(vtkInformation *request,\
 	for(int rowId = 0; rowId < output->GetNumberOfColumns(); ++rowId)
 		{
 			// TODO: make this calculation correct.
-			vtkVariant mass = output->GetValueByName(rowId,"mass");
+			vtkVariant mass = output->GetValueByName(rowId,"radii from center");
+			vtkErrorMacro("radius from center " << mass);
 			output->SetValueByName(rowId,"cumulative mass",mass);
 		}	
 	return 1;
