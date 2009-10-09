@@ -91,12 +91,13 @@ int vtkProfileFilter::RequestData(vtkInformation *request,\
 	output->AddColumn(cumulativeMassArray);
 
 	// adding to the table, just to check. that this strategy works
+	float totalMass=0;
 	for(int rowId = 0; rowId < output->GetNumberOfColumns(); ++rowId)
 		{
 			// TODO: make this calculation correct.
-			vtkVariant mass = output->GetValueByName(rowId,"radii from center");
-			vtkErrorMacro("radius from center " << mass);
-			output->SetValueByName(rowId,"cumulative mass",mass);
+			vtkVariant binMassTotal = output->GetValueByName(rowId,"mass_total");
+			totalMass+=binMassTotal;
+			output->SetValueByName(rowId,"cumulative mass",totalMass);
 		}	
 	return 1;
 }
