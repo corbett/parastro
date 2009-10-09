@@ -86,12 +86,17 @@ int vtkProfileFilter::RequestData(vtkInformation *request,\
 	vtkSmartPointer<vtkFloatArray> cumulativeMassArray=\
 																	vtkSmartPointer<vtkFloatArray>::New();
 		cumulativeMassArray->SetName("cumulative mass");
-		cumulativeMassArray->DeepCopy(input->GetPointData()->GetArray("mass"));
-//		cumulativeMassArray->SetNumberOfComponents(1);
-//		cumulativeMassArray->SetNumberOfTuples(\
-														input->GetPoints()->GetNumberOfPoints());
-	// adding to the table, just to check. that this strategy works
+		cumulativeMassArray->SetNumberOfComponents(1);
+		cumulativeMassArray->SetNumberOfTuples(output->GetNumberOfRows());
 	output->AddColumn(cumulativeMassArray);
+
+	// adding to the table, just to check. that this strategy works
+	for(int rowId = 0; rowId < output->GetNumberOfColumns(); ++rowId)
+		{
+			// TODO: make this calculation correct.
+			vtkVariant mass = output->GetValueByName(rowId,"mass");
+			output->SetValueByName(rowId,"cumulative mass",mass);
+		}	
 	return 1;
 }
 
