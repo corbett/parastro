@@ -14,6 +14,7 @@
 #include "vtkCellData.h"
 #include "vtkTable.h"
 #include "vtkSortDataArray.h"
+#include <cmath>
 
 vtkCxxRevisionMacro(vtkProfileFilter, "$Revision: 1.72 $");
 vtkStandardNewMacro(vtkProfileFilter);
@@ -82,7 +83,7 @@ int vtkProfileFilter::RequestData(vtkInformation *request,\
 	// Getting the output data
 	vtkTable* const output = vtkTable::GetData(outputVector, 0);
 	// Modifying the output from vtkExtractHistogram
-		// intializing the cumulative mass array
+	// intializing the cumulative mass array
 	vtkSmartPointer<vtkFloatArray> cumulativeMassArray=\
 																	vtkSmartPointer<vtkFloatArray>::New();
 		cumulativeMassArray->SetName("cumulative mass");
@@ -90,17 +91,64 @@ int vtkProfileFilter::RequestData(vtkInformation *request,\
 		cumulativeMassArray->SetNumberOfTuples(output->GetNumberOfRows());
 	output->AddColumn(cumulativeMassArray);
 
-	// adding to the table, just to check. that this strategy works
+	// intializing the cumulative number array
+	vtkSmartPointer<vtkFloatArray> cumulativeNumberArray=\
+																		vtkSmartPointer<vtkFloatArray>::New();
+		cumulativeNumberArray->SetName("cumulative number");
+		cumulativeNumberArray->SetNumberOfComponents(1);
+		cumulativeNumberArray->SetNumberOfTuples(output->GetNumberOfRows());
+	output->AddColumn(cumulativeNumberArray);
+	
+	// we can only compute circular velocity and density if we bin by radius
+	if(this->BinByRadius)
+		{
+		// intializing the circular velocity array
+		vtkSmartPointer<vtkFloatArray> circularVelocityArray=\
+																			vtkSmartPointer<vtkFloatArray>::New();
+			circularVelocityArray->SetName("circular velocity");
+			circularVelocityArray->SetNumberOfComponents(1);
+			circularVelocityArray->SetNumberOfTuples(output->GetNumberOfRows());
+		output->AddColumn(circularVelocityArray);
+
+		// initializing the density in bin array
+		vtkSmartPointer<vtkFloatArray> densityInBinArray=\
+																			vtkSmartPointer<vtkFloatArray>::New();
+			densityInBinArray->SetName("density");
+			densityInBinArray->SetNumberOfComponents(1);
+			densityInBinArray->SetNumberOfTuples(output->GetNumberOfRows());
+		output->AddColumn(densityInBinArray);
+		}
+
 	float totalMass=0;
+	float totalNumber=0;
 	for(int rowId = 0; rowId < output->GetNumberOfRows(); ++rowId)
 		{
-			// TODO: make this calculation correct.
-			vtkVariant binMassTotal = output->GetValueByName(rowId,"mass_total");
-			totalMass+=binMassTotal.ToFloat();
-			vtkErrorMacro(" bin/row id: " << rowId \
-			 							<< " total_mass of bin: " << binMassTotal.ToFloat()\
-										<< " total mass: " << totalMass);
-			output->SetValueByName(rowId,"cumulative mass",totalMass);
+		// computing the cumulative mass
+		float binMassTotal = \
+						output->GetValueByName(rowId,"mass_total").ToFloat();
+		totalMass+=binMassTotal;
+		output->SetValueByName(rowId,"cumulative mass",totalMass);
+
+		// computing the cumulative number
+		float binNumberTotal = \
+		 				output->GetValueByName(rowId,"bin_values").ToFloat();
+		totalNumber+=binNumberTotal;
+		output->SetValueByName(rowId,"cumulative number",binNumberTotal);
+		
+		// we can only compute circular velocity and density if we bin by radius
+		if(this->BinByRadius)
+			{
+			// we will need the bin radius for both calculations
+			float binRadius = \
+							output->GetValueByName(rowId,"radii from center").ToFloat();
+			// computing the circular velocity (sqrt(M(<r)/r))
+			float binCircularVelocity = sqrt(totalMass/binRadius);
+			output->SetValueByName(rowId,"circular velocity",binCircularVelocity);
+	
+			// computing the density M(<r) / (4/3 pi r^3)
+			float binDensity=totalMass/(4./3*M_PI*pow(binRadius,3));
+			output->SetValueByName(rowId,"density",binDensity);
+			}
 		}	
 	return 1;
 }
