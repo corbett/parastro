@@ -42,6 +42,7 @@ int vtkProfileFilter::RequestData(vtkInformation *request,\
 																	vtkInformationVector **inputVector,\
 																	vtkInformationVector *outputVector)
 {
+ 	vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
 	// If we should bin by radius, first calculate and add the radii 
 	// to outputdata
 	if(this->BinByRadius)
@@ -51,7 +52,6 @@ int vtkProfileFilter::RequestData(vtkInformation *request,\
 		// I am *not* supposed to modify the input
 		// breaking the law here 
 		// TODO: change the strategy. modify the inputVector instead
-  	vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
 		// intializing the radii array
 		vtkSmartPointer<vtkFloatArray> radiiArray=\
 																		vtkSmartPointer<vtkFloatArray>::New();
@@ -70,14 +70,36 @@ int vtkProfileFilter::RequestData(vtkInformation *request,\
 			}
 		// finally adding the new radius vector to our output 
 		input->GetPointData()->AddArray(radiiArray);
-		// and finally finally some memory management
 		// setting the input array to process to be radii
 		this->SetInputArrayToProcess(0,0,0,
 						vtkDataObject::FIELD_ASSOCIATION_POINTS_THEN_CELLS,
 						"radii from center");
+		// and finally finally some memory management
 		delete [] nextPoint;
 		}
 	// Just calling the superclass for now
 	vtkExtractHistogram::RequestData(request,inputVector,outputVector);
+	// Getting the output data
+	vtkTable* const output = vtkTable::GetData(outputVector, 0);
+	// Modifying the output from vtkExtractHistogram
+		// intializing the cumulative mass array
+	vtkSmartPointer<vtkFloatArray> cumulativeMassArray=\
+																	vtkSmartPointer<vtkFloatArray>::New();
+		cumulativeMassArray->SetName("cumulative mass");
+		cumulativeMassArray->DeepCopy(input->GetPointData()->GetArray("mass"));
+//		cumulativeMassArray->SetNumberOfComponents(1);
+//		cumulativeMassArray->SetNumberOfTuples(\
+														input->GetPoints()->GetNumberOfPoints());
+	// adding to the table, just to check. that this strategy works
+	output->AddColumn(cumulativeMassArray);
 	return 1;
 }
+
+
+
+
+
+
+
+
+
