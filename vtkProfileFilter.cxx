@@ -92,7 +92,7 @@ int vtkProfileFilter::RequestData(vtkInformation *request,\
 
 	// adding to the table, just to check. that this strategy works
 	float totalMass=0;
-	for(int rowId = 0; rowId < output->GetNumberOfColumns(); ++rowId)
+	for(int rowId = 0; rowId < output->GetNumberOfRows(); ++rowId)
 		{
 			// TODO: make this calculation correct.
 			vtkVariant binMassTotal = output->GetValueByName(rowId,"mass_total");
