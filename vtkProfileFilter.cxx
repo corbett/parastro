@@ -96,7 +96,10 @@ int vtkProfileFilter::RequestData(vtkInformation *request,\
 		{
 			// TODO: make this calculation correct.
 			vtkVariant binMassTotal = output->GetValueByName(rowId,"mass_total");
-			totalMass+=binMassTotal.ToDouble();
+			vtkErrorMacro(" bin/row id: " << rowId \
+			 							<< " total_mass of bin: " << binMassTotal.ToFloat()\
+										<< " total mass: " << totalMass);
+			totalMass+=binMassTotal.ToFloat();
 			output->SetValueByName(rowId,"cumulative mass",totalMass);
 		}	
 	return 1;
