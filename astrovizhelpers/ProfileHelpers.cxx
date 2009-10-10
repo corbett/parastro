@@ -76,6 +76,11 @@ double OverDensityInSphere(double r,void* inputLocatorInfo)
 	LocatorInfo* locatorInfo = static_cast<LocatorInfo*>(inputLocatorInfo);
 	cout <<"locator info says delta is " \
 								<< locatorInfo->criticalDensity << "\n";
+	// TODO: add in softening? how to cope with r=0 case
+	if(r==0)
+		{
+			return 0.0-locatorInfo->criticalDensity;
+		}
 	vtkSmartPointer<vtkIdList> pointsInRadius = \
 																vtkSmartPointer<vtkIdList>::New();
 	locatorInfo->locator->FindPointsWithinRadius(r,locatorInfo->center,\
