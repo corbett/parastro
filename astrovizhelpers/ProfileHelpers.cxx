@@ -12,6 +12,7 @@
 #include "vtkMath.h"
 
 //----------------------------------------------------------------------------
+
 double IllinoisRootFinder(double (*func)(double,void *),void *ctx,\
 											double r,double s,double xacc,double yacc,\
 											int *pnIter) 
@@ -158,7 +159,7 @@ VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,\
 																				0.0,0.0,
 																			  &numIter);
 			}
-		catch (std::exception& e)
+		catch (const char* e)
 			{
 				// This indicates that something has gone wrong with the root finding
 				virialRadiusInfo.virialRadius=-1; 
