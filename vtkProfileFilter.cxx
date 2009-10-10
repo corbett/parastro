@@ -64,12 +64,10 @@ int vtkProfileFilter::RequestData(vtkInformation *request,\
 		lowerBound[0]=bounds[1];
 		lowerBound[1]=bounds[3];
 		lowerBound[2]=bounds[5];
-
 		double maxR = sqrt(vtkMath::Distance2BetweenPoints(upperBound,\
 																											 this->Center));
 		double minR = sqrt(vtkMath::Distance2BetweenPoints(lowerBound,\
 																											 this->Center));
-		cout << " max R: " << maxR << " min R: " << minR << "\n";
 		// Building the point locator and the struct to use as an 
 		// input to the rootfinder.
 		// 1. Building the point locator
@@ -95,7 +93,14 @@ int vtkProfileFilter::RequestData(vtkInformation *request,\
 																					maxR,minR,
 																					0.0,0.0,
 																				  &numIter);
-		vtkErrorMacro("virial radius is " << virialRadius);
+		vtkDebugMacro("virial radius is " << virialRadius);
+		// Great, now we build a new dataset consisting only of points
+		// which are within the virial radius. note that if there was an error
+		// finding the virialRadius the radius returned is < 0
+		if(virialRadius>0)
+			{
+				
+			}
 		}
 
 	// If we should bin by radius, first calculate and add the radii 

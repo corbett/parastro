@@ -14,8 +14,10 @@
 // Uses the Illinois root finding method to find the root of the function
 // func. The root must lie between r and s. Root is returned when it is found 
 // within the accuracy xacc, yacc. pnIter indicates how many iterations the
-// algorithm took to converge
-// have to wrap as it is a template function
+// algorithm took to converge.
+// have to wrap as it is a template function.
+// Returns -1 if there is a problem, thus is designed to ONLY find positive 
+// values as root
 //BTX
 double IllinoisRootFinder(double (*func)(double,void *),void *ctx,double r,double s,double xacc,double yacc,int *pnIter);
 //ETX
