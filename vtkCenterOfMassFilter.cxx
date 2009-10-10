@@ -124,13 +124,15 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 				// Creating the sphere
 				vtkSmartPointer<vtkSphereSource> sphere = \
 				 															vtkSmartPointer<vtkSphereSource>::New();
-//				sphere->SetRadius(virialRadiusInfo.virialRadius);
-				sphere->SetRadius(100);
+				sphere->SetRadius(virialRadiusInfo.virialRadius);
 				sphere->SetCenter(dbCenterOfMass);
 				sphere->Update();
 				//Setting the points in the output to be those of the sphere
 				output->SetPoints(sphere->GetOutput()->GetPoints());
 				output->SetVerts(sphere->GetOutput()->GetVerts());
+				output->SetLines(sphere->GetOutput()->GetLines());
+				output->SetPolys(sphere->GetOutput()->GetPolys());
+				output->SetStrips(sphere->GetOutput()->GetStrips());
 				}
 			else
 				{
