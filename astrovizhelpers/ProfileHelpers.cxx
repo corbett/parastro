@@ -127,7 +127,7 @@ VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,\
 		lowerBound[1]=bounds[3];
 		lowerBound[2]=bounds[5];
 		double maxR = sqrt(vtkMath::Distance2BetweenPoints(upperBound,\
-																											 lowerBound));
+																											 center));
 		// Building the point locator and the struct to use as an 
 		// input to the rootfinder.
 		// 1. Building the point locator
