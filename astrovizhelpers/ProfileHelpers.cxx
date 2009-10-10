@@ -194,7 +194,7 @@ vtkPolyData* GetDatasetWithinVirialRadius(VirialRadiusInfo virialRadiusInfo)
 	newDataSet->CopyCells(dataSet,pointsInRadius,virialRadiusInfo.locator);
 	return newDataSet;
 	return dataSet;
-	/*
+	*/
 }
 	
 	
