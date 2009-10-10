@@ -21,9 +21,9 @@ double IllinoisRootFinder(double (*func)(double,void *),void *ctx,\
 
   fr = func(r,ctx);
   fs = func(s,ctx);
-	if(fr*fs<0)
+	if(fr*fs>0)
 		{
-			return fr*fs;
+			return -1.0*fr*fs;
 		}
   t = (s*fr - r*fs)/(fr - fs);
 

@@ -103,11 +103,8 @@ int vtkProfileFilter::RequestData(vtkInformation *request,\
 			}
 		else
 			{
-			vtkErrorMacro("fr*fs=" << virialRadius \
-										<< "<0 this means that something has gone wrong with the\
-										virial radius finding. Perhaps change your delta,\
-									  or your center, or example ProfileHelpers.cxx. For now\
-										binning out to the max radius instead of the virial.");	  		
+			vtkErrorMacro("fr*fs=" << -1*virialRadius \
+										<< ">0 this means that something has gone wrong with the virial radius finding. Perhaps change your delta, or your center, or example ProfileHelpers.cxx. For now	binning out to the max radius instead of the virial.");
 			}
 		}
 
