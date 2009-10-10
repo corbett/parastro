@@ -129,6 +129,7 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 				sphere->Update();
 				//Setting the points in the output to be those of the sphere
 				output->SetPoints(sphere->GetOutput()->GetPoints());
+				output->SetVerts(sphere->GetOutput()->GetVerts());
 				}
 			else
 				{
