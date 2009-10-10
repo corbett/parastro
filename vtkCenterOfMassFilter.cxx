@@ -9,6 +9,7 @@
 #include "vtkObjectFactory.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include "vtkStringArray.h"
+#include "vtkSphereSource.h"
 #include "astrovizhelpers/DataSetHelpers.h"
 #include "astrovizhelpers/ProfileHelpers.h"
 
@@ -120,6 +121,14 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 				// TODO: do that
 				vtkWarningMacro("the virial radius is " 
 												<< virialRadiusInfo.virialRadius);
+				// Creating the sphere
+				vtkSmartPointer<vtkSphereSource> sphere = \
+				 															vtkSmartPointer<vtkSphereSource>::New();
+				sphere->SetRadius(virialRadiusInfo.virialRadius);
+				sphere->SetCenter(dbCenterOfMass);
+				sphere->Update();
+				//Setting the points in the output to be those of the sphere
+				output->SetPoints(sphere->GetOutput()->GetPoints());
 				}
 			else
 				{

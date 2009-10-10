@@ -126,6 +126,8 @@ VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,\
 		lowerBound[0]=bounds[1];
 		lowerBound[1]=bounds[3];
 		lowerBound[2]=bounds[5];
+		// TODO: think about this more. why does this work? for example the upper
+		// bound could be very close to the center...
 		double maxR = sqrt(vtkMath::Distance2BetweenPoints(upperBound,\
 																											 center));
 		// Building the point locator and the struct to use as an 
