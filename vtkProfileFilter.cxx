@@ -81,12 +81,10 @@ int vtkProfileFilter::RequestData(vtkInformation *request,\
 		void* pntrLocatorInfo = &locatorInfo;
 		// Now we are ready to run the root finder
 		int numIter=0;
-		//TODO: experiment/ask, what is this param?
-		int nAccuracy=5;
 		double virialRadius=IllinoisRootFinder(OverDensityInSphere,\
 																					pntrLocatorInfo,\
-																					1.0e-6,maxR,
-																					0,1.0*nAccuracy,
+																					maxR,1.0e-6,
+																					0.0,0.0,
 																				  &numIter);
 		vtkErrorMacro("virial radius is " << virialRadius);
 		
