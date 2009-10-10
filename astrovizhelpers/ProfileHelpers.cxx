@@ -174,7 +174,7 @@ vtkPolyData* GetDatasetWithinVirialRadius(VirialRadiusInfo virialRadiusInfo)
 	 		<< " "<< virialRadiusInfo.center[1] \
 			<< virialRadiusInfo.center[2] << "\n";
 	cout<<"delta is " << virialRadiusInfo.criticalDensity << "\n";
-	cout<<"locator is "<< (virialRadiusInfo.locator)->PrintSelf << "\n";
+	cout<<"locator is "<< *(virialRadiusInfo.locator) << "\n";
 	vtkPolyData* dataSet=vtkPolyData::New();
 	return dataSet;
 	/*
