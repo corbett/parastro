@@ -26,7 +26,7 @@ double IllinoisRootFinder(double (*func)(double,void *),void *ctx,\
 
   fr = func(r,ctx);
   fs = func(s,ctx);
-	if(fr*fs<=0)
+	if(fr*fs>0)
 		{
 			// used to be an assert, but removing 
 			throw "something went wrong with the root finding";
