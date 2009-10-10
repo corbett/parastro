@@ -53,14 +53,23 @@ int vtkProfileFilter::RequestData(vtkInformation *request,\
 	if(this->CutOffAtVirialRadius)
 		{
 		// calculating the bounds of this pointset
-		double bounds[6],upperBound[3];
+		double bounds[6];
+		double upperBound[3];
+		double lowerBound[3];
 		input->GetPoints()->ComputeBounds();
 		input->GetPoints()->GetBounds(bounds);
 		upperBound[0]=bounds[1];
 		upperBound[1]=bounds[3];
 		upperBound[2]=bounds[5];
+		lowerBound[0]=bounds[0];
+		lowerBound[1]=bounds[2];
+		lowerBound[2]=bounds[4];
+
 		double maxR = sqrt(vtkMath::Distance2BetweenPoints(upperBound,\
 																											 this->Center));
+		double minR = sqrt(vtkMath::Distance2BetweenPoints(lowerBound,\
+																											 this->Center));
+		cout << " max R: " << maxR << " min R: " << minR << "\n";
 		// Building the point locator and the struct to use as an 
 		// input to the rootfinder.
 		// 1. Building the point locator
@@ -83,12 +92,10 @@ int vtkProfileFilter::RequestData(vtkInformation *request,\
 		int numIter=0;
 		double virialRadius=IllinoisRootFinder(OverDensityInSphere,\
 																					pntrLocatorInfo,\
-																					maxR,1.0e-6,
+																					minR,maxR,
 																					0.0,0.0,
 																				  &numIter);
 		vtkErrorMacro("virial radius is " << virialRadius);
-		
-
 		}
 
 	// If we should bin by radius, first calculate and add the radii 
