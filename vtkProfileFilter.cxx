@@ -11,6 +11,7 @@
 #include "vtkDoubleArray.h"
 #include "vtkIntArray.h"
 #include "astrovizhelpers/DataSetHelpers.h"
+#include "astrovizhelpers/ProfileHelpers.h"
 #include "vtkCellData.h"
 #include "vtkTable.h"
 #include "vtkSortDataArray.h"
@@ -45,11 +46,53 @@ int vtkProfileFilter::RequestData(vtkInformation *request,\
 																	vtkInformationVector *outputVector)
 {
  	vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
-	vtkErrorMacro("input vector has number of components " \
-								<< (**inputVector).GetNumberOfInformationObjects()
-								<< " and looks like " << **inputVector);
+
 	// If we should cutoff at the virial radius, then calculating where
-	// the cutoff is and then 
+	// the cutoff is and then redefining the data set to be only the points
+	// up to this cutoff
+	if(this->CutOffAtVirialRadius)
+		{
+		// calculating the bounds of this pointset
+		double bounds[6],upperBound[3];
+		input->GetPoints()->ComputeBounds();
+		input->GetPoints()->GetBounds(bounds);
+		upperBound[0]=bounds[1];
+		upperBound[1]=bounds[3];
+		upperBound[2]=bounds[5];
+		double maxR = sqrt(vtkMath::Distance2BetweenPoints(upperBound,\
+																											 this->Center));
+		// Building the point locator and the struct to use as an 
+		// input to the rootfinder.
+		// 1. Building the point locator
+		vtkSmartPointer<vtkPointLocator> locator = \
+		 																	vtkSmartPointer<vtkPointLocator>::New();
+		locator->SetDataSet(input);
+		locator->BuildLocator();
+		// 2. Building the struct
+		LocatorInfo locatorInfo;
+		locatorInfo.locator=locator;
+		// copies the contents of this->Center to locatorInfo's arg center
+		for(int i = 0; i < 3; ++i)
+		{
+			locatorInfo.center[i]=this->Center[i];
+		}
+		locatorInfo.criticalDensity=this->Delta;
+		// but IllinoisRootFinder takes in a void pointer
+		void* pntrLocatorInfo = &locatorInfo;
+		// Now we are ready to run the root finder
+		int numIter=0;
+		//TODO: experiment/ask, what is this param?
+		int nAccuracy=5;
+		double virialRadius=IllinoisRootFinder(OverDensityInSphere,\
+																					pntrLocatorInfo,\
+																					0,maxR,
+																					0,1.0*nAccuracy,
+																				  &numIter);
+		vtkErrorMacro("virial radius is " << virialRadius);
+		
+
+		}
+
 	// If we should bin by radius, first calculate and add the radii 
 	// to outputdata
 	if(this->BinByRadius)

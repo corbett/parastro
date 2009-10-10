@@ -10,6 +10,7 @@
 #include "vtkPointLocator.h"
 #include "vtkCellArray.h"
 #include "vtkFloatArray.h"
+// Description:
 // Uses the Illinois root finding method to find the root of the function
 // func. The root must lie between r and s. Root is returned when it is found 
 // within the accuracy xacc, yacc. pnIter indicates how many iterations the
