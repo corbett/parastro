@@ -40,6 +40,7 @@
 #include "io.h"
 #endif
 #include "ssio.h"
+#include "fio.h"
 
 #ifdef USE_LUSTRE
 #include <lustre/liblustreapi.h>
@@ -50,7 +51,7 @@
 #include "mpitrace_user_events.h"
 #endif
 
-const char *master_module_id = "$Id: master.c,v 1.187 2009/05/06 23:57:12 diemand Exp $";
+const char *master_module_id = "$Id: master.c,v 1.200 2009/10/05 14:58:34 wadsley Exp $";
 const char *master_h_module_id = MASTER_H_MODULE_ID;
 
 #define LOCKFILE ".lockfile"	/* for safety lock */
@@ -184,6 +185,9 @@ void msrInitialize(MSR *pmsr,MDL mdl,int argc,char **argv) {
     msr->param.bPeriodic = 0;
     prmAddParam(msr->prm,"bPeriodic",0,&msr->param.bPeriodic,sizeof(int),"p",
 		"periodic/non-periodic = -p");
+    msr->param.bRestart = 0;
+    prmAddParam(msr->prm,"bRestart",0,&msr->param.bRestart,sizeof(int),"restart",
+		"restart from checkpoint");
     msr->param.bParaRead = 1;
     prmAddParam(msr->prm,"bParaRead",0,&msr->param.bParaRead,sizeof(int),"par",
 		"enable/disable parallel reading of files = +par");
@@ -381,9 +385,14 @@ void msrInitialize(MSR *pmsr,MDL mdl,int argc,char **argv) {
     msr->param.dExtraStore = 0.1;
     prmAddParam(msr->prm,"dExtraStore",2,&msr->param.dExtraStore,
 		sizeof(double),NULL,NULL);
-    msr->param.dExtraNodes = 2.0;
-    prmAddParam(msr->prm,"dExtraNodes",2,&msr->param.dExtraNodes,
-		sizeof(double),NULL,NULL);
+    msr->param.nTreeBitsLo = 14;
+    prmAddParam(msr->prm,"nTreeBitsLo",1,&msr->param.nTreeBitsLo,
+	sizeof(int),"treelo",
+	"<number of low bits for treer> = 14");
+    msr->param.nTreeBitsHi = 18;
+    prmAddParam(msr->prm,"nTreeBitsHi",1,&msr->param.nTreeBitsHi,
+	sizeof(int),"treehi",
+	"<number of high bits for treer> = 18");
 #ifdef MDL_CACHE_SIZE
     msr->param.iCacheSize = MDL_CACHE_SIZE;
 #else
@@ -588,6 +597,159 @@ void msrInitialize(MSR *pmsr,MDL mdl,int argc,char **argv) {
     msr->param.bMemVelSmooth = 0;
     prmAddParam(msr->prm,"bMemVelSmooth",1,&msr->param.bMemVelSmooth,
 		sizeof(int),"Mvs","<Particles support velocity smoothing> = 0");
+/* Gas Parameters */
+    msr->param.bDoGas = 0;
+    prmAddParam(msr->prm,"bDoGas",0,&msr->param.bDoGas,sizeof(int),"gas",
+		"calculate gas/don't calculate gas = +gas");
+    msr->param.bGasAdiabatic = 1;
+    prmAddParam(msr->prm,"bGasAdiabatic",0,&msr->param.bGasAdiabatic,
+		sizeof(int),"GasAdiabatic",
+		"<Gas is Adiabatic> = +GasAdiabatic");
+    msr->param.bGasIsothermal = 0;
+    prmAddParam(msr->prm,"bGasIsothermal",0,&msr->param.bGasIsothermal,
+		sizeof(int),"GasIsothermal",
+		"<Gas is Isothermal> = +GasIsothermal");
+    msr->param.bGasCooling = 0;
+    prmAddParam(msr->prm,"bGasCooling",0,&msr->param.bGasCooling,
+		sizeof(int),"GasCooling",
+		"<Gas is Cooling> = +GasCooling");
+    msr->param.bInitTFromCooling = 0;
+    prmAddParam(msr->prm,"bInitTFromCooling",0,&msr->param.bInitTFromCooling,
+		sizeof(int),"bInitTFromCooling",
+		"set T (also E, Y, etc..) using Cooling initialization value = +bInitTFromCooling");
+    msr->param.iRungCoolTableUpdate = 0;
+    prmAddParam(msr->prm,"iRungCoolTableUpdate",1,&msr->param.iRungCoolTableUpdate,
+		sizeof(int),"iRungCoolTableUpdate",
+		"<Rung on which to update cool tables, def. 0>");
+    msr->param.bInitTFromCooling = 0;
+    /* Add any parameters specific to the cooling approach */
+    CoolAddParams( &msr->param.CoolParam, msr->prm );
+
+    msr->param.dEtaCourant = 0.4;
+    prmAddParam(msr->prm,"dEtaCourant",2,&msr->param.dEtaCourant,sizeof(double),"etaC",
+				"<Courant criterion> = 0.4");
+    msr->param.dEtaUDot = 0.25;
+    prmAddParam(msr->prm,"dEtauDot",2,&msr->param.dEtaUDot,sizeof(double),"etau",
+		"<uDot timestep criterion> = 0.25");
+    msr->param.dConstAlpha = 1.0; 
+    prmAddParam(msr->prm,"dConstAlpha",2,&msr->param.dConstAlpha,
+		sizeof(double),"alpha",
+		"<Alpha constant in viscosity> = 1.0 or 0.5 (bBulkViscosity)");
+    msr->param.dConstBeta = 2.0; 
+    prmAddParam(msr->prm,"dConstBeta",2,&msr->param.dConstBeta,
+		sizeof(double),"beta",
+		"<Beta constant in viscosity> = 2.0 or 0.5 (bBulkViscosity)");
+    msr->param.dConstGamma = 5.0/3.0;
+    prmAddParam(msr->prm,"dConstGamma",2,&msr->param.dConstGamma,
+		sizeof(double),"gamma",
+		"<Ratio of specific heats> = 5/3");
+    msr->param.dMeanMolWeight = 1.0;
+    prmAddParam(msr->prm,"dMeanMolWeight",2,&msr->param.dMeanMolWeight,
+		sizeof(double),"mmw",
+		"<Mean molecular weight in amu> = 1.0");
+    msr->param.dGasConst = 1.0;
+    prmAddParam(msr->prm,"dGasConst",2,&msr->param.dGasConst,
+		sizeof(double),"gcnst",
+		"<Gas Constant>");
+    msr->param.dKBoltzUnit = 1.0;
+    prmAddParam(msr->prm,"dKBoltzUnit",2,&msr->param.dKBoltzUnit,
+		sizeof(double),"kb",
+		"<Boltzmann Constant in System Units>");
+    msr->param.dhMinOverSoft = 0.0;
+    prmAddParam(msr->prm,"dhMinOverSoft",2,&msr->param.dhMinOverSoft,
+		sizeof(double),"hmin",
+		"<Minimum h as a fraction of Softening> = 0.0");
+    msr->param.dMetalDiffusionCoeff = 0;
+    prmAddParam(msr->prm,"dMetalDiffusionCoeff",2,&msr->param.dMetalDiffusionCoeff,
+		sizeof(double),"metaldiff",
+		"<Coefficient in Metal Diffusion> = 0.0");
+    msr->param.dThermalDiffusionCoeff = 0;
+    prmAddParam(msr->prm,"dThermalDiffusionCoeff",2,&msr->param.dThermalDiffusionCoeff,
+		sizeof(double),"thermaldiff",
+		"<Coefficient in Thermal Diffusion> = 0.0");
+    msr->param.dMsolUnit = 1.0;
+    prmAddParam(msr->prm,"dMsolUnit",2,&msr->param.dMsolUnit,
+		sizeof(double),"msu",
+		"<Solar mass/system mass unit>");
+    msr->param.dKpcUnit = 1000.0;
+    prmAddParam(msr->prm,"dKpcUnit",2,&msr->param.dKpcUnit,
+		sizeof(double),"kpcu",
+		"<Kiloparsec/system length unit>");
+    msr->param.ddHonHLimit = 0.1;
+    prmAddParam(msr->prm,"ddHonHLimit",2,&msr->param.ddHonHLimit,
+		sizeof(double),"dhonh",
+		"<|dH|/H Limiter> = 0.1");
+    msr->param.iViscosityLimiter = 1;
+    prmAddParam(msr->prm,"iViscosityLimiter",1,&msr->param.iViscosityLimiter,sizeof(int),
+		"vlim","<iViscosity Limiter> = 1");
+    msr->param.iDiffusion = 0;
+    prmAddParam(msr->prm,"iDiffusion",1,&msr->param.iDiffusion,sizeof(int),
+		"idiff","<iDiffusion> = 0");
+    msr->param.bAddDelete = 0;
+    prmAddParam(msr->prm,"bAddDelete",0,&msr->param.bAddDelete,sizeof(int),
+		"adddel","<Add Delete Particles> = 0");
+    /* Star Form parameters */
+    msr->param.bStarForm = 0;
+    prmAddParam(msr->prm,"bStarForm",0,&msr->param.bStarForm,sizeof(int),
+		"stfm","<Star Forming> = 0");
+    msr->param.bFeedback = 0;
+    prmAddParam(msr->prm,"bFeedback",0,&msr->param.bFeedback,sizeof(int),
+		"fdbk","<Stars provide feedback> = 0");
+    msr->param.SFdComovingDenMin = 0; /* RAMSES DEFAULT */
+    prmAddParam(msr->prm,"SFdComovingDenMin", 2, &msr->param.SFdComovingDenMin,
+		sizeof(double), "stODmin",
+		"<Minimum overdensity for forming stars> = 2");
+    msr->param.SFdPhysDenMin =  0.1/.76/1.66e-24; /* 0.1 nH/cc; RAMSES DEFAULT */
+    prmAddParam(msr->prm,"SFdPhysDenMin", 2, &msr->param.SFdPhysDenMin,
+		sizeof(double), "stPDmin",
+		"<Minimum physical density for forming stars (gm/cc)> =  7e-26");
+    msr->param.SFdInitStarMass = 0;
+    prmAddParam(msr->prm,"SFdInitStarMass", 2, &msr->param.SFdInitStarMass,
+		sizeof(double), "stm0",
+		"<Initial star mass> = 0");
+    msr->param.SFdESNPerStarMass = 5.0276521e+15; /* RAMSES DEFAULT */
+    prmAddParam(msr->prm,"SFdESNPerStarMass", 2, &msr->param.SFdESNPerStarMass,
+		sizeof(double), "ESNPerStarMass",
+		"<ESN per star mass, erg per g of stars> = 1.25e16");
+    msr->param.SFdTMax = 1e20; /* RAMSES DEFAULT */
+    prmAddParam(msr->prm,"SFdTMax", 2, &msr->param.SFdTMax,
+		sizeof(double), "SFdTMax",
+		"<Maximum temperature for forming stars, K> = 3e4");
+    msr->param.SFdEfficiency = 0.01; /* RAMSES DEFAULT */
+    prmAddParam(msr->prm,"SFdEfficiency", 2, &msr->param.SFdEfficiency,
+		sizeof(double), "SFdEfficiency",
+		"<SF Efficiency> = 0.1");
+    msr->param.SFdtCoolingShutoff = 30e6; /* RAMSES DEFAULT */
+    prmAddParam(msr->prm,"SFdtCoolingShutoff", 2, &msr->param.SFdtCoolingShutoff,
+		sizeof(double), "SFdtCoolingShutoff",
+		"<SF Cooling Shutoff duration> = 30e6");
+
+    msr->param.SFdtFeedbackDelay = 10e6; /* RAMSES DEFAULT */
+    prmAddParam(msr->prm,"SFdtFeedbackDelay", 2, &msr->param.SFdtFeedbackDelay,
+		sizeof(double), "SFdtFBD",
+		"<SF FB delay> = 10e6");
+    msr->param.SFdMassLossPerStarMass = 0.1; /* RAMSES DEFAULT */
+    prmAddParam(msr->prm,"SFdMassLossPerStarMass", 2, &msr->param.SFdMassLossPerStarMass,
+		sizeof(double), "SFMLPSM",
+		"<SFMSPSM > = 0.1");
+    msr->param.SFdZMassPerStarMass = 0.01; /* RAMSES DEFAULT */
+    prmAddParam(msr->prm,"SFdZMassPerStarMass", 2, &msr->param.SFdZMassPerStarMass,
+		sizeof(double), "SFZMPSM",
+		"<SF ZMPSM> = 0.01");
+    msr->param.SFdInitStarMass = 0; 
+    prmAddParam(msr->prm,"SFdInitStarMass", 2, &msr->param.SFdInitStarMass,
+		sizeof(double), "SFISM",
+		"<SF ISM> = ?");
+    msr->param.SFdMinGasMass = 0;
+    prmAddParam(msr->prm,"SFdMinGasMass", 2, &msr->param.SFdMinGasMass,
+		sizeof(double), "SFMGM",
+		"<SF MGM> = ?");
+
+    msr->param.SFbdivv = 0;
+    prmAddParam(msr->prm,"SFbdivv", 0, &msr->param.SFbdivv,
+		sizeof(int), "SFbdivv",
+		"<SF Use div v for star formation> = 1");
+    /* END Gas/Star Parameters */
 
     /*
     ** Set the box center to (0,0,0) for now!
@@ -612,6 +774,63 @@ void msrInitialize(MSR *pmsr,MDL mdl,int argc,char **argv) {
 	_msrExit(msr,1);
 	}
 
+    /* Gas parameter checks */
+#ifdef CLASSICAL_FOPEN
+    fprintf(stderr,"WARNING: CLASSICAL_FOPEN\n");
+#endif
+    /* bolzman constant in cgs */
+#define KBOLTZ	1.38e-16
+    /* mass of hydrogen atom in grams */
+#define MHYDR 1.67e-24
+    /* solar mass in grams */
+#define MSOLG 1.99e33
+    /* G in cgs */
+#define GCGS 6.67e-8
+    /* kiloparsec in centimeters */
+#define KPCCM 3.085678e21
+    /* Thompson cross-section (cm^2) */
+#define SIGMAT 6.6524e-25
+    /* Speed of Light cm/s */
+#define LIGHTSPEED 2.9979e10
+    /*
+    ** Convert kboltz/mhydrogen to system units, assuming that
+    ** G == 1.
+    */
+    if(prmSpecified(msr->prm, "dMsolUnit") &&
+       prmSpecified(msr->prm, "dKpcUnit")) {
+	msr->param.dGasConst = msr->param.dKpcUnit*KPCCM*KBOLTZ
+	    /MHYDR/GCGS/msr->param.dMsolUnit/MSOLG;
+	/* code energy per unit mass --> erg per g */
+	msr->param.dErgPerGmUnit = GCGS*msr->param.dMsolUnit*MSOLG/(msr->param.dKpcUnit*KPCCM);
+	/* code density --> g per cc */
+	msr->param.dGmPerCcUnit = (msr->param.dMsolUnit*MSOLG)/pow(msr->param.dKpcUnit*KPCCM,3.0);
+	/* code time --> seconds */
+	msr->param.dSecUnit = sqrt(1/(msr->param.dGmPerCcUnit*GCGS));
+	/* code comoving density --> g per cc = msr->param.dGmPerCcUnit (1+z)^3 */
+	msr->param.dComovingGmPerCcUnit = msr->param.dGmPerCcUnit;
+	}
+    else {
+	msr->param.dSecUnit = 1;
+	msr->param.dComovingGmPerCcUnit = 1;
+	msr->param.dGmPerCcUnit = 1;
+	msr->param.dErgPerGmUnit = 1;
+	}
+
+    msr->param.dTuFac = msr->param.dGasConst/(msr->param.dConstGamma - 1)/
+		msr->param.dMeanMolWeight;
+
+    if (prmSpecified(msr->prm, "dMetalDiffsionCoeff") || prmSpecified(msr->prm,"dThermalDiffusionCoeff")) {
+	if (!prmSpecified(msr->prm, "iDiffusion")) msr->param.iDiffusion=1;
+	}
+
+    /* Star parameter checks */
+
+    if (msr->param.bStarForm) {
+	msr->param.bAddDelete = 1;
+	if (!prmSpecified(msr->prm, "bFeedback")) msr->param.bFeedback=1;
+	}
+
+    /* END Gas and Star Parameter Checks */
 
     if (nDigits < 1 || nDigits > 9) {
 	(void) fprintf(stderr,"Unreasonable number of filename digits.\n");
@@ -863,6 +1082,8 @@ void msrLogParams(MSR msr,FILE *fp) {
 	fprintf(fp,"%s",hostname);
 #endif
     fprintf(fp,"\n# N: %"PRIu64,msr->N);
+    fprintf(fp," ngas: %"PRIu64,msr->nGas);
+    fprintf(fp," nstar: %"PRIu64,msr->nStar);
     fprintf(fp," nThreads: %d",msr->param.nThreads);
     fprintf(fp," bDiag: %d",msr->param.bDiag);
     fprintf(fp," Verbosity flags: (%d,%d,%d,%d,%d)",msr->param.bVWarnings,
@@ -870,7 +1091,8 @@ void msrLogParams(MSR msr,FILE *fp) {
 	    msr->param.bVDetails);
     fprintf(fp,"\n# bPeriodic: %d",msr->param.bPeriodic);
     fprintf(fp," bComove: %d",msr->param.csm->bComove);
-    fprintf(fp,"\n# bParaRead: %d",msr->param.bParaRead);
+    fprintf(fp,"\n# bRestart: %d",msr->param.bRestart);
+    fprintf(fp," bParaRead: %d",msr->param.bParaRead);
     fprintf(fp," bParaWrite: %d",msr->param.bParaWrite);
     fprintf(fp," bStandard: %d",msr->param.bStandard);
     fprintf(fp," iCompress: %d",msr->param.iCompress);
@@ -887,7 +1109,8 @@ void msrLogParams(MSR msr,FILE *fp) {
     fprintf(fp," nSteps: %d",msr->param.nSteps);
     fprintf(fp," nSmooth: %d",msr->param.nSmooth);
     fprintf(fp," dExtraStore: %f",msr->param.dExtraStore);
-    fprintf(fp," dExtraNodes: %f",msr->param.dExtraNodes);
+    fprintf(fp," nTreeBitsLo: %d",msr->param.nTreeBitsLo);
+    fprintf(fp," nTreeBitsHi: %d",msr->param.nTreeBitsHi);
     fprintf(fp," iCacheSize: %d",msr->param.iCacheSize);
     if (prmSpecified(msr->prm,"dSoft"))
 	fprintf(fp," dSoft: %g",msr->param.dSoft);
@@ -927,6 +1150,39 @@ void msrLogParams(MSR msr,FILE *fp) {
     fprintf(fp," dGrowDeltaM: %g",msr->param.dGrowDeltaM);
     fprintf(fp," dGrowStartT: %g",msr->param.dGrowStartT);
     fprintf(fp," dGrowEndT: %g",msr->param.dGrowEndT);
+
+    fprintf(fp,"\n# SPH: bDoGas: %d",msr->param.bDoGas);	
+    fprintf(fp," bGasAdiabatic: %d",msr->param.bGasAdiabatic);	
+    fprintf(fp," bGasIsothermal: %d",msr->param.bGasIsothermal);	
+    fprintf(fp," bGasCooling: %d",msr->param.bGasCooling);	
+    fprintf(fp," bInitTFromCooling: %d",msr->param.bInitTFromCooling);	
+    fprintf(fp," iRungCoolTableUpdate: %d",msr->param.iRungCoolTableUpdate);
+    fprintf(fp," iViscosityLimiter: %d",msr->param.iViscosityLimiter);	
+    fprintf(fp," iDiffusion: %d",msr->param.iDiffusion);	
+    fprintf(fp,"\n# dConstAlpha: %g",msr->param.dConstAlpha);
+    fprintf(fp," dConstBeta: %g",msr->param.dConstBeta);
+    fprintf(fp," dConstGamma: %g",msr->param.dConstGamma);
+    fprintf(fp," dMeanMolWeight: %g",msr->param.dMeanMolWeight);
+    fprintf(fp," dGasConst: %g",msr->param.dGasConst);
+    fprintf(fp,"\n# dEtaCourant: %g",msr->param.dEtaCourant);
+    fprintf(fp," dEtaUDot: %g",msr->param.dEtaUDot);
+    fprintf(fp," dTuFac: %g",msr->param.dTuFac);
+    fprintf(fp," dhMinOverSoft: %g",msr->param.dhMinOverSoft);
+    fprintf(fp," dMetalDiffusionCoeff: %g",msr->param.dMetalDiffusionCoeff);
+    fprintf(fp," dThermalDiffusionCoeff: %g",msr->param.dThermalDiffusionCoeff);
+    fprintf(fp,"\n# UNITS: dKBoltzUnit: %g",msr->param.dKBoltzUnit);
+    fprintf(fp," dMsolUnit: %g",msr->param.dMsolUnit);
+    fprintf(fp," dKpcUnit: %g",msr->param.dKpcUnit);
+    if(prmSpecified(msr->prm, "dMsolUnit") &&
+       prmSpecified(msr->prm, "dKpcUnit")) {
+	fprintf(fp," dErgPerGmUnit: %g", msr->param.dErgPerGmUnit );
+	fprintf(fp," dGmPerCcUnit (z=0): %g", msr->param.dGmPerCcUnit );
+	fprintf(fp," dSecUnit: %g", msr->param.dSecUnit );
+	fprintf(fp," dKmPerSecUnit (z=0): %g", sqrt(GCGS*msr->param.dMsolUnit*MSOLG/(msr->param.dKpcUnit*KPCCM))/1e5 );
+	}
+    fprintf(fp,"\n# STARFORM: bStarForm %d",msr->param.bStarForm);
+    fprintf(fp," bFeedback %d",msr->param.bFeedback);
+    /* -- */
     fprintf(fp,"\n# Group Find: bFindGroups: %d",msr->param.bFindGroups);
     fprintf(fp," dTau: %g",msr->param.dTau);
     fprintf(fp," dVTau: %g",msr->param.dVTau);
@@ -1138,19 +1394,16 @@ static void _SwapClasses(MSR msr, int id) {
     free(pClass);
     }
 
-#ifdef USE_HDF5
-void msrOneNodeReadHDF5(MSR msr, struct inReadTipsy *in) {
+void msrOneNodeRead(MSR msr, struct inReadFile *in) {
     int i,id;
     int *nParts;		/* number of particles for each processor */
     uint64_t nStart;
     PST pst0;
     LCL *plcl;
     char achInFile[PST_FILENAME_SIZE];
-    char achOutName[PST_FILENAME_SIZE];
     int nid;
     int inswap;
-    hid_t fileID;
-    IOHDF5 io;
+    FIO fio;
 
     nParts = malloc(msr->nThreads*sizeof(*nParts));
     for (id=0;id<msr->nThreads;++id) {
@@ -1170,13 +1423,14 @@ void msrOneNodeReadHDF5(MSR msr, struct inReadTipsy *in) {
     /*
     ** Add the local Data Path to the provided filename.
     */
-    _msrMakePath(plcl->pszDataPath,in->achInFile,achInFile);
-    _msrMakePath(plcl->pszDataPath,in->achOutName,achOutName);
+    _msrMakePath(plcl->pszDataPath,in->achFilename,achInFile);
 
-    fileID=H5Fopen(achInFile, H5F_ACC_RDONLY, H5P_DEFAULT);
-    assert(fileID >= 0);
-    io = ioHDF5Initialize( fileID, 32768, IOHDF5_SINGLE );
-    assert( io != NULL );
+    fio = fioOpen(achInFile,msr->param.csm->dOmega0,msr->param.csm->dOmegab);
+    if (fio==NULL) {
+	fprintf(stderr,"ERROR: unable to open input file\n");
+	perror(achInFile);
+	_msrExit(msr,1);
+	}
 
     nStart = nParts[0];
     assert(msr->pMap[0] == 0);
@@ -1186,7 +1440,7 @@ void msrOneNodeReadHDF5(MSR msr, struct inReadTipsy *in) {
 	 * Read particles into the local storage.
 	 */
 	assert(plcl->pkd->nStore >= nParts[id]);
-	pkdReadHDF5(plcl->pkd, io, in->dvFac, nStart, nParts[id]);
+	pkdReadFIO(plcl->pkd, fio, nStart, nParts[id], in->dvFac,in->dTuFac);
 	nStart += nParts[id];
 	/*
 	 * Now shove them over to the remote processor.
@@ -1201,72 +1455,9 @@ void msrOneNodeReadHDF5(MSR msr, struct inReadTipsy *in) {
     /*
      * Now read our own particles.
      */
-    pkdReadHDF5(plcl->pkd, io, in->dvFac, 0, nParts[0]);
+    pkdReadFIO(plcl->pkd, fio, 0, nParts[0], in->dvFac, in->dTuFac);
 
-    ioHDF5Finish(io);
-    H5Fclose(fileID);
-    }
-#endif
-
-void msrOneNodeReadTipsy(MSR msr, struct inReadTipsy *in) {
-    int i,id;
-    int *nParts;				/* number of particles for each processor */
-    uint64_t nStart;
-    PST pst0;
-    LCL *plcl;
-    char achInFile[PST_FILENAME_SIZE];
-    char achOutName[PST_FILENAME_SIZE];
-    int nid;
-    int inswap;
-
-    nParts = malloc(msr->nThreads*sizeof(*nParts));
-    assert(nParts!=NULL);
-    for (id=0;id<msr->nThreads;++id) {
-	nParts[id] = -1;
-	}
-
-    pstOneNodeReadInit(msr->pst, in, sizeof(*in), nParts, &nid);
-    assert((size_t)nid == msr->nThreads*sizeof(*nParts));
-    for (id=0;id<msr->nThreads;++id) {
-	assert(nParts[id] > 0);
-	}
-
-    pst0 = msr->pst;
-    while (pst0->nLeaves > 1)
-	pst0 = pst0->pstLower;
-    plcl = pst0->plcl;
-    /*
-    ** Add the local Data Path to the provided filename.
-    */
-    _msrMakePath(plcl->pszDataPath,in->achInFile,achInFile);
-    _msrMakePath(plcl->pszDataPath,in->achOutName,achOutName);
-
-    nStart = nParts[0];
-    assert(msr->pMap[0] == 0);
-    for (i=1;i<msr->nThreads;++i) {
-	id = msr->pMap[i];
-	/*
-	 * Read particles into the local storage.
-	 */
-	assert(plcl->pkd->nStore >= nParts[id]);
-	pkdReadTipsy(plcl->pkd,achInFile,nStart,nParts[id],
-		     in->bStandard,in->dvFac,in->bDoublePos,0);
-	nStart += nParts[id];
-	/*
-	 * Now shove them over to the remote processor.
-	 */
-	_SwapClasses(msr,id);
-	inswap = 0;
-	mdlReqService(pst0->mdl,id,PST_SWAPALL,&inswap,sizeof(inswap));
-	pkdSwapAll(plcl->pkd, id);
-	mdlGetReply(pst0->mdl,id,NULL,NULL);
-	}
-    assert(nStart == msr->N);
-    /*
-     * Now read our own particles.
-     */
-    pkdReadTipsy(plcl->pkd,achInFile,0,nParts[0],in->bStandard,in->dvFac,
-		 in->bDoublePos,0);
+    fioClose(fio);
     }
 
 int xdrHeader(XDR *pxdrs,struct dump *ph) {
@@ -1393,98 +1584,6 @@ double getTime(MSR msr, double dExpansion, double *dvFac) {
     return dTime;
     }
 
-#ifdef USE_HDF5
-static double _msrReadHDF5(MSR msr, const char *achFilename, uint64_t mMemoryModel) {
-    hid_t fileID;
-    IOHDF5 io;
-    double dExpansion;
-    struct inReadTipsy in;
-    char achInFile[PST_FILENAME_SIZE];
-    LCL *plcl = msr->pst->plcl;
-    double dTime;
-
-    strcpy(in.achInFile,achFilename);
-
-    /* Add local Data Path. */
-    _msrMakePath(plcl->pszDataPath,achFilename,achInFile);
-
-    fileID=H5Fopen(achInFile, H5F_ACC_RDONLY, H5P_DEFAULT);
-    if ( fileID < 0 ) {
-	printf("Could not open InFile:%s\n",achInFile);
-	_msrExit(msr,1);
-	}
-    io = ioHDF5Initialize( fileID, 32768, IOHDF5_SINGLE );
-
-    assert(ioHDF5ReadAttribute( io, "dTime", H5T_NATIVE_DOUBLE, &dExpansion ));
-    ioHDF5ReadAttribute( io, "dEcosmo", H5T_NATIVE_DOUBLE, &msr->dEcosmo );
-    ioHDF5ReadAttribute( io, "dTimeOld",H5T_NATIVE_DOUBLE, &msr->dTimeOld );
-    ioHDF5ReadAttribute( io, "dUOld",   H5T_NATIVE_DOUBLE, &msr->dUOld );
-
-    msr->nDark = ioHDF5DarkCount(io);
-    msr->nGas = ioHDF5GasCount(io);
-    msr->nStar = ioHDF5StarCount(io);
-    msr->N = msr->nDark+msr->nGas+msr->nStar;
-
-    msr->nMaxOrder = msr->N;
-    msr->nMaxOrderGas = msr->nGas;
-    msr->nMaxOrderDark = msr->nGas + msr->nDark;
-    assert(msr->N == msr->nDark+msr->nGas+msr->nStar);
-
-    ioHDF5Finish(io);
-    H5Fclose(fileID);
-
-    dTime = getTime(msr,dExpansion,&in.dvFac);
-    if (msr->param.bVStart)
-	printf("Reading file...\nN:%"PRIu64" nDark:%"PRIu64" nGas:%"PRIu64" nStar:%"PRIu64"\n",msr->N,
-	       msr->nDark,msr->nGas,msr->nStar);
-
-    in.nFileStart = 0;
-    in.nFileEnd = msr->N - 1;
-    in.nBucket = msr->param.nBucket;
-    in.nDark = msr->nDark;
-    in.nGas = msr->nGas;
-    in.nStar = msr->nStar;
-    in.mMemoryModel = mMemoryModel;
-    in.bStandard = msr->param.bStandard;
-    in.bDoublePos = msr->param.bDoublePos;
-    strcpy(in.achOutName,msr->param.achOutName);
-    /*
-    ** Since pstReadTipsy causes the allocation of the local particle
-    ** store, we need to tell it the percentage of extra storage it
-    ** should allocate for load balancing differences in the number of
-    ** particles.
-    */
-    in.fExtraStore = msr->param.dExtraStore;
-    in.fExtraNodes = msr->param.dExtraNodes;
-    in.iCacheSize  = msr->param.iCacheSize;
-    /*
-    ** Provide the period.
-    */
-    in.fPeriod[0] = msr->param.dxPeriod;
-    in.fPeriod[1] = msr->param.dyPeriod;
-    in.fPeriod[2] = msr->param.dzPeriod;
-
-    if (msr->param.bParaRead)
-	pstReadHDF5(msr->pst,&in,sizeof(in),NULL,NULL);
-    else
-	msrOneNodeReadHDF5(msr, &in);
-    msrSetClasses(msr);
-    msrprintf(msr,"Input file has been successfully read.\n");
-    /*
-    ** Now read in the output points, passing the initial time.
-    ** We do this only if nSteps is not equal to zero.
-    */
-    if (msrSteps(msr) > 0) msrReadOuts(msr,dTime);
-    /*
-    ** Set up the output counter.
-    */
-    for (msr->iOut=0;msr->iOut<msr->nOuts;++msr->iOut) {
-	if (dTime < msr->pdOutTime[msr->iOut]) break;
-	}
-    return(dTime);
-    }
-#endif
-
 #ifdef USE_GRAFIC
 double msrGenerateIC(MSR msr) {
     struct inGenerateIC in;
@@ -1502,7 +1601,8 @@ double msrGenerateIC(MSR msr) {
     in.omegav= msr->param.csm->dLambda;
     in.bComove = msr->param.csm->bComove;
     in.fExtraStore = msr->param.dExtraStore;
-    in.fExtraNodes = msr->param.dExtraNodes;
+    in.nTreeBitsLo = msr->param.nTreeBitsLo;
+    in.nTreeBitsHi = msr->param.nTreeBitsHi;
     in.iCacheSize  = msr->parm.iCacheSize;
     in.fPeriod[0] = msr->param.dxPeriod;
     in.fPeriod[1] = msr->param.dyPeriod;
@@ -1530,231 +1630,6 @@ double msrGenerateIC(MSR msr) {
     return getTime(msr,out.dExpansion,&dvFac);
     }
 #endif
-
-static double _msrReadTipsy(MSR msr, const char *achFilename, uint64_t mMemoryModel) {
-    FILE *fp;
-    struct dump h;
-    double dExpansion;
-    struct inReadTipsy in;
-    char achInFile[PST_FILENAME_SIZE];
-    LCL *plcl = msr->pst->plcl;
-    double dTime,aTo,tTo,z;
-
-    strcpy(in.achInFile,achFilename);
-
-
-    /* Add local Data Path. */
-    _msrMakePath(plcl->pszDataPath,achFilename,achInFile);
-
-
-    fp = fopen(achInFile,"r");
-
-    if (!fp) {
-	printf("Could not open InFile:%s\n",achInFile);
-	_msrExit(msr,1);
-	}
-
-    /*
-    ** Assume tipsy format for now, and dark matter only.
-    */
-    if (msr->param.bStandard) {
-	XDR xdrs;
-
-	xdrstdio_create(&xdrs,fp,XDR_DECODE);
-	xdrHeader(&xdrs,&h);
-	xdr_destroy(&xdrs);
-	}
-    else {
-	fread(&h,sizeof(struct dump),1,fp);
-	}
-    fclose(fp);
-    msr->N = h.nbodies;
-    msr->nDark = h.ndark;
-    msr->nGas = h.nsph;
-    msr->nStar = h.nstar;
-    dExpansion = h.time;
-
-#if 0
-    if (h.pad) {
-	/*
-	** This means we are dealing with *large* tipsy files
-	** The pad field provides 8 more high bits to each of
-	** nbodies, nsph, ndark and nstar.
-	*/
-	tlong = h.pad & 0x000000ff;
-	tlong = tlong << 32;
-	msr->N += tlong;
-	tlong = h.pad & 0x0000ff00;
-	tlong = tlong << 24;
-	msr->nGas += tlong;
-	tlong = h.pad & 0x00ff0000;
-	tlong = tlong << 16;
-	msr->nDark += tlong;
-	tlong = h.pad & 0xff000000;
-	tlong = tlong << 8;
-	msr->nStar += tlong;
-	}
-#endif
-
-    msr->nMaxOrder = msr->N;
-    msr->nMaxOrderGas = msr->nGas;
-    msr->nMaxOrderDark = msr->nGas + msr->nDark;
-    assert(msr->N == msr->nDark+msr->nGas+msr->nStar);
-    if (msr->param.csm->bComove) {
-	if (msr->param.csm->dHubble0 == 0.0) {
-	    printf("No hubble constant specified\n");
-	    _msrExit(msr,1);
-	    }
-	dTime = csmExp2Time(msr->param.csm,dExpansion);
-	z = 1.0/dExpansion - 1.0;
-	if (msr->param.bVStart)
-	    printf("Input file, Time:%g Redshift:%g Expansion factor:%g iStartStep:%d\n",
-		   dTime,z,dExpansion,msr->param.iStartStep);
-	if (prmSpecified(msr->prm,"dRedTo")) {
-	    if (msr->param.dRedTo <= -1.0) {
-		printf("Badly specified final redshift (zTo <= -1.0), check -zto parameter.\n");
-		_msrExit(msr,1);
-		}
-	    if (!prmArgSpecified(msr->prm,"nSteps") &&
-		    prmArgSpecified(msr->prm,"dDelta")) {
-		aTo = 1.0/(msr->param.dRedTo + 1.0);
-		tTo = csmExp2Time(msr->param.csm,aTo);
-		if (msr->param.bVStart)
-		    printf("Simulation to Time:%g Redshift:%g Expansion factor:%g\n",
-			   tTo,1.0/aTo-1.0,aTo);
-		if (tTo < dTime) {
-		    printf("Badly specified final redshift, check -zto parameter.\n");
-		    _msrExit(msr,1);
-		    }
-		msr->param.nSteps = (int)ceil((tTo-dTime)/msr->param.dDelta);
-		msr->param.dDelta =
-		    (tTo-dTime)/(msr->param.nSteps -
-				 msr->param.iStartStep);
-		}
-	    else if (!prmArgSpecified(msr->prm,"dDelta") &&
-		     prmArgSpecified(msr->prm,"nSteps")) {
-		aTo = 1.0/(msr->param.dRedTo + 1.0);
-		tTo = csmExp2Time(msr->param.csm,aTo);
-		if (msr->param.bVStart)
-		    printf("Simulation to Time:%g Redshift:%g Expansion factor:%g\n",
-			   tTo,1.0/aTo-1.0,aTo);
-		if (tTo < dTime) {
-		    printf("Badly specified final redshift, check -zto parameter.\n");
-		    _msrExit(msr,1);
-		    }
-		if (msr->param.nSteps != 0)
-		    msr->param.dDelta =
-			(tTo-dTime)/(msr->param.nSteps -
-				     msr->param.iStartStep);
-
-		else
-		    msr->param.dDelta = 0.0;
-		}
-	    else if (!prmSpecified(msr->prm,"nSteps") &&
-		     prmFileSpecified(msr->prm,"dDelta")) {
-		aTo = 1.0/(msr->param.dRedTo + 1.0);
-		tTo = csmExp2Time(msr->param.csm,aTo);
-		if (msr->param.bVStart)
-		    printf("Simulation to Time:%g Redshift:%g Expansion factor:%g\n",
-			   tTo,1.0/aTo-1.0,aTo);
-		if (tTo < dTime) {
-		    printf("Badly specified final redshift, check -zto parameter.\n");
-		    _msrExit(msr,1);
-		    }
-		msr->param.nSteps = (int)ceil((tTo-dTime)/msr->param.dDelta);
-		msr->param.dDelta =
-		    (tTo-dTime)/(msr->param.nSteps -
-				 msr->param.iStartStep);
-		}
-	    else if (!prmSpecified(msr->prm,"dDelta") &&
-		     prmFileSpecified(msr->prm,"nSteps")) {
-		aTo = 1.0/(msr->param.dRedTo + 1.0);
-		tTo = csmExp2Time(msr->param.csm,aTo);
-		if (msr->param.bVStart)
-		    printf("Simulation to Time:%g Redshift:%g Expansion factor:%g\n",
-			   tTo,1.0/aTo-1.0,aTo);
-		if (tTo < dTime) {
-		    printf("Badly specified final redshift, check -zto parameter.\n");
-		    _msrExit(msr,1);
-		    }
-		if (msr->param.nSteps != 0)
-		    msr->param.dDelta =	(tTo-dTime)/(msr->param.nSteps
-						     - msr->param.iStartStep);
-		else
-		    msr->param.dDelta = 0.0;
-		}
-	    }
-	else {
-	    tTo = dTime + msr->param.nSteps*msr->param.dDelta;
-	    aTo = csmTime2Exp(msr->param.csm,tTo);
-	    if (msr->param.bVStart)
-		printf("Simulation to Time:%g Redshift:%g Expansion factor:%g\n",
-		       tTo,1.0/aTo-1.0,aTo);
-	    }
-	if (msr->param.csm->bComove) {
-	    in.dvFac = dExpansion*dExpansion;
-	    }
-	else {
-	    in.dvFac = 1.0;
-	    }
-	}
-    else {
-	dTime = dExpansion;
-	if (msr->param.bVStart) printf("Input file, Time:%g iStartStep:%d\n",dTime,msr->param.iStartStep);
-	tTo = dTime + (msr->param.nSteps - msr->param.iStartStep)*msr->param.dDelta;
-	if (msr->param.bVStart) {
-	    printf("Simulation to Time:%g\n",tTo);
-	    printf("Reading file...\nN:%"PRIu64" nDark:%"PRIu64" nGas:%"PRIu64" nStar:%"PRIu64" Time:%g\n",
-		   msr->N,msr->nDark,msr->nGas,msr->nStar,dTime);
-	    }
-	in.dvFac = 1.0;
-	}
-    in.nFileStart = 0;
-    in.nFileEnd = msr->N - 1;
-    in.nBucket = msr->param.nBucket;
-    in.nDark = msr->nDark;
-    in.nGas = msr->nGas;
-    in.nStar = msr->nStar;
-    in.mMemoryModel = mMemoryModel;
-    in.bStandard = msr->param.bStandard;
-    in.bDoublePos = msr->param.bDoublePos;
-    strcpy(in.achOutName,msr->param.achOutName);
-    /*
-    ** Since pstReadTipsy causes the allocation of the local particle
-    ** store, we need to tell it the percentage of extra storage it
-    ** should allocate for load balancing differences in the number of
-    ** particles.
-    */
-    in.fExtraStore = msr->param.dExtraStore;
-    in.fExtraNodes = msr->param.dExtraNodes;
-    in.iCacheSize  = msr->param.iCacheSize;
-    /*
-    ** Provide the period.
-    */
-    in.fPeriod[0] = msr->param.dxPeriod;
-    in.fPeriod[1] = msr->param.dyPeriod;
-    in.fPeriod[2] = msr->param.dzPeriod;
-
-    if (msr->param.bParaRead)
-	pstReadTipsy(msr->pst,&in,sizeof(in),NULL,NULL);
-    else
-	msrOneNodeReadTipsy(msr, &in);
-    msrSetClasses(msr);
-    msrprintf(msr,"Input file has been successfully read.\n");
-    /*
-    ** Now read in the output points, passing the initial time.
-    ** We do this only if nSteps is not equal to zero.
-    */
-    if (msrSteps(msr) > 0) msrReadOuts(msr,dTime);
-    /*
-    ** Set up the output counter.
-    */
-    for (msr->iOut=0;msr->iOut<msr->nOuts;++msr->iOut) {
-	if (dTime < msr->pdOutTime[msr->iOut]) break;
-	}
-    return(dTime);
-    }
-
 
 #ifdef USE_MDL_IO
 void msrIOWrite(MSR msr, const char *achOutName, double dTime, int bCheckpoint) {
@@ -1867,7 +1742,8 @@ void msrSaveParameters(MSR msr, IOHDF5 io) {
     ioHDF5WriteAttribute( io, "bDoPotOutput", H5T_NATIVE_INT, &msr->param.bDoPotOutput );
     ioHDF5WriteAttribute( io, "dEta", H5T_NATIVE_DOUBLE, &msr->param.dEta );
     ioHDF5WriteAttribute( io, "dExtraStore", H5T_NATIVE_DOUBLE, &msr->param.dExtraStore );
-    ioHDF5WriteAttribute( io, "dExtraNodes", H5T_NATIVE_DOUBLE, &msr->param.dExtraNodes );
+    ioHDF5WriteAttribute( io, "nTreeBitsLo", H5T_NATIVE_INT, &msr->param.nTreeBitsLo );
+    ioHDF5WriteAttribute( io, "nTreeBitsHi", H5T_NATIVE_INT, &msr->param.nTreeBitsHi );
     ioHDF5WriteAttribute( io, "iCacheSize", H5T_NATIVE_INT, &msr->param.iCacheSize );
     ioHDF5WriteAttribute( io, "dSoft", H5T_NATIVE_DOUBLE, &msr->param.dSoft );
     ioHDF5WriteAttribute( io, "dSoftMax", H5T_NATIVE_DOUBLE, &msr->param.dSoftMax );
@@ -2019,7 +1895,7 @@ uint64_t msrCalcWriteStart(MSR msr) {
     }
 
 void _msrWriteTipsy(MSR msr,const char *pszFileName,double dTime,int bCheckpoint) {
-    FILE *fp;
+    FIO fio;
     struct dump h;
     struct inWriteTipsy in;
     char achOutFile[PST_FILENAME_SIZE];
@@ -2054,10 +1930,8 @@ void _msrWriteTipsy(MSR msr,const char *pszFileName,double dTime,int bCheckpoint
     /*
     ** Assume tipsy format for now.
     */
-    /* So that "N" can be nDark */
-    assert(msr->nGas==0&&msr->nStar==0);
-    h.nbodies = N; /*msr->N;*/
-    h.ndark = N; /*msr->nDark;*/
+    h.nbodies = msr->N;
+    h.ndark = msr->nDark;
     h.nsph = msr->nGas;
     h.nstar = msr->nStar;
     if (msr->param.csm->bComove) {
@@ -2103,22 +1977,16 @@ void _msrWriteTipsy(MSR msr,const char *pszFileName,double dTime,int bCheckpoint
 #endif
 	/* This is always executed if not using HDF5 */
 	{
-	fp = fopen(achOutFile,"w");
-	if (!fp) {
-	    printf("Could not open OutFile:%s\n",achOutFile);
+	fio = fioTipsyCreate(achOutFile,
+			     msr->param.bDoublePos,
+			     msr->param.bStandard,in.dTime,
+			     msr->nGas, msr->nDark, msr->nStar);
+	if (fio==NULL) {
+	    fprintf(stderr,"ERROR: unable to create output file\n");
+	    perror(achOutFile);
 	    _msrExit(msr,1);
 	    }
-	if (in.bStandard) {
-	    XDR xdrs;
-
-	    xdrstdio_create(&xdrs,fp,XDR_ENCODE);
-	    xdrHeader(&xdrs,&h);
-	    xdr_destroy(&xdrs);
-	    }
-	else {
-	    fwrite(&h,sizeof(struct dump),1,fp);
-	    }
-	fclose(fp);
+	fioClose(fio);
 
 	if (msr->param.bParaWrite)
 	    pstWriteTipsy(msr->pst,&in,sizeof(in),NULL,NULL);
@@ -2404,16 +2272,25 @@ void msrDomainDecomp(MSR msr,int iRung,int bGreater,int bSplitVA) {
 void _BuildTree(MSR msr,double dTimeStamp,int bExcludeVeryActive,int bNeedEwald) {
     struct inBuildTree in;
     struct ioCalcRoot root;
+    PST pst0;
+    LCL *plcl;
+    PKD pkd;
     KDN *pkdn;
     int iDum,nCell;
     double sec,dsec;
+
+    pst0 = msr->pst;
+    while (pst0->nLeaves > 1)
+	pst0 = pst0->pstLower;
+    plcl = pst0->plcl;
+    pkd = plcl->pkd;
 
     msrprintf(msr,"Building local trees...\n\n");
 
     in.nBucket = msr->param.nBucket;
     in.diCrit2 = 1/(msr->dCrit*msr->dCrit);
     nCell = 1<<(1+(int)ceil(log((double)msr->nThreads)/log(2.0)));
-    pkdn = malloc(nCell*sizeof(KDN));
+    pkdn = malloc(nCell*pkdNodeSize(pkd));
     assert(pkdn != NULL);
     in.iCell = ROOT;
     in.nCell = nCell;
@@ -2425,7 +2302,7 @@ void _BuildTree(MSR msr,double dTimeStamp,int bExcludeVeryActive,int bNeedEwald)
     dsec = msrTime() - sec;
     msrprintf(msr,"Tree built, Wallclock: %f secs\n\n",dsec);
 
-    pstDistribCells(msr->pst,pkdn,nCell*(int)sizeof(KDN),NULL,NULL);
+    pstDistribCells(msr->pst,pkdn,nCell*pkdNodeSize(pkd),NULL,NULL);
     free(pkdn);
     if (!bExcludeVeryActive && bNeedEwald) {
 	/*
@@ -2481,7 +2358,7 @@ void msrOutASCII(MSR msr,const char *pszFile,int iType,int nDims) {
 
 
     switch(nDims) {
-    case 1: arrayOrVector = "vector"; break;
+    case 1: arrayOrVector = "vector"; break; /* JW -- seems like a bug */
     case 3: arrayOrVector = "array";  break;
     default:assert(nDims==1 || nDims==3);
 	}
@@ -2597,27 +2474,47 @@ void msrOutVector(MSR msr,const char *pszFile,int iType) {
     msrOutASCII(msr,pszFile,iType,3);
     }
 
+void msrSmoothSetSMF(MSR msr, SMF *smf, double dTime) {
+#ifdef SYMBA
+    smf->dSunMass = msr->dSunMass;
+#endif
+    smf->dTime = dTime;
+    if (msrComove(msr)) {
+	smf->bComove = 1;
+	smf->H = csmTime2Hub(msr->param.csm,dTime);
+	smf->a = csmTime2Exp(msr->param.csm,dTime);
+	}
+    else {
+	smf->bComove = 0;
+	smf->H = 0.0;
+	smf->a = 1.0;
+	}
+    smf->alpha = msr->param.dConstAlpha;
+    smf->beta = msr->param.dConstBeta;
+    smf->gamma = msr->param.dConstGamma;
+    smf->dDelta = msr->param.dDelta;
+    smf->dEtaCourant = msr->param.dEtaCourant;
+    smf->iViscosityLimiter = msr->param.iViscosityLimiter;
+    smf->iDiffusion = msr->param.iDiffusion;
+    smf->dMetalDiffusionCoeff = msr->param.dMetalDiffusionCoeff;
+    smf->dThermalDiffusionCoeff = msr->param.dThermalDiffusionCoeff;
+    /* For SF & FB in code units */
+#define SECONDSPERYEAR   31557600.
+    smf->SFdESNPerStarMass = msr->param.SFdESNPerStarMass/msr->param.dErgPerGmUnit;
+    smf->SFdtCoolingShutoff = msr->param.SFdtCoolingShutoff*SECONDSPERYEAR/msr->param.dSecUnit;
+    smf->SFdtFeedbackDelay = msr->param.SFdtFeedbackDelay*SECONDSPERYEAR/msr->param.dSecUnit;
+    smf->SFdMassLossPerStarMass = msr->param.SFdMassLossPerStarMass;
+    smf->SFdZMassPerStarMass = msr->param.SFdZMassPerStarMass;
+    }
+
 void msrSmooth(MSR msr,double dTime,int iSmoothType,int bSymmetric) {
     struct inSmooth in;
 
-    /*
-    ** Make sure that the type of tree is a density binary tree!
-    */
     in.nSmooth = msr->param.nSmooth;
     in.bPeriodic = msr->param.bPeriodic;
     in.bSymmetric = bSymmetric;
     in.iSmoothType = iSmoothType;
-#ifdef SYMBA
-    in.smf.dSunMass = msr->dSunMass;
-#endif
-    if (msrComove(msr)) {
-	in.smf.H = csmTime2Hub(msr->param.csm,dTime);
-	in.smf.a = csmTime2Exp(msr->param.csm,dTime);
-	}
-    else {
-	in.smf.H = 0.0;
-	in.smf.a = 1.0;
-	}
+    msrSmoothSetSMF(msr, &(in.smf), dTime);
     if (msr->param.bVStep) {
 	double sec,dsec;
 	printf("Smoothing...\n");
@@ -2635,21 +2532,11 @@ void msrSmooth(MSR msr,double dTime,int iSmoothType,int bSymmetric) {
 void msrReSmooth(MSR msr,double dTime,int iSmoothType,int bSymmetric) {
     struct inReSmooth in;
 
-    /*
-    ** Make sure that the type of tree is a density binary tree!
-    */
     in.nSmooth = msr->param.nSmooth;
     in.bPeriodic = msr->param.bPeriodic;
     in.bSymmetric = bSymmetric;
     in.iSmoothType = iSmoothType;
-    if (msrComove(msr)) {
-	in.smf.H = csmTime2Hub(msr->param.csm,dTime);
-	in.smf.a = csmTime2Exp(msr->param.csm,dTime);
-	}
-    else {
-	in.smf.H = 0.0;
-	in.smf.a = 1.0;
-	}
+    msrSmoothSetSMF(msr, &(in.smf), dTime);
     if (msr->param.bVStep) {
 	double sec,dsec;
 	printf("ReSmoothing...\n");
@@ -2746,6 +2633,9 @@ void msrGravity(MSR msr,uint8_t uRungLo, uint8_t uRungHi, double dTime,
     struct outGravity *out;
     int i,id,iDum;
     double sec,dsec,dTotFlop;
+
+    msrSelSrcAll(msr); /* Not really sure what the setting here needs to be */
+    msrSelDstAll(msr);  
 
     if (msr->param.bVStep) printf("Calculating Gravity, Step:%f\n",dStep);
     in.dTime = dTime;
@@ -2859,17 +2749,20 @@ void msrDrift(MSR msr,double dTime,double dDelta,uint8_t uRungLo,uint8_t uRungHi
     in.dTime = dTime;
     if (msr->param.csm->bComove) {
 	in.dDelta = csmComoveDriftFac(msr->param.csm,dTime,dDelta);
+	in.dDeltaVPred = csmComoveKickFac(msr->param.csm,dTime,dDelta);
 	}
     else {
 	in.dDelta = dDelta;
+	in.dDeltaVPred = dDelta;
 	}
+    in.dDeltaUPred = dDelta;
     in.uRungLo = uRungLo;
     in.uRungHi = uRungHi;
     pstDrift(msr->pst,&in,sizeof(in),NULL,NULL);
     }
 
 /*
- * For gasoline, updates predicted velocities to beginning of timestep.
+ * For gas, updates predicted velocities to beginning of timestep.
  */
 void msrKickKDKOpen(MSR msr,double dTime,double dDelta,uint8_t uRungLo,uint8_t uRungHi) {
     struct inKick in;
@@ -2878,10 +2771,14 @@ void msrKickKDKOpen(MSR msr,double dTime,double dDelta,uint8_t uRungLo,uint8_t u
     in.dTime = dTime;
     if (msr->param.csm->bComove) {
 	in.dDelta = csmComoveKickFac(msr->param.csm,dTime,dDelta);
+	in.dDeltaVPred = 0;
     }
     else {
 	in.dDelta = dDelta;
+	in.dDeltaVPred = 0;
     }
+    in.dDeltaU = dDelta;
+    in.dDeltaUPred = 0;
     in.uRungLo = uRungLo;
     in.uRungHi = uRungHi;
     pstKick(msr->pst,&in,sizeof(in),&out,NULL);
@@ -2890,7 +2787,7 @@ void msrKickKDKOpen(MSR msr,double dTime,double dDelta,uint8_t uRungLo,uint8_t u
     }
 
 /*
- * For gasoline, updates predicted velocities to end of timestep.
+ * For gas, updates predicted velocities to end of timestep.
  */
 void msrKickKDKClose(MSR msr,double dTime,double dDelta,uint8_t uRungLo,uint8_t uRungHi) {
     struct inKick in;
@@ -2899,10 +2796,14 @@ void msrKickKDKClose(MSR msr,double dTime,double dDelta,uint8_t uRungLo,uint8_t 
     in.dTime = dTime;
     if (msr->param.csm->bComove) {
 	in.dDelta = csmComoveKickFac(msr->param.csm,dTime,dDelta);
+	in.dDeltaVPred = in.dDelta;
     }
     else {
 	in.dDelta = dDelta;
+	in.dDeltaVPred = in.dDelta;
     }
+    in.dDeltaU = dDelta;
+    in.dDeltaUPred = in.dDeltaU;
     in.uRungLo = uRungLo;
     in.uRungHi = uRungHi;
     pstKick(msr->pst,&in,sizeof(in),&out,NULL);
@@ -3129,9 +3030,9 @@ msrInitStep(MSR msr) {
     pstInitStep(msr->pst, &in, sizeof(in), NULL, NULL);
 
     /*
-    ** Initialize particles to lowest rung. (what for?)
+    ** Initialize particles to lowest rung. (what for? JW: Seconded and removed)
     */
-    insr.uRung = msr->param.iMaxRung - 1;
+    insr.uRung = 0; /* msr->param.iMaxRung - 1; */
     insr.uRungLo = 0;
     insr.uRungHi = MAX_RUNG;
     pstSetRung(msr->pst, &insr, sizeof(insr), NULL, NULL);
@@ -3230,6 +3131,18 @@ void msrAccelStep(MSR msr,uint8_t uRungLo,uint8_t uRungHi,double dTime) {
     in.uRungLo = uRungLo;
     in.uRungHi = uRungHi;
     pstAccelStep(msr->pst,&in,sizeof(in),NULL,NULL);
+    }
+
+/* Requires full forces and full udot (i.e. sph and cooling both done) */
+void msrSphStep(MSR msr,uint8_t uRungLo,uint8_t uRungHi,double dTime) {
+    struct inSphStep in;
+    double a;
+
+    a = csmTime2Exp(msr->param.csm,dTime);
+    in.dAccFac = 1.0/(a*a*a);
+    in.uRungLo = uRungLo;
+    in.uRungHi = uRungHi;
+    pstSphStep(msr->pst,&in,sizeof(in),NULL,NULL);
     }
 
 void msrDensityStep(MSR msr,uint8_t uRungLo,uint8_t uRungHi,double dTime) {
@@ -3342,9 +3255,11 @@ void msrTopStepKDK(MSR msr,
     if (iAdjust && (iRung < msrMaxRung(msr)-1)) {
 	msrprintf(msr,"%*cAdjust, iRung: %d\n",2*iRung+2,' ',iRung);
 	msrActiveRung(msr, iRung, 1);
-
 	if (msr->param.bAccelStep) {
 	    msrAccelStep(msr,iRung,MAX_RUNG,dTime);
+	    }
+	if (msrDoGas(msr)) {
+	    msrSphStep(msr,iRung,MAX_RUNG,dTime);
 	    }
 	if (msr->param.bDensityStep) {
 	    bSplitVA = 0;
@@ -3354,7 +3269,8 @@ void msrTopStepKDK(MSR msr,
 	    msrDensityStep(msr,iRung,MAX_RUNG,dTime);
 	    }
 	iRungVeryActive = msrUpdateRung(msr,iRung);
-	}
+        }
+
     msrprintf(msr,"%*cmsrKickOpen  at iRung: %d 0.5*dDelta: %g\n",
 	      2*iRung+2,' ',iRung,0.5*dDelta);
     msrKickKDKOpen(msr,dTime,0.5*dDelta,iRung,iRung);
@@ -3383,21 +3299,28 @@ void msrTopStepKDK(MSR msr,
 	bSplitVA = 0;
 	msrDomainDecomp(msr,iKickRung,1,bSplitVA);
 
-	if (msrDoGravity(msr)) {
+	if (msrDoGravity(msr) || msrDoGas(msr)) {
 	    msrActiveRung(msr,iKickRung,1);
-	    msrUpdateSoft(msr,dTime);
-	    msrprintf(msr,"%*cGravity, iRung: %d to %d\n",2*iRung+2,' ',iKickRung,iRung);
+	    if (msrDoGravity(msr)) msrUpdateSoft(msr,dTime);
+	    msrprintf(msr,"%*cForces, iRung: %d to %d\n",2*iRung+2,' ',iKickRung,iRung);
 	    msrBuildTree(msr,dTime,msr->param.bEwald);
+	    }
+	if (msrDoGravity(msr)) {
 	    msrGravity(msr,iKickRung,MAX_RUNG,dTime,dStep,msr->param.bEwald,piSec,&nActive);
 	    *pdActiveSum += (double)nActive/msr->N;
 	    }
-
+	
 #ifdef PLANETS
 	/* Sun's direct and indirect gravity */
 	if (msr->param.bHeliocentric) {
 	    msrGravSun(msr);
 	    }
 #endif
+	if (msrDoGas(msr)) {
+	    msrSph(msr,dTime,dStep);
+	    msrCooling(msr,dTime,dStep,0,
+		       (iKickRung<=msr->param.iRungCoolTableUpdate ? 1:0),0);
+	    }
 	/*
 	 * move time back to 1/2 step so that KickClose can integrate
 	 * from 1/2 through the timestep to the end.
@@ -3408,6 +3331,7 @@ void msrTopStepKDK(MSR msr,
 	double dDeltaTmp;
 	int i;
 
+	assert(!msrDoGas(msr)); /* Gas doesn't handle VA yet */
 	/*
 	 * We have more rungs to go, but we've hit the very active limit.
 	 */
@@ -3501,8 +3425,82 @@ void msrTopStepKDK(MSR msr,
     msrprintf(msr,"%*cKickClose, iRung: %d, 0.5*dDelta: %g\n",
 	      2*iRung+2,' ',iRung, 0.5*dDelta);
     msrKickKDKClose(msr,dTime,0.5*dDelta,iRung,iRung);
+
+    /* JW: Creating/Deleting/Merging is best done outside (before or after) KDK cycle 
+       -- Tree should still be valid from last force eval (only Drifts + Deletes invalidate it) */
+    if (iKickRung == iRung) { /* Do all co-incident kicked p's in one go */
+	msrActiveRung(msr,iKickRung,1);
+	msrStarForm(msr, dTime); /* re-eval timesteps as needed for next step 
+					    -- apply to all neighbours */
+	}
     }
 
+void msrStarForm(MSR msr, double dTime)
+    {
+    struct inStarForm in;
+    struct outStarForm out;
+    double a,d1,d2;
+    double sec,sec1,dsec;
+
+    if(!msr->param.bStarForm) return;
+    sec = msrTime();
+
+    a = csmTime2Exp(msr->param.csm,dTime);
+    in.dDelta = 0;
+    /* Convert input parameters to code units */
+    in.dRateCoeff = msr->param.SFdEfficiency*sqrt(32/(3*M_PI)/pow(a,3)); /* G=1 */
+    in.dTMax = msr->param.SFdTMax;
+    d1 = msr->param.SFdComovingDenMin;
+    d2 = msr->param.SFdPhysDenMin/msr->param.dGmPerCcUnit*pow(a,3);
+    in.dDenMin = (d1>d2 ? d1 : d2);
+    
+    in.dTime = dTime;
+    in.dInitStarMass = msr->param.SFdInitStarMass;
+    in.dESNPerStarMass = msr->param.SFdESNPerStarMass/msr->param.dErgPerGmUnit;
+#define SECONDSPERYEAR   31557600.
+    in.dtCoolingShutoff = msr->param.SFdtCoolingShutoff*SECONDSPERYEAR/msr->param.dSecUnit;
+    in.dtFeedbackDelay = msr->param.SFdtFeedbackDelay*SECONDSPERYEAR/msr->param.dSecUnit;
+    in.dMassLossPerStarMass = msr->param.SFdMassLossPerStarMass;
+    in.dZMassPerStarMass = msr->param.SFdZMassPerStarMass;
+    in.dInitStarMass = msr->param.SFdInitStarMass;
+    in.dMinGasMass = msr->param.SFdMinGasMass;
+    in.bdivv = msr->param.SFbdivv;
+    
+    if (msr->param.bVDetails) printf("Star Form ... ");
+    
+    pstStarForm(msr->pst, &in, sizeof(in), &out, NULL);
+    if (msr->param.bVDetails)
+	printf("%d Stars formed with mass %g, %d gas deleted\n",
+	       out.nFormed, out.dMassFormed, out.nDeleted);
+    
+    if (out.nDeleted) {
+	msrSelSrcGas(msr); /* Not really sure what the setting here needs to be */
+	msrSelDstGas(msr);  
+	msrActiveRung(msr,0,1);
+	msrBuildTree(msr,dTime,msr->param.bEwald);
+	msrSmooth(msr, dTime, SMX_DIST_DELETED_GAS, 1);
+	}
+
+    /* Strictly speaking adding/deleting particles invalidates the tree 
+       In practice we can find deleted particles (and ignore them) and we aren't looking for 
+       any new star particles so we should be able to function with an old tree for FB 
+       Could do FB before the AddDel call if careful to exclude deleted particles */
+    if (out.nDeleted || out.nFormed) msrAddDelParticles(msr);
+    
+    sec1 = msrTime();
+    dsec = sec1 - sec;
+    printf("Star Formation Calculated, Wallclock: %f secs\n\n",dsec);
+
+    if (msr->param.bFeedback) {
+ 	msrSelSrcGas(msr); /* Not really sure what the setting here needs to be */
+	msrSelDstStar(msr);  
+	msrActiveRung(msr,0,1);
+	msrBuildTree(msr,dTime,msr->param.bEwald);
+	msrSmooth(msr, dTime, SMX_DIST_SN_ENERGY, 1);
+	dsec = msrTime() - sec1;
+	printf("Feedback Calculated, Wallclock: %f secs\n\n",dsec);
+	}
+    }
 
 void msrStepVeryActiveKDK(MSR msr, double dStep, double dTime, double dDelta,
 		     int iRung) {
@@ -3885,6 +3883,29 @@ uint64_t msrMaxOrder(MSR msr) {
     return msr->nMaxOrder;
     }
 
+void msrGetNParts(MSR msr) { /* JW: Not pretty -- may be better way via fio */
+    struct outGetNParts outget;
+
+    pstGetNParts(msr->pst,NULL,0,&outget,NULL);
+    if (outget.iMaxOrderGas == -1) outget.iMaxOrderGas = 0;
+    if (outget.iMaxOrderDark == -1) outget.iMaxOrderDark = outget.iMaxOrderGas;
+    if (outget.iMaxOrderStar == -1) outget.iMaxOrderStar = outget.iMaxOrderDark;
+    assert(outget.nGas == msr->nGas);
+    assert(outget.nDark == msr->nDark);
+    assert(outget.nStar == msr->nStar);
+    msr->nMaxOrderGas = outget.iMaxOrderGas;
+    msr->nMaxOrderDark = outget.iMaxOrderDark;
+    msr->nMaxOrder = outget.iMaxOrderStar;
+    if (outget.iMaxOrderGas > msr->nMaxOrder) {
+	msr->nMaxOrder = outget.iMaxOrderGas;
+	fprintf(stderr,"WARNING: Largest iOrder of gas > Largest iOrder of star\n");
+	}
+    if (outget.iMaxOrderDark > msr->nMaxOrder) {
+	msr->nMaxOrder = outget.iMaxOrderDark;
+	fprintf(stderr,"WARNING: Largest iOrder of dark > Largest iOrder of star\n");
+	}
+    }
+
 void
 msrAddDelParticles(MSR msr) {
     struct outColNParts *pColNParts;
@@ -3916,7 +3937,7 @@ msrAddDelParticles(MSR msr) {
 	      printf("need to rebuild tree, code in msrAddDelParticles()\n");
 	      printf("needs to be updated. Bailing out for now...\n");
 	      exit(-1); */
-	    pNewOrder[i] = msr->nMaxOrder;
+	    pNewOrder[i] = msr->nMaxOrder+1; /* JW: +1 was missing for some reason */
 	    msr->nMaxOrder += pColNParts[i].nNew;
 	    msr->nGas += pColNParts[i].nDeltaGas;
 	    msr->nDark += pColNParts[i].nDeltaDark;
@@ -3925,7 +3946,7 @@ msrAddDelParticles(MSR msr) {
 	}
     msr->N = msr->nGas + msr->nDark + msr->nStar;
 
-    msr->nMaxOrderDark = msr->nMaxOrder;
+    /*msr->nMaxOrderDark = msr->nMaxOrder;*/
 
     pstNewOrder(msr->pst,pNewOrder,(int)sizeof(*pNewOrder)*msr->nThreads,NULL,NULL);
 
@@ -3937,6 +3958,7 @@ msrAddDelParticles(MSR msr) {
     in.nStar = msr->nStar;
     in.nMaxOrderGas = msr->nMaxOrderGas;
     in.nMaxOrderDark = msr->nMaxOrderDark;
+    in.nMaxOrder = msr->nMaxOrder;
     pstSetNParts(msr->pst,&in,sizeof(in),NULL,NULL);
 
 #ifdef PLANETS
@@ -3960,6 +3982,132 @@ int msrPNGResolution(MSR msr) {
 int msrDoGravity(MSR msr) {
     return(msr->param.bDoGravity);
     }
+
+/* Gas routines */
+
+int msrDoGas(MSR msr) {
+    return(msr->param.bDoGas);
+    }
+
+void msrInitSph(MSR msr,double dTime)
+    {
+    /* Init gas, internal energy -- correct estimate from dTuFac */
+    msrActiveRung(msr,0,1);
+    /* Very important NOT to do this if starting from a checkpoint */
+    if (msr->param.bGasCooling && !msr->param.bRestart) {
+	struct inCorrectEnergy in;
+	double a;
+
+ 	msrSelSrcGas(msr); /* Not really sure what the setting here needs to be */
+	msrSelDstGas(msr);  
+	msrSmooth(msr,dTime,SMX_DENDVDX,0);  
+
+	in.dTuFac = msr->param.dTuFac;
+	a = csmTime2Exp(msr->param.csm,dTime);
+	in.z = 1/a - 1;
+	in.dTime = dTime;
+	if (msr->param.bInitTFromCooling) {
+	    fprintf(stderr,"INFO: Resetting thermal energies to special value in cooling routines\n");
+	    in.iDirection = CORRECTENERGY_SPECIAL;
+	    }
+	else {
+	    fprintf(stderr,"INFO: Correcting (dTuFac) thermal energies using cooling routines\n");
+	    in.iDirection = CORRECTENERGY_IN;
+	    }
+	   
+	pstCorrectEnergy(msr->pst, &in, sizeof(in), NULL, NULL);
+	}
+    
+    /* Init forces, ... */
+    msrActiveRung(msr,0,1);
+    msrSph(msr,dTime,0);
+    msrSphStep(msr,0,MAX_RUNG,dTime); /* Requires SPH */
+    msrCooling(msr,dTime,0,0,1,1); /* Interate cooling for consistent dt */
+    }
+
+void msrSph(MSR msr,double dTime, double dStep) {
+    double sec,dsec;
+
+    if (msr->param.bVStep) printf("Calculating Sph, Step:%f\n",dStep);
+    sec = msrTime();
+
+/* JW: Is the tree aware of this -- does it need to be? 
+       Will smooth behave correctly? */
+
+    msrSelSrcGas(msr); /* Not really sure what the setting here needs to be */
+    msrSelDstGas(msr);  
+
+    msrSmooth(msr,dTime,SMX_DENDVDX,0);  
+    msrSmooth(msr,dTime,SMX_SPHFORCES,1); /* Should be a resmooth */
+
+    dsec = msrTime() - sec;
+    if (msr->param.bVStep) {
+	printf("SPH Calculated, Wallclock: %f secs\n",  dsec);
+	}
+    }
+
+
+void msrCoolSetup(MSR msr, double dTime)
+    {
+    struct inCoolSetup in;
+    
+    if (!msr->param.bGasCooling) return;
+
+    in.dGmPerCcUnit = msr->param.dGmPerCcUnit;
+    in.dComovingGmPerCcUnit = msr->param.dComovingGmPerCcUnit;
+    in.dErgPerGmUnit = msr->param.dErgPerGmUnit;
+    in.dSecUnit = msr->param.dSecUnit;
+    in.dKpcUnit = msr->param.dKpcUnit;
+    
+    in.dOmega0 = msr->param.csm->dOmega0;
+    in.dHubble0 = msr->param.csm->dHubble0; /* code unit Hubble0 -- usually sqrt(8 pi/3) */
+    in.dLambda = msr->param.csm->dLambda;
+    in.dOmegab = msr->param.csm->dOmegab;
+    in.dOmegaRad = msr->param.csm->dOmegaRad;
+    
+    in.a = csmTime2Exp(msr->param.csm,dTime);
+    in.z = 1/in.a-1;
+    in.dTime = dTime; 
+    in.CoolParam = msr->param.CoolParam;
+    
+    pstCoolSetup(msr->pst,&in,sizeof(struct inCoolSetup),NULL,NULL);
+    }
+
+void msrCooling(MSR msr,double dTime,double dStep,int bUpdateState, int bUpdateTable, int bIterateDt)
+    {
+    struct inCooling in;
+    struct outCooling out;
+    double a,sec,dsec;
+	
+    if (!msr->param.bGasCooling) return;
+    if (msr->param.bVStep) printf("Calculating Cooling, Step:%f\n",dStep);
+    sec = msrTime();
+
+    a = csmTime2Exp(msr->param.csm,dTime);
+    in.z = 1/a - 1;
+    in.dTime = dTime;
+    in.bUpdateState = bUpdateState;
+    in.bUpdateTable = bUpdateTable;
+    in.bIterateDt = bIterateDt;
+    
+    if (bUpdateTable) {
+	printf("Cooling: Updating Tables to z=%g\n",in.z);
+	}
+
+    if (bIterateDt > 0) {
+	printf("Cooling: Iterating on cooling timestep: individual dDelta(uDot) \n");
+	}
+
+    pstCooling(msr->pst,&in,sizeof(in),&out,NULL);
+    
+    dsec = msrTime() - sec;
+    if (msr->param.bVStep) {
+	printf("Cooling Calculated, Wallclock: %f secs\n",  dsec);
+	}
+    }
+
+
+/* END Gas routines */
 
 void msrFof(MSR msr, double exp) {
     struct inFof in;
@@ -4333,7 +4481,8 @@ msrReadSS(MSR msr) {
      ** particles.
      */
     in.fExtraStore = msr->param.dExtraStore;
-    in.fExtraNodes = msr->param.dExtraNodes;
+    in.nTreeBitsLo = msr->param.nTreeBitsLo;
+    in.nTreeBitsHi = msr->param.nTreeBitsHi;
     in.iCacheSize  = msr->parm.iCacheSize;
 
     in.fPeriod[0] = msr->param.dxPeriod;
@@ -4909,142 +5058,11 @@ void msrWrite(MSR msr,const char *pszFileName,double dTime,int bCheckpoint) {
 #endif
     }
 
-
-static struct inReadFile * fileScan(MSR msr, const char *achFilename, double *pdExpansion) {
-    struct inReadFile *read;
-    struct inFile *file;
-    int i;
-    FILE *fp;
-    struct dump h;
-    uint64_t iOffset;
-    off_t oStart, oEnd, oSize;
-
-#if defined(HAVE_WORDEXP) && defined(HAVE_WORDFREE)
-    wordexp_t files;
-
-    wordexp(achFilename, &files, 0);
-    if ( files.we_wordc <= 0 ) {
-	printf("No such file: %s\n", achFilename);
-	_msrExit(msr,1);
-	}
-
-    assert(files.we_wordc<=PST_MAX_FILES);
-    read = malloc(sizeof(struct inReadFile) + files.we_wordc*sizeof(struct inFile));
-    assert(read != NULL);
-    read->nFiles = files.we_wordc;
-#elif defined(HAVE_GLOB) && defined(HAVE_GLOBFREE)
-    glob_t files;
-    if (glob(achFilename,GLOB_ERR|GLOB_NOSORT,NULL,&files) || files.gl_pathc==0) {
-	printf("No such file: %s\n", achFilename);
-	_msrExit(msr,1);
-	}
-    assert(files.gl_pathc<=PST_MAX_FILES);
-    read = malloc(sizeof(struct inReadFile) + files.gl_pathc*sizeof(struct inFile));
-    assert(read != NULL);
-    read->nFiles = files.gl_pathc;
-#else
-    read = malloc(sizeof(struct inReadFile) + sizeof(struct inFile) );
-    assert(read != NULL);
-    read->nFiles = 1;
-    printf( "REMINDER: Wildcards not expanded. wordexp() not available.\n" );
-#endif
-
-    file = (struct inFile *)(read+1);
-
-    msr->nDark = msr->nGas = msr->nStar = msr->N = 0;
-    iOffset = 0;
-
-    for( i=0; i<read->nFiles; i++ ) {
-
-#if defined(HAVE_WORDEXP) && defined(HAVE_WORDFREE)
-	assert( strlen(files.we_wordv[i]) < sizeof(file[i].achFilename) );
-	strcpy( file[i].achFilename, files.we_wordv[i] );
-#elif defined(HAVE_GLOB) && defined(HAVE_GLOBFREE)
-	assert( strlen(files.gl_pathv[i]) < sizeof(file[i].achFilename) );
-	strcpy( file[i].achFilename, files.gl_pathv[i] );
-#else
-	assert( strlen(achFilename) < sizeof(file[i].achFilename) );
-	strcpy( file[i].achFilename, achFilename );
-#endif
-
-	printf( "Opening %s\n", file[i].achFilename );
-
-#ifdef USE_HDF5
-	if ( H5Fis_hdf5(file[i].achFilename) ) {
-	    hid_t fileID;
-	    IOHDF5 io;
-
-	    fileID=H5Fopen(file[i].achFilename, H5F_ACC_RDONLY, H5P_DEFAULT);
-	    if ( fileID < 0 ) {
-		printf("Could not open InFile:%s\n",file[i].achFilename);
-		_msrExit(msr,1);
-		}
-
-	    io = ioHDF5Initialize( fileID, 32768, IOHDF5_SINGLE );
-
-	    msr->nDark += (file[i].nDark = ioHDF5DarkCount(io));
-	    msr->nGas  += (file[i].nGas = ioHDF5GasCount(io));
-	    msr->nStar += (file[i].nStar = ioHDF5StarCount(io));
-	    assert(ioHDF5ReadAttribute( io, "dTime", H5T_NATIVE_DOUBLE, pdExpansion ));
-	    ioHDF5Finish(io);
-	    H5Fclose(fileID);
-	    }
-	else {
-#endif
-
-	    fp = fopen(file[i].achFilename,"r");
-	    if (!fp) {
-		printf("Could not open InFile:%s\n",file[i].achFilename);
-		_msrExit(msr,1);
-		}
-
-	    if ( i == 0 ) {
-		if (msr->param.bStandard) {
-		    XDR xdrs;
-		    xdrstdio_create(&xdrs,fp,XDR_DECODE);
-		    xdrHeader(&xdrs,&h);
-		    xdr_destroy(&xdrs);
-		    }
-		else {
-		    fread(&h,sizeof(struct dump),1,fp);
-		    }
-		msr->N = h.nbodies;
-		msr->nDark = h.ndark;
-		msr->nGas = h.nsph;
-		msr->nStar = h.nstar;
-		*pdExpansion = h.time;
-		/* For now, simplify the logic below */
-		assert( msr->nGas==0 && msr->nStar==0 );
-		assert( msr->N == msr->nDark + msr->nGas + msr->nStar );
-		}
-	    oStart = ftello(fp);
-	    fseeko(fp, 0, SEEK_END);
-	    oEnd = ftello(fp);
-	    fclose(fp);
-	    oSize = oEnd-oStart;
-	    file[i].nDark = oSize / (msr->param.bStandard?(msr->param.bDoublePos?48:36):sizeof(struct dark_particle));
-	    file[i].nGas = 0;
-	    file[i].nStar = 0;
-#ifdef USE_HDF5
-	    }
-#endif
-	}
-    msr->N = msr->nDark + msr->nGas + msr->nStar;
-
-#if defined(HAVE_WORDEXP) && defined(HAVE_WORDFREE)
-    wordfree(&files);
-#elif defined(HAVE_GLOB) && defined(HAVE_GLOBFREE)
-    globfree(&files);
-#endif
-
-    return read;
-    }
-
-
 double msrRead(MSR msr, const char *achInFile) {
     double dTime,dExpansion;
-    struct inReadFile *read;
-    struct inFile *file;
+    FIO fio;
+    int j;
+    struct inReadFile read;
     uint64_t mMemoryModel = 0;
 
     /*
@@ -5053,10 +5071,9 @@ double msrRead(MSR msr, const char *achInFile) {
     ** will force these flags to be on.
     */
     if (msr->param.bFindGroups) mMemoryModel |= PKD_MODEL_GROUPS|PKD_MODEL_VELOCITY|PKD_MODEL_POTENTIAL;
-    if (msrDoGravity(msr)) mMemoryModel |= PKD_MODEL_VELOCITY|PKD_MODEL_ACCELERATION|PKD_MODEL_POTENTIAL;
+    if (msrDoGravity(msr)) mMemoryModel |= PKD_MODEL_VELOCITY|PKD_MODEL_ACCELERATION|PKD_MODEL_POTENTIAL|PKD_MODEL_TREE_MOMENT;
     if (msr->param.bHermite) mMemoryModel |= PKD_MODEL_HERMITE;
     if (msr->param.bTraceRelaxation) mMemoryModel |= PKD_MODEL_RELAXATION;
-
     if (msr->param.bMemAcceleration) mMemoryModel |= PKD_MODEL_ACCELERATION;
     if (msr->param.bMemVelocity)     mMemoryModel |= PKD_MODEL_VELOCITY;
     if (msr->param.bMemPotential)    mMemoryModel |= PKD_MODEL_POTENTIAL;
@@ -5070,33 +5087,47 @@ double msrRead(MSR msr, const char *achInFile) {
 #ifdef PLANETS
     dTime = msrReadSS(msr); /* must use "Solar System" (SS) I/O format... */
 #else
-    char achFilename[PST_FILENAME_SIZE];
-
     /* Add Data Subpath for local and non-local names. */
-    _msrMakePath(msr->param.achDataSubPath,achInFile,achFilename);
+    _msrMakePath(msr->param.achDataSubPath,achInFile,read.achFilename);
 
-    read = fileScan(msr,achFilename,&dExpansion);
-    file = (struct inFile *)(read+1);
+    fio = fioOpen(read.achFilename,msr->param.csm->dOmega0,msr->param.csm->dOmegab);
+    if (fio==NULL) {
+	fprintf(stderr,"ERROR: unable to open input file\n");
+	perror(read.achFilename);
+	_msrExit(msr,1);
+	}
 
-    dTime = getTime(msr,dExpansion,&read->dvFac);
+    if (!fioGetAttr(fio,"dTime",FIO_TYPE_DOUBLE,&dExpansion)) dExpansion = 0.0;
+    if (!fioGetAttr(fio,"dEcosmo",FIO_TYPE_DOUBLE,&msr->dEcosmo)) msr->dEcosmo = 0.0;
+    if (!fioGetAttr(fio,"dTimeOld",FIO_TYPE_DOUBLE,&msr->dTimeOld)) msr->dTimeOld = 0.0;
+    if (!fioGetAttr(fio,"dUOld",FIO_TYPE_DOUBLE,&msr->dUOld)) msr->dUOld = 0.0;
+    msr->N     = fioGetN(fio,FIO_SPECIES_ALL);
+    msr->nGas  = fioGetN(fio,FIO_SPECIES_SPH);
+    msr->nDark = fioGetN(fio,FIO_SPECIES_DARK);
+    msr->nStar = fioGetN(fio,FIO_SPECIES_STAR);
+    fioClose(fio);
 
-
-    read->nNodeStart = 0;
-    read->nNodeEnd = msr->N - 1;
-    read->nBucket = msr->param.nBucket;
-    read->nDark = msr->nDark;
-    read->nGas = msr->nGas;
-    read->nStar = msr->nStar;
-    read->mMemoryModel = mMemoryModel;
-    read->bStandard = msr->param.bStandard;
-    read->bDoublePos = msr->param.bDoublePos;
-    read->fExtraStore = msr->param.dExtraStore;
-    read->fExtraNodes = msr->param.dExtraNodes;
-    read->iCacheSize  = msr->param.iCacheSize;
-    read->fPeriod[0] = msr->param.dxPeriod;
-    read->fPeriod[1] = msr->param.dyPeriod;
-    read->fPeriod[2] = msr->param.dzPeriod;
-    read->eFileType = PST_FILE_TYPE_TIPSY;
+    dTime = getTime(msr,dExpansion,&read.dvFac);
+    read.dTuFac = msr->param.dTuFac;
+    
+    if (msr->nGas && !prmSpecified(msr->prm,"bDoGas")) msr->param.bDoGas = 1;
+    if (msrDoGas(msr) || msr->nGas) mMemoryModel |= (PKD_MODEL_SPH|PKD_MODEL_ACCELERATION|PKD_MODEL_VELOCITY);		
+    if (msr->param.bStarForm || msr->nStar) mMemoryModel |= (PKD_MODEL_SPH|PKD_MODEL_ACCELERATION|PKD_MODEL_VELOCITY|PKD_MODEL_MASS|PKD_MODEL_SOFTENING|PKD_MODEL_STAR);
+    
+    read.nNodeStart = 0;
+    read.nNodeEnd = msr->N - 1;
+    read.nBucket = msr->param.nBucket;
+    read.mMemoryModel = mMemoryModel;
+    read.fExtraStore = msr->param.dExtraStore;
+    read.nTreeBitsLo = msr->param.nTreeBitsLo;
+    read.nTreeBitsHi = msr->param.nTreeBitsHi;
+    read.iCacheSize  = msr->param.iCacheSize;
+    read.dOmega0 = msr->param.csm->dOmega0;
+    read.dOmegab = msr->param.csm->dOmegab;
+    read.fPeriod[0] = msr->param.dxPeriod;
+    read.fPeriod[1] = msr->param.dyPeriod;
+    read.fPeriod[2] = msr->param.dzPeriod;
+    for( j=0; j<FIO_SPECIES_LAST; j++) read.nSpecies[j] = fioGetN(fio,j);
 
     /*
     ** If bParaRead is 0, then we read serially; if it is 1, then we read
@@ -5105,29 +5136,14 @@ double msrRead(MSR msr, const char *achInFile) {
     ** the total amount of simultaneous I/O for file systems that cannot
     ** handle it.
     */
-    read->nProcessors = msr->param.bParaRead==1 ? msr->nThreads:msr->param.bParaRead;
+    read.nProcessors = msr->param.bParaRead==1 ? msr->nThreads:msr->param.bParaRead;
 
-#ifdef USE_HDF5
-    if ( H5Fis_hdf5(file[0].achFilename) )
-	read->eFileType = PST_FILE_TYPE_HDF5;
-#endif
     if (msr->param.bParaRead)
-	pstReadFile(msr->pst,read,sizeof(struct inReadFile) + read->nFiles*sizeof(struct inFile),NULL,NULL);
+	pstReadFile(msr->pst,&read,sizeof(struct inReadFile),NULL,NULL);
     else {
-#ifdef USE_HDF5
-	assert(read->nFiles==1);
-	/* We can automatically detect if a given file is in HDF5 format */
-	if ( H5Fis_hdf5(file[0].achFilename) ) {
-	    dTime = _msrReadHDF5(msr,file[0].achFilename,mMemoryModel);
-	    }
-	else
-#endif
-	    /* This is always executed if not using HDF5 */
-	    {
-	    dTime = _msrReadTipsy(msr,file[0].achFilename,mMemoryModel);
-	    }
-#endif
+	msrOneNodeRead(msr,&read);
 	}
+#endif
     msrSetClasses(msr);
     msrprintf(msr,"Input file has been successfully read.\n");
 #ifdef USE_MDL_IO
@@ -5141,7 +5157,6 @@ double msrRead(MSR msr, const char *achInFile) {
 	mdlSetComm(msr->mdl,0);
 	}
 #endif
-    free(read);
 
     /*
     ** If this is a non-periodic box, then we must precalculate the bounds.
@@ -5183,6 +5198,9 @@ void msrOutput(MSR msr, int iStep, double dTime, int bCheckpoint) {
     int nFOFsDone;
     int i;
 
+    msrSelSrcAll(msr); /* Not really sure what the setting here needs to be */
+    msrSelDstAll(msr);  
+
     printf( "Writing output for step %d\n", iStep );
     msrBuildIoName(msr,achFile,iStep);
 
@@ -5203,6 +5221,23 @@ void msrOutput(MSR msr, int iStep, double dTime, int bCheckpoint) {
 #else
     if ( iStep ) msrWrite(msr,achFile,dTime,bCheckpoint );
 #endif
+
+    if (msrDoGas(msr) && !msr->param.nSteps) {  /* Diagnostic Gas */ 
+	msrReorder(msr);
+	msrBuildName(msr,achFile,iStep);
+	strncat(achFile,".uDot",256);
+	msrOutArray(msr,achFile,OUT_UDOT_ARRAY);
+	msrBuildName(msr,achFile,iStep);
+	strncat(achFile,".u",256);
+	msrOutArray(msr,achFile,OUT_U_ARRAY);
+	msrBuildName(msr,achFile,iStep);
+	strncat(achFile,".c",256);
+	msrOutArray(msr,achFile,OUT_C_ARRAY);
+	msrBuildName(msr,achFile,iStep);
+	strncat(achFile,".hsph",256);
+	msrOutArray(msr,achFile,OUT_HSPH_ARRAY);
+	}
+
     if (msrDoDensity(msr) || msr->param.bFindGroups) {
 	msrActiveRung(msr,0,1); /* Activate all particles */
 	msrDomainDecomp(msr,0,1,0);
@@ -5210,10 +5245,12 @@ void msrOutput(MSR msr, int iStep, double dTime, int bCheckpoint) {
 	bSymmetric = 0; /* FOR TESTING!!*/
 	msrSmooth(msr,dTime,SMX_DENSITY,bSymmetric);
 	}
+
     if ( msr->param.bFindGroups ) {
 	/*
 	** Build tree, activating all particles first (just in case).
 	*/
+	nFOFsDone = 0;
 	msrActiveRung(msr,0,1); /* Activate all particles */
 	msrDomainDecomp(msr,0,1,0);
 	msrBuildTree(msr,dTime,0);
@@ -5236,21 +5273,20 @@ void msrOutput(MSR msr, int iStep, double dTime, int bCheckpoint) {
 	if (	msr->param.bStandard) msrOutGroups(msr,achFile,OUT_GROUP_TIPSY_STD,dTime);
 	else msrOutGroups(msr,achFile,OUT_GROUP_TIPSY_NAT,dTime);
 	nFOFsDone++;
+	if ( nFOFsDone )msrDeleteGroups(msr);
 	}
-    if ( nFOFsDone )msrDeleteGroups(msr);
 
-
-    if (msrDoGravity(msr)) {
-	if (msr->param.bDoAccOutput) {
-	    msrReorder(msr);
-	    sprintf(achFile,"%s.accg",msrOutName(msr));
-	    msrOutVector(msr,achFile,OUT_ACCEL_VECTOR);
-	    }
-	if (msr->param.bDoPotOutput) {
-	    sprintf(achFile,"%s.pot",msrOutName(msr));
-	    msrReorder(msr);
-	    msrOutArray(msr,achFile,OUT_POT_ARRAY);
-	    }
+    if (msr->param.bDoAccOutput) {
+	msrReorder(msr);
+	msrBuildName(msr,achFile,iStep);
+	strncat(achFile,".acc",256);
+	msrOutVector(msr,achFile,OUT_ACCEL_VECTOR);
+	}
+    if (msr->param.bDoPotOutput) {
+	msrReorder(msr);
+	msrBuildName(msr,achFile,iStep);
+	strncat(achFile,".pot",256);
+	msrOutArray(msr,achFile,OUT_POT_ARRAY);
 	}
 
     if ( msr->param.bTraceRelaxation) {
@@ -5288,6 +5324,20 @@ void msrSelSrcAll(MSR msr) {
     }
 void msrSelDstAll(MSR msr) {
     pstSelDstAll(msr->pst, NULL, 0, NULL, NULL );
+    }
+
+void msrSelSrcGas(MSR msr) {
+    pstSelSrcGas(msr->pst, NULL, 0, NULL, NULL );
+    }
+void msrSelDstGas(MSR msr) {
+    pstSelDstGas(msr->pst, NULL, 0, NULL, NULL );
+    }
+
+void msrSelSrcStar(MSR msr) {
+    pstSelSrcStar(msr->pst, NULL, 0, NULL, NULL );
+    }
+void msrSelDstStar(MSR msr) {
+    pstSelDstStar(msr->pst, NULL, 0, NULL, NULL );
     }
 
 uint64_t msrSelSrcById(MSR msr,uint64_t idStart,uint64_t idEnd,int setIfTrue,int clearIfFalse) {
