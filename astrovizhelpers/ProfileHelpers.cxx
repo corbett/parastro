@@ -151,7 +151,7 @@ VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,\
 			{
 			virialRadiusInfo.virialRadius=IllinoisRootFinder(OverDensityInSphere,\
 																				pntrVirialRadiusInfo,\
-																				maxR,1e-15f,
+																				maxR,1e-11f,
 																				0.0,0.0,
 																			  &numIter);
 			}
