@@ -23,12 +23,7 @@ double IllinoisRootFinder(double (*func)(double,void *),void *ctx,\
   fs = func(s,ctx);
 	if(fr*fs<0)
 		{
-  		vtkErrorMacro("fr=" << fr << "*fs=" << fs \
-									<< "<0 this means that something has gone wrong with the\
-								    	virial radius finding. Perhaps change your delta,\
-								    	or your center, or example ProfileHelpers.cxx. For now\
-											binning out to the max radius instead of the virial.");
-			return -1;
+			return fr*fs;
 		}
   t = (s*fr - r*fs)/(fr - fs);
 
