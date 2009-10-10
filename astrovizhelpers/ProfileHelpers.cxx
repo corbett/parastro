@@ -168,16 +168,18 @@ VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,\
 //----------------------------------------------------------------------------
 vtkPolyData* GetDatasetWithinVirialRadius(VirialRadiusInfo virialRadiusInfo)
 {
+	/*
 	vtkSmartPointer<vtkIdList> pointsInRadius = \
 																vtkSmartPointer<vtkIdList>::New();
 	virialRadiusInfo.locator->FindPointsWithinRadius(\
 															virialRadiusInfo.virialRadius,\
 															virialRadiusInfo.center,\
 															pointsInRadius);
-	
+	*/
   vtkPolyData* dataSet = \
 					vtkPolyData::SafeDownCast(virialRadiusInfo.locator->GetDataSet());	
 	// Creating a new dataset
+	/*	
 	vtkSmartPointer<vtkPolyData> newDataSet = \
 																	vtkSmartPointer<vtkPolyData>::New();
 	  newDataSet->SetPoints(vtkSmartPointer<vtkPoints>::New());
@@ -188,6 +190,7 @@ vtkPolyData* GetDatasetWithinVirialRadius(VirialRadiusInfo virialRadiusInfo)
 	// duplicated in the output.
 	newDataSet->CopyCells(dataSet,pointsInRadius,virialRadiusInfo.locator);
 	return newDataSet;
+	*/
 	return dataSet;
 }
 	
