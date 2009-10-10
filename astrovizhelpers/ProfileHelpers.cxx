@@ -133,10 +133,9 @@ VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,\
 		// Building the point locator and the struct to use as an 
 		// input to the rootfinder.
 		// 1. Building the point locator
-		vtkSmartPointer<vtkPointLocator> locator = \
-		 																	vtkSmartPointer<vtkPointLocator>::New();
-		locator->SetDataSet(input);
-		locator->BuildLocator();
+		vtkPointLocator* locator = vtkPointLocator::New();
+			locator->SetDataSet(input);
+			locator->BuildLocator();
 		// 2. Building the struct
 		VirialRadiusInfo virialRadiusInfo;
 		virialRadiusInfo.locator=locator;
