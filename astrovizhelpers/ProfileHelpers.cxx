@@ -21,7 +21,7 @@ double IllinoisRootFinder(double (*func)(double,void *),void *ctx,\
 
   fr = func(r,ctx);
   fs = func(s,ctx);
-	cout << "fr and fs are " << fr << " " << fs;
+	cout << "fr and fs are " << fr << " " << fs << "\n";
   assert(fr*fs < 0);
   t = (s*fr - r*fs)/(fr - fs);
 
@@ -72,10 +72,10 @@ double IllinoisRootFinder(double (*func)(double,void *),void *ctx,\
 
 double OverDensityInSphere(double r,void* inputLocatorInfo)
 {
-	cout << "overdensity called with r " << r;
+	cout << "overdensity called with r " << r << "\n";
 	LocatorInfo* locatorInfo = static_cast<LocatorInfo*>(inputLocatorInfo);
 	cout <<"locator info says delta is " \
-								<< locatorInfo->criticalDensity;
+								<< locatorInfo->criticalDensity << "\n";
 	vtkSmartPointer<vtkIdList> pointsInRadius = \
 																vtkSmartPointer<vtkIdList>::New();
 	locatorInfo->locator->FindPointsWithinRadius(r,locatorInfo->center,\
