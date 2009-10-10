@@ -82,27 +82,28 @@ double OverDensityInSphere(double r,void* inputLocatorInfo)
 																							pointsInRadius);
 	// calculating the average mass, dividing this by the volume of the sphere
 	// to get the density
-	double totalMass;
+	double totalMass=0;
+	vtkPointSet* dataSet=\
+								vtkPointSet::SafeDownCast(locatorInfo->locator->GetDataSet());
 	for(int pointLocalId = 0; \
 			pointLocalId < pointsInRadius->GetNumberOfIds(); \
 			++pointLocalId)
 		{
 		vtkIdType pointGlobalId = pointsInRadius->GetId(pointLocalId);
-		vtkPointSet* dataSet=\
-								vtkPointSet::SafeDownCast(locatorInfo->locator->GetDataSet());
 		double* nextPoint=GetPoint(dataSet,pointGlobalId);
 		// extracting the mass
 		// has to be double as this version of VTK doesn't have 
 		double* mass=GetDataValue(dataSet,\
 															"mass",pointGlobalId);
+		cout << " next mass is " << mass[0];
 		totalMass+=mass[0];
 		// Finally, some memory management
 		delete [] mass;
 		delete [] nextPoint;
 		}
-		cout <<"total mass is " << totalMass << "\n"; 
-		// Returning the density minus the critical density
-		return totalMass/(4./3*M_PI*pow(r,3)) - locatorInfo->criticalDensity;
+	cout <<"total mass is " << totalMass << "\n"; 
+	// Returning the density minus the critical density
+	return totalMass/(4./3*M_PI*pow(r,3)) - locatorInfo->criticalDensity;
 }
 	
 	
