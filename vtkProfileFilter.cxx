@@ -16,6 +16,7 @@
 #include "vtkTable.h"
 #include "vtkSortDataArray.h"
 #include "vtkMath.h"
+#include "vtkInformationDataObjectKey.h"
 #include <cmath>
 
 vtkCxxRevisionMacro(vtkProfileFilter, "$Revision: 1.72 $");
@@ -45,8 +46,7 @@ int vtkProfileFilter::RequestData(vtkInformation *request,\
 																	vtkInformationVector **inputVector,\
 																	vtkInformationVector *outputVector)
 {
- 	vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
-
+ 	vtkPolyData* input = vtkPolyData::GetData(inputVector[0]);
 	// If we should cutoff at the virial radius, then calculating where
 	// the cutoff is and then redefining the data set to be only the points
 	// up to this cutoff
@@ -57,13 +57,19 @@ int vtkProfileFilter::RequestData(vtkInformation *request,\
 		vtkErrorMacro("virial radius is " << virialRadiusInfo.virialRadius);
 		// note that if there was an error finding the virialRadius the 
 		// radius returned is < 0
+
 		if(virialRadiusInfo.virialRadius>0)
 			{
-				
+			vtkPolyData* newInput=\
+										GetDatasetWithinVirialRadius(virialRadiusInfo);
+			// Setting the input to be the new input
+//			(*inputVector)->Set(DATA_OBJECT,vtkPolyData);
+			vtkErrorMacro("input vector is " << **inputVector);
+			
 			}
 		else
 			{
-			vtkErrorMacro("Something has gone wrong with the virial radius finding. Perhaps change your delta, or your center, or if you are truely puzzled check out ProfileHelpers.cxx. For now	binning out to the max radius instead of the virial.");
+			vtkErrorMacro("Something has gone wrong with the virial radius finding. Perhaps change your delta, or your center, or if you are truely puzzled check out ProfileHelpers.cxx. For now binning out to the max radius instead of the virial.");
 			}
 		}
 

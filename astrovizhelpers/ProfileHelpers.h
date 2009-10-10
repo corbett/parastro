@@ -46,3 +46,9 @@ struct VirialRadiusInfo
 // Computes the virial radius >=0 base upon the user defined 
 // overdensity and center. Returns -1 if there is a problem. 
 VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,double overdensity,double center[]);
+
+// Description
+// Given a populated virialradiusinfo struct, returns a dataset corresponding
+// to only those points within the virial radius.
+// This method only works if input was vtkPolyData...
+vtkPolyData* GetDatasetWithinVirialRadius(VirialRadiusInfo virialRadiusInfo);

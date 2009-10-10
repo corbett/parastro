@@ -8,11 +8,9 @@
 #include "DataSetHelpers.h"
 #include <assert.h>
 #include <cmath>
-#include <exception>
 #include "vtkMath.h"
 
 //----------------------------------------------------------------------------
-
 double IllinoisRootFinder(double (*func)(double,void *),void *ctx,\
 											double r,double s,double xacc,double yacc,\
 											int *pnIter) 
@@ -78,6 +76,7 @@ double IllinoisRootFinder(double (*func)(double,void *),void *ctx,\
   return(t);
 }
 
+//----------------------------------------------------------------------------
 double OverDensityInSphere(double r,void* inputVirialRadiusInfo)
 {
 	VirialRadiusInfo* virialRadiusInfo = \
@@ -165,6 +164,30 @@ VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,\
 				virialRadiusInfo.virialRadius=-1; 
 			}
   	return virialRadiusInfo;
+}
+
+//----------------------------------------------------------------------------
+vtkPolyData* GetDatasetWithinVirialRadius(VirialRadiusInfo virialRadiusInfo)
+{
+	vtkSmartPointer<vtkIdList> pointsInRadius = \
+																vtkSmartPointer<vtkIdList>::New();
+	virialRadiusInfo.locator->FindPointsWithinRadius(\
+															virialRadiusInfo.virialRadius,\
+															virialRadiusInfo.center,\
+															pointsInRadius);
+  vtkPolyData* dataSet = \
+					vtkPolyData::SafeDownCast(virialRadiusInfo.locator->GetDataSet());	
+	// Creating a new dataset
+	vtkSmartPointer<vtkPolyData> newDataSet = \
+																	vtkSmartPointer<vtkPolyData>::New();
+	  newDataSet->SetPoints(vtkSmartPointer<vtkPoints>::New());
+		newDataSet->SetVerts(vtkSmartPointer<vtkCellArray>::New());
+	// Copy cells listed in idList from pd, including points, point data, 
+	// and cell data. This method assumes that point and cell data have been
+	// allocated. As I pass in a point locator, then the points won't be
+	// duplicated in the output.
+	newDataSet->CopyCells(dataSet,pointsInRadius,virialRadiusInfo.locator);
+	return newDataSet;
 }
 	
 	
