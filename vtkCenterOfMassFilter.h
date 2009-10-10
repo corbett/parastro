@@ -29,6 +29,10 @@ public:
   static vtkCenterOfMassFilter *New();
   vtkTypeRevisionMacro(vtkCenterOfMassFilter,vtkPointSetAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent);
+  // Description:
+  // Get/Set the density parameter
+  vtkSetMacro(Overdensity, double);
+  vtkGetMacro(Overdensity, double);
 
 protected:
   vtkCenterOfMassFilter();
@@ -41,6 +45,7 @@ protected:
   virtual int RequestData(vtkInformation*,
                           vtkInformationVector**,
                           vtkInformationVector*);
+	double Overdensity;
 
 private:
   vtkCenterOfMassFilter(const vtkCenterOfMassFilter&);  // Not implemented.

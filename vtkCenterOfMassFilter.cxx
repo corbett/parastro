@@ -18,6 +18,7 @@ vtkStandardNewMacro(vtkCenterOfMassFilter);
 //----------------------------------------------------------------------------
 vtkCenterOfMassFilter::vtkCenterOfMassFilter()
 {
+	this->Overdensity = 0; // this file is also optional
 }
 
 //----------------------------------------------------------------------------
@@ -100,8 +101,7 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 		{
 		vtkErrorMacro("total mass is zero, cannot calculate center of mass");
 		return 0;
-		}		
-	// Displaying/storing the result
+		}			
 	// we will create one point in the output: the center of mass point
 	output->SetPoints(vtkSmartPointer<vtkPoints>::New());
 	output->SetVerts(vtkSmartPointer<vtkCellArray>::New()); 
