@@ -175,8 +175,10 @@ vtkPolyData* GetDatasetWithinVirialRadius(VirialRadiusInfo virialRadiusInfo)
 															virialRadiusInfo.virialRadius,\
 															virialRadiusInfo.center,\
 															pointsInRadius);
+
   vtkPolyData* dataSet = \
 					vtkPolyData::SafeDownCast(virialRadiusInfo.locator->GetDataSet());	
+	/*
 	// Creating a new dataset
 	vtkSmartPointer<vtkPolyData> newDataSet = \
 																	vtkSmartPointer<vtkPolyData>::New();
@@ -188,6 +190,8 @@ vtkPolyData* GetDatasetWithinVirialRadius(VirialRadiusInfo virialRadiusInfo)
 	// duplicated in the output.
 	newDataSet->CopyCells(dataSet,pointsInRadius,virialRadiusInfo.locator);
 	return newDataSet;
+	*/
+	return dataSet;
 }
 	
 	
