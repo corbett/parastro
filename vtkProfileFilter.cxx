@@ -58,12 +58,12 @@ int vtkProfileFilter::RequestData(vtkInformation *request,\
 		double lowerBound[3];
 		input->GetPoints()->ComputeBounds();
 		input->GetPoints()->GetBounds(bounds);
-		upperBound[0]=bounds[1];
-		upperBound[1]=bounds[3];
-		upperBound[2]=bounds[5];
-		lowerBound[0]=bounds[0];
-		lowerBound[1]=bounds[2];
-		lowerBound[2]=bounds[4];
+		upperBound[0]=bounds[0];
+		upperBound[1]=bounds[2];
+		upperBound[2]=bounds[4];
+		lowerBound[0]=bounds[1];
+		lowerBound[1]=bounds[3];
+		lowerBound[2]=bounds[5];
 
 		double maxR = sqrt(vtkMath::Distance2BetweenPoints(upperBound,\
 																											 this->Center));
@@ -92,7 +92,7 @@ int vtkProfileFilter::RequestData(vtkInformation *request,\
 		int numIter=0;
 		double virialRadius=IllinoisRootFinder(OverDensityInSphere,\
 																					pntrLocatorInfo,\
-																					minR,maxR,
+																					maxR,minR,
 																					0.0,0.0,
 																				  &numIter);
 		vtkErrorMacro("virial radius is " << virialRadius);

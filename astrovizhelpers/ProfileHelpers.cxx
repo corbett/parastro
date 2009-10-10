@@ -95,7 +95,6 @@ double OverDensityInSphere(double r,void* inputLocatorInfo)
 		// has to be double as this version of VTK doesn't have 
 		double* mass=GetDataValue(dataSet,\
 															"mass",pointGlobalId);
-		cout << " next mass is " << mass[0];
 		totalMass+=mass[0];
 		// Finally, some memory management
 		delete [] mass;
