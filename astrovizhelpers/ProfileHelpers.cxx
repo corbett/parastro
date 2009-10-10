@@ -133,7 +133,8 @@ VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,\
 		// Building the point locator and the struct to use as an 
 		// input to the rootfinder.
 		// 1. Building the point locator
-		vtkPointLocator* locator = vtkPointLocator::New();
+		vtkSmartPointer<vtkPointLocator> locator = \
+		 																	vtkSmartPointer<vtkPointLocator>::New();
 		locator->SetDataSet(input);
 		locator->BuildLocator();
 		// 2. Building the struct
@@ -168,9 +169,12 @@ VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,\
 //----------------------------------------------------------------------------
 vtkPolyData* GetDatasetWithinVirialRadius(VirialRadiusInfo virialRadiusInfo)
 {
+	vtkErrorMacro("virial radius is again "<< virialRadiusInfo.virialRadius);
+	vtkPolyData* dataSet=vtkPolyData::New();
+	return dataSet;
+	/*
 	vtkSmartPointer<vtkIdList> pointsInRadius = \
 																vtkSmartPointer<vtkIdList>::New();
-	
 	virialRadiusInfo.locator->FindPointsWithinRadius(\
 															virialRadiusInfo.virialRadius,\
 															virialRadiusInfo.center,\
@@ -190,6 +194,7 @@ vtkPolyData* GetDatasetWithinVirialRadius(VirialRadiusInfo virialRadiusInfo)
 	newDataSet->CopyCells(dataSet,pointsInRadius,virialRadiusInfo.locator);
 	return newDataSet;
 	return dataSet;
+	/*
 }
 	
 	
