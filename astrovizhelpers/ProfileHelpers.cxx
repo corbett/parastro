@@ -169,7 +169,7 @@ VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,\
 //----------------------------------------------------------------------------
 vtkPolyData* GetDatasetWithinVirialRadius(VirialRadiusInfo virialRadiusInfo)
 {
-	vtkErrorMacro("virial radius is again "<< virialRadiusInfo.virialRadius);
+	cout<<"virial radius is again "<< virialRadiusInfo.virialRadius;
 	vtkPolyData* dataSet=vtkPolyData::New();
 	return dataSet;
 	/*
