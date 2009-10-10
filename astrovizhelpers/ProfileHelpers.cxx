@@ -8,6 +8,7 @@
 #include "DataSetHelpers.h"
 #include <assert.h>
 #include <cmath>
+#include <exception>
 #include "vtkMath.h"
 
 //----------------------------------------------------------------------------
@@ -24,12 +25,10 @@ double IllinoisRootFinder(double (*func)(double,void *),void *ctx,\
 
   fr = func(r,ctx);
   fs = func(s,ctx);
-	if(fr*fs>0)
+	if(fr*fs<=0)
 		{
-			// THIS IS AN ERROR returning -1 to indicate. 
-			// Probably a problem in the user's parameters to the
-			// function, but don't want to hard crash.
-			return -1.0*fr*fs;
+			// used to be an assert, but removing 
+			throw "something went wrong with the root finding";
 		}
   t = (s*fr - r*fs)/(fr - fs);
 
@@ -149,13 +148,21 @@ VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,\
 		virialRadiusInfo.criticalDensity=overdensity;
 		// but IllinoisRootFinder takes in a void pointer
 		void* pntrVirialRadiusInfo = &virialRadiusInfo;
-		// Now we are ready to run the root finder
+		// 3. Now we are ready to run the root finder
 		int numIter=0;
-		virialRadiusInfo.virialRadius=IllinoisRootFinder(OverDensityInSphere,\
-																					pntrVirialRadiusInfo,\
-																					maxR,minR,
-																					0.0,0.0,
-																				  &numIter);
+		try
+			{
+			virialRadiusInfo.virialRadius=IllinoisRootFinder(OverDensityInSphere,\
+																				pntrVirialRadiusInfo,\
+																				maxR,minR,
+																				0.0,0.0,
+																			  &numIter);
+			}
+		catch (std::exception& e)
+			{
+				// This indicates that something has gone wrong with the root finding
+				virialRadiusInfo.virialRadius=-1; 
+			}
   	return virialRadiusInfo;
 }
 	

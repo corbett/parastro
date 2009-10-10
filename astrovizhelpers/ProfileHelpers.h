@@ -15,12 +15,8 @@
 // func. The root must lie between r and s. Root is returned when it is found 
 // within the accuracy xacc, yacc. pnIter indicates how many iterations the
 // algorithm took to converge.
-// have to wrap as it is a template function.
-// Returns -1 if there is a problem, thus is designed to ONLY find positive 
-// values as root
-//BTX
 double IllinoisRootFinder(double (*func)(double,void *),void *ctx,double r,double s,double xacc,double yacc,int *pnIter);
-//ETX
+
 // Description:
 // This assumes locatorStruct is a VirialRadiusInfo struct, which contains
 // a locator for a given vtkdataset, a center from which to calculate
@@ -37,6 +33,7 @@ double OverDensityInSphere(double r, void* locatorStruct);
 // .center  which is a double[3]
 // .criticalDensity which is a double
 // .virialRadius
+
 struct VirialRadiusInfo 
 {
 	vtkPointLocator* locator;
@@ -45,4 +42,7 @@ struct VirialRadiusInfo
 	double virialRadius;
 };
 
+// Description:
+// Computes the virial radius >=0 base upon the user defined 
+// overdensity and center. Returns -1 if there is a problem. 
 VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,double overdensity,double center[]);

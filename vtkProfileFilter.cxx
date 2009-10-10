@@ -55,17 +55,15 @@ int vtkProfileFilter::RequestData(vtkInformation *request,\
 		VirialRadiusInfo virialRadiusInfo =\
 		 										ComputeVirialRadius(input,this->Delta,this->Center);
 		vtkErrorMacro("virial radius is " << virialRadiusInfo.virialRadius);
-		// Great, now we build a new dataset consisting only of points
-		// which are within the virial radius. note that if there was an error
-		// finding the virialRadius the radius returned is < 0
+		// note that if there was an error finding the virialRadius the 
+		// radius returned is < 0
 		if(virialRadiusInfo.virialRadius>0)
 			{
 				
 			}
 		else
 			{
-			vtkErrorMacro("fr*fs=" << -1*virialRadiusInfo.virialRadius \
-										<< ">0 this means that something has gone wrong with the virial radius finding. Perhaps change your delta, or your center, or example ProfileHelpers.cxx. For now	binning out to the max radius instead of the virial.");
+			vtkErrorMacro("Something has gone wrong with the virial radius finding. Perhaps change your delta, or your center, or if you are truely puzzled check out ProfileHelpers.cxx. For now	binning out to the max radius instead of the virial.");
 			}
 		}
 
