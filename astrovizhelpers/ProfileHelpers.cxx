@@ -6,6 +6,7 @@
 #include "vtkIntArray.h"
 #include "vtkSmartPointer.h"
 #include "DataSetHelpers.h"
+#include <assert>
 #include <cmath>
 //----------------------------------------------------------------------------
 double IllinoisRootFinder(double (*func)(double,void *),void *ctx,\
