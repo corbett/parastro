@@ -187,9 +187,8 @@ vtkPolyData* GetDatasetWithinVirialRadius(VirialRadiusInfo virialRadiusInfo)
 	// and cell data. This method assumes that point and cell data have been
 	// allocated. As I pass in a point locator, then the points won't be
 	// duplicated in the output.
-	// THIS is currently causing a segfault.
-	// TODO: fix
-	newDataSet->CopyCells(dataSet,pointsInRadius);
+	// THIS is currently causing a segfault, but only if I pass the locator
+	newDataSet->CopyCells(dataSet,pointsInRadius,virialRadiusInfo.locator);
 	return newDataSet;
 }
 	
