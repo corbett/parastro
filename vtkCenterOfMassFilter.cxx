@@ -87,6 +87,7 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 		}
 	// calculating the result
 	// our final data is in float, as Tipsy's data is stored in float
+	double* dbCenterOfMass=new double[3]; // this is needed for the virial calc
 	float* centerOfMass=new float[3];
 	if(totalMass!=0)
 		{
@@ -94,14 +95,14 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 			{
 			// casting to float to be the same precision as other Tipsy
 			// variables.	
-			centerOfMass[i]=\
-				static_cast<float>(totalWeightedMass[i]/totalMass);
+			dbCenterOfMass[i]=totalWeightedMass[i]/totalMass;
+			centerOfMass[i]=static_cast<float>(dbCenterOfMass[i]);
 			}
 		}
 	else
 		{
 		vtkErrorMacro("total mass is zero, cannot calculate center of mass");
-		return 0;
+		return 0; 
 		}			
 	// we will create one point in the output: the center of mass point
 	output->SetPoints(vtkSmartPointer<vtkPoints>::New());
@@ -112,7 +113,7 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 	if(this->Overdensity>0)
 		{
 			VirialRadiusInfo virialRadiusInfo=\
-										ComputeVirialRadius(input,this->Overdensity,centerOfMass);
+								ComputeVirialRadius(input,this->Overdensity,dbCenterOfMass);
 			if(virialRadiusInfo.virialRadius>0)
 				{
 				//Here is where we create the sphere around the COM to display
@@ -134,5 +135,6 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 		}
 	// finally, some memory management
 	delete [] centerOfMass;
+	delete [] dbCenterOfMass;
   return 1;
 }
