@@ -24,9 +24,10 @@
 	  <DoubleVectorProperty
 			name="Overdensity"
 			command="SetOverdensity"
-			number_of_elements="1">
+			number_of_elements="1"
+			default_values="0">
 			<Documentation>
-			Set the over density parameter. If this is set, then a sphere about the center of mass will be drawn at the radius at which the density is equal to this overdensity.
+			Set the over density parameter. If this is set to a non-zero value, then a sphere about the center of mass will be drawn at the radius at which the density is equal to this overdensity.
 			</Documentation>
 	  </DoubleVectorProperty>
    </SourceProxy>
