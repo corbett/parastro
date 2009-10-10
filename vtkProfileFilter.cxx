@@ -60,10 +60,8 @@ int vtkProfileFilter::RequestData(vtkInformation *request,\
 
 		if(virialRadiusInfo.virialRadius>0)
 			{
-			/*
 			vtkPolyData* newInput=\
 										GetDatasetWithinVirialRadius(virialRadiusInfo);
-			*/
 			}
 		else
 			{
