@@ -100,7 +100,7 @@ double OverDensityInSphere(double r,void* inputLocatorInfo)
 		delete [] mass;
 		delete [] nextPoint;
 		}
-		
+		cout <<"total mass is " << totalMass << "\n"; 
 		// Returning the density minus the critical density
 		return totalMass/(4./3*M_PI*pow(r,3)) - locatorInfo->criticalDensity;
 }
