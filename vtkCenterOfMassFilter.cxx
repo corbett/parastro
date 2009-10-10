@@ -10,6 +10,7 @@
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include "vtkStringArray.h"
 #include "astrovizhelpers/DataSetHelpers.h"
+#include "astrovizhelpers/ProfileHelpers.h"
 
 
 vtkCxxRevisionMacro(vtkCenterOfMassFilter, "$Revision: 1.72 $");
@@ -105,8 +106,32 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 	// we will create one point in the output: the center of mass point
 	output->SetPoints(vtkSmartPointer<vtkPoints>::New());
 	output->SetVerts(vtkSmartPointer<vtkCellArray>::New()); 
-	// Placing the point's data in the output
-	SetPointValue(output,centerOfMass);
+	// if the Overdensity is non zero and we are able to find a
+	// virial radius then we set the output to the sphere
+	// around the COM at the virial radius.
+	if(this->Overdensity>0)
+		{
+			VirialRadiusInfo virialRadiusInfo=\
+										ComputeVirialRadius(input,this->overdensity,centerOfMass);
+			if(virialRadiusInfo.virialRadius>0)
+				{
+				//Here is where we create the sphere around the COM to display
+				// TODO: do that
+				vtkWarningMacro("the virial radius is " 
+												<< virialRadiusInfo.virialRadius);
+				}
+			else
+				{
+				vtkWarningMacro("unable to find the virial radius from over density you specified. Perhaps it is too high. For now displaying only the center of mass");
+				// Placing the point's data in the output
+				SetPointValue(output,centerOfMass);					
+				}
+		}
+	else
+		{
+			// Placing the point's data in the output
+			SetPointValue(output,centerOfMass);
+		}
 	// finally, some memory management
 	delete [] centerOfMass;
   return 1;
