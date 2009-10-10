@@ -112,7 +112,7 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 	if(this->Overdensity>0)
 		{
 			VirialRadiusInfo virialRadiusInfo=\
-										ComputeVirialRadius(input,this->overdensity,centerOfMass);
+										ComputeVirialRadius(input,this->Overdensity,centerOfMass);
 			if(virialRadiusInfo.virialRadius>0)
 				{
 				//Here is where we create the sphere around the COM to display
