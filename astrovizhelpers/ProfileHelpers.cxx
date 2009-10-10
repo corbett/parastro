@@ -185,9 +185,8 @@ vtkPolyData* GetDatasetWithinVirialRadius(VirialRadiusInfo virialRadiusInfo)
 		newDataSet->SetVerts(vtkSmartPointer<vtkCellArray>::New());
 	// Copy cells listed in idList from pd, including points, point data, 
 	// and cell data. This method assumes that point and cell data have been
-	// allocated. As I pass in a point locator, then the points won't be
-	// duplicated in the output.
-	newDataSet->CopyCells(dataSet,pointsInRadius,virialRadiusInfo.locator);
+	// allocated.
+	newDataSet->CopyCells(dataSet,pointsInRadius);
 	return newDataSet;
 }
 	
