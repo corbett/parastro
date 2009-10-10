@@ -14,6 +14,7 @@
 #include "vtkCellData.h"
 #include "vtkTable.h"
 #include "vtkSortDataArray.h"
+#include "vtkMath.h"
 #include <cmath>
 
 vtkCxxRevisionMacro(vtkProfileFilter, "$Revision: 1.72 $");
@@ -66,7 +67,8 @@ int vtkProfileFilter::RequestData(vtkInformation *request,\
 			{
 				nextPoint=GetPoint(input,nextPointId);
 				float radius=\
-						static_cast<float>(ComputeRadialDistance(nextPoint,this->Center));
+						static_cast<float>(sqrt(vtkMath::Distance2BetweenPoints(nextPoint,\
+																												this->Center)));
 				radiiArray->InsertValue(nextPointId,radius);
 			}
 		// finally adding the new radius vector to our output 

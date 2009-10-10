@@ -45,9 +45,6 @@ void AllocateDoubleDataArray(vtkPointSet* output, const char* arrayName,\
 // returns a pointer to the point's coordinates in output which corresponds 
 // to this id
 double* GetPoint(vtkPointSet* output,vtkIdType id);
-// Description:
-// Computes the radial distance between two two dimensional points
-double ComputeRadialDistance(double pointOne[],double pointTwo[]);
 
 
 

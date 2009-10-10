@@ -16,6 +16,7 @@
 #include "vtkPoints.h"
 #include "vtkGenericPointIterator.h"
 #include "vtkDataArray.h"
+#include "vtkMath.h"
 #include "astrovizhelpers/DataSetHelpers.h"
 
 vtkCxxRevisionMacro(vtkNSmoothFilter, "$Revision: 1.72 $");
@@ -54,7 +55,8 @@ double vtkNSmoothFilter::CalculateDensity(double pointOne[],\
 {
 	// now calculating the radial distance from the last point to the
   // center point to which it is a neighbor
-	double radialDistance=ComputeRadialDistance(pointOne,pointTwo);
+	double radialDistance=sqrt(vtkMath::Distance2BetweenPoints(pointOne,\
+																														pointTwo));
 	// the volume is a sphere around nextPoint with radius of the 
 	// last in the list of the closestNpoints
 	// so 4/3 pi r^3 where 

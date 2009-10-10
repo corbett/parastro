@@ -67,9 +67,4 @@ double* GetDataValue(vtkPointSet* output, const char* arrayName,\
 	return data;
 }
 //----------------------------------------------------------------------------
-double ComputeRadialDistance(double pointOne[],double pointTwo[])
-{
-	return sqrt(pow(pointOne[0]-pointTwo[0],2) \
-					+pow(pointOne[1]-pointTwo[1],2) \
-					+pow(pointOne[2]-pointTwo[2],2));
-}
+
