@@ -45,6 +45,11 @@ int vtkProfileFilter::RequestData(vtkInformation *request,\
 																	vtkInformationVector *outputVector)
 {
  	vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
+	vtkErrorMacro("input vector has number of components " \
+								<< (**inputVector).GetNumberOfInformationObjects()
+								<< " and looks like " << **inputVector);
+	// If we should cutoff at the virial radius, then calculating where
+	// the cutoff is and then 
 	// If we should bin by radius, first calculate and add the radii 
 	// to outputdata
 	if(this->BinByRadius)
