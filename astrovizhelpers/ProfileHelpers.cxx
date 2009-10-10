@@ -183,15 +183,14 @@ vtkPolyData* GetDatasetWithinVirialRadius(VirialRadiusInfo virialRadiusInfo)
 																	vtkSmartPointer<vtkPolyData>::New();
 	  newDataSet->SetPoints(vtkSmartPointer<vtkPoints>::New());
 		newDataSet->SetVerts(vtkSmartPointer<vtkCellArray>::New());
-	/*
 	// Copy cells listed in idList from pd, including points, point data, 
 	// and cell data. This method assumes that point and cell data have been
 	// allocated. As I pass in a point locator, then the points won't be
 	// duplicated in the output.
-	newDataSet->CopyCells(dataSet,pointsInRadius,virialRadiusInfo.locator);
+	// THIS is currently causing a segfault.
+	// TODO: fix
+	newDataSet->CopyCells(dataSet,pointsInRadius);
 	return newDataSet;
-	*/
-	return dataSet;
 }
 	
 	
