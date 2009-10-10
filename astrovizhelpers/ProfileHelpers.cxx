@@ -8,6 +8,8 @@
 #include "DataSetHelpers.h"
 #include <assert.h>
 #include <cmath>
+#include "vtkMath.h"
+
 //----------------------------------------------------------------------------
 double IllinoisRootFinder(double (*func)(double,void *),void *ctx,\
 											double r,double s,double xacc,double yacc,\
@@ -15,6 +17,7 @@ double IllinoisRootFinder(double (*func)(double,void *),void *ctx,\
 {
 	// This code copied from Doug Potter's and Joachim Stadel's
 	// pkdgrav, class master.c, method illinois
+	// NOTE: Only use for positive roots. 
   const int maxIter = 100;
   double t,fr,fs,ft,phis,phir,gamma;
   int i;
@@ -23,6 +26,9 @@ double IllinoisRootFinder(double (*func)(double,void *),void *ctx,\
   fs = func(s,ctx);
 	if(fr*fs>0)
 		{
+			// THIS IS AN ERROR returning -1 to indicate. 
+			// Probably a problem in the user's parameters to the
+			// function, but don't want to hard crash.
 			return -1.0*fr*fs;
 		}
   t = (s*fr - r*fs)/(fr - fs);
@@ -72,18 +78,21 @@ double IllinoisRootFinder(double (*func)(double,void *),void *ctx,\
   return(t);
 }
 
-double OverDensityInSphere(double r,void* inputLocatorInfo)
+double OverDensityInSphere(double r,void* inputVirialRadiusInfo)
 {
-	LocatorInfo* locatorInfo = static_cast<LocatorInfo*>(inputLocatorInfo);
+	VirialRadiusInfo* virialRadiusInfo = \
+	 											static_cast<VirialRadiusInfo*>(inputVirialRadiusInfo);
 	vtkSmartPointer<vtkIdList> pointsInRadius = \
 																vtkSmartPointer<vtkIdList>::New();
-	locatorInfo->locator->FindPointsWithinRadius(r,locatorInfo->center,\
-																							pointsInRadius);
+	virialRadiusInfo->locator->FindPointsWithinRadius(r,\
+																										virialRadiusInfo->center,\
+																										pointsInRadius);
 	// calculating the average mass, dividing this by the volume of the sphere
 	// to get the density
 	double totalMass=0;
 	vtkPointSet* dataSet=\
-								vtkPointSet::SafeDownCast(locatorInfo->locator->GetDataSet());
+								vtkPointSet::SafeDownCast(\
+															virialRadiusInfo->locator->GetDataSet());
 	for(int pointLocalId = 0; \
 			pointLocalId < pointsInRadius->GetNumberOfIds(); \
 			++pointLocalId)
@@ -100,7 +109,54 @@ double OverDensityInSphere(double r,void* inputLocatorInfo)
 		delete [] nextPoint;
 		}
 	// Returning the density minus the critical density
-	return totalMass/(4./3*M_PI*pow(r,3)) - locatorInfo->criticalDensity;
+	return totalMass/(4./3*M_PI*pow(r,3)) - virialRadiusInfo->criticalDensity;
+}
+
+VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,\
+																		double overdensity,double center[])
+{
+		// calculating the bounds of this pointset
+		double bounds[6];
+		double upperBound[3];
+		double lowerBound[3];
+		input->GetPoints()->ComputeBounds();
+		input->GetPoints()->GetBounds(bounds);
+		upperBound[0]=bounds[0];
+		upperBound[1]=bounds[2];
+		upperBound[2]=bounds[4];
+		lowerBound[0]=bounds[1];
+		lowerBound[1]=bounds[3];
+		lowerBound[2]=bounds[5];
+		double maxR = sqrt(vtkMath::Distance2BetweenPoints(upperBound,\
+																											 center));
+		double minR = sqrt(vtkMath::Distance2BetweenPoints(lowerBound,\
+																											 center));
+		// Building the point locator and the struct to use as an 
+		// input to the rootfinder.
+		// 1. Building the point locator
+		vtkSmartPointer<vtkPointLocator> locator = \
+		 																	vtkSmartPointer<vtkPointLocator>::New();
+		locator->SetDataSet(input);
+		locator->BuildLocator();
+		// 2. Building the struct
+		VirialRadiusInfo virialRadiusInfo;
+		virialRadiusInfo.locator=locator;
+		// copies the contents of center to virialRadiusInfo's arg center
+		for(int i = 0; i < 3; ++i)
+		{
+			virialRadiusInfo.center[i]=center[i];
+		}
+		virialRadiusInfo.criticalDensity=overdensity;
+		// but IllinoisRootFinder takes in a void pointer
+		void* pntrVirialRadiusInfo = &virialRadiusInfo;
+		// Now we are ready to run the root finder
+		int numIter=0;
+		virialRadiusInfo.virialRadius=IllinoisRootFinder(OverDensityInSphere,\
+																					pntrVirialRadiusInfo,\
+																					maxR,minR,
+																					0.0,0.0,
+																				  &numIter);
+  	return virialRadiusInfo;
 }
 	
 	

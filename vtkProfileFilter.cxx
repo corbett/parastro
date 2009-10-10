@@ -52,58 +52,19 @@ int vtkProfileFilter::RequestData(vtkInformation *request,\
 	// up to this cutoff
 	if(this->CutOffAtVirialRadius)
 		{
-		// calculating the bounds of this pointset
-		double bounds[6];
-		double upperBound[3];
-		double lowerBound[3];
-		input->GetPoints()->ComputeBounds();
-		input->GetPoints()->GetBounds(bounds);
-		upperBound[0]=bounds[0];
-		upperBound[1]=bounds[2];
-		upperBound[2]=bounds[4];
-		lowerBound[0]=bounds[1];
-		lowerBound[1]=bounds[3];
-		lowerBound[2]=bounds[5];
-		double maxR = sqrt(vtkMath::Distance2BetweenPoints(upperBound,\
-																											 this->Center));
-		double minR = sqrt(vtkMath::Distance2BetweenPoints(lowerBound,\
-																											 this->Center));
-		// Building the point locator and the struct to use as an 
-		// input to the rootfinder.
-		// 1. Building the point locator
-		vtkSmartPointer<vtkPointLocator> locator = \
-		 																	vtkSmartPointer<vtkPointLocator>::New();
-		locator->SetDataSet(input);
-		locator->BuildLocator();
-		// 2. Building the struct
-		LocatorInfo locatorInfo;
-		locatorInfo.locator=locator;
-		// copies the contents of this->Center to locatorInfo's arg center
-		for(int i = 0; i < 3; ++i)
-		{
-			locatorInfo.center[i]=this->Center[i];
-		}
-		locatorInfo.criticalDensity=this->Delta;
-		// but IllinoisRootFinder takes in a void pointer
-		void* pntrLocatorInfo = &locatorInfo;
-		// Now we are ready to run the root finder
-		int numIter=0;
-		double virialRadius=IllinoisRootFinder(OverDensityInSphere,\
-																					pntrLocatorInfo,\
-																					maxR,minR,
-																					0.0,0.0,
-																				  &numIter);
-		vtkDebugMacro("virial radius is " << virialRadius);
+		VirialRadiusInfo virialRadiusInfo =\
+		 										ComputeVirialRadius(input,this->Delta,this->Center);
+		vtkErrorMacro("virial radius is " << virialRadiusInfo.virialRadius);
 		// Great, now we build a new dataset consisting only of points
 		// which are within the virial radius. note that if there was an error
 		// finding the virialRadius the radius returned is < 0
-		if(virialRadius>0)
+		if(virialRadiusInfo.virialRadius>0)
 			{
 				
 			}
 		else
 			{
-			vtkErrorMacro("fr*fs=" << -1*virialRadius \
+			vtkErrorMacro("fr*fs=" << -1*virialRadiusInfo.virialRadius \
 										<< ">0 this means that something has gone wrong with the virial radius finding. Perhaps change your delta, or your center, or example ProfileHelpers.cxx. For now	binning out to the max radius instead of the virial.");
 			}
 		}

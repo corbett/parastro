@@ -22,7 +22,7 @@
 double IllinoisRootFinder(double (*func)(double,void *),void *ctx,double r,double s,double xacc,double yacc,int *pnIter);
 //ETX
 // Description:
-// This assumes locatorStruct is a LocatorInfo struct, which contains
+// This assumes locatorStruct is a VirialRadiusInfo struct, which contains
 // a locator for a given vtkdataset, a center from which to calculate
 // the volume 
 // Given a radius, a center, calculates the density of within the sphere
@@ -32,13 +32,17 @@ double IllinoisRootFinder(double (*func)(double,void *),void *ctx,double r,doubl
 double OverDensityInSphere(double r, void* locatorStruct);
 
 // Description:
-// The locator struct is an pointLocatorStruct containing:
+// The VirialRadiusInfo struct is an containing:
 // .locator which is a vtkPointLocator
 // .center  which is a double[3]
 // .criticalDensity which is a double
-struct LocatorInfo 
+// .virialRadius
+struct VirialRadiusInfo 
 {
 	vtkPointLocator* locator;
 	double center[3];
 	double criticalDensity;
+	double virialRadius;
 };
+
+VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,double overdensity,double center[]);
