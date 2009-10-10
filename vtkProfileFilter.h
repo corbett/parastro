@@ -34,11 +34,16 @@ public:
   // Get/Set the number of bins
   vtkSetVector3Macro(Center,double);
   vtkGetVectorMacro(Center,double,3);
-
   // Description:
   // Get/Set whether the bins are by radius
   vtkSetMacro(BinByRadius, int);
   vtkGetMacro(BinByRadius, int);
+
+  // Description:
+  // Get/Set whether the bins should be only from the center to the virial 
+	// radius
+	vtkSetMacro(CutOffAtVirialRadius,int);
+	vtkGetMacro(CutOffAtVirialRadius,int);
 
 //BTX
 protected:
@@ -56,6 +61,7 @@ protected:
 	double Delta;
 	double Center[3];
 	int BinByRadius;
+	int CutOffAtVirialRadius;
 
 private:
   vtkProfileFilter(const vtkProfileFilter&); // Not implemented

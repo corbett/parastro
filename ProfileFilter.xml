@@ -35,7 +35,17 @@
         default_values="1" > 
        <BooleanDomain name="bool"/>
        <Documentation>
-         If the value of this property is 1, then the bins are by radius up to the virial radius, otherwise they are binned by the quantity selected in the scalar array.
+         If the value of this property is 1, then the bins are by radius, otherwise they are binned by the quantity selected in the scalar array.
+       </Documentation>
+     </IntVectorProperty>
+     <IntVectorProperty 
+        name="CutOffAtVirialRadius" 
+        command="SetCutOffAtVirialRadius" 
+        number_of_elements="1"
+        default_values="1" > 
+       <BooleanDomain name="bool"/>
+       <Documentation>
+         If the value of this property is 1, then the bins are only from the center up to the virial radius.
        </Documentation>
      </IntVectorProperty>
 	  <DoubleVectorProperty
