@@ -127,8 +127,8 @@ VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,\
 		lowerBound[1]=bounds[3];
 		lowerBound[2]=bounds[5];
 		double maxR = sqrt(vtkMath::Distance2BetweenPoints(upperBound,\
-																											 lowerBound));
-		double minR = sqrt(vtkMath::Distance2BetweenPoints(lowerBound,\
+																											 center));
+///		double minR = sqrt(vtkMath::Distance2BetweenPoints(lowerBound,\
 																											 center));
 		// Building the point locator and the struct to use as an 
 		// input to the rootfinder.
@@ -153,7 +153,7 @@ VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,\
 			{
 			virialRadiusInfo.virialRadius=IllinoisRootFinder(OverDensityInSphere,\
 																				pntrVirialRadiusInfo,\
-																				maxR,minR,
+																				maxR,1e-11f,
 																				0.0,0.0,
 																			  &numIter);
 			}
