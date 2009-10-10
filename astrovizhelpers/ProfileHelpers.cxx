@@ -170,8 +170,8 @@ VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,\
 vtkPolyData* GetDatasetWithinVirialRadius(VirialRadiusInfo virialRadiusInfo)
 {
 	cout<<"virial radius is again "<< virialRadiusInfo.virialRadius << "\n";
-	cout<<"center is "<< virialRadiusInfo.center[0] <<
-	 		<< " "<< virialRadiusInfo.center[1]
+	cout<<"center is "<< virialRadiusInfo.center[0] << \
+	 		<< " "<< virialRadiusInfo.center[1] \
 			<< virialRadiusInfo.center[2] << "\n";
 	cout<<"delta is " << virialRadiusInfo.criticalDensity << "\n";
 	cout<<"locator is "<< virialRadiusInfo.locator << "\n";
