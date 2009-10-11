@@ -15,6 +15,10 @@
             <Group name="sources"/>
             <Group name="filters"/>
           </ProxyGroupDomain>
+          <ProxyListDomain name="proxy_list">
+            <Proxy group="extended_sources" name="FixedRadiusPointSource" />
+          </ProxyListDomain>
+
           <DataTypeDomain name="input_type">
             <DataType value="vtkPolyData"/>
           </DataTypeDomain>
@@ -140,9 +144,12 @@
          </RequiredProperties>
        </ArrayRangeDomain>
      </DoubleVectorProperty>
+
+
       <Hints>
       <!-- View can be used to specify the preferred view for the proxy -->
       <!-- <View type="XYPlotView" /> -->
+       <Visibility replace_input="0" />
 	  <View type="ClientTableView" />
       <!-- Temporary hint to allow the output of this filter to be plotted -->
       <Plotable />
