@@ -13,7 +13,7 @@
 
     <InputProperty
        name="Input"
-       command="SetSourceConnection">
+       command="SetInputConnection">
           <ProxyGroupDomain name="groups">
             <Group name="sources"/>
             <Group name="filters"/>
@@ -34,7 +34,7 @@
      </InputProperty>
      <InputProperty
         name="Source"
-        command="SetInputConnection"
+        command="SetCenter"
         label="Probe Type">
            <ProxyGroupDomain name="groups">
              <Group name="sources"/>
@@ -88,6 +88,7 @@
 			Set the density parameter
 			</Documentation>
 	  </DoubleVectorProperty>
+<!--
 	  <DoubleVectorProperty
 			name="Center"
 			command="SetCenter"
@@ -97,6 +98,7 @@
 				Set the center from which to search.
 			</Documentation>
 	  </DoubleVectorProperty>
+-->
      <StringVectorProperty
          name="SelectInputArray" 
          command="SetInputArrayToProcess" 
