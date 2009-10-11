@@ -7,8 +7,11 @@
 #include "vtkSphereSource.h"
 #include "vtkSmartPointer.h"
 #include <cmath>
+
 /*----------------------------------------------------------------------------
-* Work with VtkPolyData
+*
+* Work with VtkPolyData (a derived class from vtkPointSet)
+*
 *---------------------------------------------------------------------------*/
 
 //----------------------------------------------------------------------------
@@ -34,8 +37,11 @@ void CreateSphere(vtkPolyData* output,double radius,double center[])
 }
 
 /*----------------------------------------------------------------------------
+*
 * Work with VtkPointSet
+*
 *---------------------------------------------------------------------------*/
+
 //----------------------------------------------------------------------------
 void AllocateDataArray(vtkPointSet* output, const char* arrayName,\
  			int numComponents, int numTuples)
@@ -47,6 +53,7 @@ void AllocateDataArray(vtkPointSet* output, const char* arrayName,\
 		dataArray->SetNumberOfTuples(numTuples);
   output->GetPointData()->AddArray(dataArray);
 }
+
 //----------------------------------------------------------------------------
 void AllocateDoubleDataArray(vtkPointSet* output, const char* arrayName,\
  			int numComponents, int numTuples)
@@ -74,12 +81,14 @@ void SetDataValue(vtkPointSet* output, const char* arrayName,\
 {
 	output->GetPointData()->GetArray(arrayName)->SetTuple(id,data);
 }
+
 //----------------------------------------------------------------------------
 void SetDataValue(vtkPointSet* output, const char* arrayName,\
 			vtkIdType id,double data[])
 {
 	output->GetPointData()->GetArray(arrayName)->SetTuple(id,data);
 }
+
 //----------------------------------------------------------------------------
 double* GetDataValue(vtkPointSet* output, const char* arrayName,\
  					vtkIdType id)
@@ -88,5 +97,5 @@ double* GetDataValue(vtkPointSet* output, const char* arrayName,\
 	output->GetPointData()->GetArray(arrayName)->GetTuple(id,data);
 	return data;
 }
-//----------------------------------------------------------------------------
+
 
