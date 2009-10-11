@@ -77,6 +77,32 @@ double IllinoisRootFinder(double (*func)(double,void *),void *ctx,\
 }
 
 //----------------------------------------------------------------------------
+double ComputeMaxR(vtkPointSet* input,double point[])
+{
+	double bounds[6]; //xmin,xmax,ymin,ymax,zmin,zmax
+	input->GetPoints()->ComputeBounds();
+	input->GetPoints()->GetBounds(bounds);
+	double maxR=0;
+	double testR=0;
+	// for each of the 8 corners of the bounding box, compute the 
+	// distance to the point. maxR is the max distance.
+	for(int x = 0; x < 2; ++x)
+		{
+		for(int y = 2; y <4; ++y)
+			{
+			for(int z = 4; z < 6; ++z)
+				{
+				double testCorner[3] = {bounds[x],bounds[y],bounds[z]};
+				testR = sqrt(vtkMath::Distance2BetweenPoints(testCorner,point));
+				// only if our test R is greater than the current max do we update
+				maxR=std::max(maxR,testR);
+				}
+			}
+		}
+	return maxR;
+}
+
+//----------------------------------------------------------------------------
 double OverDensityInSphere(double r,void* inputVirialRadiusInfo)
 {
 	VirialRadiusInfo* virialRadiusInfo = \
@@ -114,22 +140,8 @@ double OverDensityInSphere(double r,void* inputVirialRadiusInfo)
 VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,\
 																		double overdensity,double center[])
 {
-		// calculating the bounds of this pointset
-		double bounds[6];
-		double upperBound[3];
-		double lowerBound[3];
-		input->GetPoints()->ComputeBounds();
-		input->GetPoints()->GetBounds(bounds);
-		upperBound[0]=bounds[0];
-		upperBound[1]=bounds[2];
-		upperBound[2]=bounds[4];
-		lowerBound[0]=bounds[1];
-		lowerBound[1]=bounds[3];
-		lowerBound[2]=bounds[5];
-		// TODO: think about this more. why does this work? for example the upper
-		// bound could be very close to the center...
-		double maxR = sqrt(vtkMath::Distance2BetweenPoints(upperBound,\
-																											 center));
+		// calculating the the max an min r of this pointset
+		double maxR=ComputeMaxR(input,center);
 		// Building the point locator and the struct to use as an 
 		// input to the rootfinder.
 		// 1. Building the point locator
@@ -153,7 +165,7 @@ VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,\
 			{
 			virialRadiusInfo.virialRadius=IllinoisRootFinder(OverDensityInSphere,\
 																				pntrVirialRadiusInfo,\
-																				maxR,1e-11f,
+																				maxR,1e-11f,//minR is almost zero
 																				0.0,0.0,
 																			  &numIter);
 			}

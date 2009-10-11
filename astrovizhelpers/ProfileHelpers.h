@@ -18,6 +18,38 @@
 double IllinoisRootFinder(double (*func)(double,void *),void *ctx,double r,double s,double xacc,double yacc,int *pnIter);
 
 // Description:
+// Given a point and an input data set, computes the maximum distance from the
+// point to the data set boundaries.
+// This is the maximum distance from the point to the 8 corners of the 
+// bounding cube of this dataset
+/*    	  
+*										             (xmin,ymax,zmax)
+*														       / |\
+*														      /  | \
+*														     /   |  \
+*														   //    |   \\                							^  ^
+*														  /      |     \              						z| /y
+*														 /       \(xmin,ymax,zmin)    						|/
+*			    (xmin,ymin,zmax)  |       / \      | (xmax,ymax,zmax)       \
+*														|\     /   \    /|             						x\
+*														| \   /  .p \\ / |               						v
+*														|  \ /       //  |
+*														|  /\       /  \ |
+*														| /  \\    /    \|
+*				  (xmin,ymin,zmin)	|/     \  /      | (xmax,ymax,zmin)
+*														/   (xmax,ymin,zmax)  
+*														 \       |      /
+*														  \      |     /
+*														   \\    |   //
+*														     \   |  /
+*														      \  | /
+*														       \  /
+*										            (xmax,ymin,zmin)
+*
+*/
+double ComputeMaxR(vtkPointSet* input,double point[]);
+
+// Description:
 // This assumes locatorStruct is a VirialRadiusInfo struct, which contains
 // a locator for a given vtkdataset, a center from which to calculate
 // the volume 
@@ -33,7 +65,6 @@ double OverDensityInSphere(double r, void* locatorStruct);
 // .center  which is a double[3]
 // .criticalDensity which is a double
 // .virialRadius
-
 struct VirialRadiusInfo 
 {
 	vtkPointLocator* locator;
