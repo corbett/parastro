@@ -63,7 +63,7 @@ int vtkProfileFilter::RequestData(vtkInformation *request,\
 			vtkPolyData* newInput=\
 										GetDatasetWithinVirialRadius(virialRadiusInfo);
 			// TODO: finish implementing this, setting the input to this newInput									
-			this->SetInput(newInput);
+			//this->SetInput(newInput); //segfault
 
 			}
 		else
