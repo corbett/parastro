@@ -34,7 +34,7 @@
      </InputProperty>
      <InputProperty
         name="Source"
-        command="SetCenter"
+        command="SetInputConnection"
         label="Probe Type">
            <ProxyGroupDomain name="groups">
              <Group name="sources"/>
@@ -47,17 +47,7 @@
            </Documentation>
       </InputProperty>
 
-     <InputProperty
-        name="Source"
-        command="SetInputConnection"
-        label="Probe Type">
-           <ProxyGroupDomain name="groups">
-             <Group name="sources"/>
-           </ProxyGroupDomain>
-           <Documentation>
-             This property specifies the dataset whose geometry will be used in determining positions to probe.
-           </Documentation>
-      </InputProperty>
+
 
      <IntVectorProperty 
         name="BinByRadius" 
