@@ -38,11 +38,11 @@ int vtkMostBoundFilter::FillInputPortInformation(int, vtkInformation* info)
 {
   // This filter uses the vtkDataSet cell traversal methods so it
   // suppors any data set type as input.
-  info->Set(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), "vtkPolyData");
+  info->Set(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), "vtkPointSet");
   return 1;
 }
 
-double* vtkMostBoundFilter::GetMostBoundParticle(vtkPolyData* input)
+double* vtkMostBoundFilter::GetMostBoundParticle(vtkPointSet* input)
 {
 	double* mostBoundParticle = new double[3];
 	//TODO: implement
@@ -58,7 +58,7 @@ int vtkMostBoundFilter::RequestData(vtkInformation*,
                                  vtkInformationVector* outputVector)
 {
   // Get input and output data.
-  vtkPolyData* input = vtkPolyData::GetData(inputVector[0]);
+  vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
   vtkPolyData* output = vtkPolyData::GetData(outputVector);	
 	// Calculate the most bound particle
 	double* dbMostBound = GetMostBoundParticle(input); // db to calc virial r

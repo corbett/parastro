@@ -21,13 +21,13 @@
 #ifndef __vtkMostBoundFilter_h
 #define __vtkMostBoundFilter_h
 
-#include "vtkPolyDataAlgorithm.h"
+#include "vtkPointSetAlgorithm.h"
 
-class VTK_GRAPHICS_EXPORT vtkMostBoundFilter : public vtkPolyDataAlgorithm
+class VTK_GRAPHICS_EXPORT vtkMostBoundFilter : public vtkPointSetAlgorithm
 {
 public:
   static vtkMostBoundFilter *New();
-  vtkTypeRevisionMacro(vtkMostBoundFilter,vtkPolyDataAlgorithm);
+  vtkTypeRevisionMacro(vtkMostBoundFilter,vtkPointSetAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent);
   // Description:
   // Get/Set the density parameter
@@ -50,7 +50,7 @@ protected:
 private:
   vtkMostBoundFilter(const vtkMostBoundFilter&);  // Not implemented.
   void operator=(const vtkMostBoundFilter&);  // Not implemented.
-	double* GetMostBoundParticle(vtkPolyData* input);
+	double* GetMostBoundParticle(vtkPointSet* input);
 };
 
 #endif
