@@ -1,0 +1,35 @@
+<ServerManagerConfiguration>
+  <!-- This is the server manager configuration XML. It defines the interface to
+       a new filter. As a rule of thumb, try to locate the configuration for
+       a filter already in ParaView (in Servers/ServerManager/Resources/*.xml)
+       that matches your filter and then model your xml on it -->
+  <ProxyGroup name="filters">
+   <SourceProxy name="Most Bound" class="vtkMostBoundFilter" label="Most Bound">
+     <Documentation
+        long_help="Finds the most bound particle, as is defined by the particle with the lowest potential."
+        short_help="Finds most bound particle.">
+     </Documentation>
+     <InputProperty
+        name="Input"
+        command="SetInputConnection">
+           <ProxyGroupDomain name="groups">
+             <Group name="sources"/>
+             <Group name="filters"/>
+           </ProxyGroupDomain>
+           <DataTypeDomain name="input_type">
+             <DataType value="vtkPolyData"/>
+           </DataTypeDomain>
+      </InputProperty>
+	  <DoubleVectorProperty
+			name="Overdensity"
+			command="SetOverdensity"
+			number_of_elements="1"
+			default_values="0">
+			<Documentation>
+			Set the over density parameter. If this is set to a non-zero value, then a sphere about the most bound particle will be drawn at the radius at which the density is equal to this overdensity.
+			</Documentation>
+	  </DoubleVectorProperty>
+   </SourceProxy>
+ </ProxyGroup>
+</ServerManagerConfiguration>
+
