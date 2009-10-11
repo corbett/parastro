@@ -62,7 +62,8 @@ protected:
 	double Center[3];
 	int BinByRadius;
 	int CutOffAtVirialRadius;
-
+	void SetCenterFromGUI();
+	
 private:
   vtkProfileFilter(const vtkProfileFilter&); // Not implemented
   void operator=(const vtkProfileFilter&); // Not implemented
