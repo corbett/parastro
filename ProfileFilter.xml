@@ -15,10 +15,6 @@
             <Group name="sources"/>
             <Group name="filters"/>
           </ProxyGroupDomain>
-          <ProxyListDomain name="proxy_list">
-            <Proxy group="extended_sources" name="FixedRadiusPointSource" />
-          </ProxyListDomain>
-
           <DataTypeDomain name="input_type">
             <DataType value="vtkPolyData"/>
           </DataTypeDomain>
@@ -32,6 +28,34 @@
             This property specifies the input to the Profile filter.
           </Documentation>
      </InputProperty>
+
+     <InputProperty
+        name="Source"
+        command="SetInputConnection"
+        label="Probe Type">
+           <ProxyGroupDomain name="groups">
+             <Group name="sources"/>
+           </ProxyGroupDomain>
+           <ProxyListDomain name="proxy_list">
+             <Proxy group="extended_sources" name="FixedRadiusPointSource" />
+           </ProxyListDomain>
+           <Documentation>
+             This property specifies the dataset whose geometry will be used in determining positions to probe.
+           </Documentation>
+      </InputProperty>
+
+     <InputProperty
+        name="Source"
+        command="SetInputConnection"
+        label="Probe Type">
+           <ProxyGroupDomain name="groups">
+             <Group name="sources"/>
+           </ProxyGroupDomain>
+           <Documentation>
+             This property specifies the dataset whose geometry will be used in determining positions to probe.
+           </Documentation>
+      </InputProperty>
+
      <IntVectorProperty 
         name="BinByRadius" 
         command="SetBinByRadius" 
