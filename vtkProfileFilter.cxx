@@ -27,9 +27,6 @@ vtkProfileFilter::vtkProfileFilter():vtkExtractHistogram()
 {
 	this->SetCalculateAverages(1); // no longer taking this in as an option
 																 // may later actually disable
-	this->Center[0]=0;
-	this->Center[1]=0;
-	this->Center[2]=0;
 }
 
 //----------------------------------------------------------------------------
@@ -65,7 +62,9 @@ int vtkProfileFilter::RequestData(vtkInformation *request,\
 			{
 			vtkPolyData* newInput=\
 										GetDatasetWithinVirialRadius(virialRadiusInfo);
-			// TODO: finish implementing this, setting the input to this newInput
+			// TODO: finish implementing this, setting the input to this newInput									
+			this->SetInput(newInput);
+
 			}
 		else
 			{
