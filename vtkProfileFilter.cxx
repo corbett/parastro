@@ -27,6 +27,8 @@ vtkProfileFilter::vtkProfileFilter():vtkExtractHistogram()
 {
 	this->SetCalculateAverages(1); // no longer taking this in as an option
 																 // may later actually disable
+	double center[3]={0,0,0};
+	this->Center=center;
 }
 
 //----------------------------------------------------------------------------

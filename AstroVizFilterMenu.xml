@@ -6,5 +6,6 @@
      <Filter name="Center Of Mass" />
 	 <Filter name="Mass Function Filter" />
 	 <Filter name="Profile Filter" />
+	 <Filter name="Most Bound" />
    </Category>
  </ParaViewFilters>
