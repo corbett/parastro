@@ -4,8 +4,38 @@
 #include "vtkFloatArray.h"
 #include "vtkDoubleArray.h"
 #include "vtkIntArray.h"
+#include "vtkSphereSource.h"
 #include "vtkSmartPointer.h"
 #include <cmath>
+/*----------------------------------------------------------------------------
+* Work with VtkPolyData
+*---------------------------------------------------------------------------*/
+
+//----------------------------------------------------------------------------
+vtkIdType SetPointValue(vtkPolyData* output,float pos[])
+{
+	vtkIdType id=output->GetPoints()->InsertNextPoint(pos);
+	output->GetVerts()->InsertNextCell(1, &id);
+	return id;
+}
+
+//----------------------------------------------------------------------------
+void CreateSphere(vtkPolyData* output,double radius,double center[])
+{
+	vtkSmartPointer<vtkSphereSource> sphere = \
+	 															vtkSmartPointer<vtkSphereSource>::New();
+	sphere->SetRadius(radius);
+	sphere->SetCenter(center);
+	sphere->Update();
+	//Setting the points in the output to be those of the sphere
+	output->SetPoints(sphere->GetOutput()->GetPoints());
+	output->SetVerts(sphere->GetOutput()->GetVerts());
+	output->SetPolys(sphere->GetOutput()->GetPolys());
+}
+
+/*----------------------------------------------------------------------------
+* Work with VtkPointSet
+*---------------------------------------------------------------------------*/
 //----------------------------------------------------------------------------
 void AllocateDataArray(vtkPointSet* output, const char* arrayName,\
  			int numComponents, int numTuples)
@@ -29,13 +59,6 @@ void AllocateDoubleDataArray(vtkPointSet* output, const char* arrayName,\
   output->GetPointData()->AddArray(dataArray);
 }
 
-//----------------------------------------------------------------------------
-vtkIdType SetPointValue(vtkPolyData* output,float pos[])
-{
-	vtkIdType id=output->GetPoints()->InsertNextPoint(pos);
-	output->GetVerts()->InsertNextCell(1, &id);
-	return id;
-}
 
 //----------------------------------------------------------------------------
 double* GetPoint(vtkPointSet* output,vtkIdType id)
@@ -44,7 +67,6 @@ double* GetPoint(vtkPointSet* output,vtkIdType id)
 	output->GetPoints()->GetPoint(id,nextPoint);
 	return nextPoint;
 }
-
 
 //----------------------------------------------------------------------------
 void SetDataValue(vtkPointSet* output, const char* arrayName,\
