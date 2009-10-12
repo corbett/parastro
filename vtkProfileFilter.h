@@ -69,7 +69,7 @@ protected:
 	int CutOffAtVirialRadius;
   // Description:
   // Build the field lists containing the central point to be probed
-  void BuildFieldList(vtkDataSet* source);
+  void CalculateAndSetCenter(vtkDataSet* source);
 	
 private:
   vtkProfileFilter(const vtkProfileFilter&); // Not implemented
