@@ -176,8 +176,6 @@
       <Hints>
 	  	<View type="ClientTableView" />
       	<Visibility replace_input="0" />
-		<!--trying here to hide several properties-->
-        <Property name="Center" show="0"/> 
       <Plotable />
       </Hints>
    </SourceProxy>

@@ -33,6 +33,7 @@ vtkProfileFilter::vtkProfileFilter():vtkExtractHistogram()
 //----------------------------------------------------------------------------
 vtkProfileFilter::~vtkProfileFilter()
 {
+	this->SetCenter(0);
 }
 
 //----------------------------------------------------------------------------
@@ -55,6 +56,11 @@ void vtkProfileFilter::CalculateAndSetCenter(vtkDataSet* source)
 	// GUI, or the first end of the line selected in the GUI
 	double* selectedCenter=source->GetPoint(0);
 	this->SetCenter(selectedCenter);
+	delete [] selectedCenter;
+	//testing center setting
+	vtkErrorMacro("center is " <<  this->Center[0] \
+								<< " " << this->Center[1] \
+								<< " " << this->Center[2]);
 	/*
   delete this->PointList;
   delete this->CellList;
@@ -74,7 +80,7 @@ int vtkProfileFilter::RequestData(vtkInformation *request,\
 {
  	vtkPolyData* input = vtkPolyData::GetData(inputVector[0]);
 	vtkDataSet* pointInfo = vtkDataSet::GetData(inputVector[1]);
-	CalculateAndSetCenter(pointInfo);
+	SetCenter(pointInfo);
 	
 	//TODO: change
 	// temporary hack swapping inputs so that superclass doesn't get confused
