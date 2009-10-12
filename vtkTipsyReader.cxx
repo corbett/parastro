@@ -258,21 +258,27 @@ vtkIdType vtkTipsyReader::ReadDarkParticle(vtkPolyData* output,\
 void vtkTipsyReader::AllocateAllTipsyVariableArrays(TipsyHeader& tipsyHeader,\
 											vtkPolyData* output)
 {
-  // Allocate objects to hold points and vertex cells. Storing the points and cells in the output data object.
+  // Allocate objects to hold points and vertex cells. 
+	// Storing the points and cells in the output data object.
   output->SetPoints(vtkSmartPointer<vtkPoints>::New());
   output->SetVerts(vtkSmartPointer<vtkCellArray>::New()); 
-	// the default scalars to be displayed
-  AllocateDataArray(output,"potential",1,tipsyHeader.h_nBodies);
-	// the rest of the scalars
-  AllocateDataArray(output,"mass",1,tipsyHeader.h_nBodies);
-  AllocateDataArray(output,"eps",1,tipsyHeader.h_nBodies);
-  AllocateDataArray(output,"rho",1,tipsyHeader.h_nBodies);
-  AllocateDataArray(output,"hsmooth",1,tipsyHeader.h_nBodies);
-  AllocateDataArray(output,"temperature",1,tipsyHeader.h_nBodies);
-  AllocateDataArray(output,"metals",1,tipsyHeader.h_nBodies);
-  AllocateDataArray(output,"tform",1,tipsyHeader.h_nBodies);
-	// the default vectors to be displayed
-  AllocateDataArray(output,"velocity",3,tipsyHeader.h_nBodies);
+	// Only allocate the other arrays if we are to read this data in
+  if(!this->ReadPositionsOnly)
+		{
+		// the default scalars to be displayed
+		// Only allocate if we are to read thes in
+	  AllocateDataArray(output,"potential",1,tipsyHeader.h_nBodies);
+		// the rest of the scalars
+	  AllocateDataArray(output,"mass",1,tipsyHeader.h_nBodies);
+	  AllocateDataArray(output,"eps",1,tipsyHeader.h_nBodies);
+	  AllocateDataArray(output,"rho",1,tipsyHeader.h_nBodies);
+	  AllocateDataArray(output,"hsmooth",1,tipsyHeader.h_nBodies);
+	  AllocateDataArray(output,"temperature",1,tipsyHeader.h_nBodies);
+	  AllocateDataArray(output,"metals",1,tipsyHeader.h_nBodies);
+	  AllocateDataArray(output,"tform",1,tipsyHeader.h_nBodies);
+		// the default vectors to be displayed
+	  AllocateDataArray(output,"velocity",3,tipsyHeader.h_nBodies);
+		}
 }
 //----------------------------------------------------------------------------
 int vtkTipsyReader::RequestData(vtkInformation*,
