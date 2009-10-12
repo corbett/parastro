@@ -19,6 +19,7 @@
 #define __vtkProfileFilter_h
 
 #include "vtkExtractHistogram.h"
+#include "vtkFieldList.h" // needed to declare the field list below
 
 class VTK_EXPORT vtkProfileFilter : public vtkExtractHistogram
 {
@@ -66,8 +67,8 @@ protected:
 	double Center[3];
 	int BinByRadius;
 	int CutOffAtVirialRadius;
-	vtkDataSetAttributes::FieldList* CellList;
-  vtkDataSetAttributes::FieldList* PointList;
+	FieldList* CellList;
+  FieldList* PointList;
 	
 private:
   vtkProfileFilter(const vtkProfileFilter&); // Not implemented
