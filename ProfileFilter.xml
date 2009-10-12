@@ -41,7 +41,6 @@
 	         This property specifies the dataset whose geometry will be used in determining positions to probe.
 	       </Documentation>
 	  </InputProperty>
-<!--
     <InputProperty
        name="Input"
        command="SetInputConnection">
@@ -63,7 +62,6 @@
             This property specifies the dataset from which to obtain probe values.
           </Documentation>
      </InputProperty>
--->
      <IntVectorProperty 
         name="BinByRadius" 
         command="SetBinByRadius" 

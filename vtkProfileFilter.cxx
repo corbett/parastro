@@ -52,7 +52,7 @@ int vtkProfileFilter::RequestData(vtkInformation *request,\
 																	vtkInformationVector **inputVector,\
 																	vtkInformationVector *outputVector)
 {
-	vtkDataSet* inInfo = vtkDataSet::GetData(inputVector[0]);
+	vtkDataSet* pointInfo = vtkDataSet::GetData(inputVector[0]);
  	vtkPolyData* input = vtkPolyData::GetData(inputVector[1]);
 
 	// If we should cutoff at the virial radius, then calculating where
