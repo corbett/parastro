@@ -42,6 +42,10 @@
            <Documentation>
              This property specifies the dataset whose geometry will be used in determining positions to probe.
            </Documentation>
+		   <Hints>
+				<Property name="Radius" show="0"/>
+	        	<Property name="NumberOfPoints" show="0"/> 
+	    	</Hints>
       </InputProperty>
 	<!--Adds a checkbox for the option Bin By Radius-->
      <IntVectorProperty 
@@ -168,15 +172,10 @@
          </RequiredProperties>
        </ArrayRangeDomain>
      </DoubleVectorProperty>
-
-
       <Hints>
 	  	<View type="ClientTableView" />
       	<Visibility replace_input="0" />
 		<!--trying here to hide several properties-->
-	    <Property name="Radius" show="0"/>
-        <Property name="NumberOfPoints" show="0"/> 
-        <Property name="Source" show="0"/> 
         <Property name="Center" show="0"/> 
       <Plotable />
       </Hints>
