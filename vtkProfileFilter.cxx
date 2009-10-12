@@ -27,7 +27,7 @@ vtkProfileFilter::vtkProfileFilter():vtkExtractHistogram()
 {
 	this->SetCalculateAverages(1); // no longer taking this in as an option
 																 // may later actually disable
-//  this->SetNumberOfInputPorts(1);
+  this->SetNumberOfInputPorts(2);
 }
 
 //----------------------------------------------------------------------------
@@ -47,7 +47,18 @@ void vtkProfileFilter::SetSourceConnection(vtkAlgorithmOutput* algOutput)
   this->SetInputConnection(1, algOutput);
 }
 
+//----------------------------------------------------------------------------
+void vtkProbeFilter::BuildFieldList(vtkDataSet* source)
+{
+  delete this->PointList;
+  delete this->CellList;
 
+  this->PointList = new vtkDataSetAttributes::FieldList(1);
+  this->PointList->InitializeFieldList(source->GetPointData());
+
+  this->CellList = new vtkDataSetAttributes::FieldList(1);
+  this->CellList->InitializeFieldList(source->GetCellData());
+}
 
 //----------------------------------------------------------------------------
 int vtkProfileFilter::RequestData(vtkInformation *request,\
@@ -55,7 +66,7 @@ int vtkProfileFilter::RequestData(vtkInformation *request,\
 																	vtkInformationVector *outputVector)
 {
  	vtkPolyData* input = vtkPolyData::GetData(inputVector[0]);
-//	vtkDataSet* pointInfo = vtkDataSet::GetData(inputVector[1]);
+	vtkDataSet* pointInfo = vtkDataSet::GetData(inputVector[1]);
 
 	//TODO: change
 	// temporary hack swapping inputs so that superclass doesn't get confused

@@ -66,6 +66,8 @@ protected:
 	double Center[3];
 	int BinByRadius;
 	int CutOffAtVirialRadius;
+	vtkDataSetAttributes::FieldList* CellList;
+  vtkDataSetAttributes::FieldList* PointList;
 	
 private:
   vtkProfileFilter(const vtkProfileFilter&); // Not implemented

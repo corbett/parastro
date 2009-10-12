@@ -173,10 +173,11 @@
 
 
       <Hints>
-      <!-- View can be used to specify the preferred view for the proxy -->
-      <Visibility replace_input="0" />
-	  <View type="ClientTableView" />
-      <!-- Temporary hint to allow the output of this filter to be plotted -->
+      	<!-- View can be used to specify the preferred view for the proxy -->
+      	<Visibility replace_input="0" />
+	  	<View type="ClientTableView" />
+<!--	    <Property name="Radius" show="0"/>
+        <Property name="NumberOfPoint" show="0"/> -->
       <Plotable />
       </Hints>
    </SourceProxy>
