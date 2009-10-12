@@ -93,15 +93,16 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 		//setting the input to this newInput
 		if(virialRadiusInfo.virialRadius>0)
 			{
-
+/*
 			vtkPolyData* newInput=\
 				GetDatasetWithinVirialRadius(virialRadiusInfo);	// note vtkPolyData must now manually be deleted!
 			//setting the input to this newInput
 			inputVector[0]->GetInformationObject(0)->Set(\
 				vtkDataObject::DATA_OBJECT(),newInput);
-
-			//TODO: debug this--- GetDatasetWithinVirialRadius is currently
-			// one point only
+*/
+			// TODO: debug this--- GetDatasetWithinVirialRadius is currently
+			// one point only, moreover even if it's all 1001 points, the new 		
+			// histogram doesn't find the input data arrays
 			}
 		else
 			{

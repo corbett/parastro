@@ -183,9 +183,8 @@ vtkPolyData* GetDatasetWithinVirialRadius(VirialRadiusInfo virialRadiusInfo)
 
 	vtkSmartPointer<vtkIdList> pointsInRadius = \
 																vtkSmartPointer<vtkIdList>::New();
-//first arg: virialRadiusInfo.virialRadius,  TODO: change back
 	virialRadiusInfo.locator->FindPointsWithinRadius(\
-															1.0,\ 
+															virialRadiusInfo.virialRadius,\ 
 															virialRadiusInfo.center,\
 															pointsInRadius);
   vtkPolyData* dataSet = \
@@ -195,17 +194,6 @@ vtkPolyData* GetDatasetWithinVirialRadius(VirialRadiusInfo virialRadiusInfo)
 	vtkPolyData* newDataSet = vtkPolyData::New();
 	  newDataSet->SetPoints(vtkSmartPointer<vtkPoints>::New());
 		newDataSet->SetVerts(vtkSmartPointer<vtkCellArray>::New());
-  AllocateDataArray(newDataSet,"potential",1,pointsInRadius->GetNumberOfIds());
-	// the rest of the scalars
-  AllocateDataArray(newDataSet,"mass",1,pointsInRadius->GetNumberOfIds());
-  AllocateDataArray(newDataSet,"eps",1,pointsInRadius->GetNumberOfIds());
-  AllocateDataArray(newDataSet,"rho",1,pointsInRadius->GetNumberOfIds());
-  AllocateDataArray(newDataSet,"hsmooth",1,pointsInRadius->GetNumberOfIds());
-  AllocateDataArray(newDataSet,"temperature",1,pointsInRadius->GetNumberOfIds());
-  AllocateDataArray(newDataSet,"metals",1,pointsInRadius->GetNumberOfIds());
-  AllocateDataArray(newDataSet,"tform",1,pointsInRadius->GetNumberOfIds());
-	// the default vectors to be displayed
-  AllocateDataArray(newDataSet,"velocity",3,pointsInRadius->GetNumberOfIds());
 	// Copy cells listed in idList from pd, including points, point data, 
 	// and cell data. This method assumes that point and cell data have been
 	// allocated.
