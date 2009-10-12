@@ -176,6 +176,7 @@
 		<!--trying here to hide several properties-->
 	    <Property name="Radius" show="0"/>
         <Property name="NumberOfPoints" show="0"/> 
+        <Property name="Source" show="0"/> 
         <Property name="Center" show="0"/> 
       <Plotable />
       </Hints>
