@@ -94,11 +94,10 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 		if(virialRadiusInfo.virialRadius>0)
 			{
 			vtkPolyData* newInput=\
-				GetDatasetWithinVirialRadius(virialRadiusInfo);
+				GetDatasetWithinVirialRadius(virialRadiusInfo);	// note vtkPolyData must now manually be deleted!
 			vtkErrorMacro("no segfault yet");
-			newInput->GetPoints();
 			//setting the input to this newInput
-//			inputVector[0]->GetInformationObject(0)->Set(\
+			inputVector[0]->GetInformationObject(0)->Set(\
 				vtkDataObject::DATA_OBJECT(),newInput);
 			}
 		else
