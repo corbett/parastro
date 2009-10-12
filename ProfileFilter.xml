@@ -29,7 +29,6 @@
             This property specifies the input to the Profile filter.
           </Documentation>
      </InputProperty>
-<!--	
      <InputProperty
         name="Source"
         command="SetSourceConnection"
@@ -44,7 +43,6 @@
              This property specifies the dataset whose geometry will be used in determining positions to probe.
            </Documentation>
       </InputProperty>
-	-->
 	<!--Adds a checkbox for the option Bin By Radius-->
      <IntVectorProperty 
         name="BinByRadius" 
