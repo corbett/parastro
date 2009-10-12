@@ -183,8 +183,9 @@ vtkPolyData* GetDatasetWithinVirialRadius(VirialRadiusInfo virialRadiusInfo)
 
 	vtkSmartPointer<vtkIdList> pointsInRadius = \
 																vtkSmartPointer<vtkIdList>::New();
+//first arg: virialRadiusInfo.virialRadius,  TODO: change back
 	virialRadiusInfo.locator->FindPointsWithinRadius(\
-															1.0,\ //virialRadiusInfo.virialRadius,  TODO: change back
+															1.0,\ 
 															virialRadiusInfo.center,\
 															pointsInRadius);
   vtkPolyData* dataSet = \
