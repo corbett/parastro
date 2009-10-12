@@ -11,57 +11,40 @@
         short_help="physical profile">
      </Documentation>
 <!--trying out some stuff to perhaps take input by selecting a point.-->
-	<InputProperty
-	   name="Input"
-	   command="SetSourceConnection">
-	      <ProxyGroupDomain name="groups">
-	        <Group name="sources"/>
-	        <Group name="filters"/>
-	      </ProxyGroupDomain>
-	      <DataTypeDomain name="input_type">
-	        <DataType value="vtkPolyData"/>
-	      </DataTypeDomain>
-	      <InputArrayDomain name="input_array"/>
-	      <Documentation>
-	        This property specifies the dataset from which to obtain probe values.
-	      </Documentation>
-	 </InputProperty>
-
-	 <InputProperty
-	    name="Source"
-	    command="SetInputConnection"
-	    label="Probe Type">
-	       <ProxyGroupDomain name="groups">
-	         <Group name="sources"/>
-	       </ProxyGroupDomain>
-	       <ProxyListDomain name="proxy_list">
-	         <Proxy group="extended_sources" name="FixedRadiusPointSource" />
-	       </ProxyListDomain>
-	       <Documentation>
-	         This property specifies the dataset whose geometry will be used in determining positions to probe.
-	       </Documentation>
-	  </InputProperty>
-    <InputProperty
-       name="Input"
-       command="SetInputConnection">
+     <InputProperty name="Input" command="SetInputConnection">
           <ProxyGroupDomain name="groups">
             <Group name="sources"/>
             <Group name="filters"/>
           </ProxyGroupDomain>
           <DataTypeDomain name="input_type">
-            <DataType value="vtkPolyData"/>
+            <DataType value="vtkPointSet"/>
           </DataTypeDomain>
           <InputArrayDomain name="input_array">
-          <RequiredProperties>
+             <RequiredProperties>
                 <Property name="SelectInputArray" 
                           function="FieldDataSelection"/>
              </RequiredProperties>
           </InputArrayDomain>
-
           <Documentation>
-            This property specifies the dataset from which to obtain probe values.
+            This property specifies the input to the Profile filter.
           </Documentation>
      </InputProperty>
+
+     <InputProperty
+        name="Source"
+        command="SetSourceConnection"
+        label="Probe Type">
+           <ProxyGroupDomain name="groups">
+             <Group name="sources"/>
+           </ProxyGroupDomain>
+           <ProxyListDomain name="proxy_list">
+             <Proxy group="extended_sources" name="FixedRadiusPointSource" />
+           </ProxyListDomain>
+           <Documentation>
+             This property specifies the dataset whose geometry will be used in determining positions to probe.
+           </Documentation>
+      </InputProperty>
+
      <IntVectorProperty 
         name="BinByRadius" 
         command="SetBinByRadius" 
