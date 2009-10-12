@@ -59,6 +59,7 @@ void vtkProfileFilter::CalculateAndSetCenter(vtkDataSet* source)
 	vtkErrorMacro("center is " <<  this->Center[0] \
 								<< " " << this->Center[1] \
 								<< " " << this->Center[2]);
+	delete [] selectedCenter;
 	/*
   delete this->PointList;
   delete this->CellList;
