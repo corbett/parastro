@@ -48,13 +48,13 @@ void vtkProfileFilter::SetSourceConnection(vtkAlgorithmOutput* algOutput)
 }
 
 //----------------------------------------------------------------------------
-void vtkProfileFilter::BuildFieldList(vtkDataSet* source)
+void vtkProfileFilter::CalculateAndSetCenter(vtkDataSet* source)
 {
-	//TODO: this can later be done as in the XML documentation for this filter; for now.
-	//GET the first point
+	//TODO: this can later be done as in the XML documentation for this filter; 	  
+	// for now, only getting the first point. this is the point selected in the
+	// GUI, or the first end of the line selected in the GUI
 	double* selectedCenter=source->GetPoint(0);
-	vtkErrorMacro("selected center is "<< selectedCenter[0] << " " \
-								<< selectedCenter[1] << selectedCenter[2] );
+	this->SetCenter(selectedCenter);
 	/*
   delete this->PointList;
   delete this->CellList;
@@ -74,7 +74,7 @@ int vtkProfileFilter::RequestData(vtkInformation *request,\
 {
  	vtkPolyData* input = vtkPolyData::GetData(inputVector[0]);
 	vtkDataSet* pointInfo = vtkDataSet::GetData(inputVector[1]);
-	BuildFieldList(pointInfo);
+	CalculateAndSetCenter(pointInfo);
 	
 	//TODO: change
 	// temporary hack swapping inputs so that superclass doesn't get confused

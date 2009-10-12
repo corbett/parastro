@@ -67,8 +67,6 @@ protected:
 	double Center[3];
 	int BinByRadius;
 	int CutOffAtVirialRadius;
-  vtkDataSetAttributes::FieldList* CellList;
-  vtkDataSetAttributes::FieldList* PointList;
   // Description:
   // Build the field lists containing the central point to be probed
   void BuildFieldList(vtkDataSet* source);
