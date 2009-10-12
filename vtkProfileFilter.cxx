@@ -55,7 +55,7 @@ void vtkProfileFilter::CalculateAndSetCenter(vtkDataSet* source)
 	// for now, only getting the first point. this is the point selected in the
 	// GUI, or the first end of the line selected in the GUI
 	double* selectedCenter=source->GetPoint(0);
-	this->SetCenter(selectedCenter);
+	this->SetVector3Center(selectedCenter);
 	delete [] selectedCenter;
 	//testing center setting
 	vtkErrorMacro("center is " <<  this->Center[0] \
