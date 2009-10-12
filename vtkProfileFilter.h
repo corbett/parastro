@@ -69,6 +69,9 @@ protected:
 	int CutOffAtVirialRadius;
   vtkDataSetAttributes::FieldList* CellList;
   vtkDataSetAttributes::FieldList* PointList;
+  // Description:
+  // Build the field lists containing the central point to be probed
+  void BuildFieldList(vtkDataSet* source);
 	
 private:
   vtkProfileFilter(const vtkProfileFilter&); // Not implemented
