@@ -52,7 +52,7 @@ void vtkProfileFilter::BuildFieldList(vtkDataSet* source)
 {
 	//TODO: this can later be done as in the XML documentation for this filter; for now.
 	//GET the first point
-	double* selectedCenter=GetPoint(source,0);
+	double* selectedCenter=source->GetPoint(0);
 	vtkErrorMacro("selected center is "<< selectedCenter[0] << " " \
 								<< selectedCenter[1] << selectedCenter[2] );
 	/*
