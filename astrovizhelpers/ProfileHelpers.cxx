@@ -184,7 +184,7 @@ vtkPolyData* GetDatasetWithinVirialRadius(VirialRadiusInfo virialRadiusInfo)
 	vtkSmartPointer<vtkIdList> pointsInRadius = \
 																vtkSmartPointer<vtkIdList>::New();
 	virialRadiusInfo.locator->FindPointsWithinRadius(\
-															virialRadiusInfo.virialRadius,\
+															1.0,\ //virialRadiusInfo.virialRadius,  TODO: change back
 															virialRadiusInfo.center,\
 															pointsInRadius);
   vtkPolyData* dataSet = \
@@ -198,7 +198,7 @@ vtkPolyData* GetDatasetWithinVirialRadius(VirialRadiusInfo virialRadiusInfo)
 	// and cell data. This method assumes that point and cell data have been
 	// allocated.
 	newDataSet->CopyCells(dataSet,pointsInRadius);
-	cout << "number of points "<< newDataSet->GetNumberOfPoints();
+	cout << "number of points "<< newDataSet->GetNumberOfPoints() << "\n\n";
 	return newDataSet;
 }
 	
