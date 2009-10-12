@@ -27,6 +27,7 @@ vtkProfileFilter::vtkProfileFilter():vtkExtractHistogram()
 {
 	this->SetCalculateAverages(1); // no longer taking this in as an option
 																 // may later actually disable
+  this->SetNumberOfInputPorts(2);
 }
 
 //----------------------------------------------------------------------------
@@ -40,6 +41,11 @@ void vtkProfileFilter::PrintSelf(ostream& os, vtkIndent indent)
   vtkExtractHistogram::PrintSelf(os,indent);
 }
 
+//----------------------------------------------------------------------------
+void vtkProfileFilter::SetSourceConnection(vtkAlgorithmOutput* algOutput)
+{
+  this->SetInputConnection(1, algOutput);
+}
 
 //----------------------------------------------------------------------------
 int vtkProfileFilter::RequestData(vtkInformation *request,\
@@ -47,6 +53,8 @@ int vtkProfileFilter::RequestData(vtkInformation *request,\
 																	vtkInformationVector *outputVector)
 {
  	vtkPolyData* input = vtkPolyData::GetData(inputVector[0]);
+	vtkDataSet* sourceInfo = vtkDataSet::GetData(inputVector[1]);
+
 	// If we should cutoff at the virial radius, then calculating where
 	// the cutoff is and then redefining the data set to be only the points
 	// up to this cutoff
