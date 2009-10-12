@@ -171,11 +171,11 @@
 
 
       <Hints>
-      	<!-- View can be used to specify the preferred view for the proxy -->
-      	<Visibility replace_input="0" />
 	  	<View type="ClientTableView" />
-<!--	    <Property name="Radius" show="0"/>
-        <Property name="NumberOfPoint" show="0"/> -->
+      	<Visibility replace_input="0" />
+		<!--trying here to hide several properties-->
+	    <Property name="Radius" show="0"/>
+        <Property name="NumberOfPoints" show="0"/> 
       <Plotable />
       </Hints>
    </SourceProxy>
