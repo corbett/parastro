@@ -55,7 +55,7 @@ void vtkProfileFilter::CalculateAndSetCenter(vtkDataSet* source)
 	// for now, only getting the first point. this is the point selected in the
 	// GUI, or the first end of the line selected in the GUI
 	double* selectedCenter=source->GetPoint(0);
-	this->SetVector3Center(selectedCenter);
+	this->SetCenter(selectedCenter);
 	delete [] selectedCenter;
 	//testing center setting
 	vtkErrorMacro("center is " <<  this->Center[0] \
@@ -80,7 +80,7 @@ int vtkProfileFilter::RequestData(vtkInformation *request,\
 {
  	vtkPolyData* input = vtkPolyData::GetData(inputVector[0]);
 	vtkDataSet* pointInfo = vtkDataSet::GetData(inputVector[1]);
-	SetCenter(pointInfo);
+	this->CalculateAndSetCenter(pointInfo);
 	
 	//TODO: change
 	// temporary hack swapping inputs so that superclass doesn't get confused
