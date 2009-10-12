@@ -37,6 +37,7 @@
              <Group name="sources"/>
            </ProxyGroupDomain>
            <ProxyListDomain name="proxy_list">
+			 <Proxy group="extended_sources" name="HighResLineSource" />
              <Proxy group="extended_sources" name="FixedRadiusPointSource" />
            </ProxyListDomain>
            <Documentation>
