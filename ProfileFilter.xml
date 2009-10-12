@@ -10,7 +10,7 @@
 		       tion of radius"
         short_help="physical profile">
      </Documentation>
-<!--trying out some stuff to perhaps take input by selecting a point.-->
+	<!--Sets the input dataset-->
      <InputProperty name="Input" command="SetInputConnection">
           <ProxyGroupDomain name="groups">
             <Group name="sources"/>
@@ -29,7 +29,7 @@
             This property specifies the input to the Profile filter.
           </Documentation>
      </InputProperty>
-
+	<!--Allows us to read in a point from the gui selection-->
      <InputProperty
         name="Source"
         command="SetSourceConnection"
@@ -44,7 +44,7 @@
              This property specifies the dataset whose geometry will be used in determining positions to probe.
            </Documentation>
       </InputProperty>
-
+	<!--Adds a checkbox for the option Bin By Radius-->
      <IntVectorProperty 
         name="BinByRadius" 
         command="SetBinByRadius" 
@@ -55,6 +55,7 @@
          If the value of this property is 1, then the bins are by radius, otherwise they are binned by the quantity selected in the scalar array.
        </Documentation>
      </IntVectorProperty>
+	<!--Adds a checkbox for the option Cut Off At Virial Radius-->
      <IntVectorProperty 
         name="CutOffAtVirialRadius" 
         command="SetCutOffAtVirialRadius" 
@@ -65,6 +66,7 @@
          If the value of this property is 1, then the bins are only from the center up to the virial radius.
        </Documentation>
      </IntVectorProperty>
+	<!--Allows the user to type into a text field their desired overdensity-->
 	  <DoubleVectorProperty
 			name="Delta"
 			command="SetDelta"
@@ -74,7 +76,7 @@
 			Set the density parameter
 			</Documentation>
 	  </DoubleVectorProperty>
-
+	  <!--This property is obselete with the ability to select the input-->
 	  <DoubleVectorProperty
 			name="Center"
 			command="SetCenter"
@@ -84,6 +86,8 @@
 				Set the center from which to search.
 			</Documentation>
 	  </DoubleVectorProperty>
+	<!--This allows the user to select an array, if they wish 
+	to instead bin by these-->
      <StringVectorProperty
          name="SelectInputArray" 
          command="SetInputArrayToProcess" 
@@ -105,7 +109,7 @@
             This property indicates the name of the array from which to compute the histogram, if Bin By Radius is not selected.
           </Documentation>
      </StringVectorProperty>
-
+	<!--Allows the user to select the number of bins-->
      <IntVectorProperty name="BinCount" 
         command="SetBinCount" 
         number_of_elements="1" 
@@ -115,7 +119,7 @@
           The value of this property specifies the number of bins for the histogram.
         </Documentation>
      </IntVectorProperty>
-
+	<!--Interfaces with the ability to profile with a given attribute-->
      <IntVectorProperty 
         name="Component" 
         command="SetComponent" 
@@ -132,6 +136,7 @@
           The value of this property specifies the array component from which the histogram should be computed.
         </Documentation>
      </IntVectorProperty>
+	<!--Allows the user to select custom bin ranges-->
      <IntVectorProperty name="UseCustomBinRanges"
        command="SetUseCustomBinRanges"
        number_of_elements="1"
@@ -142,7 +147,7 @@
          full range for the selected array. By default, set to false.
        </Documentation>
      </IntVectorProperty>
-
+	<!--Allows the user to select custom bin ranges-->
      <DoubleVectorProperty name="CustomBinRanges"
        command="SetCustomBinRanges"
        number_of_elements="2"
@@ -162,8 +167,8 @@
 
       <Hints>
       <!-- View can be used to specify the preferred view for the proxy -->
-      <!-- <View type="XYPlotView" /> -->
-       <Visibility replace_input="0" />
+<!--      <Visibility replace_input="0" />
+	  <Visibility radius="0"/>-->
 	  <View type="ClientTableView" />
       <!-- Temporary hint to allow the output of this filter to be plotted -->
       <Plotable />
