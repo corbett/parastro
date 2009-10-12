@@ -198,7 +198,7 @@ vtkPolyData* GetDatasetWithinVirialRadius(VirialRadiusInfo virialRadiusInfo)
 	// and cell data. This method assumes that point and cell data have been
 	// allocated.
 	newDataSet->CopyCells(dataSet,pointsInRadius);
-	vtkErrorMacro("number of points "<< newDataSet->GetNumberOfPoints());
+	cout << "number of points "<< newDataSet->GetNumberOfPoints();
 	return newDataSet;
 }
 	
