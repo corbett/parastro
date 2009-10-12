@@ -41,7 +41,7 @@
              <Proxy group="extended_sources" name="FixedRadiusPointSource" />
            </ProxyListDomain>
            <Documentation>
-             This property specifies the dataset whose geometry will be used in determining positions to probe.
+			If HighResLineSource is selected: select line source, then in the 3D view define a line in space. Finds the particle with the lowest potential closest to this line. If there are ties, finds the particle closest to the center of mass. This is considered the center of the halo, from which the virial radius is searched outward. If Fixed Radius Point Source is selected, finds the particle with the lowest potential closest to the point. If more than one point is desired and a non-zero radius is specified, searches around this number of randomly sampled of points in the area of the sphere of the desired radius. Ties a broken again as the point closest in distance to the center of mass. If there are further ties, the point with the minimum x, then minimum y, then minimum z is selected.
            </Documentation>
 		   <Hints>
 				<Property name="Radius" show="0"/>

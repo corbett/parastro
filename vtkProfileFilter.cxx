@@ -50,6 +50,12 @@ void vtkProfileFilter::SetSourceConnection(vtkAlgorithmOutput* algOutput)
 //----------------------------------------------------------------------------
 void vtkProfileFilter::BuildFieldList(vtkDataSet* source)
 {
+	//TODO: this can later be done as in the XML documentation for this filter; for now.
+	//GET the first point
+	double* selectedCenter=GetPoint(source,0);
+	vtkErrorMacro("selected center is "<< selectedCenter[0] << " " \
+								<< selectedCenter[1] << selectedCenter[2] );
+	/*
   delete this->PointList;
   delete this->CellList;
 
@@ -58,6 +64,7 @@ void vtkProfileFilter::BuildFieldList(vtkDataSet* source)
 
   this->CellList = new vtkDataSetAttributes::FieldList(1);
   this->CellList->InitializeFieldList(source->GetCellData());
+	*/
 }
 
 //----------------------------------------------------------------------------
@@ -67,7 +74,8 @@ int vtkProfileFilter::RequestData(vtkInformation *request,\
 {
  	vtkPolyData* input = vtkPolyData::GetData(inputVector[0]);
 	vtkDataSet* pointInfo = vtkDataSet::GetData(inputVector[1]);
-
+	BuildFieldList(pointInfo);
+	
 	//TODO: change
 	// temporary hack swapping inputs so that superclass doesn't get confused
 	// If we should cutoff at the virial radius, then calculating where
