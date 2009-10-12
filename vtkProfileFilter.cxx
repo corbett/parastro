@@ -47,6 +47,8 @@ void vtkProfileFilter::SetSourceConnection(vtkAlgorithmOutput* algOutput)
   this->SetInputConnection(1, algOutput);
 }
 
+
+
 //----------------------------------------------------------------------------
 int vtkProfileFilter::RequestData(vtkInformation *request,\
 																	vtkInformationVector **inputVector,\

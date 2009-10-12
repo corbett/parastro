@@ -29,7 +29,7 @@
             This property specifies the input to the Profile filter.
           </Documentation>
      </InputProperty>
-	<!--Allows us to read in a point from the gui selection-->
+<!--	
      <InputProperty
         name="Source"
         command="SetSourceConnection"
@@ -44,6 +44,7 @@
              This property specifies the dataset whose geometry will be used in determining positions to probe.
            </Documentation>
       </InputProperty>
+	-->
 	<!--Adds a checkbox for the option Bin By Radius-->
      <IntVectorProperty 
         name="BinByRadius" 
@@ -85,6 +86,12 @@
 			<Documentation>
 				Set the center from which to search.
 			</Documentation>
+			<Hints>
+	         <!-- This tag alerts the auto-generated panels and input selection
+	              that this input is a selection.  It should use the special
+	              selection GUI. -->
+	         <SelectionInput />
+	       </Hints>
 	  </DoubleVectorProperty>
 	<!--This allows the user to select an array, if they wish 
 	to instead bin by these-->
@@ -168,7 +175,6 @@
       <Hints>
       <!-- View can be used to specify the preferred view for the proxy -->
       <Visibility replace_input="0" />
-<!--	  <Visibility radius="0"/>-->
 	  <View type="ClientTableView" />
       <!-- Temporary hint to allow the output of this filter to be plotted -->
       <Plotable />
