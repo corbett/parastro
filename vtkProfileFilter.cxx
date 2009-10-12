@@ -90,9 +90,7 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 		vtkErrorMacro("virial radius is " << virialRadiusInfo.virialRadius);
 		// note that if there was an error finding the virialRadius the 
 		// radius returned is < 0
-		//setting the input to this newInput									
-		inputVector[0]->GetInformationObject(0)->Set(\
-																			vtkDataObject::DATA_OBJECT(),input);
+		//setting the input to this newInput
 		if(virialRadiusInfo.virialRadius>0)
 			{
 						
@@ -100,9 +98,7 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 				GetDatasetWithinVirialRadius(virialRadiusInfo);
 			//setting the input to this newInput									
 			inputVector[0]->GetInformationObject(0)->Set(\
-																						vtkDataObject::DATA_OBJECT(),
-				newInput);
-
+																				vtkDataObject::DATA_OBJECT(),input);
 			}
 		else
 			{
