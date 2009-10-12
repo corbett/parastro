@@ -33,7 +33,6 @@ vtkProfileFilter::vtkProfileFilter():vtkExtractHistogram()
 //----------------------------------------------------------------------------
 vtkProfileFilter::~vtkProfileFilter()
 {
-	this->SetCenter(0);
 }
 
 //----------------------------------------------------------------------------
