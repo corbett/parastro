@@ -30,6 +30,14 @@
 			Set the over density parameter. If this is set to a non-zero value, then a sphere about the center of mass will be drawn at the radius at which the density is equal to this overdensity.
 			</Documentation>
 	  </DoubleVectorProperty>
+      <Hints>
+        <!-- Visibility Element can be used to suggest the GUI about
+             visibility of this filter (or its input) on creation.
+             replace_input="0" implies that the input visibility is not
+             changed on creation of this filter (defaults to "1")
+             -->
+        <Visibility replace_input="0" />
+      </Hints>
    </SourceProxy>
  </ProxyGroup>
 </ServerManagerConfiguration>
