@@ -48,7 +48,7 @@ void vtkProfileFilter::SetSourceConnection(vtkAlgorithmOutput* algOutput)
 }
 
 //----------------------------------------------------------------------------
-void vtkProbeFilter::BuildFieldList(vtkDataSet* source)
+void vtkProfileFilter::BuildFieldList(vtkDataSet* source)
 {
   delete this->PointList;
   delete this->CellList;
