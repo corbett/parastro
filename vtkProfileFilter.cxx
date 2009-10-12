@@ -56,10 +56,6 @@ void vtkProfileFilter::CalculateAndSetCenter(vtkDataSet* source)
 	double* selectedCenter=source->GetPoint(0);
 	this->SetCenter(selectedCenter);
 	delete [] selectedCenter;
-	//testing center setting
-	vtkErrorMacro("center is " <<  this->Center[0] \
-								<< " " << this->Center[1] \
-								<< " " << this->Center[2]);
 
 	/*
   delete this->PointList;
@@ -74,7 +70,7 @@ void vtkProfileFilter::CalculateAndSetCenter(vtkDataSet* source)
 }
 
 //----------------------------------------------------------------------------
-int vtkProfileFilter::RequestData(vtkInformation *request,\
+int vtkProfileFilter::RequestData(vtkInformation *request,
 																	vtkInformationVector **inputVector,\
 																	vtkInformationVector *outputVector)
 {
@@ -90,17 +86,20 @@ int vtkProfileFilter::RequestData(vtkInformation *request,\
 	if(this->CutOffAtVirialRadius)
 		{
 		VirialRadiusInfo virialRadiusInfo =\
-		 										ComputeVirialRadius(input,this->Delta,this->Center);
+		 	ComputeVirialRadius(input,this->Delta,this->Center);
 		vtkErrorMacro("virial radius is " << virialRadiusInfo.virialRadius);
 		// note that if there was an error finding the virialRadius the 
 		// radius returned is < 0
 
 		if(virialRadiusInfo.virialRadius>0)
 			{
+						
 			vtkPolyData* newInput=\
-										GetDatasetWithinVirialRadius(virialRadiusInfo);
-			// TODO: finish implementing this, setting the input to this newInput									
-			//this->SetInput(newInput); //segfault
+				GetDatasetWithinVirialRadius(virialRadiusInfo);
+			//setting the input to this newInput									
+			inputVector[0]->GetInformationObject(0)->Set(\
+																								vtkDataObject::DATA_OBJECT(),
+																								newInput);
 
 			}
 		else
