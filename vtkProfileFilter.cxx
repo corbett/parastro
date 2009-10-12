@@ -97,10 +97,8 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 			vtkPolyData* newInput=\
 				GetDatasetWithinVirialRadius(virialRadiusInfo);
 			//setting the input to this newInput									
-			inputVector[0]->GetInformationObject(0)->Set(\
-																								vtkDataObject::DATA_OBJECT(),
-																								newInput);
-
+			vtkErrorMacro(" info object " <<
+										inputVector[0]->GetInformationObject(0));
 			}
 		else
 			{
