@@ -27,7 +27,7 @@ vtkProfileFilter::vtkProfileFilter():vtkExtractHistogram()
 {
 	this->SetCalculateAverages(1); // no longer taking this in as an option
 																 // may later actually disable
-  this->SetNumberOfInputPorts(2);
+//  this->SetNumberOfInputPorts(1);
 }
 
 //----------------------------------------------------------------------------
@@ -55,7 +55,7 @@ int vtkProfileFilter::RequestData(vtkInformation *request,\
 																	vtkInformationVector *outputVector)
 {
  	vtkPolyData* input = vtkPolyData::GetData(inputVector[0]);
-	vtkDataSet* pointInfo = vtkDataSet::GetData(inputVector[1]);
+//	vtkDataSet* pointInfo = vtkDataSet::GetData(inputVector[1]);
 
 	//TODO: change
 	// temporary hack swapping inputs so that superclass doesn't get confused
