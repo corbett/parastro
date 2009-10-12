@@ -191,8 +191,7 @@ vtkPolyData* GetDatasetWithinVirialRadius(VirialRadiusInfo virialRadiusInfo)
 					vtkPolyData::SafeDownCast(virialRadiusInfo.locator->GetDataSet());	
 	// Creating a new dataset
 
-	vtkSmartPointer<vtkPolyData> newDataSet = \
-																	vtkSmartPointer<vtkPolyData>::New();
+	vtkPolyData* newDataSet = vtkPolyData::New();
 	  newDataSet->SetPoints(vtkSmartPointer<vtkPoints>::New());
 		newDataSet->SetVerts(vtkSmartPointer<vtkCellArray>::New());
 	// Copy cells listed in idList from pd, including points, point data, 

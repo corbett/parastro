@@ -93,13 +93,11 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 		//setting the input to this newInput
 		if(virialRadiusInfo.virialRadius>0)
 			{
-				vtkSmartPointer<vtkPolyData> newInput = vtkSmartPointer<vtkPolyData>::New();
-				CreateSphere(newInput,1.0,this->Center);
 //			vtkPolyData* newInput=\
 				GetDatasetWithinVirialRadius(virialRadiusInfo);
-			//setting the input to this newInput									
-			inputVector[0]->GetInformationObject(0)->Set(\
-																				vtkDataObject::DATA_OBJECT(),newInput);
+			//setting the input to this newInput
+//			inputVector[0]->GetInformationObject(0)->Set(\
+				vtkDataObject::DATA_OBJECT(),newInput);
 			}
 		else
 			{
