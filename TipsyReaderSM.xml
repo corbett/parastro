@@ -19,6 +19,15 @@
 					If set, only particles specified in the marked file are read in.
 				</Documentation>
 			</StringVectorProperty>
+  	     <IntVectorProperty name="ReadPositionsOnly"
+	       command="SetReadPositionsOnly"
+	       number_of_elements="1"
+	       default_values="0">
+	       <BooleanDomain name="bool" />
+	       <Documentation>
+	         When set to true, only the particle's position, not its attributes are read in.
+	       </Documentation>
+	     </IntVectorProperty>
 		</SourceProxy>
 	</ProxyGroup>
 </ServerManagerConfiguration>

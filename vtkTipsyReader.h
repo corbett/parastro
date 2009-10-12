@@ -31,13 +31,23 @@ public:
   // Set/Get the name of the file from which to get additional attributes
   vtkSetStringMacro(AttributeFile);
   vtkGetStringMacro(AttributeFile);
+  // Description:
+  // Get/Set whether only the particles positions should be read in.
+	vtkSetMacro(ReadPositionsOnly,int);
+	vtkGetMacro(ReadPositionsOnly,int);
 
+// The BTX, ETX comments bracket the portion of the code which should not be
+// attempted to wrap for use by python, specifically the code which uses
+// C++ templates as this code is unable to be wrapped. DO NOT REMOVE.
+//BTX
 protected:
   vtkTipsyReader();
   ~vtkTipsyReader();
   char* FileName;
 	char* MarkFileName;
 	char* AttributeFile;
+	int ReadPositionsOnly;
+
   int RequestData(vtkInformation*,
                   vtkInformationVector**,
                   vtkInformationVector*);
@@ -57,10 +67,6 @@ private:
 	// Description:
 	// reads variables common to all particles
 	vtkIdType ReadBaseParticle(vtkPolyData* output, TipsyBaseParticle& b);
-	// The BTX, ETX comments bracket the portion of the code which should not be
-	// attempted to wrap for use by python, specifically the code which uses
-	// C++ templates as this code is unable to be wrapped. DO NOT REMOVE.
-	//BTX
 	// Description:
 	// Reads only Marked particles from the tipsy file. Must be called after function ReadMarkedParticleIndices.
 	void ReadMarkedParticles(queue<int> markedParticleIndices,TipsyHeader& tipsyHeader,ifTipsy& tipsyInfile,vtkPolyData* output);
@@ -68,10 +74,11 @@ private:
 	// reads in an array of the indices of marked particles from a file, returns a queue of marked particles
 	// which is empty if reading was unsucessful.
 	queue<int> ReadMarkedParticleIndices(TipsyHeader& tipsyHeader,ifTipsy& tipsyInfile);
-	//ETX
 	/* Helper functions for storing data in output vector*/
 	// Description:
 	// allocates all vtk arrays for Tipsy variables and places them in the output vector
 	void AllocateAllTipsyVariableArrays(TipsyHeader& tipsyHeader,vtkPolyData* output);
+//ETX
+
 };
 #endif
