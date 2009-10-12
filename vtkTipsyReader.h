@@ -68,6 +68,15 @@ private:
 	// reads variables common to all particles
 	vtkIdType ReadBaseParticle(vtkPolyData* output, TipsyBaseParticle& b);
 	// Description:
+	// reads variables common to all gas particles
+	vtkIdType ReadGasParticle(vtkPolyData* output, TipsyGasParticle& g);
+	// Description:
+	// reads variables common to all star particles
+	vtkIdType ReadStarParticle(vtkPolyData* output, TipsyStarParticle& s);
+	// Description:
+	// reads variables common to all dark particles
+	vtkIdType ReadDarkParticle(vtkPolyData* output, TipsyDarkParticle& d);
+	// Description:
 	// Reads only Marked particles from the tipsy file. Must be called after function ReadMarkedParticleIndices.
 	void ReadMarkedParticles(queue<int> markedParticleIndices,TipsyHeader& tipsyHeader,ifTipsy& tipsyInfile,vtkPolyData* output);
 	// Description:

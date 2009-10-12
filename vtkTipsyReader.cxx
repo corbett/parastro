@@ -118,10 +118,10 @@ void vtkTipsyReader::ReadAllParticles(TipsyHeader& tipsyHeader,\
 											ifTipsy& tipsyInfile,vtkPolyData* output)
 {
 	// Allocates vtk scalars and vector arrays to hold particle data, 
-	AllocateAllTipsyVariableArrays(tipsyHeader,output);
+	this->AllocateAllTipsyVariableArrays(tipsyHeader,output);
 	for(int i=0; i<tipsyHeader.h_nBodies; i++)  // we could have many bodies
   	{ 
-			ReadParticle(tipsyInfile,output);
+			this->ReadParticle(tipsyInfile,output);
   	}
 }
 
@@ -135,7 +135,7 @@ void vtkTipsyReader::ReadMarkedParticles(\
 	// Allocates vtk scalars and vector arrays to hold particle data, 
 	// As marked file was read, only allocates numBodies which 
 	// now equals the number of marked particles
-	AllocateAllTipsyVariableArrays(tipsyHeader,output);
+	this->AllocateAllTipsyVariableArrays(tipsyHeader,output);
 	int nextMarkedParticleIndex;
   while(!markedParticleIndices.empty())
 		{
@@ -182,23 +182,15 @@ vtkIdType vtkTipsyReader::ReadParticle(ifTipsy& tipsyInfile,\
 		{
    case tipsypos::gas:
      tipsyInfile >> g;
-     id=ReadBaseParticle(output,g);
-     SetDataValue(output,"rho",id,&g.rho);
-     SetDataValue(output,"temperature",id,&g.temp);
-     SetDataValue(output,"hsmooth",id,&g.hsmooth);
-     SetDataValue(output,"metals",id,&g.metals);
+		 id=this->ReadGasParticle(output,g);
      break;
    case tipsypos::dark:
      tipsyInfile >> d;
-     id=ReadBaseParticle(output,d);
-     SetDataValue(output,"eps",id,&d.eps);
+		 id=this->ReadDarkParticle(output,d);
      break;
    case tipsypos::star:
      tipsyInfile >> s;
-     id=ReadBaseParticle(output,s);
-     SetDataValue(output,"eps",id,&s.eps);
-     SetDataValue(output,"metals",id,&s.metals);
-     SetDataValue(output,"tform",id,&s.tform);
+		 id=this->ReadStarParticle(output,s);
      break;
    default:
      assert(0);
@@ -213,12 +205,55 @@ vtkIdType vtkTipsyReader::ReadBaseParticle(vtkPolyData* output,\
 														TipsyBaseParticle& b) 
 {
 	vtkIdType id = SetPointValue(output,b.pos);
-	SetDataValue(output,"velocity",id,b.vel);
-  SetDataValue(output,"mass",id,&b.mass);
-	SetDataValue(output,"potential",id,&b.phi);
+  if(!this->ReadPositionsOnly)
+		{
+		SetDataValue(output,"velocity",id,b.vel);
+	  SetDataValue(output,"mass",id,&b.mass);
+		SetDataValue(output,"potential",id,&b.phi);
+		}
 	return id;
 }
 
+//----------------------------------------------------------------------------
+vtkIdType vtkTipsyReader::ReadGasParticle(vtkPolyData* output,\
+ 																					TipsyGasParticle& g)
+{
+ 	vtkIdType id=ReadBaseParticle(output,g);
+  if(!this->ReadPositionsOnly)
+		{
+	  SetDataValue(output,"rho",id,&g.rho);
+	  SetDataValue(output,"temperature",id,&g.temp);
+	  SetDataValue(output,"hsmooth",id,&g.hsmooth);
+	  SetDataValue(output,"metals",id,&g.metals);	
+		}
+	return id;
+}
+
+//----------------------------------------------------------------------------
+vtkIdType vtkTipsyReader::ReadStarParticle(vtkPolyData* output,\
+ 																					TipsyStarParticle& s)
+{
+	vtkIdType id=ReadBaseParticle(output,s);
+	if(!this->ReadPositionsOnly)
+		{
+	  SetDataValue(output,"eps",id,&s.eps);
+	  SetDataValue(output,"metals",id,&s.metals);
+	  SetDataValue(output,"tform",id,&s.tform);
+		}
+	return id;
+}
+//----------------------------------------------------------------------------	
+vtkIdType vtkTipsyReader::ReadDarkParticle(vtkPolyData* output,\
+ 																					TipsyDarkParticle& d)
+{
+ 	vtkIdType id=this->ReadBaseParticle(output,d);
+  if(!this->ReadPositionsOnly)
+		{
+	 	SetDataValue(output,"eps",id,&d.eps);
+		}
+	return id;
+}
+		
 //----------------------------------------------------------------------------
 void vtkTipsyReader::AllocateAllTipsyVariableArrays(TipsyHeader& tipsyHeader,\
 											vtkPolyData* output)
@@ -270,7 +305,7 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 	//All helper functions will need access to this
 	vtkPolyData* output = vtkPolyData::GetData(outputVector);
   // Read the header from the input
-	TipsyHeader tipsyHeader=ReadTipsyHeader(tipsyInfile);
+	TipsyHeader tipsyHeader=this->ReadTipsyHeader(tipsyInfile);
 	// Next considering whether to read in a mark file, 
 	// and if so whether that reading was a success 
 	queue<int> markedParticleIndices;
@@ -278,7 +313,8 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 		{
 		vtkDebugMacro("Reading marked point indices from file:" \
 									<< this->MarkFileName);
-		markedParticleIndices=ReadMarkedParticleIndices(tipsyHeader,tipsyInfile);
+		markedParticleIndices=this->ReadMarkedParticleIndices(tipsyHeader,\
+																													tipsyInfile);
 		}
   // Read every particle and add their position to be displayed, 
 	// as well as relevant scalars
@@ -287,14 +323,15 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 		// no marked particle file or there was an error reading the mark file, 
 		// so reading all particles
 		vtkDebugMacro("Reading all points from file " << this->FileName);
-		ReadAllParticles(tipsyHeader,tipsyInfile,output);
+		this->ReadAllParticles(tipsyHeader,tipsyInfile,output);
 		}
 	else 
 		{
 		//reading only marked particles
 		vtkDebugMacro("Reading only the marked points in file: " \
 									<< this->MarkFileName << " from file " << this->FileName);
-		ReadMarkedParticles(markedParticleIndices,tipsyHeader,tipsyInfile,output);	
+		this->ReadMarkedParticles(markedParticleIndices,\
+															tipsyHeader,tipsyInfile,output);	
 		}
   // Close the tipsy in file.
 	tipsyInfile.close();
