@@ -42,7 +42,7 @@
 		<Hints>
 			<Property name="FileName" show="1"/>
 			<Property name="MarkFileName" show="1"/>
-			<Property name"Additional Attribute Files" show="1"/>
+			<Property name"AdditionalAttributeFiles" show="1"/>
 		</Hints>
 		</SourceProxy>
 	</ProxyGroup>
