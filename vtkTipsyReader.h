@@ -21,10 +21,6 @@ public:
   vtkTypeRevisionMacro(vtkTipsyReader,vtkPolyDataAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent);
   // Description:
-  // Set/Get the name of the file from which to read points.
-  vtkSetStringMacro(FileName);
-  vtkGetStringMacro(FileName);
-  // Description:
   // Set/Get the name of the file from which to read the marked points.
   vtkSetStringMacro(MarkFileName);
   vtkGetStringMacro(MarkFileName);
@@ -32,6 +28,11 @@ public:
   // Set/Get the name of the file from which to get additional attributes
   vtkSetStringMacro(AF);
   vtkGetStringMacro(AF);
+  // Description:
+  // Set/Get the name of the file from which to read points.
+  vtkSetStringMacro(FileName);
+  vtkGetStringMacro(FileName);
+
   // Description:
   // Get/Set whether only the particles positions should be read in.
 	vtkSetMacro(ReadPositionsOnly,int);
@@ -44,9 +45,9 @@ public:
 protected:
   vtkTipsyReader();
   ~vtkTipsyReader();
-  char* FileName;
 	char* MarkFileName;
 	char* AF;
+  char* FileName;
 	int ReadPositionsOnly;
 
   int RequestData(vtkInformation*,
