@@ -97,12 +97,16 @@ int vtkGadgetIIReader::ReadSnapshot(FILE* gadgetInFile,\
 
   for(k=0, ntot_withmasses=0; k<5; k++)
 		{
+		vtkWarningMacro("header " << header1.mass[k]);
+		
 		if(header1.mass[k]==0)
 			{
 	    ntot_withmasses+= header1.npart[k];
 			}
 		}
   SKIP;
+// segfault is in the next section.
+
 /*
 
   for(k=0,pc_new=pc;k<6;k++)
@@ -114,7 +118,6 @@ int vtkGadgetIIReader::ReadSnapshot(FILE* gadgetInFile,\
 	    }
 		}
   SKIP;
-//continue uncommenting there is a segfault someplace
 
   SKIP;
   for(k=0,pc_new=pc;k<6;k++)
