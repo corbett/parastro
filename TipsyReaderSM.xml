@@ -2,15 +2,6 @@
 	<ProxyGroup name="sources">
 		<SourceProxy name="TipsyReader" class="vtkTipsyReader">
 			<StringVectorProperty
-				name="FileName"
-				command="SetFileName"
-				number_of_elements="1">
-				<FileListDomain name="files"/>
-				<Documentation>
-					Reads in points from a tipsy binary file.
-				</Documentation>
-			</StringVectorProperty>
-			<StringVectorProperty
 				name="MarkFileName"
 				command="SetMarkFileName"
 				number_of_elements="1">
@@ -28,6 +19,16 @@
 			    Additional AF files set are merged into existing database.
 				</Documentation>
 			</StringVectorProperty>
+			<StringVectorProperty
+				name="FileName"
+				command="SetFileName"
+				number_of_elements="1">
+				<FileListDomain name="files"/>
+				<Documentation>
+					Reads in points from a tipsy binary file.
+				</Documentation>
+			</StringVectorProperty>
+
   	     <IntVectorProperty name="ReadPositionsOnly"
 	       command="SetReadPositionsOnly"
 	       number_of_elements="1"
