@@ -21,10 +21,9 @@
 			</StringVectorProperty>
 
 			<StringVectorProperty
-				name="AF"
-				command="SetAF"
+				name="AttributeFile"
+				command="SetAttributeFile"
 				number_of_elements="1">
-
 				<Documentation>
 			    Additional AF files set are merged into existing database.
 				</Documentation>

@@ -25,13 +25,13 @@ public:
   vtkSetStringMacro(MarkFileName);
   vtkGetStringMacro(MarkFileName);
   // Description:
-  // Set/Get the name of the file from which to get additional attributes
-  vtkSetStringMacro(AF);
-  vtkGetStringMacro(AF);
-  // Description:
   // Set/Get the name of the file from which to read points.
   vtkSetStringMacro(FileName);
   vtkGetStringMacro(FileName);
+  // Description:
+  // Set/Get the name of the file from which to get additional attributes
+  vtkSetStringMacro(AttributeFile);
+  vtkGetStringMacro(AttributeFile);
 
   // Description:
   // Get/Set whether only the particles positions should be read in.
@@ -46,8 +46,8 @@ protected:
   vtkTipsyReader();
   ~vtkTipsyReader();
 	char* MarkFileName;
-	char* AF;
-  char* FileName;
+	char* FileName;
+	char* AttributeFile;
 	int ReadPositionsOnly;
 
   int RequestData(vtkInformation*,
