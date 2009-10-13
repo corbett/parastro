@@ -16,6 +16,7 @@
 // a unique id and places one point per cell. Works only with PolyData
 vtkIdType SetPointValue(vtkPolyData* output,float pos[]);
 
+
 // Description:
 // creates a sphere of radius R, center center in the output.
 void CreateSphere(vtkPolyData* output,double radius,double center[]);
@@ -57,6 +58,11 @@ void AllocateDoubleDataArray(vtkPointSet* output, const char* arrayName,\
 // returns a pointer to the point's coordinates in output which corresponds 
 // to this id
 double* GetPoint(vtkPointSet* output,vtkIdType id);
+
+// Description:
+// takes in a double array of size three representing a point
+// and converts it to an array of the same size but in float precision
+float* DoublePointToFloat(double point[]);
 
 
 

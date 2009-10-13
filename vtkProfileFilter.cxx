@@ -25,8 +25,8 @@ vtkStandardNewMacro(vtkProfileFilter);
 //----------------------------------------------------------------------------
 vtkProfileFilter::vtkProfileFilter():vtkExtractHistogram()
 {
-	this->SetCalculateAverages(1); // no longer taking this in as an option
-																 // may later actually disable
+	this->SetCalculateAverages(1); // no longer taking this in as an option 
+	 															// may later actually disable
   this->SetNumberOfInputPorts(2);
 }
 
@@ -71,7 +71,7 @@ void vtkProfileFilter::CalculateAndSetCenter(vtkDataSet* source)
 
 //----------------------------------------------------------------------------
 int vtkProfileFilter::RequestData(vtkInformation *request,
-																	vtkInformationVector **inputVector,\
+																	vtkInformationVector **inputVector,
 																	vtkInformationVector *outputVector)
 {
  	vtkPolyData* input = vtkPolyData::GetData(inputVector[0]);
@@ -85,7 +85,7 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 	// up to this cutoff
 	if(this->CutOffAtVirialRadius)
 		{
-		VirialRadiusInfo virialRadiusInfo =\
+		VirialRadiusInfo virialRadiusInfo = \
 		 	ComputeVirialRadius(input,this->Delta,this->Center);
 		vtkErrorMacro("virial radius is " << virialRadiusInfo.virialRadius);
 		// note that if there was an error finding the virialRadius the 
@@ -93,13 +93,19 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 		//setting the input to this newInput
 		if(virialRadiusInfo.virialRadius>0)
 			{
-/*
-			vtkPolyData* newInput=\
-				GetDatasetWithinVirialRadius(virialRadiusInfo);	// note vtkPolyData must now manually be deleted!
+			vtkPolyData* newDataSet = \
+				GetDatasetWithinVirialRadius(virialRadiusInfo);	// note vtkPolyData 
+																						// must now manually be deleted!
 			//setting the input to this newInput
-			inputVector[0]->GetInformationObject(0)->Set(\
-				vtkDataObject::DATA_OBJECT(),newInput);
-*/
+			//	cout << "number of points "<< newDataSet->GetNumberOfPoints() << "\n\n";
+				double* potential = GetDataValue(newDataSet, "potential",1000);
+				double* coords = newDataSet->GetPoints()->GetPoint(1000);
+					cout << " potential of item 1001 is " \
+					<<  potential[0] << "\n" << "and it's coordinates are " << coords[0]
+					<< "," << coords[1]  << "," << coords[2];
+			
+			inputVector[0]->GetInformationObject(0)->Set(
+				vtkDataObject::DATA_OBJECT(),newDataSet);
 			// TODO: debug this--- GetDatasetWithinVirialRadius is currently
 			// one point only, moreover even if it's all 1001 points, the new 		
 			// histogram doesn't find the input data arrays
@@ -140,8 +146,8 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 		input->GetPointData()->AddArray(radiiArray);
 		// setting the input array to process to be radii
 		this->SetInputArrayToProcess(0,0,0,
-						vtkDataObject::FIELD_ASSOCIATION_POINTS_THEN_CELLS,
-						"radii from center");
+			vtkDataObject::FIELD_ASSOCIATION_POINTS_THEN_CELLS,
+			"radii from center");
 		// and finally finally some memory management
 		delete [] nextPoint;
 		}
@@ -151,16 +157,16 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 	vtkTable* const output = vtkTable::GetData(outputVector, 0);
 	// Modifying the output from vtkExtractHistogram
 	// intializing the cumulative mass array
-	vtkSmartPointer<vtkFloatArray> cumulativeMassArray=\
-																	vtkSmartPointer<vtkFloatArray>::New();
+	vtkSmartPointer<vtkFloatArray> cumulativeMassArray = \
+		vtkSmartPointer<vtkFloatArray>::New();
 		cumulativeMassArray->SetName("cumulative mass");
 		cumulativeMassArray->SetNumberOfComponents(1);
 		cumulativeMassArray->SetNumberOfTuples(output->GetNumberOfRows());
 	output->AddColumn(cumulativeMassArray);
 
 	// intializing the cumulative number array
-	vtkSmartPointer<vtkFloatArray> cumulativeNumberArray=\
-																		vtkSmartPointer<vtkFloatArray>::New();
+	vtkSmartPointer<vtkFloatArray> cumulativeNumberArray = \
+		vtkSmartPointer<vtkFloatArray>::New();
 		cumulativeNumberArray->SetName("cumulative number");
 		cumulativeNumberArray->SetNumberOfComponents(1);
 		cumulativeNumberArray->SetNumberOfTuples(output->GetNumberOfRows());
@@ -170,16 +176,16 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 	if(this->BinByRadius)
 		{
 		// intializing the circular velocity array
-		vtkSmartPointer<vtkFloatArray> circularVelocityArray=\
-																			vtkSmartPointer<vtkFloatArray>::New();
+		vtkSmartPointer<vtkFloatArray> circularVelocityArray = \
+			vtkSmartPointer<vtkFloatArray>::New();
 			circularVelocityArray->SetName("circular velocity");
 			circularVelocityArray->SetNumberOfComponents(1);
 			circularVelocityArray->SetNumberOfTuples(output->GetNumberOfRows());
 		output->AddColumn(circularVelocityArray);
 
 		// initializing the density in bin array
-		vtkSmartPointer<vtkFloatArray> densityInBinArray=\
-																			vtkSmartPointer<vtkFloatArray>::New();
+		vtkSmartPointer<vtkFloatArray> densityInBinArray = \
+			vtkSmartPointer<vtkFloatArray>::New();
 			densityInBinArray->SetName("density");
 			densityInBinArray->SetNumberOfComponents(1);
 			densityInBinArray->SetNumberOfTuples(output->GetNumberOfRows());
@@ -192,13 +198,13 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 		{
 		// computing the cumulative mass
 		float binMassTotal = \
-						output->GetValueByName(rowId,"mass_total").ToFloat();
+			output->GetValueByName(rowId,"mass_total").ToFloat();
 		totalMass+=binMassTotal;
 		output->SetValueByName(rowId,"cumulative mass",totalMass);
 
 		// computing the cumulative number
 		float binNumberTotal = \
-		 				output->GetValueByName(rowId,"bin_values").ToFloat();
+		 	output->GetValueByName(rowId,"bin_values").ToFloat();
 		totalNumber+=binNumberTotal;
 		output->SetValueByName(rowId,"cumulative number",totalNumber);
 		
@@ -207,7 +213,7 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 			{
 			// we will need the bin radius for both calculations
 			float binRadius = \
-							output->GetValueByName(rowId,"radii from center").ToFloat();
+				output->GetValueByName(rowId,"radii from center").ToFloat();
 			// computing the circular velocity (sqrt(M(<r)/r))
 			float binCircularVelocity = sqrt(totalMass/binRadius);
 			output->SetValueByName(rowId,"circular velocity",binCircularVelocity);

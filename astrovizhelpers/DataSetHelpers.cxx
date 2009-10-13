@@ -23,6 +23,16 @@ vtkIdType SetPointValue(vtkPolyData* output,float pos[])
 }
 
 //----------------------------------------------------------------------------
+float* DoublePointToFloat(double point[])
+{
+	float* floatPoint = new float[3];
+	for(int i = 0; i < 3; ++i)
+	{
+		floatPoint[i]=static_cast<float>(point[i]);
+	}
+	return floatPoint;
+}
+//----------------------------------------------------------------------------
 void CreateSphere(vtkPolyData* output,double radius,double center[])
 {
 	vtkSmartPointer<vtkSphereSource> sphere = \

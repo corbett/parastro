@@ -109,24 +109,24 @@ double OverDensityInSphere(double r,void* inputVirialRadiusInfo)
 	 											static_cast<VirialRadiusInfo*>(inputVirialRadiusInfo);
 	vtkSmartPointer<vtkIdList> pointsInRadius = \
 																vtkSmartPointer<vtkIdList>::New();
-	virialRadiusInfo->locator->FindPointsWithinRadius(r,\
-																										virialRadiusInfo->center,\
-																										pointsInRadius);
+	virialRadiusInfo->locator->FindPointsWithinRadius(r,
+		virialRadiusInfo->center,
+		pointsInRadius);
 	// calculating the average mass, dividing this by the volume of the sphere
 	// to get the density
 	double totalMass=0;
 	vtkPointSet* dataSet=\
-								vtkPointSet::SafeDownCast(\
-															virialRadiusInfo->locator->GetDataSet());
-	for(int pointLocalId = 0; \
-			pointLocalId < pointsInRadius->GetNumberOfIds(); \
+		vtkPointSet::SafeDownCast(
+		virialRadiusInfo->locator->GetDataSet());
+	for(int pointLocalId = 0; 
+			pointLocalId < pointsInRadius->GetNumberOfIds(); 
 			++pointLocalId)
 		{
 		vtkIdType pointGlobalId = pointsInRadius->GetId(pointLocalId);
 		double* nextPoint=GetPoint(dataSet,pointGlobalId);
 		// extracting the mass
 		// has to be double as this version of VTK doesn't have 
-		double* mass=GetDataValue(dataSet,\
+		double* mass=GetDataValue(dataSet,
 															"mass",pointGlobalId);
 		totalMass+=mass[0];
 		// Finally, some memory management
@@ -137,7 +137,7 @@ double OverDensityInSphere(double r,void* inputVirialRadiusInfo)
 	return totalMass/(4./3*M_PI*pow(r,3)) - virialRadiusInfo->criticalDensity;
 }
 
-VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,\
+VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,
 																		double overdensity,double center[])
 {
 		// calculating the the max an min r of this pointset
@@ -163,11 +163,11 @@ VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,\
 		int numIter=0;
 		try
 			{
-			virialRadiusInfo.virialRadius=IllinoisRootFinder(OverDensityInSphere,\
-																				pntrVirialRadiusInfo,\
-																				maxR,1e-11f,//minR is almost zero
-																				0.0,0.0,
-																			  &numIter);
+			virialRadiusInfo.virialRadius=IllinoisRootFinder(OverDensityInSphere,
+				pntrVirialRadiusInfo,\
+				maxR,1e-11f,//minR is almost zero
+				0.0,0.0,
+			  &numIter);
 			}
 		catch (const char* e)
 			{
@@ -178,27 +178,73 @@ VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,\
 }
 
 //----------------------------------------------------------------------------
+vtkPolyData* CopyPolyPointsAndData(vtkPolyData* dataSet, vtkIdList*
+ 	pointsInRadius)
+{
+	// TODO: I was using CopyCells method of vtkPolyData
+	// but this wasn't working so I decided to do manually
+	// go back to finding the way using the VTK api to do this
+	int numNewPoints=pointsInRadius->GetNumberOfIds();
+	// Initilizing
+	vtkPolyData* newDataSet = vtkPolyData::New(); // this memory must be managed
+		// Initializing points and verts
+	  newDataSet->SetPoints(vtkSmartPointer<vtkPoints>::New());
+		newDataSet->SetVerts(vtkSmartPointer<vtkCellArray>::New());
+	  // Initializing data
+	vtkSmartPointer<vtkDataArray> nextArray;
+	for(int i = 0; i < dataSet->GetPointData()->GetNumberOfArrays(); ++i)
+		{
+		nextArray = dataSet->GetPointData()->GetArray(i);
+		AllocateDataArray(newDataSet,
+			nextArray->GetName(),
+			nextArray->GetNumberOfComponents(),
+			numNewPoints);
+		}
+	// Copying
+
+	for(int pointLocalId = 0; 
+			pointLocalId < pointsInRadius->GetNumberOfIds(); 
+			++pointLocalId)
+		{
+		vtkIdType pointGlobalId = pointsInRadius->GetId(pointLocalId);
+		double* dbNextPoint=GetPoint(dataSet,pointGlobalId);
+		float* nextPoint=DoublePointToFloat(dbNextPoint);
+		vtkIdType newId =SetPointValue(newDataSet,nextPoint);
+		// adding this to the newDataSet
+		// adding this point's data to the newDataSet, for each data array
+			for(int i = 0; i < dataSet->GetPointData()->GetNumberOfArrays(); ++i)
+				{
+				nextArray = dataSet->GetPointData()->GetArray(i);
+				double* nextData = GetDataValue(dataSet,
+					nextArray->GetName(),pointGlobalId);
+				SetDataValue(newDataSet,nextArray->GetName(),newId,nextData);
+				delete [] nextData;
+				}
+			delete [] nextPoint;
+			delete [] dbNextPoint;
+			}
+	return newDataSet;
+}
+
+//----------------------------------------------------------------------------
 vtkPolyData* GetDatasetWithinVirialRadius(VirialRadiusInfo virialRadiusInfo)
 {
 
 	vtkSmartPointer<vtkIdList> pointsInRadius = \
-																vtkSmartPointer<vtkIdList>::New();
-	virialRadiusInfo.locator->FindPointsWithinRadius(\
-															virialRadiusInfo.virialRadius,\
-															virialRadiusInfo.center,\
-															pointsInRadius);
+		vtkSmartPointer<vtkIdList>::New();
+	virialRadiusInfo.locator->FindPointsWithinRadius(
+//TODO: this is for testing, to capture all points instead
+// of just thos in the virial radius
+//		virialRadiusInfo.virialRadius,
+		1.0,
+		virialRadiusInfo.center,
+		pointsInRadius);
   vtkPolyData* dataSet = \
-					vtkPolyData::SafeDownCast(virialRadiusInfo.locator->GetDataSet());	
+		vtkPolyData::SafeDownCast(virialRadiusInfo.locator->GetDataSet());	
 	// Creating a new dataset
-
-	vtkPolyData* newDataSet = vtkPolyData::New();
-	  newDataSet->SetPoints(vtkSmartPointer<vtkPoints>::New());
-		newDataSet->SetVerts(vtkSmartPointer<vtkCellArray>::New());
-	// Copy cells listed in idList from pd, including points, point data, 
-	// and cell data. This method assumes that point and cell data have been
-	// allocated.
-	newDataSet->CopyCells(dataSet,pointsInRadius);
-	cout << "number of points "<< newDataSet->GetNumberOfPoints() << "\n\n";
+	// first allocating
+	vtkPolyData* newDataSet = \
+		CopyPolyPointsAndData(dataSet,pointsInRadius);
 	return newDataSet;
 }
 	
