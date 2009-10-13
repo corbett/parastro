@@ -21,14 +21,14 @@
 				</Documentation>
 			</StringVectorProperty>
 
-			<StringVectorProperty
+<!--			<StringVectorProperty
 				name="AdditionalAttributeFiles"
 				command="SetAttributeFile"
 				number_of_elements="1">
 				<Documentation>
 			    Additional attribute files set are merged into existing database. Give full paths separated by commas.
 				</Documentation>
-			</StringVectorProperty>
+			</StringVectorProperty> -->
 
   	     <IntVectorProperty name="ReadPositionsOnly"
 	       command="SetReadPositionsOnly"
