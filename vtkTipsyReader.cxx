@@ -23,9 +23,10 @@ vtkStandardNewMacro(vtkTipsyReader);
 //----------------------------------------------------------------------------
 vtkTipsyReader::vtkTipsyReader()
 {
-  this->FileName = 0;
   this->MarkFileName = 0; // this file is optional
 	this->AF = 0; // this file is also optional
+  this->FileName = 0;
+
 	this->ReadPositionsOnly = 0;
   this->SetNumberOfInputPorts(0); 
 }
