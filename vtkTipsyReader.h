@@ -13,6 +13,7 @@ Modified from vtkSimplePointsReader and from Doug Potter's Tipsylib
 #include "vtkPolyData.h" // needed as most helper functions modify output which is vtkPolyData
 #include <queue> // needed for FIFO queue used to store marked particles
 using std::queue;
+class vtkCharArray;
 class VTK_IO_EXPORT vtkTipsyReader : public vtkPolyDataAlgorithm
 {
 public:
@@ -29,8 +30,8 @@ public:
   vtkGetStringMacro(MarkFileName);
   // Description:
   // Set/Get the name of the file from which to get additional attributes
-  vtkSetStringMacro(AttributeFile);
-  vtkGetStringMacro(AttributeFile);
+  vtkSetStringMacro(AF);
+  vtkGetStringMacro(AF);
   // Description:
   // Get/Set whether only the particles positions should be read in.
 	vtkSetMacro(ReadPositionsOnly,int);
@@ -45,7 +46,7 @@ protected:
   ~vtkTipsyReader();
   char* FileName;
 	char* MarkFileName;
-	char* AttributeFile;
+	char* AF;
 	int ReadPositionsOnly;
 
   int RequestData(vtkInformation*,
