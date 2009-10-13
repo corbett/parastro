@@ -14,7 +14,7 @@
 				name="MarkFileName"
 				command="SetMarkFileName"
 				number_of_elements="1">
-				<FileListDomain name="files"/>
+
 				<Documentation>
 					If set, only particles specified in the marked file are read in.
 				</Documentation>
@@ -23,7 +23,7 @@
 				name="AF"
 				command="SetAF"
 				number_of_elements="1">
-				<FileListDomain name="files"/>
+
 				<Documentation>
 			    Additional AF files set are merged into existing database.
 				</Documentation>
