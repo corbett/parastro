@@ -21,14 +21,15 @@
 				</Documentation>
 			</StringVectorProperty>
 
-<!--			<StringVectorProperty
+			<StringVectorProperty
 				name="AdditionalAttributeFiles"
 				command="SetAttributeFile"
 				number_of_elements="1">
+				<FileListDomain name="files"/>
 				<Documentation>
 			    Additional attribute files set are merged into existing database. Give full paths separated by commas
 				</Documentation>
-			</StringVectorProperty> -->
+			</StringVectorProperty> 
 
   	     <IntVectorProperty name="ReadPositionsOnly"
 	       command="SetReadPositionsOnly"
@@ -39,7 +40,7 @@
 	         When set to true, only the particle's position, not its attributes are read in.
 	       </Documentation>
 	     </IntVectorProperty>
-<!--		<Hints>
+		<Hints>
 			<Property name="FileName" show="1"/>
 			<Property name="MarkFileName" show="1"/>
 			<Property name="AdditionalAttributeFiles" show="1"/>
