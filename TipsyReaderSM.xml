@@ -24,7 +24,7 @@
 				name="AF"
 				command="SetAF"
 				number_of_elements="1">
-				<FileListDomain name="additional_files"/>
+
 				<Documentation>
 			    Additional AF files set are merged into existing database.
 				</Documentation>
