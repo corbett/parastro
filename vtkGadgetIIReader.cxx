@@ -103,6 +103,7 @@ int vtkGadgetIIReader::ReadSnapshot(FILE* gadgetInFile,\
 			}
 		}
   SKIP;
+/*
 
   for(k=0,pc_new=pc;k<6;k++)
 		{
@@ -114,7 +115,6 @@ int vtkGadgetIIReader::ReadSnapshot(FILE* gadgetInFile,\
 		}
   SKIP;
 //continue uncommenting there is a segfault someplace
-/*
 
   SKIP;
   for(k=0,pc_new=pc;k<6;k++)
