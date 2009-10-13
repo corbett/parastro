@@ -7,18 +7,19 @@ Modified from vtkSimplePointsReader and from Doug Potter's Tipsylib
 // here is the desciprtion
 #ifndef __vtkTipsyReader_h
 #define __vtkTipsyReader_h
-#include "vtkPolyDataAlgorithm.h" // needed as this class extends vtkPolyDataAlgorithm
+#include "vtkPolyDataReader.h"
+//#include "vtkPolyDataAlgorithm.h" // needed as this class extends vtkPolyDataAlgorithm
 #include "tipsylib/ftipsy.hpp" // needed for functions which take Tipsy particles as arguments
 #include "vtkSmartPointer.h" // needed for the functions to initialize arrays
 #include "vtkPolyData.h" // needed as most helper functions modify output which is vtkPolyData
 #include <queue> // needed for FIFO queue used to store marked particles
 using std::queue;
 class vtkCharArray;
-class VTK_IO_EXPORT vtkTipsyReader : public vtkPolyDataAlgorithm
+class VTK_IO_EXPORT vtkTipsyReader : public vtkPolyDataReader
 {
 public:
   static vtkTipsyReader* New();
-  vtkTypeRevisionMacro(vtkTipsyReader,vtkPolyDataAlgorithm);
+  vtkTypeRevisionMacro(vtkTipsyReader,vtkPolyDataReader);
   void PrintSelf(ostream& os, vtkIndent indent);
   // Description:
   // Set/Get the name of the file from which to read the marked points.

@@ -75,9 +75,21 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 																	vtkInformationVector *outputVector)
 {
  	vtkPolyData* input = vtkPolyData::GetData(inputVector[0]);
+/*
+	vtkPolyData* newDataSet = vtkPolyData::New();
+	newDataSet->DeepCopy(input);
+	cout << "number of points "<< newDataSet->GetNumberOfPoints() << "\n\n";
+	double* nextData = GetDataValue(newDataSet,
+		"potential",1000);
+	cout << "potential is "<< nextData[0];
+
+	inputVector[0]->GetInformationObject(0)->Set(
+		vtkDataObject::DATA_OBJECT(),newDataSet);
+
 	vtkDataSet* pointInfo = vtkDataSet::GetData(inputVector[1]);
 	this->CalculateAndSetCenter(pointInfo);
-	
+*/
+//for testing only 
 	//TODO: change
 	// temporary hack swapping inputs so that superclass doesn't get confused
 	// If we should cutoff at the virial radius, then calculating where
@@ -93,19 +105,13 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 		//setting the input to this newInput
 		if(virialRadiusInfo.virialRadius>0)
 			{
-			vtkPolyData* newDataSet = \
+//			vtkPolyData* newDataSet = \
 				GetDatasetWithinVirialRadius(virialRadiusInfo);	// note vtkPolyData 
 																						// must now manually be deleted!
 			//setting the input to this newInput
-			//	cout << "number of points "<< newDataSet->GetNumberOfPoints() << "\n\n";
-				double* potential = GetDataValue(newDataSet, "potential",1000);
-				double* coords = newDataSet->GetPoints()->GetPoint(1000);
-					cout << " potential of item 1001 is " \
-					<<  potential[0] << "\n" << "and it's coordinates are " << coords[0]
-					<< "," << coords[1]  << "," << coords[2];
 			
-			inputVector[0]->GetInformationObject(0)->Set(
-				vtkDataObject::DATA_OBJECT(),newDataSet);
+//			inputVector[0]->GetInformationObject(0)->Set(
+//				vtkDataObject::DATA_OBJECT(),newDataSet);
 			// TODO: debug this--- GetDatasetWithinVirialRadius is currently
 			// one point only, moreover even if it's all 1001 points, the new 		
 			// histogram doesn't find the input data arrays
