@@ -34,8 +34,8 @@ vtkTipsyReader::vtkTipsyReader()
 vtkTipsyReader::~vtkTipsyReader()
 {
   this->SetFileName(0);
+  this->SetAttributeFile(0);
   this->SetMarkFileName(0);
-  this->SetAF(0);
 	this->SetReadPositionsOnly(0);
 }
 
