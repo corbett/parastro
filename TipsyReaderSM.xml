@@ -39,11 +39,6 @@
 	         When set to true, only the particle's position, not its attributes are read in.
 	       </Documentation>
 	     </IntVectorProperty>
-		<Hints>
-			<Property name="FileName" show="1"/>
-			<Property name="MarkFileName" show="1"/>
-			<Property name="AF" show="1"/>
-		</Hints>
 		</SourceProxy>
 	</ProxyGroup>
 </ServerManagerConfiguration>
