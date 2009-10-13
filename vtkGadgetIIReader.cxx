@@ -97,10 +97,12 @@ int vtkGadgetIIReader::ReadSnapshot(FILE* gadgetInFile,\
 
   for(k=0, ntot_withmasses=0; k<5; k++)
 		{
-		vtkWarningMacro("header " << header1.mass[k]);
+		vtkWarningMacro("header mass " << header1.mass[k]);
 		
 		if(header1.mass[k]==0)
 			{
+			vtkWarningMacro("header npart " << header1.npart[k]);
+			
 	    ntot_withmasses+= header1.npart[k];
 			}
 		}
