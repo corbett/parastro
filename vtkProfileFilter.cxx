@@ -75,14 +75,17 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 																	vtkInformationVector *outputVector)
 {
  	vtkPolyData* input = vtkPolyData::GetData(inputVector[0]);
-/*
+	vtkInformationVector* newInputVector = vtkInformationVector::New();
+	newInputVector->Copy(*inputVector);
+	/*
 	vtkPolyData* newDataSet = vtkPolyData::New();
-	newDataSet->DeepCopy(input);
+	newDataSet->DeepCopy(oldInput);
 	cout << "number of points "<< newDataSet->GetNumberOfPoints() << "\n\n";
 	double* nextData = GetDataValue(newDataSet,
 		"potential",1000);
 	cout << "potential is "<< nextData[0];
-
+	*/
+/*
 	inputVector[0]->GetInformationObject(0)->Set(
 		vtkDataObject::DATA_OBJECT(),newDataSet);
 
@@ -157,7 +160,8 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 		delete [] nextPoint;
 		}
 	// Just calling the superclass for now
-	vtkExtractHistogram::RequestData(request,inputVector,outputVector);
+	//TODO: changing to newInputVector, for test
+	vtkExtractHistogram::RequestData(request,&newInputVector,outputVector);
 	// Getting the output data
 	vtkTable* const output = vtkTable::GetData(outputVector, 0);
 	// Modifying the output from vtkExtractHistogram
@@ -217,6 +221,14 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 			// computing the density M(<r)/(4/3 pi r^3)
 			float binDensity=totalMass/(4./3*M_PI*pow(binRadius,3));
 			output->SetValueByName(rowId,"density",binDensity);
+			// computing the radial velocity
+// TODO also keep track of radial vector
+//			double* velocity = output->GetValueByName(rowId,"density");
+//			double* radius	= output->GetValueByName(rowId,"radius");
+//			double radialVelocity = Dot(velocity,radius)/Norm(radius);
+//			output->SetValueByName(rowId,"radial velocity",radialVelocity);
+			// computing the tangential velocity
+			// computing the specific angular momentum
 			}
 		}	
 	return 1;
