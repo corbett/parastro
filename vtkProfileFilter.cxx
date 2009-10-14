@@ -134,9 +134,8 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 		// intializing the radii array
 		vtkSmartPointer<vtkFloatArray> radiiArray=\
 																		vtkSmartPointer<vtkFloatArray>::New();
-			radiiArray->SetName("radii from center");
-			radiiArray->SetNumberOfComponents(1);
-			radiiArray->SetNumberOfTuples(input->GetPoints()->GetNumberOfPoints());
+		InitializeDataArray(radiiArray,
+			"radii from center",1,input->GetPoints()->GetNumberOfPoints());
 		double* nextPoint; // need for the loop
 		for(int nextPointId = 0;\
 		 		nextPointId < input->GetPoints()->GetNumberOfPoints();
@@ -165,36 +164,32 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 	// intializing the cumulative mass array
 	vtkSmartPointer<vtkFloatArray> cumulativeMassArray = \
 		vtkSmartPointer<vtkFloatArray>::New();
-		cumulativeMassArray->SetName("cumulative mass");
-		cumulativeMassArray->SetNumberOfComponents(1);
-		cumulativeMassArray->SetNumberOfTuples(output->GetNumberOfRows());
+	InitializeDataArray(cumulativeMassArray,
+		"cumulative mass",1,output->GetNumberOfRows());
 	output->AddColumn(cumulativeMassArray);
 
 	// intializing the cumulative number array
 	vtkSmartPointer<vtkFloatArray> cumulativeNumberArray = \
 		vtkSmartPointer<vtkFloatArray>::New();
-		cumulativeNumberArray->SetName("cumulative number");
-		cumulativeNumberArray->SetNumberOfComponents(1);
-		cumulativeNumberArray->SetNumberOfTuples(output->GetNumberOfRows());
+	InitializeDataArray(cumulativeNumberArray,
+		"cumulative number",1,output->GetNumberOfRows());
 	output->AddColumn(cumulativeNumberArray);
-	
+
 	// we can only compute circular velocity and density if we bin by radius
 	if(this->BinByRadius)
 		{
 		// intializing the circular velocity array
 		vtkSmartPointer<vtkFloatArray> circularVelocityArray = \
 			vtkSmartPointer<vtkFloatArray>::New();
-			circularVelocityArray->SetName("circular velocity");
-			circularVelocityArray->SetNumberOfComponents(1);
-			circularVelocityArray->SetNumberOfTuples(output->GetNumberOfRows());
+		InitializeDataArray(circularVelocityArray,
+			"circular velocity",1,output->GetNumberOfRows());
 		output->AddColumn(circularVelocityArray);
 
 		// initializing the density in bin array
 		vtkSmartPointer<vtkFloatArray> densityInBinArray = \
 			vtkSmartPointer<vtkFloatArray>::New();
-			densityInBinArray->SetName("density");
-			densityInBinArray->SetNumberOfComponents(1);
-			densityInBinArray->SetNumberOfTuples(output->GetNumberOfRows());
+		InitializeDataArray(densityInBinArray,
+			"density",1,output->GetNumberOfRows());
 		output->AddColumn(densityInBinArray);
 		}
 

@@ -55,6 +55,13 @@ void AllocateDoubleDataArray(vtkPointSet* output, const char* arrayName,\
 	int numComponents, int numTuples);
 
 // Description:
+// Given a VTK array, sets it to have arrayName, numComponents and numTuples
+// unlike the above methods, does not create the array, nor add it to the 
+// output	
+void InitializeDataArray(vtkDataArray* dataArray, const char* arrayName,\
+	int numComponents, int numTuples);
+
+// Description:
 // returns a pointer to the point's coordinates in output which corresponds 
 // to this id
 double* GetPoint(vtkPointSet* output,vtkIdType id);

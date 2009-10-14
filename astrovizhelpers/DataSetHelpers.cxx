@@ -70,13 +70,21 @@ void AllocateDoubleDataArray(vtkPointSet* output, const char* arrayName,\
 {
 	vtkSmartPointer<vtkDoubleArray> dataArray=\
 		vtkSmartPointer<vtkDoubleArray>::New();
+
   	dataArray->SetNumberOfComponents(numComponents);
   	dataArray->SetName(arrayName);
 		dataArray->SetNumberOfTuples(numTuples);
   output->GetPointData()->AddArray(dataArray);
 }
 
-
+//----------------------------------------------------------------------------
+void InitializeDataArray(vtkDataArray* dataArray, const char* arrayName,\
+ 			int numComponents, int numTuples)
+{
+	dataArray->SetNumberOfComponents(numComponents);
+	dataArray->SetName(arrayName);
+	dataArray->SetNumberOfTuples(numTuples);
+}
 //----------------------------------------------------------------------------
 double* GetPoint(vtkPointSet* output,vtkIdType id)
 {
