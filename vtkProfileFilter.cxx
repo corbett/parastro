@@ -75,7 +75,10 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 																	vtkInformationVector *outputVector)
 {
 	// Copying the new input vector so that we don't modify the original
+	
 	vtkInformationVector* newInputVector = 	vtkInformationVector::New();
+	newInputVector->SetNumberOfInformationObjects(
+		(*inputVector)->GetNumberOfInformationObjects());
 	// performas a deep copy of inputVector
 	newInputVector->Copy(*inputVector,1);
 	// Now we can get the newDataSet with which we want to work
@@ -85,11 +88,12 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 	vtkDataSet* pointInfo = vtkDataSet::GetData(&newInputVector[1]);
 	this->CalculateAndSetCenter(pointInfo);
 	*/
+/*
 	cout << "number of points "<< newDataSet->GetNumberOfPoints() << "\n\n";
 	double* nextData = GetDataValue(newDataSet,
 		"potential",1000);
-	cout << "potential is "<< nextData[0];
-
+	cout << "potential is "<< nextData[0] << "\n";
+*/
 
 //for testing only 
 	//TODO: change
