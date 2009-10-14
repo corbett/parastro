@@ -75,36 +75,14 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 																	vtkInformationVector *outputVector)
 {
 	// Copying the new input vector so that we don't modify the original
-// OK looks like it is a VECTOR of information vectors
-	cout << "number of information objects in 0 " \
-		<< (inputVector[0])->GetNumberOfInformationObjects();
-	cout << "number of information objects in 1 " \
-		<< (inputVector[1])->GetNumberOfInformationObjects();
-	vtkInformationVector* newInputVector = 	vtkInformationVector::New();
-	newInputVector->SetNumberOfInformationObjects(
-		(*inputVector)->GetNumberOfInformationObjects());
-	// performas a deep copy of inputVector
-	newInputVector->Copy(*inputVector,1);
+	vtkInformationVector** newInputVector = \
+		DeepCopyInputVector(inputVector,this->GetNumberOfInputPorts());
 	// Now we can get the newDataSet with which we want to work
- 	vtkPolyData* newDataSet = vtkPolyData::GetData(&newInputVector[0]);
+ 	vtkPolyData* newDataSet = vtkPolyData::GetData(newInputVector[0]);
 	// Setting the center based upon the selection in the GUI
-	/*
-	vtkDataSet* pointInfo = vtkDataSet::GetData(&newInputVector[1]);
+	vtkDataSet* pointInfo = vtkDataSet::GetData(newInputVector[1]);
 	this->CalculateAndSetCenter(pointInfo);
-	*/
-/*
-	cout << "number of points "<< newDataSet->GetNumberOfPoints() << "\n\n";
-	double* nextData = GetDataValue(newDataSet,
-		"potential",1000);
-	cout << "potential is "<< nextData[0] << "\n";
-*/
 
-//for testing only 
-	//TODO: change
-	// temporary hack swapping inputs so that superclass doesn't get confused
-	// If we should cutoff at the virial radius, then calculating where
-	// the cutoff is and then redefining the data set to be only the points
-	// up to this cutoff
 	if(this->CutOffAtVirialRadius)
 		{
 		VirialRadiusInfo virialRadiusInfo = \
@@ -115,16 +93,16 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 		//setting the input to this newInput
 		if(virialRadiusInfo.virialRadius>0)
 			{
-//			vtkPolyData* newDataSet = \
+			// TODO: add back in
+/*			newDataSet = \
 				GetDatasetWithinVirialRadius(virialRadiusInfo);	// note vtkPolyData 
 																						// must now manually be deleted!
-			//setting the input to this newInput
-			
-//			inputVector[0]->GetInformationObject(0)->Set(
-//				vtkDataObject::DATA_OBJECT(),newDataSet);
-			// TODO: debug this--- GetDatasetWithinVirialRadius is currently
-			// one point only, moreover even if it's all 1001 points, the new 		
-			// histogram doesn't find the input data arrays
+			inputVector[0]->GetInformationObject(0)->Set(
+				vtkDataObject::DATA_OBJECT(),newDataSet);
+	
+			// some memory managment
+			newDataSet->Delete();
+*/
 			}
 		else
 			{
@@ -136,12 +114,6 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 	// to outputdata
 	if(this->BinByRadius)
 		{
-		// getting the input and output
-		// according to paraview's pipeline architecture
-		// I am *not* supposed to modify the input
-		// breaking the law here 
-		// TODO: change the strategy. modify the inputVector instead
-		// intializing the radii array
 		AllocateDataArray(newDataSet,
 			"radii from center",1,newDataSet->GetPoints()->GetNumberOfPoints());
 		double* nextPoint = new double[3]; // need for the loop
@@ -168,7 +140,7 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 		}
 	// Just calling the superclass for now
 	//TODO: changing to newInputVector, for test
-	vtkExtractHistogram::RequestData(request,&newInputVector,outputVector);
+	vtkExtractHistogram::RequestData(request,newInputVector,outputVector);
 	// Getting the output data
 	vtkTable* const output = vtkTable::GetData(outputVector, 0);
 	// Modifying the output from vtkExtractHistogram
@@ -230,14 +202,18 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 			output->SetValueByName(rowId,"density",binDensity);
 			// computing the radial velocity
 // TODO also keep track of radial vector
-//			double* velocity = output->GetValueByName(rowId,"density");
-//			double* radius	= output->GetValueByName(rowId,"radius");
+//			double* velocity = output->GetValueByName(rowId,"velocity");
+//			double radiusMag	= output->GetValueByName(rowId,"radius");
+// 			double radiusVec[3] = {radiusMag,0,0}; // defining r=|r|\hat(i)
 //			double radialVelocity = Dot(velocity,radius)/Norm(radius);
 //			output->SetValueByName(rowId,"radial velocity",radialVelocity);
 			// computing the tangential velocity
 			// computing the specific angular momentum
 			}
-		}	
+		}
+
+	// Finally some memory managment
+  DeleteDeepCopyInputVector(newInputVector,this->GetNumberOfInputPorts());
 	return 1;
 }
 

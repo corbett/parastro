@@ -129,4 +129,37 @@ double* GetDataValue(vtkPointSet* output, const char* arrayName,\
 	return data;
 }
 
+/*----------------------------------------------------------------------------
+*
+* Work with vtkInformationVector and vtkInformation objets
+*
+*---------------------------------------------------------------------------*/
+//----------------------------------------------------------------------------
+vtkInformationVector** DeepCopyInputVector(vtkInformationVector** inputVector,
+	int inputVectorSize)
+{
+	vtkInformationVector** newInputVector = \
+		new vtkInformationVector *[inputVectorSize];
+	for(int i = 0; i < inputVectorSize; ++i)
+		{
+		vtkInformationVector* newInput = \
+			vtkInformationVector::New();
+		newInput->SetNumberOfInformationObjects(
+			inputVector[i]->GetNumberOfInformationObjects());
+		// performas a deep copy of inputVector
+		newInput->Copy(inputVector[i],1);
+		newInputVector[i]=newInput;
+		}
+	return newInputVector; // note caller must manage this memory
+												// see helper function DeleteDeepCopyInput below
+}
 
+//----------------------------------------------------------------------------
+void DeleteDeepCopyInputVector(vtkInformationVector** inputVector, int inputVectorSize)
+{	
+	for(int i = 0; i < inputVectorSize; ++i)
+		{
+		inputVector[i]->Delete();
+		}
+	delete [] inputVector;
+}

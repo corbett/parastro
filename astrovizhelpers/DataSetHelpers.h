@@ -10,6 +10,7 @@
 #include "vtkCellArray.h"
 #include "vtkTable.h"
 #include "vtkFloatArray.h"
+#include "vtkInformationVector.h"
 
 // The following methods take and modify vtkPolyData
 // Description:
@@ -74,6 +75,17 @@ double* GetPoint(vtkPointSet* output,vtkIdType id);
 // takes in a double array of size three representing a point
 // and converts it to an array of the same size but in float precision
 float* DoublePointToFloat(double point[]);
+
+// Description:
+// Creates a new information vector that is a deep copy of the old one
+// Note, returned vector of pointers to vtkInformationVectors must be 
+// deleted by caller. See DeleteDeepCopyInput below.
+vtkInformationVector** DeepCopyInputVector(vtkInformationVector** inputVector,int inputVectorSize); 
+
+// Description: 
+// Deletes an array of pointers to vtkInformationVectors
+void DeleteDeepCopyInputVector(vtkInformationVector** inputVector, int inputVectorSize);
+
 
 
 
