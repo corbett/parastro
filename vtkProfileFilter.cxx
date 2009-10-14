@@ -74,20 +74,21 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 																	vtkInformationVector **inputVector,
 																	vtkInformationVector *outputVector)
 {
- 	vtkPolyData* input = vtkPolyData::GetData(inputVector[0]);
-	vtkInformationVector* newInputVector = vtkInformationVector::New();
-	newInputVector->Copy(*inputVector);
-	vtkPolyData* newDataSet = vtkPolyData::New();
-	newDataSet->DeepCopy(input);
+	// Copying the new input vector so that we don't modify the original
+	vtkInformationVector* newInputVector = 	vtkInformationVector::New();
+	// performas a deep copy of inputVector
+	newInputVector->Copy(*inputVector,1);
+	// Now we can get the newDataSet with which we want to work
+ 	vtkPolyData* newDataSet = vtkPolyData::GetData(&newInputVector[0]);
+	// Setting the center based upon the selection in the GUI
+	vtkDataSet* pointInfo = vtkDataSet::GetData(&newInputVector[1]);
+	this->CalculateAndSetCenter(pointInfo);
+
 	cout << "number of points "<< newDataSet->GetNumberOfPoints() << "\n\n";
 	double* nextData = GetDataValue(newDataSet,
 		"potential",1000);
 	cout << "potential is "<< nextData[0];
-	newInputVector[0].GetInformationObject(0)->Set(
-		vtkDataObject::DATA_OBJECT(),newDataSet);
 
-	vtkDataSet* pointInfo = vtkDataSet::GetData(&newInputVector[1]);
-	this->CalculateAndSetCenter(pointInfo);
 
 //for testing only 
 	//TODO: change
@@ -98,7 +99,7 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 	if(this->CutOffAtVirialRadius)
 		{
 		VirialRadiusInfo virialRadiusInfo = \
-		 	ComputeVirialRadius(input,this->Delta,this->Center);
+		 	ComputeVirialRadius(newDataSet,this->Delta,this->Center);
 		vtkErrorMacro("virial radius is " << virialRadiusInfo.virialRadius);
 		// note that if there was an error finding the virialRadius the 
 		// radius returned is < 0
@@ -132,24 +133,24 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 		// breaking the law here 
 		// TODO: change the strategy. modify the inputVector instead
 		// intializing the radii array
-		AllocateDataArray(input,
-			"radii from center",1,input->GetPoints()->GetNumberOfPoints());
+		AllocateDataArray(newDataSet,
+			"radii from center",1,newDataSet->GetPoints()->GetNumberOfPoints());
 		double* nextPoint = new double[3]; // need for the loop
 		for(int nextPointId = 0;\
-		 		nextPointId < input->GetPoints()->GetNumberOfPoints();
+		 		nextPointId < newDataSet->GetPoints()->GetNumberOfPoints();
 		 		++nextPointId)
 			{
-				nextPoint = GetPoint(input,nextPointId);
+				nextPoint = GetPoint(newDataSet,nextPointId);
 				float* radius=new float[1];
 				radius[0] = \
 					static_cast<float>(
 					sqrt(vtkMath::Distance2BetweenPoints(nextPoint,
 					this->Center)));
-				SetDataValue(input,"radii from center",nextPointId,radius);
+				SetDataValue(newDataSet,"radii from center",nextPointId,radius);
 				// and finally some memory management
 				delete [] radius;
 			}
-		// setting the input array to process to be radii
+		// setting the newDataSet array to process to be radii
 		this->SetInputArrayToProcess(0,0,0,
 			vtkDataObject::FIELD_ASSOCIATION_POINTS_THEN_CELLS,
 			"radii from center");
