@@ -77,21 +77,18 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
  	vtkPolyData* input = vtkPolyData::GetData(inputVector[0]);
 	vtkInformationVector* newInputVector = vtkInformationVector::New();
 	newInputVector->Copy(*inputVector);
-	/*
 	vtkPolyData* newDataSet = vtkPolyData::New();
-	newDataSet->DeepCopy(oldInput);
+	newDataSet->DeepCopy(input);
 	cout << "number of points "<< newDataSet->GetNumberOfPoints() << "\n\n";
 	double* nextData = GetDataValue(newDataSet,
 		"potential",1000);
 	cout << "potential is "<< nextData[0];
-	*/
-/*
-	inputVector[0]->GetInformationObject(0)->Set(
+	newInputVector[0].GetInformationObject(0)->Set(
 		vtkDataObject::DATA_OBJECT(),newDataSet);
 
-	vtkDataSet* pointInfo = vtkDataSet::GetData(inputVector[1]);
+	vtkDataSet* pointInfo = vtkDataSet::GetData(&newInputVector[1]);
 	this->CalculateAndSetCenter(pointInfo);
-*/
+
 //for testing only 
 	//TODO: change
 	// temporary hack swapping inputs so that superclass doesn't get confused
