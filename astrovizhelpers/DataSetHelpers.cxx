@@ -142,10 +142,7 @@ vtkInformationVector** DeepCopyInputVector(vtkInformationVector** inputVector,
 		new vtkInformationVector *[inputVectorSize];
 	for(int i = 0; i < inputVectorSize; ++i)
 		{
-		vtkInformationVector* newInput = \
-			vtkInformationVector::New();
-		newInput->SetNumberOfInformationObjects(
-			inputVector[i]->GetNumberOfInformationObjects());
+		vtkInformationVector* newInput = vtkInformationVector::New();
 		// performas a deep copy of inputVector
 		newInput->Copy(inputVector[i],1);
 		newInputVector[i]=newInput;
