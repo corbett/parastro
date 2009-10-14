@@ -76,6 +76,8 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 {
 	// Copying the new input vector so that we don't modify the original
 	
+	cout << "number of information objects " \
+		<< (*inputVector)->GetNumberOfInformationObjects();
 	vtkInformationVector* newInputVector = 	vtkInformationVector::New();
 	newInputVector->SetNumberOfInformationObjects(
 		(*inputVector)->GetNumberOfInformationObjects());
@@ -84,8 +86,8 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 	// Now we can get the newDataSet with which we want to work
  	vtkPolyData* newDataSet = vtkPolyData::GetData(&newInputVector[0]);
 	// Setting the center based upon the selection in the GUI
-	vtkDataSet* pointInfo = vtkDataSet::GetData(&newInputVector[1]);
 	/*
+	vtkDataSet* pointInfo = vtkDataSet::GetData(&newInputVector[1]);
 	this->CalculateAndSetCenter(pointInfo);
 	*/
 /*
