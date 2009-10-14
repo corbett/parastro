@@ -75,9 +75,11 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 																	vtkInformationVector *outputVector)
 {
 	// Copying the new input vector so that we don't modify the original
-	
-	cout << "number of information objects " \
-		<< (*inputVector)->GetNumberOfInformationObjects();
+// OK looks like it is a VECTOR of information vectors
+	cout << "number of information objects in 0 " \
+		<< (inputVector[0])->GetNumberOfInformationObjects();
+	cout << "number of information objects in 1 " \
+		<< (inputVector[1])->GetNumberOfInformationObjects();
 	vtkInformationVector* newInputVector = 	vtkInformationVector::New();
 	newInputVector->SetNumberOfInformationObjects(
 		(*inputVector)->GetNumberOfInformationObjects());
