@@ -81,9 +81,10 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 	// Now we can get the newDataSet with which we want to work
  	vtkPolyData* newDataSet = vtkPolyData::GetData(&newInputVector[0]);
 	// Setting the center based upon the selection in the GUI
+	/*
 	vtkDataSet* pointInfo = vtkDataSet::GetData(&newInputVector[1]);
 	this->CalculateAndSetCenter(pointInfo);
-
+	*/
 	cout << "number of points "<< newDataSet->GetNumberOfPoints() << "\n\n";
 	double* nextData = GetDataValue(newDataSet,
 		"potential",1000);
