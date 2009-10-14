@@ -132,23 +132,23 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 		// breaking the law here 
 		// TODO: change the strategy. modify the inputVector instead
 		// intializing the radii array
-		vtkSmartPointer<vtkFloatArray> radiiArray=\
-																		vtkSmartPointer<vtkFloatArray>::New();
-		InitializeDataArray(radiiArray,
+		AllocateDataArray(input,
 			"radii from center",1,input->GetPoints()->GetNumberOfPoints());
-		double* nextPoint; // need for the loop
+		double* nextPoint = new double[3]; // need for the loop
 		for(int nextPointId = 0;\
 		 		nextPointId < input->GetPoints()->GetNumberOfPoints();
 		 		++nextPointId)
 			{
-				nextPoint=GetPoint(input,nextPointId);
-				float radius=\
-						static_cast<float>(sqrt(vtkMath::Distance2BetweenPoints(nextPoint,\
-																												this->Center)));
-				radiiArray->InsertValue(nextPointId,radius);
+				nextPoint = GetPoint(input,nextPointId);
+				float* radius=new float[1];
+				radius[0] = \
+					static_cast<float>(
+					sqrt(vtkMath::Distance2BetweenPoints(nextPoint,
+					this->Center)));
+				SetDataValue(input,"radii from center",nextPointId,radius);
+				// and finally some memory management
+				delete [] radius;
 			}
-		// finally adding the new radius vector to our output 
-		input->GetPointData()->AddArray(radiiArray);
 		// setting the input array to process to be radii
 		this->SetInputArrayToProcess(0,0,0,
 			vtkDataObject::FIELD_ASSOCIATION_POINTS_THEN_CELLS,
@@ -161,36 +161,29 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 	// Getting the output data
 	vtkTable* const output = vtkTable::GetData(outputVector, 0);
 	// Modifying the output from vtkExtractHistogram
-	// intializing the cumulative mass array
-	vtkSmartPointer<vtkFloatArray> cumulativeMassArray = \
-		vtkSmartPointer<vtkFloatArray>::New();
-	InitializeDataArray(cumulativeMassArray,
+	AllocateDataArray(output,
 		"cumulative mass",1,output->GetNumberOfRows());
-	output->AddColumn(cumulativeMassArray);
-
-	// intializing the cumulative number array
-	vtkSmartPointer<vtkFloatArray> cumulativeNumberArray = \
-		vtkSmartPointer<vtkFloatArray>::New();
-	InitializeDataArray(cumulativeNumberArray,
+	AllocateDataArray(output,
 		"cumulative number",1,output->GetNumberOfRows());
-	output->AddColumn(cumulativeNumberArray);
-
-	// we can only compute circular velocity and density if we bin by radius
+		// we can only compute circular velocity, vtan
+		// vrad (and their associated dispersions), angular momentum
+		// and density, if we bin by radius
 	if(this->BinByRadius)
 		{
-		// intializing the circular velocity array
-		vtkSmartPointer<vtkFloatArray> circularVelocityArray = \
-			vtkSmartPointer<vtkFloatArray>::New();
-		InitializeDataArray(circularVelocityArray,
+		AllocateDataArray(output,
 			"circular velocity",1,output->GetNumberOfRows());
-		output->AddColumn(circularVelocityArray);
-
-		// initializing the density in bin array
-		vtkSmartPointer<vtkFloatArray> densityInBinArray = \
-			vtkSmartPointer<vtkFloatArray>::New();
-		InitializeDataArray(densityInBinArray,
+		AllocateDataArray(output,
 			"density",1,output->GetNumberOfRows());
-		output->AddColumn(densityInBinArray);
+		AllocateDataArray(output,
+			"radial velocity",1,output->GetNumberOfRows());
+		AllocateDataArray(output,
+			"radial velocity dispersion",1,output->GetNumberOfRows());
+		AllocateDataArray(output,
+			"tangential velocity",1,output->GetNumberOfRows());
+		AllocateDataArray(output,
+			"tangential velocity dispersion",1,output->GetNumberOfRows());
+		AllocateDataArray(output,
+			"angular momentum",1,output->GetNumberOfRows());
 		}
 
 	float totalMass=0;
@@ -209,7 +202,9 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 		totalNumber+=binNumberTotal;
 		output->SetValueByName(rowId,"cumulative number",totalNumber);
 		
-		// we can only compute circular velocity and density if we bin by radius
+		// we can only compute circular velocity, vtan
+		// vrad (and their associated dispersions), angular momentum
+		// and density, if we bin by radius
 		if(this->BinByRadius)
 			{
 			// we will need the bin radius for both calculations
@@ -219,7 +214,7 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 			float binCircularVelocity = sqrt(totalMass/binRadius);
 			output->SetValueByName(rowId,"circular velocity",binCircularVelocity);
 	
-			// computing the density M(<r) / (4/3 pi r^3)
+			// computing the density M(<r)/(4/3 pi r^3)
 			float binDensity=totalMass/(4./3*M_PI*pow(binRadius,3));
 			output->SetValueByName(rowId,"density",binDensity);
 			}

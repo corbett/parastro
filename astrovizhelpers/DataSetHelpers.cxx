@@ -7,7 +7,32 @@
 #include "vtkSphereSource.h"
 #include "vtkSmartPointer.h"
 #include <cmath>
+/*----------------------------------------------------------------------------
+*
+* Work with vtkDataArray
+*
+*---------------------------------------------------------------------------*/
+void InitializeDataArray(vtkDataArray* dataArray, const char* arrayName,\
+ 			int numComponents, int numTuples)
+{
+	dataArray->SetNumberOfComponents(numComponents);
+	dataArray->SetName(arrayName);
+	dataArray->SetNumberOfTuples(numTuples);
+}
 
+/*----------------------------------------------------------------------------
+*
+* Work with vtkTable
+*
+*---------------------------------------------------------------------------*/
+void AllocateDataArray(vtkTable* output, const char* arrayName,\
+ 			int numComponents, int numTuples)
+{
+	vtkSmartPointer<vtkFloatArray> dataArray=\
+		vtkSmartPointer<vtkFloatArray>::New();
+	InitializeDataArray(dataArray,arrayName,numComponents,numTuples);		
+  output->AddColumn(dataArray);
+}
 /*----------------------------------------------------------------------------
 *
 * Work with VtkPolyData (a derived class from vtkPointSet)
@@ -32,6 +57,7 @@ float* DoublePointToFloat(double point[])
 	}
 	return floatPoint;
 }
+
 //----------------------------------------------------------------------------
 void CreateSphere(vtkPolyData* output,double radius,double center[])
 {
@@ -58,9 +84,7 @@ void AllocateDataArray(vtkPointSet* output, const char* arrayName,\
 {
 	vtkSmartPointer<vtkFloatArray> dataArray=\
 		vtkSmartPointer<vtkFloatArray>::New();
-  	dataArray->SetNumberOfComponents(numComponents);
-  	dataArray->SetName(arrayName);
-		dataArray->SetNumberOfTuples(numTuples);
+	InitializeDataArray(dataArray,arrayName,numComponents,numTuples);
   output->GetPointData()->AddArray(dataArray);
 }
 
@@ -70,21 +94,10 @@ void AllocateDoubleDataArray(vtkPointSet* output, const char* arrayName,\
 {
 	vtkSmartPointer<vtkDoubleArray> dataArray=\
 		vtkSmartPointer<vtkDoubleArray>::New();
-
-  	dataArray->SetNumberOfComponents(numComponents);
-  	dataArray->SetName(arrayName);
-		dataArray->SetNumberOfTuples(numTuples);
+	InitializeDataArray(dataArray,arrayName,numComponents,numTuples);
   output->GetPointData()->AddArray(dataArray);
 }
 
-//----------------------------------------------------------------------------
-void InitializeDataArray(vtkDataArray* dataArray, const char* arrayName,\
- 			int numComponents, int numTuples)
-{
-	dataArray->SetNumberOfComponents(numComponents);
-	dataArray->SetName(arrayName);
-	dataArray->SetNumberOfTuples(numTuples);
-}
 //----------------------------------------------------------------------------
 double* GetPoint(vtkPointSet* output,vtkIdType id)
 {

@@ -8,6 +8,7 @@
 #include "vtkIdList.h"
 #include "vtkCell.h"
 #include "vtkCellArray.h"
+#include "vtkTable.h"
 #include "vtkFloatArray.h"
 
 // The following methods take and modify vtkPolyData
@@ -37,15 +38,18 @@ double* GetDataValue(vtkPointSet* output, const char* arrayName,\
  					vtkIdType id);
 
 // Description:
-// create a vtkDataArray with the  name arrayName, number of components 
-// numComponents and number of tuples numTuples of type T
-// e.g. AllocateFloatArray("density",1,100) creates a array of 100 
-// scalar float densities
-// AllocateFloatArray("velocity",3,100) creates a array of 100 vector 
-// float velocities
+// create a vtkDataArray of floats with the  name arrayName, number /
+// of components. place it in the vtkPointSet
 void AllocateDataArray(vtkPointSet* output, const char* arrayName,\
  			int numComponents, int numTuples);
 
+// Description:
+// create a vtkDataArray with the  name arrayName, number of components 
+// numComponents and number of tuples numTuples of type T. place it in
+// the vtkTable
+
+void AllocateDataArray(vtkTable* output, const char* arrayName,\
+			int numComponents, int numTuples);
 // Description:
 // create a vtkDataArray with the  name arrayName, number of components 
 // numComponents and number of tuples numTuples of type T
