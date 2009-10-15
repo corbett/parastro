@@ -91,3 +91,60 @@ vtkPolyData* CopyPolyPointsAndData(vtkPolyData* dataSet, vtkIdList*
 // to only those points within the virial radius.
 // This method only works if input was vtkPolyData...
 vtkPolyData* GetDatasetWithinVirialRadius(VirialRadiusInfo virialRadiusInfo);
+
+// Description
+// Given an input data set, the bin number, a list of points in the relevant
+// bin,  and the output table, computes the average radial velocity in the
+// bin, the radial velocity dispersion in the bin, the tangential velocity
+// in the bin, the tangentical velocity dispersion in the bin, and the angular
+// momentum in the bin and adds it to the output table in the appropriate bin.
+//
+// Average velocity: 
+// \vec v_{ave} = \frac{\sum_{i=1}^{N} \vec v_i}{N}
+//
+// Velocity Dispersion:
+// \vec \sigma_v = \frac{\sum_{i=1}^{N} 
+// \sqrt{(\vec v_i)^2-(\vec v_{ave}^2)}}{N}
+//
+// Specific Angular Momentum:
+// \vec j = \frac{\sum_{i=1}^{N} \vec r_i x \vec v_i}{N}
+//
+void ComputeStatisticsInBin(vtkPolyData* inputDataSet, double center[],
+	int binNum, vtkIdList* pointsInBin, vtkTable* output);
+	
+// Description:
+// given 3-vector vectorOne and 3-vector vectorTwo, computes the 
+// projection of vectorOnew onto vector two.
+// Can be used to calculate e.g.
+// radialVelocity = ComputeProjection(v,r);
+//  or velocitySquared = ComputeProjection(v,v);
+double* ComputeProjection(double  vectorOne[],double vectorTwo[]);
+
+// Description:
+// Computes the vector difference between two 3-vectors
+// Can be used to calculate e.g. tangential velocity
+// tangentialVelocity = PointVectorDifference(v,radialVelocity);
+double* PointVectorDifference(double vectorOne[], double vectorTwo[]);
+
+// Description
+// Give a 3 vector v and a three vector r computes the specific angular 
+// momentum = r x v
+double* ComputeAngularMomentum(double v[], double r[]);
+
+// Description:
+// Multiplies in place a 3-vector by a constant
+void VecMultConstant(double vector[],double constant);
+
+// Description
+// Given a vSquaredAve and a vAve calculates the velocity dispersion
+// placing it in the output vector velocityDispersion
+double* CalcVelocityDispersion(double vSquaredAve[], double  vAve[],
+	double velocityDipersion);
+
+
+
+
+
+
+
+

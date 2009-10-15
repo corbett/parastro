@@ -247,6 +247,123 @@ vtkPolyData* GetDatasetWithinVirialRadius(VirialRadiusInfo virialRadiusInfo)
 		CopyPolyPointsAndData(dataSet,pointsInRadius);
 	return newDataSet;
 }
+
+//----------------------------------------------------------------------------
+void ComputeStatisticsInRadialBin(vtkPolyData* inputDataSet, double center[], 
+	int binNum, vtkIdList* pointsInBin, vtkTable* output)
+{
+	double vAve[3],vRadAve[3],vTanAve[3],jAve[3],\
+		vSquaredAve[3],vRadSquaredAve[3],vTanSquaredAve[3],\
+		vDisp[3],vRadDisp[3],vTanDisp[3];
+	double* x_i,v_i,r_i,vRad_i,vTan_i,j_i\
+		vSquared_i,vRadSquared_i,vTanSquared_i;// useful for calculating
+		// the velocity dispersion of the respective quantities
+	// for id in id list
+	for(int pointLocalId = 0; 
+			pointLocalId < pointsInBin->GetNumberOfIds(); 
+			++pointLocalId)
+		{
+		vtkIdType pointGlobalId = pointsInBin->GetId(pointLocalId);
+		x_i=GetPoint(dataSet,pointGlobalId);
+		// extracting the mass
+		r_i=PointVectorDifference(x_i,center);
+		// has to be double as this version of VTK doesn't have 
+		v_i=GetDataValue(dataSet,"velocity",pointGlobalId);
+		// calculate all the i quantities
+		vRad_i=ComputeProjection(v_i,r_i);
+		vTan_i=PointVectorDifference(v_i,vRad_i);
+		j_i=ComputeAngularMomentum(v_i,r_i);
+		vSquared_i=ComputeProjection(v_i,v_i);
+		vRadSquared_i=ComputeProjection(vRad_i,vRad_i);
+		vTanSquared_i=ComputeProjection(vTan_i,vTan_i);
+		// update the total averages
+		for(int coord = 0; coord < 3; ++coord)
+			{
+			vAve[coord]+=v_i[coord];
+			vRadAve[coord]+=vRad_i[coord];
+			vTanAve[coord]+=vTan_i[coord];
+			jAve[coord]+=j_i[coord];
+			vSquaredAve[coord]+=vSquared_i[coord];
+			vRadSquaredAve[coord]+=vRadSquared_i[coord];
+			vTanSquaredAve[coord]+=vTanSquared_i[coord];
+			}
+		}
+	//done with for loop divide everything by N
+	VecMultConstant(vAve,1./N);
+	VecMultConstant(vRadAve,1./N);
+	VecMultConstant(vTanAve,1./N);
+	VecMultConstant(jAve,1./N);	
+	VecMultConstant(vSquaredAve,1./N);	
+	VecMultConstant(vRadSquaredAve,1./N);		
+	VecMultConstant(vTanSquaredAve,1./N);		
+	// calculate velocity dispersions, taking the necessary square roots	
+	CalculateVelocityDispersion(vSquaredAve,vAve,vDisp);
+	CalculateVelocityDispersion(vRadSquaredAve,vRadAve,vRadDisp);
+	CalculateVelocityDispersion(vTanSquaredAve,vTanAve,vTanDisp);
+	// add vAve, vRadAve, vTanAve,, vAveDisp, vRadAveDisp, vTanAveDisp and j
+	// to the ouput table.
+	
+	// finally some memory management
+	delete [] x_i;
+	delete [] v_i;
+	delete [] r_i;
+	delete [] vRad_i;
+	delete [] vTan_i;
+	delete [] j_i;
+	delete [] vSquared_i;
+	delete [] vRadSquared_i;
+	delete [] vTanSquared_i;	
+}
+
+//----------------------------------------------------------------------------
+double* ComputeProjection(double  vectorOne[],double vectorTwo[])
+{
+	double normVectorTwo = Norm(vectorTwo);
+	double projectionMagnitude = Dot(vectorOne,vectoTwo)/normVectorTwo;
+	double* projectionVector = new double[3];
+	for(int i = 0; i < 3; ++i)
+	{
+		projectionVector[i] = projectionMagnitude * vectorTwo[i] /normVectorTwo;
+	}
+	return projectionVector;
+}
+
+//----------------------------------------------------------------------------
+double* PointVectorDifference(double vectorOne[], double vectorTwo[])
+{
+	double* pointVectorDifference = new double[3];
+	for(int i = 0; i < 3; ++i)
+	{
+		pointVectorDifference[i] = vectorOne[i] - vectorTwo[i];
+	}
+	return pointVectorDifference;
+}
+
+//----------------------------------------------------------------------------
+void VecMultConstant(double vector[],double constant)
+{
+	for(int i = 0; i < 3; ++i)
+	{
+		vector[i] *= constant;
+	}
+}
+
+//----------------------------------------------------------------------------
+double* ComputeAngularMomentum(double v[], double r[])
+{
+	double* angularMomentum = new double[3];
+	Cross(v,r,angularMomentum);
+	return angularMomentum;
+}
+
+double* CalcVelocityDispersion(double vSquaredAve[], double  vAve[],
+	double velocityDipersion)
+{
+	for(int i = 0; i < 3; ++i)
+	{
+		velocityDispersion[i] = sqrt(vSquaredAve[i] - pow(vAve[i],2));
+	}
+}
 	
 	
 	

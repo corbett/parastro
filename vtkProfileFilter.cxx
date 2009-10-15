@@ -201,12 +201,6 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 			float binDensity=totalMass/(4./3*M_PI*pow(binRadius,3));
 			output->SetValueByName(rowId,"density",binDensity);
 			// computing the radial velocity
-// TODO also keep track of radial vector
-//			double* velocity = output->GetValueByName(rowId,"velocity");
-//			double radiusMag	= output->GetValueByName(rowId,"radius");
-// 			double radiusVec[3] = {radiusMag,0,0}; // defining r=|r|\hat(i)
-//			double radialVelocity = Dot(velocity,radius)/Norm(radius);
-//			output->SetValueByName(rowId,"radial velocity",radialVelocity);
 			// computing the tangential velocity
 			// computing the specific angular momentum
 			}
