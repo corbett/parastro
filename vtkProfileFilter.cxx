@@ -56,7 +56,43 @@ void vtkProfileFilter::SetSourceConnection(vtkAlgorithmOutput* algOutput)
   this->SetInputConnection(1, algOutput);
 }
 
-
+//----------------------------------------------------------------------------
+int vtkProfileFilter::RequestData(vtkInformation *request,
+																	vtkInformationVector **inputVector,
+																	vtkInformationVector *outputVector)
+{
+	// Now we can get the input with which we want to work
+ 	vtkPolyData* dataSet = vtkPolyData::GetData(inputVector[0]);
+	// Setting the center based upon the selection in the GUI
+	vtkDataSet* pointInfo = vtkDataSet::GetData(inputVector[1]);
+	vtkTable* output = vtkTable::GetData(outputVector[0]);
+	this->CalculateAndSetCenter(pointInfo);
+	// If we want to cut off at the virial radius, compute this, and remove the
+	// portion of the data set we don't care about
+	if(this->CutOffAtVirialRadius)
+		{
+		VirialRadiusInfo virialRadiusInfo = \
+		 	ComputeVirialRadius(dataSet,this->Delta,this->Center);
+		vtkErrorMacro("virial radius is " << virialRadiusInfo.virialRadius);
+		// note that if there was an error finding the virialRadius the 
+		// radius returned is < 0
+		//setting the dataSet to this newInput
+		if(virialRadiusInfo.virialRadius>0)
+			{
+			dataSet = \
+				GetDatasetWithinVirialRadius(virialRadiusInfo);	
+			this->GenerateProfile(dataSet,output);
+			delete [] dataSet;
+			return 1;
+			}
+		else
+			{
+			vtkErrorMacro("Something has gone wrong with the virial radius finding. Perhaps change your delta, or your center, or if you are truely puzzled check out ProfileHelpers.cxx. For now binning out to the max radius instead of the virial.");
+			}
+		}
+	this->GenerateProfile(dataSet,output);
+	return 1;
+}
 
 //----------------------------------------------------------------------------
 void vtkProfileFilter::CalculateAndSetCenter(vtkDataSet* source)
@@ -120,27 +156,180 @@ void vtkProfileFilter::InitializeBins(vtkPolyData input,
 		}
 }
 
-
 //----------------------------------------------------------------------------
-void vtkProfileFilter::ComputeStatistics(vtkPolyData* inputDataSet,vtkTable* output)
+void vtkProfileFilter::CalculateAndSetBinExtents(vtkPolyData input)
 {
-	double* nextPoint = new double[3]; // need for the loop
-	for(int nextPointId = 0;
-	 		nextPointId < dataSet->GetPoints()->GetNumberOfPoints();
-	 		++nextPointId)
-		{
-			nextPoint = GetPoint(dataSet,nextPointId);
-			UpdateBinStatistics(inputDataSet,nextPoint,nextPointId,output);
-		}
-	// Updating averages
-	UpdateBinAverages(this->BinNumber,output);
-	//Finally some memory management
-	delete [] nextPoint;
+	// TODO: implement
+	throw "unimplemented";
 }
 
 //----------------------------------------------------------------------------
-void 	UpdateBinAverages(vtkTable* output)
+void vtkProfileFilter::ComputeStatistics(vtkPolyData* input,vtkTable* output)
 {
+	for(int nextPointId = 0;
+	 		nextPointId < input->GetPoints()->GetNumberOfPoints();
+	 		++nextPointId)
+		{
+			this->UpdateBinStatistics(input,nextPointId,output);
+		}
+	// Updating averages and doing relevant postprocessing
+	this->BinAveragesAndPostprocessing(output);
+}
+
+//----------------------------------------------------------------------------
+void vtkProfileFilter::UpdateBinStatistics(vtkPolyData* input,
+ 	vtkIdType pointGlobalId,vtkTable* output)
+{
+	double* x = GetPoint(input,pointGlobalId);
+	// As we bin by radius always need
+	double* r=PointVectorDifference(x,center);
+	// Many of the quantities explicitely require the velocity
+	double* v=GetDataValue(input,"velocity",pointGlobalId);
+	int binNum=this->GetBinNumber(r);
+	// Updating quanties for the input data arrays
+	for(int i = 0; i < input->GetPointData()->GetNumberOfArrays(); ++i)
+		{
+		vtkSmartPointer<vtkDataArray> nextArray = \
+		 	input->GetPointData()->GetArray(i);
+		// getting the data for this point
+		double* nextData = GetDataValue(input,
+			nextArray->GetName(),pointGlobalId);
+		// Updating the total bin
+		vtkstd::string totalName = nextArray->GetName() + "_total";		
+		this->UpdateBin(binNum, BinUpdateType.add,totalName,
+			nextArray->GetNumberOfComponents(), nextData, output);
+		if(this->CumulativeQuantities->LookupValue(nextArray->GetName())>=0)
+			{
+			// we should also consider this a cumulative quantity
+			vtkstd::string cumulativeName = nextArray->GetName() + "_cumulative";
+			this->UpdateCumulativeBins(binNum,BinUpdateType.add,cumulativeName,1,
+				additionalData,output);
+			}
+		//Finally some memory management
+		delete [] nextData;
+		}
+	// For our additional quantities, allocating a column for the average 
+	// and the sum. These are restricted to be scalars
+	for(int i = 0; i < 
+		this->AdditionalProfileQuantities.GetNumberOfValues(); 
+		++i)
+		{
+		vtkstd::string nextName=this->AdditionalProfileQuantities.GetValue(i);
+		double* additionalData = \
+			this->CalculateAdditionalProfileQuantity(nextName,v,r);
+		// updating the totalbin
+		vtkstd::string totalName = nextName + "_total";
+		this->UpdateBin(binNum,BinUpdateType.add,totalName,1,
+			additionalData,output);
+		if(this->CumulativeQuantities->LookupValue(nextName)>=0)
+			{
+			// we should also consider this a cumulative quantity
+			vtkstd::string cumulativeName = nextName + "_cumulative";
+			this->UpdateCumulativeBins(binNum,BinUpdateType.add,
+				cumulativeName,1,additionalData,output);
+			}
+			//Finally some memory management
+			delete [] additionalData;
+		}
+	// Finally some memory management
+	delete [] x;
+	delete [] r;
+	delete [] v;
+}
+
+
+//----------------------------------------------------------------------------
+int vtkProfileFilter::GetBinNum(double r[])
+{
+	// TODO: implement
+	throw "uninplemented";
+}
+
+//----------------------------------------------------------------------------
+void vtkProfileFilter::UpdateBin(int binNum, BinUpdateType updateType,
+ 	char* attributeName, int attributeNumComponents, double* dataToAdd,
+ 	vtkTable* output)
+{
+	double* data=output->GetValueByName(binNum,attributeName).ToDouble();
+	for(int i = 0; i < attributeNumComponents; ++i)
+		{
+			switch(updateType)
+			{
+			case add:
+				data[i]+=dataToAdd[i];
+				break;
+			case multiply:
+				data[i]*=dataToAdd[i];
+				break;
+			}
+		}
+	output.SetValueByName(binNum,attributeName,data);
+}
+
+//----------------------------------------------------------------------------
+void vtkProfileFilter::UpdateCumulativeBins(int binNum, BinUpdateType 		
+	updateType, char* attributeName, int attributeNumComponents, 
+	double* dataToAdd, vtkTable* output)
+{
+		for(int bin = binNum; bin < this->BinNumber; ++bin)
+			{
+			this->UpdateBin(bin,updateType,attributeName,attributeNumComponents,
+				dataToAdd,output);
+			}
+}
+
+//----------------------------------------------------------------------------
+double* vtkProfileFilter::CalculateAdditionalProfileQuantity(
+	vtkstd::string additionalQuantityName, double v[], double r[])
+{
+	// Some inefficiency by recomputing quantities, but paid for with 
+	// flexibility, i.e don't have to call in a certain order or can compute
+	// one quantity without storing the other
+	// TODO: probably not string == here, just a proxy for
+	// the function I should use throwing unimplemented until
+	// I implement
+	throw "unimplemented";
+	if(additionalQuantityName == "radial velocity")
+		{
+		return ComputeRadialVelocity(v,r);
+		}
+	else if(additionalQuantityName == "tangential velocity")
+		{
+		return ComputeTangentialVelocity(v,r);
+		}
+	else if(additionalQuantityName == "angular momentum")
+		{
+		return ComputeAngularMomentum(v,r);
+		}
+	else if(additionalQuantityName == "velocity dispersion")
+		{
+		return ComputeVelocitySquared(v,r);
+		}
+	else if(additionalQuantityName == "radial velocity dispersion")
+		{
+		return ComputeRadialVelocitySquared(v,r);
+		}
+	else if(additionalQuantityName == "tangential velocity dispersion")
+		{
+		return ComputeTangentialVelocitySquared(v,r);
+		}
+	else if(additionalQuantityName=="number in bin")
+		{
+			return {1.0};
+		}
+	else
+		{
+		vtkWarningMacro("input arrray requested not found, quantity returned as \
+			array of zero");
+		return {0.0};
+		}
+}
+
+//----------------------------------------------------------------------------
+void 	vtkProfileFilter::BinAveragesAndPostprocessing(vtkTable* output)
+{
+	// TODO: implement
+	throw "unimplemented"
 	/*
 	for(bin in this->BinNumber)
 	{
@@ -180,170 +369,8 @@ void 	UpdateBinAverages(vtkTable* output)
 
 
 
-//----------------------------------------------------------------------------
-void vtkProfileFilter::UpdateBin(int binNum, int totalBins, 
-	BinUpdateType updateType, char* attributeName, int attributeNumComponents,
-	double* dataToAdd[], vtkTable* output)
-{
-	double* data=output->GetValueByName(binNum,attributeName).ToDouble();
-	for(int i = 0; i < numComponents; ++i)
-		{
-			switch(updateType)
-			{
-			case add:
-				data[i]+=dataToAdd[i];
-				break;
-			case multiply:
-				data[i]*=dataToAdd[i];
-				break;
-			}
-		}
-	output.SetValueByName(binNum,attributeName,data);
-}
 
-void vtkProfileFilter::UpdateCumulativeBins(int binNum, int totalBins,
-	BinUpdateType updateType, char* attributeName, int attributeNumComponents,
-	double* dataToAdd[], vtkTable* output)
-{
-		for(int bin = binNum; bin < totalBins; ++bin)
-		{
-			UpdateBin(bin,totalBins,updateType,attributeName,\
-				attributeNumComponents,dataToAdd[],output);
-		}
-}
 
-//----------------------------------------------------------------------------
-void vtkProfileFilter::UpdateBinStatistics(vtkPolyData* inputDataSet,
- 	double x[], vtkIdType pointGlobalId,vtkTable* output)
-{
-	//TODO: add later cumulative capabilities.
-	// As we bin by radius allways need this
-	double* r=PointVectorDifference(x,center);
-	// Many of the quantities explicitely require the velocity
-	double* v=GetDataValue(inputDataSet,"velocity",pointGlobalId);
-	double binNum=GetBinNumber(r,this->BinNumber,this->BinSpacing);
-	
-	for(int i = 0; i < dataSet->GetPointData()->GetNumberOfArrays(); ++i)
-		{
-		vtkSmartPointer<vtkDataArray> nextArray = \
-		 	input->GetPointData()->GetArray(i);
-		// getting the data for this point
-		double* nextData = GetDataValue(inputDataSet,
-			nextArray->GetName(),pointGlobalId);
-		// Updating the total bin
-		vtkstd::string totalName = nextArray->GetName() + "_total";		
-		UpdateBin(binNum, totalBins, BinUpdateType.add,totalName,
-			nextArray->GetNumberOfComponents(), nextData, output);
-		if(this->CumulativeQuantities->LookupValue(nextArray->GetName())>=0)
-			{
-			// we should also consider this a cumulative quantity
-			vtkstd::string cumulativeName = nextArray->GetName() + "_cumulative";
-			UpdateCumulativeBins(binNum,totalBins,BinUpdateType.add,
-				cumulativeName,1,additionalData,output);
-			}
-		}
-	// For our additional quantities, allocating a column for the average 
-	// and the sum. These are restricted to be scalars
-	for(int i = 0; i < 
-		this->AdditionalProfileQuantities.GetNumberOfValues(); 
-		++i)
-		{
-		vtkstd::string nextName=this->AdditionalProfileQuantities.GetValue(i);
-		double* additionalData = CalculateAdditionalProfileQuantity(nextName,v,r);
-		// updating the totalbin
-		vtkstd::string totalName = nextName + "_total";
-		UpdateBin(binNum,totalBins,BinUpdateType.add,totalName,\
-			1,additionalData,output);
-		if(this->CumulativeQuantities->LookupValue(nextName)>=0)
-			{
-			// we should also consider this a cumulative quantity
-			vtkstd::string cumulativeName = nextName + "_cumulative";
-			UpdateCumulativeBins(binNum,totalBins,BinUpdateType.add,
-				cumulativeName,1,additionalData,output);
-			}
-		}
-}
-
-//----------------------------------------------------------------------------
-double* vtkProfileFilter::CalculateAdditionalProfileQuantity(
-	vtkstd::string nextName)
-{
-	// Some inefficiency by recomputing quantities, but paid for with 
-	// flexibility, i.e don't have to call in a certain order or can compute
-	// one quantity without storing the other
-	if(nextName == "radial velocity")
-		{
-		return ComputeRadialVelocity(v,r);
-		}
-	else if(nextName == "tangential velocity")
-		{
-		return ComputeTangentialVelocity(v,r);
-		}
-	else if(nextName == "angular momentum")
-		{
-		return ComputeAngularMomentum(v,r);
-		}
-	else if(nextName == "velocity dispersion")
-		{
-		return ComputeVelocitySquared(v,r);
-		}
-	else if(nextName == "radial velocity dispersion")
-		{
-		return ComputeRadialVelocitySquared(v,r);
-		}
-	else if(nextName == "tangential velocity dispersion")
-		{
-		return ComputeTangentialVelocitySquared(v,r);
-		}
-	else if(nextName=="number in bin")
-		{
-			return {1.0};
-		}
-	else
-		{
-		vtkWarningMacro("input arrray requested not found, quantity returned as \
-			array of zero");
-		return {0.0};
-		}
-}
-
-//----------------------------------------------------------------------------
-int vtkProfileFilter::RequestData(vtkInformation *request,
-																	vtkInformationVector **inputVector,
-																	vtkInformationVector *outputVector)
-{
-	// Now we can get the dataSet with which we want to work
- 	vtkPolyData* dataSet = vtkPolyData::GetData(inputVector[0]);
-	// Setting the center based upon the selection in the GUI
-	vtkDataSet* pointInfo = vtkDataSet::GetData(inputVector[1]);
-	vtkTable* output = vtkTable::GetData(outputVector[0]);
-	this->CalculateAndSetCenter(pointInfo);
-	// If we want to cut off at the virial radius, compute this, and remove the
-	// portion of the data set we don't care about
-	if(this->CutOffAtVirialRadius)
-		{
-		VirialRadiusInfo virialRadiusInfo = \
-		 	ComputeVirialRadius(dataSet,this->Delta,this->Center);
-		vtkErrorMacro("virial radius is " << virialRadiusInfo.virialRadius);
-		// note that if there was an error finding the virialRadius the 
-		// radius returned is < 0
-		//setting the input to this newInput
-		if(virialRadiusInfo.virialRadius>0)
-			{
-			dataSet = \
-				GetDatasetWithinVirialRadius(virialRadiusInfo);	
-			this->GenerateProfile(dataSet,output);
-			delete [] dataSet;
-			return 1;
-			}
-		else
-			{
-			vtkErrorMacro("Something has gone wrong with the virial radius finding. Perhaps change your delta, or your center, or if you are truely puzzled check out ProfileHelpers.cxx. For now binning out to the max radius instead of the virial.");
-			}
-		}
-	this->GenerateProfile(dataSet,output);
-	return 1;
-}
 
 
 

@@ -111,12 +111,66 @@ protected:
 	//
 	// For each cumulative array as specified by the CumulativeQuantitiesArray
 	//
-	void InitializeBins(vtkPolyData input,vtkTable* output)
+	void InitializeBins(vtkPolyData input,vtkTable* output);
+
+	// Description:
+	// Calculates the bin spacing and number of bins if necessary from
+	// the user input.
+	void CalculateAndSetBinExtents(vtkPolyData input);
+
+	// Description:
+	// For each point in the input, update the relevant bins and bin columns
+	// to reflect this point's data. Finally compute the averages, relevant
+	// dispersions, and global statistics.
+	void ComputeStatistics(vtkPolyData* input,vtkTable* output);
+
+	// Description:
+	// For each quantity initialized in InitializeBins updates the statistics
+	// of the correct bin to reflect the data values of the point identified
+	// with pointGlobalId. Note: for quantities that are averages, or require
+	// post processing this are updated additively as with totals. This is
+	// why after all points have updated the bin statistics,
+	// BinAveragesAndPostprocessing must be called to do the proper averaging
+	// and/or postprocessing on  the accumlated columns.
+	void UpdateBinStatistics(UpdateBinStatistics(vtkPolyData* input,
+		vtkIdType pointGlobalId,vtkTable* output);
 	
+	// Description:
+	// returns the bin number in which this radius lies.
+	int GetBinNum(double r[]);
+	
+	// Description:
+	// Updates the data values of attribute specified in attributeName
+	// in the bin specified by binNum, either additively or 	
+	// multiplicatively as specified by updateddType by dataToAdd
+	void UpdateBin(int binNum, BinUpdateType updateType, char* attributeName,
+		int attributeNumComponents, double* dataToAdd, vtkTable* output);
+		
+	// Description:
+	// This function is useful for those data items who want to keep track of 
+	// a cumulative number. E.g. N(<=r), calls updateBin on all bins >= binNum
+	// updating the attribute specified
+	void UpdateCumulativeBins(int binNum, BinUpdateType updateType, 
+		char* attributeName, int attributeNumComponents, double* dataToAdd,
+		vtkTable* output);
+
+	// Description:
+	// Base upon the additionalQuantityName, returns a double array representing
+	// the computation of this quantity. Currently all of these are calculated
+	// from v and from r, which are 3-vectors taken as inputs. Would have to be 
+	// rediefined to be more general if other quantities were desired.
+	double* CalculateAdditionalProfileQuantity(vtkstd::string
+		additionalQuantityName,double v[], double r[]);
+	
+	// Description:
+   // After all points have updated the bin statistics, UpdateBinAverages
+	// must be called to do the proper averaging and/or postprocessing on 
+	// the accumlated columns.
+	void BinAveragesAndPostprocessing(vtkTable* output);
+		
 private:
   vtkProfileFilter(const vtkProfileFilter&); // Not implemented
   void operator=(const vtkProfileFilter&); // Not implemented
-
 //ETX
 };
 
