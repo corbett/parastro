@@ -49,16 +49,6 @@
 	    	</Hints>
       </InputProperty>
 	<!--Adds a checkbox for the option Bin By Radius-->
-     <IntVectorProperty 
-        name="BinByRadius" 
-        command="SetBinByRadius" 
-        number_of_elements="1"
-        default_values="1" > 
-       <BooleanDomain name="bool"/>
-       <Documentation>
-         If the value of this property is 1, then the bins are by radius, otherwise they are binned by the quantity selected in the scalar array.
-       </Documentation>
-     </IntVectorProperty>
 	<!--Adds a checkbox for the option Cut Off At Virial Radius-->
      <IntVectorProperty 
         name="CutOffAtVirialRadius" 

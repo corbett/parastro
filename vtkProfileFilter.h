@@ -21,6 +21,14 @@
 #include "vtkExtractHistogram.h"
 #include "vtkDataSetAttributes.h" // needed to declare the field list below
 
+//----------------------------------------------------------------------------
+enum BinUpdateType
+{
+	add, 
+	multiply 
+};
+
+//----------------------------------------------------------------------------
 class VTK_EXPORT vtkProfileFilter : public vtkExtractHistogram
 {
 public:
@@ -35,10 +43,6 @@ public:
   // Get/Set the number of bins
   vtkSetVector3Macro(Center,double);
   vtkGetVectorMacro(Center,double,3);
-  // Description:
-  // Get/Set whether the bins are by radius
-  vtkSetMacro(BinByRadius, int);
-  vtkGetMacro(BinByRadius, int);
 
   // Description:
   // Get/Set whether the bins should be only from the center to the virial 
@@ -62,14 +66,52 @@ protected:
   virtual int RequestData(vtkInformation*, 
                           vtkInformationVector**, 
                           vtkInformationVector*);
+  // Description:
 	// Set in GUI, with defaults
-	double Delta;
+	// Overdensity
+	double Delta; 
+  // Description:
+	// Center around which to compute radial bins
 	double Center[3];
-	int BinByRadius;
+  // Description:
+	// Whether to only compute the profile up to the virial radius
 	int CutOffAtVirialRadius;
   // Description:
+	// Number of bins to use
+	int BinNumber;
+  // Description:
+	// Spacing between bins, automatically calculated based upon other
+	// selections
+	double BinSpacing;
+  // Description:
+	// Quantities to add to the input computing averages for. Note:
+	// if you were to add to this, you would also have to update the function
+	// CalculateAdditionalProfileQuantity
+	vtkStringArray* AdditionalProfileQuantities;
+  // Description:
+ 	// Quantities to compute cumulative Sum(<=binR) for in the output table.
+ 	// Note: the name of this quantity must either be definined in the 
+	// input data or in the array AdditionalProfileQuantities, with 
+	// corresponding modification to CalculateAdditionalProfileQuantity
+	vtkStringArray* CumulativeQuantities; 	
+	  // Description:
   // Build the field lists containing the central point to be probed
   void CalculateAndSetCenter(vtkDataSet* source);
+
+	// Description:
+	// Calculates the bin spacing and number of bins if necessary from
+	// the user input.
+	//
+	// For each dataarray in the input, define a total and an
+	// average column in the binned output table.
+	//
+	// For each additional quantity as specified by the 
+	// AdditionalProfileQuantities array, define a average column in the
+	// binned output table
+	//
+	// For each cumulative array as specified by the CumulativeQuantitiesArray
+	//
+	void InitializeBins(vtkPolyData input,vtkTable* output)
 	
 private:
   vtkProfileFilter(const vtkProfileFilter&); // Not implemented

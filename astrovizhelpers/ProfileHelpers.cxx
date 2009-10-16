@@ -9,7 +9,6 @@
 #include <assert.h>
 #include <cmath>
 #include "vtkMath.h"
-
 //----------------------------------------------------------------------------
 double IllinoisRootFinder(double (*func)(double,void *),void *ctx,\
 											double r,double s,double xacc,double yacc,\
@@ -226,6 +225,8 @@ vtkPolyData* CopyPolyPointsAndData(vtkPolyData* dataSet, vtkIdList*
 	return newDataSet;
 }
 
+
+
 //----------------------------------------------------------------------------
 vtkPolyData* GetDatasetWithinVirialRadius(VirialRadiusInfo virialRadiusInfo)
 {
@@ -248,80 +249,65 @@ vtkPolyData* GetDatasetWithinVirialRadius(VirialRadiusInfo virialRadiusInfo)
 	return newDataSet;
 }
 
+
 //----------------------------------------------------------------------------
-void ComputeStatisticsInRadialBin(vtkPolyData* inputDataSet, double center[], 
-	int binNum, vtkIdList* pointsInBin, vtkTable* output)
+double* ComputeRadialVelocity(double v[],double r[])
 {
-	double vAve[3],vRadAve[3],vTanAve[3],jAve[3],\
-		vSquaredAve[3],vRadSquaredAve[3],vTanSquaredAve[3],\
-		vDisp[3],vRadDisp[3],vTanDisp[3];
-	double* x_i;
-	double* v_i;
-	double* r_i;
-	double* vRad_i;
-	double* vTan_i;
-	double* j_i;
-	double*	vSquared_i;
-	double* vRadSquared_i;
-	double* vTanSquared_i;// useful for calculating
-		// the velocity dispersion of the respective quantities
-	// for id in id list
-	double binSize = pointsInBin->GetNumberOfIds();
-	for(int pointLocalId = 0; 
-			pointLocalId < binSize; 
-			++pointLocalId)
-		{
-		vtkIdType pointGlobalId = pointsInBin->GetId(pointLocalId);
-		x_i=GetPoint(inputDataSet,pointGlobalId);
-		// extracting the mass
-		r_i=PointVectorDifference(x_i,center);
-		// has to be double as this version of VTK doesn't have 
-		v_i=GetDataValue(inputDataSet,"velocity",pointGlobalId);
-		// calculate all the i quantities
-		vRad_i=ComputeProjection(v_i,r_i);
-		vTan_i=PointVectorDifference(v_i,vRad_i);
-		j_i=ComputeAngularMomentum(v_i,r_i);
-		vSquared_i=ComputeProjection(v_i,v_i);
-		vRadSquared_i=ComputeProjection(vRad_i,vRad_i);
-		vTanSquared_i=ComputeProjection(vTan_i,vTan_i);
-		// update the total averages
-		for(int coord = 0; coord < 3; ++coord)
-			{
-			vAve[coord]+=v_i[coord];
-			vRadAve[coord]+=vRad_i[coord];
-			vTanAve[coord]+=vTan_i[coord];
-			jAve[coord]+=j_i[coord];
-			vSquaredAve[coord]+=vSquared_i[coord];
-			vRadSquaredAve[coord]+=vRadSquared_i[coord];
-			vTanSquaredAve[coord]+=vTanSquared_i[coord];
-			}
-		}
-	//done with for loop divide everything by N
-	VecMultConstant(vAve,1./binSize);
-	VecMultConstant(vRadAve,1./binSize);
-	VecMultConstant(vTanAve,1./binSize);
-	VecMultConstant(jAve,1./binSize);	
-	VecMultConstant(vSquaredAve,1./binSize);	
-	VecMultConstant(vRadSquaredAve,1./binSize);		
-	VecMultConstant(vTanSquaredAve,1./binSize);		
-	// calculate velocity dispersions, taking the necessary square roots	
-	ComputeVelocityDispersion(vSquaredAve,vAve,vDisp);
-	ComputeVelocityDispersion(vRadSquaredAve,vRadAve,vRadDisp);
-	ComputeVelocityDispersion(vTanSquaredAve,vTanAve,vTanDisp);
-	// add vAve, vRadAve, vTanAve,, vAveDisp, vRadAveDisp, vTanAveDisp and j
-	// to the ouput table.
-	
-	// finally some memory management
-	delete [] x_i;
-	delete [] v_i;
-	delete [] r_i;
-	delete [] vRad_i;
-	delete [] vTan_i;
-	delete [] j_i;
-	delete [] vSquared_i;
-	delete [] vRadSquared_i;
-	delete [] vTanSquared_i;	
+	return ComputeProjection(v,r);
 }
+
+//----------------------------------------------------------------------------
+double* ComputeTangentialVelocity(double v[],double r[])
+{
+	double* vRad=ComputeRadialVelocity(v,r);
+  double* vTan=PointVectorDifference(v,vRad);
+	delete [] vRad;
+	return vTan;	
+}
+//----------------------------------------------------------------------------
+double* ComputeAngularMomentum(double v[], double r[])
+{
+	double* angularMomentum = new double[3];
+	vtkMath::Cross(v,r,angularMomentum);
+	return angularMomentum;
+}
+
+//----------------------------------------------------------------------------
+double* ComputeVelocitySquared(double v[],double r[])
+{
+	return ComputeProjection(v,v);
+}
+
+//----------------------------------------------------------------------------
+double* ComputeRadialVelocitySquared(double v[],double r[])
+{
+	double* vRad=ComputeRadialVelocity(v,r);
+	double* vRadSquared=ComputeProjection(vRad,vRad);
+	delete [] vRad;
+	return vRadSquared;
+}
+
+//----------------------------------------------------------------------------
+double* ComputeTangentialVelocitySquared(double v[],double r[])
+{
+	double* vRad=ComputeRadialVelocity(v,r)
+	double* vTan=ComputeTangentialVelocity(v,r);
+	double* vTanSquared=ComputeProjection(vTan,vTan);
+	delete [] vRad;
+	delete [] vTan;
+	return vTanSquared;	
+}
+
+//----------------------------------------------------------------------------
+double* ComputeVelocityDispersion(double vSquaredAve[], double  vAve[],
+	double velocityDispersion[])
+{
+	for(int i = 0; i < 3; ++i)
+	{
+		velocityDispersion[i] = sqrt(vSquaredAve[i] - pow(vAve[i],2));
+	}
+}
+
 
 //----------------------------------------------------------------------------
 double* ComputeProjection(double  vectorOne[],double vectorTwo[])
@@ -357,22 +343,6 @@ void VecMultConstant(double vector[],double constant)
 	}
 }
 
-//----------------------------------------------------------------------------
-double* ComputeAngularMomentum(double v[], double r[])
-{
-	double* angularMomentum = new double[3];
-	vtkMath::Cross(v,r,angularMomentum);
-	return angularMomentum;
-}
-
-double* ComputeVelocityDispersion(double vSquaredAve[], double  vAve[],
-	double velocityDispersion[])
-{
-	for(int i = 0; i < 3; ++i)
-	{
-		velocityDispersion[i] = sqrt(vSquaredAve[i] - pow(vAve[i],2));
-	}
-}
 	
 	
 	
