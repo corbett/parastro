@@ -255,20 +255,28 @@ void ComputeStatisticsInRadialBin(vtkPolyData* inputDataSet, double center[],
 	double vAve[3],vRadAve[3],vTanAve[3],jAve[3],\
 		vSquaredAve[3],vRadSquaredAve[3],vTanSquaredAve[3],\
 		vDisp[3],vRadDisp[3],vTanDisp[3];
-	double* x_i,v_i,r_i,vRad_i,vTan_i,j_i\
-		vSquared_i,vRadSquared_i,vTanSquared_i;// useful for calculating
+	double* x_i;
+	double* v_i;
+	double* r_i;
+	double* vRad_i;
+	double* vTan_i;
+	double* j_i;
+	double*	vSquared_i;
+	double* vRadSquared_i;
+	double* vTanSquared_i;// useful for calculating
 		// the velocity dispersion of the respective quantities
 	// for id in id list
+	double binSize = pointsInBin->GetNumberOfIds();
 	for(int pointLocalId = 0; 
-			pointLocalId < pointsInBin->GetNumberOfIds(); 
+			pointLocalId < binSize; 
 			++pointLocalId)
 		{
 		vtkIdType pointGlobalId = pointsInBin->GetId(pointLocalId);
-		x_i=GetPoint(dataSet,pointGlobalId);
+		x_i=GetPoint(inputDataSet,pointGlobalId);
 		// extracting the mass
 		r_i=PointVectorDifference(x_i,center);
 		// has to be double as this version of VTK doesn't have 
-		v_i=GetDataValue(dataSet,"velocity",pointGlobalId);
+		v_i=GetDataValue(inputDataSet,"velocity",pointGlobalId);
 		// calculate all the i quantities
 		vRad_i=ComputeProjection(v_i,r_i);
 		vTan_i=PointVectorDifference(v_i,vRad_i);
@@ -289,17 +297,17 @@ void ComputeStatisticsInRadialBin(vtkPolyData* inputDataSet, double center[],
 			}
 		}
 	//done with for loop divide everything by N
-	VecMultConstant(vAve,1./N);
-	VecMultConstant(vRadAve,1./N);
-	VecMultConstant(vTanAve,1./N);
-	VecMultConstant(jAve,1./N);	
-	VecMultConstant(vSquaredAve,1./N);	
-	VecMultConstant(vRadSquaredAve,1./N);		
-	VecMultConstant(vTanSquaredAve,1./N);		
+	VecMultConstant(vAve,1./binSize);
+	VecMultConstant(vRadAve,1./binSize);
+	VecMultConstant(vTanAve,1./binSize);
+	VecMultConstant(jAve,1./binSize);	
+	VecMultConstant(vSquaredAve,1./binSize);	
+	VecMultConstant(vRadSquaredAve,1./binSize);		
+	VecMultConstant(vTanSquaredAve,1./binSize);		
 	// calculate velocity dispersions, taking the necessary square roots	
-	CalculateVelocityDispersion(vSquaredAve,vAve,vDisp);
-	CalculateVelocityDispersion(vRadSquaredAve,vRadAve,vRadDisp);
-	CalculateVelocityDispersion(vTanSquaredAve,vTanAve,vTanDisp);
+	ComputeVelocityDispersion(vSquaredAve,vAve,vDisp);
+	ComputeVelocityDispersion(vRadSquaredAve,vRadAve,vRadDisp);
+	ComputeVelocityDispersion(vTanSquaredAve,vTanAve,vTanDisp);
 	// add vAve, vRadAve, vTanAve,, vAveDisp, vRadAveDisp, vTanAveDisp and j
 	// to the ouput table.
 	
@@ -318,8 +326,9 @@ void ComputeStatisticsInRadialBin(vtkPolyData* inputDataSet, double center[],
 //----------------------------------------------------------------------------
 double* ComputeProjection(double  vectorOne[],double vectorTwo[])
 {
-	double normVectorTwo = Norm(vectorTwo);
-	double projectionMagnitude = Dot(vectorOne,vectoTwo)/normVectorTwo;
+	double normVectorTwo = vtkMath::Norm(vectorTwo);
+	double projectionMagnitude = \
+		vtkMath::Dot(vectorOne,vectorTwo)/normVectorTwo;
 	double* projectionVector = new double[3];
 	for(int i = 0; i < 3; ++i)
 	{
@@ -352,12 +361,12 @@ void VecMultConstant(double vector[],double constant)
 double* ComputeAngularMomentum(double v[], double r[])
 {
 	double* angularMomentum = new double[3];
-	Cross(v,r,angularMomentum);
+	vtkMath::Cross(v,r,angularMomentum);
 	return angularMomentum;
 }
 
-double* CalcVelocityDispersion(double vSquaredAve[], double  vAve[],
-	double velocityDipersion)
+double* ComputeVelocityDispersion(double vSquaredAve[], double  vAve[],
+	double velocityDispersion[])
 {
 	for(int i = 0; i < 3; ++i)
 	{

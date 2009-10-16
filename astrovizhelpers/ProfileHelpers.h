@@ -10,6 +10,7 @@
 #include "vtkPointLocator.h"
 #include "vtkCellArray.h"
 #include "vtkFloatArray.h"
+#include "vtkTable.h"
 // Description:
 // Uses the Illinois root finding method to find the root of the function
 // func. The root must lie between r and s. Root is returned when it is found 
@@ -138,8 +139,8 @@ void VecMultConstant(double vector[],double constant);
 // Description
 // Given a vSquaredAve and a vAve calculates the velocity dispersion
 // placing it in the output vector velocityDispersion
-double* CalcVelocityDispersion(double vSquaredAve[], double  vAve[],
-	double velocityDipersion);
+double* ComputeVelocityDispersion(double vSquaredAve[], double  vAve[],
+	double velocityDispersion []);
 
 
 
