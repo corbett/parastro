@@ -18,22 +18,30 @@
 #ifndef __vtkProfileFilter_h
 #define __vtkProfileFilter_h
 
-#include "vtkExtractHistogram.h"
+#include "vtkTableAlgorithm.h"
 #include "vtkDataSetAttributes.h" // needed to declare the field list below
-
+#include "vtkStringArray.h" // some class variables are vtkStringArrays
+#include "vtkPolyData.h" // helper functions take this as argument
 //----------------------------------------------------------------------------
 enum BinUpdateType
 {
-	add, 
-	multiply 
+	ADD, 
+	MULTIPLY 
+};
+
+enum ColumnType
+{
+	AVERAGE,
+	TOTAL,
+	CUMULATIVE
 };
 
 //----------------------------------------------------------------------------
-class VTK_EXPORT vtkProfileFilter : public vtkExtractHistogram
+class VTK_EXPORT vtkProfileFilter : public vtkTableAlgorithm
 {
 public:
   static vtkProfileFilter* New();
-  vtkTypeRevisionMacro(vtkProfileFilter, vtkExtractHistogram);
+  vtkTypeRevisionMacro(vtkProfileFilter, vtkTableAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent);
   // Description:
   // Get/Set the density parameter
@@ -83,7 +91,11 @@ protected:
 	// Spacing between bins, automatically calculated based upon other
 	// selections
 	double BinSpacing;
-  // Description:
+	// Description:
+	// Max distance from center point to the data set boundaries, or to
+	// the virial radius if applicable
+	double MaxR;
+	// Description:
 	// Quantities to add to the input computing averages for. Note:
 	// if you were to add to this, you would also have to update the function
 	// CalculateAdditionalProfileQuantity
@@ -94,9 +106,16 @@ protected:
 	// input data or in the array AdditionalProfileQuantities, with 
 	// corresponding modification to CalculateAdditionalProfileQuantity
 	vtkStringArray* CumulativeQuantities; 	
-	  // Description:
-  // Build the field lists containing the central point to be probed
-  void CalculateAndSetCenter(vtkDataSet* source);
+	
+	// Description:
+	// Generates the desired profile quantities and places them
+	// in the output table by bin.
+	void GenerateProfile(vtkPolyData* input,vtkTable* output);
+  
+	// Description:
+  // Calculates the center and the maximum distance from the center
+	// based upon the user's input and the boundaries of the dataset.
+	void CalculateAndSetBounds(vtkPolyData* input, vtkDataSet* source);
 
 	// Description:
 	// Calculates the bin spacing and number of bins if necessary from
@@ -111,12 +130,12 @@ protected:
 	//
 	// For each cumulative array as specified by the CumulativeQuantitiesArray
 	//
-	void InitializeBins(vtkPolyData input,vtkTable* output);
+	void InitializeBins(vtkPolyData* input,vtkTable* output);
 
 	// Description:
 	// Calculates the bin spacing and number of bins if necessary from
 	// the user input.
-	void CalculateAndSetBinExtents(vtkPolyData input);
+	void CalculateAndSetBinExtents(vtkPolyData* input);
 
 	// Description:
 	// For each point in the input, update the relevant bins and bin columns
@@ -132,27 +151,26 @@ protected:
 	// why after all points have updated the bin statistics,
 	// BinAveragesAndPostprocessing must be called to do the proper averaging
 	// and/or postprocessing on  the accumlated columns.
-	void UpdateBinStatistics(UpdateBinStatistics(vtkPolyData* input,
+	void UpdateBinStatistics(vtkPolyData* input, 
 		vtkIdType pointGlobalId,vtkTable* output);
 	
 	// Description:
 	// returns the bin number in which this radius lies.
-	int GetBinNum(double r[]);
+	int GetBinNumber(double r[]);
 	
 	// Description:
 	// Updates the data values of attribute specified in attributeName
 	// in the bin specified by binNum, either additively or 	
 	// multiplicatively as specified by updateddType by dataToAdd
-	void UpdateBin(int binNum, BinUpdateType updateType, char* attributeName,
-		int attributeNumComponents, double* dataToAdd, vtkTable* output);
+	void UpdateBin(int binNum, BinUpdateType updateType,
+		vtkstd::string attributeName, double dataToAdd, vtkTable* output);
 		
 	// Description:
 	// This function is useful for those data items who want to keep track of 
 	// a cumulative number. E.g. N(<=r), calls updateBin on all bins >= binNum
 	// updating the attribute specified
 	void UpdateCumulativeBins(int binNum, BinUpdateType updateType, 
-		char* attributeName, int attributeNumComponents, double* dataToAdd,
-		vtkTable* output);
+		vtkstd::string attributeName, double dataToAdd,	vtkTable* output);
 
 	// Description:
 	// Base upon the additionalQuantityName, returns a double array representing
@@ -167,7 +185,13 @@ protected:
 	// must be called to do the proper averaging and/or postprocessing on 
 	// the accumlated columns.
 	void BinAveragesAndPostprocessing(vtkTable* output);
-		
+
+	// Description:
+	// given a base name, a variable index and a column type
+	// (TOTAL,AVERAGE,or CUMULATIVE) returns a string representing
+	// this data column's name
+	vtkstd::string GetColumnName(vtkstd::string baseName, ColumnType columnType,
+		int dataIndex);
 private:
   vtkProfileFilter(const vtkProfileFilter&); // Not implemented
   void operator=(const vtkProfileFilter&); // Not implemented

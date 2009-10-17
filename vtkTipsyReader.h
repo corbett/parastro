@@ -8,7 +8,6 @@ Modified from vtkSimplePointsReader and from Doug Potter's Tipsylib
 #ifndef __vtkTipsyReader_h
 #define __vtkTipsyReader_h
 #include "vtkPolyDataReader.h"
-//#include "vtkPolyDataAlgorithm.h" // needed as this class extends vtkPolyDataAlgorithm
 #include "tipsylib/ftipsy.hpp" // needed for functions which take Tipsy particles as arguments
 #include "vtkSmartPointer.h" // needed for the functions to initialize arrays
 #include "vtkPolyData.h" // needed as most helper functions modify output which is vtkPolyData
@@ -27,8 +26,8 @@ public:
   vtkGetStringMacro(MarkFileName);
   // Description:
   // Set/Get the name of the file from which to read points.
-  vtkSetStringMacro(FileName);
-  vtkGetStringMacro(FileName);
+	vtkSetStringMacro(FileName);
+ 	vtkGetStringMacro(FileName);
   // Description:
   // Set/Get the name of the file from which to get additional attributes
   vtkSetStringMacro(AttributeFile);

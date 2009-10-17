@@ -152,11 +152,3 @@ vtkInformationVector** DeepCopyInputVector(vtkInformationVector** inputVector,
 }
 
 //----------------------------------------------------------------------------
-void DeleteDeepCopyInputVector(vtkInformationVector** inputVector, int inputVectorSize)
-{	
-	for(int i = 0; i < inputVectorSize; ++i)
-		{
-		inputVector[i]->Delete();
-		}
-	delete [] inputVector;
-}

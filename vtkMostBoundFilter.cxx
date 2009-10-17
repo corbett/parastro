@@ -75,8 +75,9 @@ int vtkMostBoundFilter::RequestData(vtkInformation*,
 	output->SetVerts(vtkSmartPointer<vtkCellArray>::New()); 
 	if(this->Overdensity>0)
 		{
+			double maxR=ComputeMaxR(input,dbMostBound);
 			VirialRadiusInfo virialRadiusInfo=\
-								ComputeVirialRadius(input,this->Overdensity,dbMostBound);
+								ComputeVirialRadius(input,this->Overdensity,maxR,dbMostBound);
 			if(virialRadiusInfo.virialRadius>0)
 				{
 				//Here is where we create the sphere around the COM to display

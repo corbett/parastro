@@ -27,7 +27,7 @@
 				number_of_elements="1">
 				<FileListDomain name="files"/>
 				<Documentation>
-			    Additional attribute files set are merged into existing database. Give full paths separated by commas
+			    Additional attribute files set are merged into existing database.
 				</Documentation>
 			</StringVectorProperty> 
 

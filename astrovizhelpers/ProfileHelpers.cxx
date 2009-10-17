@@ -137,10 +137,8 @@ double OverDensityInSphere(double r,void* inputVirialRadiusInfo)
 }
 
 VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,
-																		double overdensity,double center[])
+	double overdensity,double maxR,double center[])
 {
-		// calculating the the max an min r of this pointset
-		double maxR=ComputeMaxR(input,center);
 		// Building the point locator and the struct to use as an 
 		// input to the rootfinder.
 		// 1. Building the point locator
@@ -290,7 +288,7 @@ double* ComputeRadialVelocitySquared(double v[],double r[])
 //----------------------------------------------------------------------------
 double* ComputeTangentialVelocitySquared(double v[],double r[])
 {
-	double* vRad=ComputeRadialVelocity(v,r)
+	double* vRad=ComputeRadialVelocity(v,r);
 	double* vTan=ComputeTangentialVelocity(v,r);
 	double* vTanSquared=ComputeProjection(vTan,vTan);
 	delete [] vRad;

@@ -11,6 +11,8 @@
 #include "vtkTable.h"
 #include "vtkFloatArray.h"
 #include "vtkInformationVector.h"
+#include <iostream>
+#include <sstream>
 
 // The following methods take and modify vtkPolyData
 // Description:
@@ -41,6 +43,10 @@ double* GetDataValue(vtkPointSet* output, const char* arrayName,\
 // Description:
 // create a vtkDataArray of floats with the  name arrayName, number /
 // of components. place it in the vtkPointSet
+void AllocateDataArray(vtkPointSet* output, const char* arrayName,\
+ 			int numComponents, int numTuples);
+
+// float velocities
 void AllocateDataArray(vtkPointSet* output, const char* arrayName,\
  			int numComponents, int numTuples);
 
@@ -86,6 +92,14 @@ vtkInformationVector** DeepCopyInputVector(vtkInformationVector** inputVector,in
 // Deletes an array of pointers to vtkInformationVectors
 void DeleteDeepCopyInputVector(vtkInformationVector** inputVector, int inputVectorSize);
 
+// Description:
+// converts a double to a vtkstd::string
+inline vtkstd::string ToString(double x)
+{
+  std::ostringstream o;
+	o << x;
+  return o.str();
+}
 
 
 

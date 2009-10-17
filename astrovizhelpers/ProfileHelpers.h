@@ -77,7 +77,7 @@ struct VirialRadiusInfo
 // Description:
 // Computes the virial radius >=0 base upon the user defined 
 // overdensity and center. Returns -1 if there is a problem. 
-VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,double overdensity,double center[]);
+VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,double overdensity,double maxR,double center[]);
 
 // Description:
 // From dataSet, initializes a newDataSet with point and cell arrays (empty),
@@ -141,11 +141,30 @@ void VecMultConstant(double vector[],double constant);
 // placing it in the output vector velocityDispersion
 double* ComputeVelocityDispersion(double vSquaredAve[], double  vAve[],
 	double velocityDispersion []);
+	
+// Description:
+// helper function to compute radial velocity
+double* ComputeRadialVelocity(double v[],double r[]);
 
+// Description:
+// helper function to compute tangential velocity
+double* ComputeTangentialVelocity(double v[],double r[]);
 
+// Description:
+// helper function to compute angular momentum
+double* ComputeAngularMomentum(double v[], double r[]);
 
+// Description:
+// helper function to compute velocity squared
+double* ComputeVelocitySquared(double v[],double r[]);
 
+// Description:
+// helper function to compute radial velocity squared
+double* ComputeRadialVelocitySquared(double v[],double r[]);
 
+// Description:
+// helper function to compute tangential velocity squared
+double* ComputeTangentialVelocitySquared(double v[],double r[]);
 
 
 
