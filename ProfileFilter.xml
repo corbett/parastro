@@ -70,48 +70,8 @@
 			Set the density parameter
 			</Documentation>
 	  </DoubleVectorProperty>
-	  <!--This property is obselete with the ability to select the input-->
-	  <DoubleVectorProperty
-			name="Center"
-			command="SetCenter"
-			number_of_elements="3"
-			default_values="0 0 0">
-			<Documentation>
-				Set the center from which to search.
-			</Documentation>
-			<Hints>
-	         <!-- This tag alerts the auto-generated panels and input selection
-	              that this input is a selection.  It should use the special
-	              selection GUI. -->
-	         <SelectionInput />
-	       </Hints>
-	  </DoubleVectorProperty>
-	<!--This allows the user to select an array, if they wish 
-	to instead bin by these-->
-     <StringVectorProperty
-         name="SelectInputArray" 
-         command="SetInputArrayToProcess" 
-         number_of_elements="5" 
-         element_types="0 0 0 0 2" 
-         animateable="0"> 
-          <ArrayListDomain name="array_list" 
-                           attribute_type="Scalars">
-            <RequiredProperties>
-               <Property name="Input" function="Input"/>
-            </RequiredProperties>
-          </ArrayListDomain>
-          <FieldDataDomain name="field_list">
-            <RequiredProperties>
-               <Property name="Input" function="Input"/>
-            </RequiredProperties>
-          </FieldDataDomain>
-          <Documentation>
-            This property indicates the name of the array from which to compute the histogram, if Bin By Radius is not selected.
-          </Documentation>
-     </StringVectorProperty>
-	<!--Allows the user to select the number of bins-->
-     <IntVectorProperty name="BinCount" 
-        command="SetBinCount" 
+     <IntVectorProperty name="BinNumber" 
+        command="SetBinNumber" 
         number_of_elements="1" 
         default_values="30">
         <IntRangeDomain name="range" min="1" max="256"/>
@@ -119,50 +79,6 @@
           The value of this property specifies the number of bins for the histogram.
         </Documentation>
      </IntVectorProperty>
-	<!--Interfaces with the ability to profile with a given attribute-->
-     <IntVectorProperty 
-        name="Component" 
-        command="SetComponent" 
-        number_of_elements="1" 
-        default_values="0" 
-        animateable="0"> 
-        <NumberOfComponentsDomain name="comps">
-          <RequiredProperties>
-            <Property name="Input" function="Input" />
-               <Property name="SelectInputArray" function="ArraySelection"/>
-          </RequiredProperties>
-        </NumberOfComponentsDomain>
-        <Documentation>
-          The value of this property specifies the array component from which the histogram should be computed.
-        </Documentation>
-     </IntVectorProperty>
-	<!--Allows the user to select custom bin ranges-->
-     <IntVectorProperty name="UseCustomBinRanges"
-       command="SetUseCustomBinRanges"
-       number_of_elements="1"
-       default_values="0">
-       <BooleanDomain name="bool" />
-       <Documentation>
-         When set to true, CustomBinRanges will  be used instead of using the
-         full range for the selected array. By default, set to false.
-       </Documentation>
-     </IntVectorProperty>
-	<!--Allows the user to select custom bin ranges-->
-     <DoubleVectorProperty name="CustomBinRanges"
-       command="SetCustomBinRanges"
-       number_of_elements="2"
-       default_values="0.0 100.0">
-       <Documentation>
-         Set custom bin ranges to use. These are used only when
-         UseCustomBinRanges is set to true.
-       </Documentation>
-       <ArrayRangeDomain name="scalar_range">
-         <RequiredProperties>
-            <Property name="Input" function="Input"/>
-            <Property name="SelectInputArray" function="ArraySelection"/>
-         </RequiredProperties>
-       </ArrayRangeDomain>
-     </DoubleVectorProperty>
       <Hints>
 	  	<View type="ClientTableView" />
       	<Visibility replace_input="0" />

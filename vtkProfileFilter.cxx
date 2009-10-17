@@ -63,6 +63,14 @@ void vtkProfileFilter::SetSourceConnection(vtkAlgorithmOutput* algOutput)
   this->SetInputConnection(1, algOutput);
 }
 
+int vtkProfileFilter::FillInputPortInformation (int port, 
+                                                   vtkInformation *info)
+{
+  this->Superclass::FillInputPortInformation(port, info);
+  info->Set(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), "vtkPolyData");
+  return 1;
+}
+
 //----------------------------------------------------------------------------
 int vtkProfileFilter::RequestData(vtkInformation *request,
 																	vtkInformationVector **inputVector,
@@ -72,7 +80,8 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
  	vtkPolyData* dataSet = vtkPolyData::GetData(inputVector[0]);
 	// Setting the center based upon the selection in the GUI
 	vtkDataSet* pointInfo = vtkDataSet::GetData(inputVector[1]);
-	vtkTable* output = vtkTable::GetData(outputVector,0);
+	vtkTable* const output = vtkTable::GetData(outputVector,0);
+	output->Initialize();
 	this->CalculateAndSetBounds(dataSet,pointInfo);
 	// If we want to cut off at the virial radius, compute this, and remove the
 	// portion of the data set we don't care about
@@ -158,7 +167,9 @@ void vtkProfileFilter::InitializeBins(vtkPolyData* input,
 				AllocateDataArray(output,cumulativeName.c_str(),1,this->BinNumber);
 				}
 			}
+
 		}
+	// TODO: removing for debugging add back in
 	// For our additional quantities, allocating a column for the average 
 	// and the sum. These are restricted to be scalars
 	for(int i = 0; 
@@ -184,7 +195,8 @@ void vtkProfileFilter::InitializeBins(vtkPolyData* input,
 //----------------------------------------------------------------------------
 void vtkProfileFilter::CalculateAndSetBinExtents(vtkPolyData* input)
 {
-	this->BinSpacing=log(this->MaxR)/this->BinNumber;
+	// TODO: only supporting non-log bin spacing for now
+	this->BinSpacing=this->MaxR/this->BinNumber;
 }
 
 //----------------------------------------------------------------------------
@@ -393,12 +405,15 @@ string vtkProfileFilter::GetColumnName(string baseName,
 {
 	switch(columnType)
 		{
-		case(AVERAGE):
+		case AVERAGE:
 			return baseName+"_"+ToString(dataIndex)+"_average";
-		case(TOTAL):
+		case TOTAL:
 			return baseName+"_"+ToString(dataIndex)+"_total";
-		case(CUMULATIVE):
+		case CUMULATIVE:
 			return baseName+"_"+ToString(dataIndex)+"_cumulative";
+		default:
+			vtkDebugMacro("columnType not found for function GetColumnName, returning error string");
+			return "error";
 		}
 }
 

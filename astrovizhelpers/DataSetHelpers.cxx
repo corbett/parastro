@@ -31,7 +31,8 @@ void AllocateDataArray(vtkTable* output, const char* arrayName,\
 	vtkSmartPointer<vtkFloatArray> dataArray=\
 		vtkSmartPointer<vtkFloatArray>::New();
 	InitializeDataArray(dataArray,arrayName,numComponents,numTuples);		
-  output->AddColumn(dataArray);
+	//TODO: removing for debugging, add back in
+//  output->AddColumn(dataArray);
 }
 /*----------------------------------------------------------------------------
 *

@@ -18,8 +18,7 @@
 #ifndef __vtkProfileFilter_h
 #define __vtkProfileFilter_h
 
-#include "vtkTableAlgorithm.h"
-#include "vtkDataSetAttributes.h" // needed to declare the field list below
+#include "vtkTableAlgorithm.h" 
 #include "vtkStringArray.h" // some class variables are vtkStringArrays
 #include "vtkPolyData.h" // helper functions take this as argument
 //----------------------------------------------------------------------------
@@ -48,10 +47,13 @@ public:
   vtkSetMacro(Delta, double);
   vtkGetMacro(Delta, double);
   // Description:
-  // Get/Set the number of bins
+  // Get/Set the center
   vtkSetVector3Macro(Center,double);
   vtkGetVectorMacro(Center,double,3);
-
+  // Description:
+  // Get/Set the number of bins
+  vtkSetMacro(BinNumber,int);
+  vtkGetMacro(BinNumber,int);
   // Description:
   // Get/Set whether the bins should be only from the center to the virial 
 	// radius
@@ -62,6 +64,7 @@ public:
   // Specify the point locations used to probe input. Any geometry
   // can be used. New style. Equivalent to SetInputConnection(1, algOutput).
   void SetSourceConnection(vtkAlgorithmOutput* algOutput);
+
 //BTX
 protected:
   vtkProfileFilter();
@@ -192,6 +195,8 @@ protected:
 	// this data column's name
 	vtkstd::string GetColumnName(vtkstd::string baseName, ColumnType columnType,
 		int dataIndex);
+
+  virtual int FillInputPortInformation (int port, vtkInformation *info);
 private:
   vtkProfileFilter(const vtkProfileFilter&); // Not implemented
   void operator=(const vtkProfileFilter&); // Not implemented
