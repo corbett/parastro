@@ -133,12 +133,12 @@ protected:
 	//
 	// For each cumulative array as specified by the CumulativeQuantitiesArray
 	//
-	void InitializeBins(vtkPolyData* input,vtkTable* output);
+	void InitializeBins(vtkPolyData* input, vtkTable* output);
 
 	// Description:
 	// Calculates the bin spacing and number of bins if necessary from
 	// the user input.
-	void CalculateAndSetBinExtents(vtkPolyData* input);
+	void CalculateAndSetBinExtents(vtkPolyData* input, vtkTable* output);
 
 	// Description:
 	// For each point in the input, update the relevant bins and bin columns
@@ -187,7 +187,7 @@ protected:
    // After all points have updated the bin statistics, UpdateBinAverages
 	// must be called to do the proper averaging and/or postprocessing on 
 	// the accumlated columns.
-	void BinAveragesAndPostprocessing(vtkTable* output);
+	void BinAveragesAndPostprocessing(vtkPolyData* input, vtkTable* output);
 
 	// Description:
 	// given a base name, a variable index and a column type

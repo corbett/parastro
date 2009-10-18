@@ -29,12 +29,20 @@ vtkProfileFilter::vtkProfileFilter()
   this->SetNumberOfInputPorts(2);
 	// TODO: doesn't actually initialize like this, but shorthand for now
 	// for what I have in mind
+	//this->AdditionalProfileQuantities = {"number in bin",\
+		"radii from center","cumulative mass","cumulative number",\
+		"circular velocity","density","radial velocity",\
+		"radial velocity dispersion","tangential velocity",\
+		"tangential velocity dispersion","angular momentum"}; 	
 	this->AdditionalProfileQuantities = vtkStringArray::New();
-//		{"number in bin","radii from center","cumulative mass","cumulative number","circular velocity","density","radial velocity","radial velocity dispersion","tangential velocity","tangential velocity dispersion","angular momentum"}; // ALWAYS need at least "number in bin"
+		this->AdditionalProfileQuantities->InsertNextValue("number in bin");
+
 	// TODO: doesn't actually initialize like this, but shorthand for now
 	// for what I have in mind
+	//this->CumulativeQuantities ={"mass","number in bin"};	
 	this->CumulativeQuantities = vtkStringArray::New();
-//		{"mass","number in bin"};	
+		this->CumulativeQuantities->InsertNextValue("number in bin");
+
 	this->MaxR=1.0;
 	this->Delta=0.0;
 	this->BinNumber=30;
@@ -147,9 +155,7 @@ void vtkProfileFilter::GenerateProfile(vtkPolyData* input,vtkTable* output)
 void vtkProfileFilter::InitializeBins(vtkPolyData* input,
 	vtkTable* output)
 {
-	this->CalculateAndSetBinExtents(input);
-	// For all quantities we will keep track of the number of items in the bin
-	AllocateDataArray(output,"total in bin",1,this->BinNumber);	
+	this->CalculateAndSetBinExtents(input,output);
 	vtkSmartPointer<vtkDataArray> nextArray;
 	for(int i = 0; i < input->GetPointData()->GetNumberOfArrays(); ++i)
 		{
@@ -191,15 +197,21 @@ void vtkProfileFilter::InitializeBins(vtkPolyData* input,
 			AllocateDataArray(output,cumulativeName.c_str(),1,this->BinNumber);
 			}
 		}
-		
-		
 }
 
 //----------------------------------------------------------------------------
-void vtkProfileFilter::CalculateAndSetBinExtents(vtkPolyData* input)
+void vtkProfileFilter::CalculateAndSetBinExtents(vtkPolyData* input,
+	vtkTable* output)
 {
-	// TODO: only supporting non-log bin spacing for now
 	this->BinSpacing=this->MaxR/this->BinNumber;
+	// the first column will be the bin radius
+	AllocateDataArray(output,"bin radius",1,this->BinNumber);
+	// setting the bin radii in the output
+	for(int binNum = 0; binNum < this->BinNumber; ++binNum)
+	{
+		this->UpdateBin(binNum,ADD,"bin radius",binNum*this->BinSpacing,output);
+	}
+	
 }
 
 //----------------------------------------------------------------------------
@@ -212,7 +224,7 @@ void vtkProfileFilter::ComputeStatistics(vtkPolyData* input,vtkTable* output)
 			this->UpdateBinStatistics(input,nextPointId,output);
 		}
 	// Updating averages and doing relevant postprocessing
-	this->BinAveragesAndPostprocessing(output);
+	this->BinAveragesAndPostprocessing(input,output);
 }
 
 //----------------------------------------------------------------------------
@@ -225,7 +237,6 @@ void vtkProfileFilter::UpdateBinStatistics(vtkPolyData* input,
 	// Many of the quantities explicitely require the velocity
 	double* v=GetDataValue(input,"velocity",pointGlobalId);
 	int binNum=this->GetBinNumber(x);
-	this->UpdateBin(binNum,ADD,"total in bin",1,output);
 	assert(0<=binNum<=this->BinNum);
 	// Updating quanties for the input data arrays
 	for(int i = 0; i < input->GetPointData()->GetNumberOfArrays(); ++i)
@@ -241,10 +252,6 @@ void vtkProfileFilter::UpdateBinStatistics(vtkPolyData* input,
 			string baseName = nextArray->GetName();
 			string totalName =GetColumnName(baseName,TOTAL,comp);		
 			this->UpdateBin(binNum,ADD,totalName, nextData[comp], output);	
-			// updating the average bins by the sum, we will divide by 
-			// number in bin during post processing.
-			string averageName =GetColumnName(baseName,AVERAGE,comp);		
-			this->UpdateBin(binNum,ADD,averageName, nextData[comp], output);			
 			if(this->CumulativeQuantities->LookupValue(baseName)>=0)
 				{
 				// we should also consider this a cumulative quantity
@@ -365,10 +372,45 @@ double* vtkProfileFilter::CalculateAdditionalProfileQuantity(
 }
 
 //----------------------------------------------------------------------------
-void 	vtkProfileFilter::BinAveragesAndPostprocessing(vtkTable* output)
+void 	vtkProfileFilter::BinAveragesAndPostprocessing(
+	vtkPolyData* input,vtkTable* output)
 {
-	// TODO: implement
-//	throw "unimplemented"
+	// TODO: finish implementation
+	for(int binNum = 0; binNum < this->BinNumber; ++binNum)
+		{
+		string numberInBinColumnName= GetColumnName("number in bin",TOTAL,0);
+		int binSize=output->GetValueByName(binNum,
+			numberInBinColumnName.c_str()).ToInt();
+		// For each input array, update its average column by getting
+		// the total from the total column then dividing by 
+		// the number in the bin. Only do this if the number in the bin
+		// is greater than zero
+			if(binSize>0)
+				{
+				vtkSmartPointer<vtkDataArray> nextArray;
+				for(int i = 0; i < input->GetPointData()->GetNumberOfArrays(); ++i)
+					{
+					nextArray = input->GetPointData()->GetArray(i);
+					string baseName = nextArray->GetName();
+					for(int comp = 0; comp < nextArray->GetNumberOfComponents(); ++comp)
+						{
+						string totalName = GetColumnName(baseName,TOTAL,comp); 
+						double totalData=output->GetValueByName(binNum,
+							totalName.c_str()).ToDouble();
+						string averageName = GetColumnName(baseName,AVERAGE,comp); 
+						UpdateBin(binNum,ADD,averageName.c_str(),
+							totalData/binSize,output);
+						}	
+					}
+				}
+		// For each additional quantity we also divide by N
+
+		// For the velocity dispersions we do something special, actually creating 
+		//  arrays and adding them to the output, calculating and updating
+
+		// For the circular velocity we do something special, actually creating
+		// array and adding them to the output, calculating and updating
+		}
 	/*
 	for(bin in this->BinNumber)
 	{
