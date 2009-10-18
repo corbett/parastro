@@ -43,8 +43,9 @@ vtkProfileFilter::vtkProfileFilter()
 //----------------------------------------------------------------------------
 vtkProfileFilter::~vtkProfileFilter()
 {
-	this->CumulativeQuantities->Delete();
-	this->AdditionalProfileQuantities->Delete();
+/*	this->CumulativeQuantities->Delete();
+	this->AdditionalProfileQuantities->Delete(); */ 
+	// removed this--get	paraview(54834,0xa01ef500) malloc: *** error for object 0x21c8f8c0: incorrect checksum for freed object - object was probably modified after being freed. *** set a breakpoint in malloc_error_break to debug
 }
 
 //----------------------------------------------------------------------------
