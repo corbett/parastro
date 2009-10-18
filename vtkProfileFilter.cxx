@@ -30,7 +30,6 @@ vtkProfileFilter::vtkProfileFilter()
 	// TODO: doesn't actually initialize like this, but shorthand for now
 	// for what I have in mind
 	//this->AdditionalProfileQuantities = {"number in bin",\
-		"radii from center","cumulative mass","cumulative number",\
 		"circular velocity","density","radial velocity",\
 		"radial velocity dispersion","tangential velocity",\
 		"tangential velocity dispersion","angular momentum"}; 	
@@ -38,6 +37,9 @@ vtkProfileFilter::vtkProfileFilter()
 		this->AdditionalProfileQuantities->InsertNextValue("number in bin");
 		this->AdditionalProfileQuantities->InsertNextValue("circular velocity");
 		this->AdditionalProfileQuantities->InsertNextValue("density");
+		this->AdditionalProfileQuantities->InsertNextValue("radial velocity");
+		this->AdditionalProfileQuantities->InsertNextValue("tangential velocity");
+		this->AdditionalProfileQuantities->InsertNextValue("angular momentum");
 
 	// TODO: doesn't actually initialize like this, but shorthand for now
 	// for what I have in mind
@@ -371,7 +373,7 @@ double* vtkProfileFilter::CalculateAdditionalProfileQuantity(
 		}
 	else
 		{
-		vtkDebugMacro("input arrray requested not found, quantity returned as \
+		vtkWarningMacro("input arrray requested not found, quantity returned as \
 			array of zero");
 		// sometimes the quantities should be 0, only updated at post-processing
 		// final step
@@ -408,12 +410,25 @@ void 	vtkProfileFilter::BinAveragesAndPostprocessing(
 						double totalData=output->GetValueByName(binNum,
 							totalName.c_str()).ToDouble();
 						string averageName = GetColumnName(baseName,AVERAGE,comp); 
-						this->UpdateBin(binNum,ADD,averageName.c_str(),
+						this->UpdateBin(binNum,SET,averageName.c_str(),
 							totalData/binSize,output);
 						}	
 					}
+					// For each additional quantity we also divide by N in the average, 
+					for(int i = 0; 
+						i < this->AdditionalProfileQuantities->GetNumberOfValues();
+					 	++i)
+						{
+						string baseName=this->AdditionalProfileQuantities->GetValue(i);
+						string totalName = GetColumnName(baseName,TOTAL,0); 
+						double totalData=output->GetValueByName(binNum,
+							totalName.c_str()).ToDouble();
+						string averageName = GetColumnName(baseName,AVERAGE,0); 
+						this->UpdateBin(binNum,SET,averageName.c_str(),
+							totalData/binSize,output);
+						}
 				}
-		// For each additional quantity we also divide by N in the average, 
+
 
 		// Special handling should come last
 		// For the velocity dispersions we do something special, 
@@ -444,22 +459,10 @@ void 	vtkProfileFilter::BinAveragesAndPostprocessing(
 			density,output);
 
 		}
-	/*
-	for(bin in this->BinNumber)
-	{
-		double binSize=
-		//done with for loop divide everything by N
-		VecMultConstant(vAve,1./binSize);
-		VecMultConstant(vRadAve,1./binSize);
-		VecMultConstant(vTanAve,1./binSize);
-		VecMultConstant(jAve,1./binSize);	
-		VecMultConstant(vSquaredAve,1./binSize);	
-		VecMultConstant(vRadSquaredAve,1./binSize);		
-		VecMultConstant(vTanSquaredAve,1./binSize);		
 		// calculate velocity dispersions, taking the necessary square roots	
-		ComputeVelocityDispersion(vSquaredAve,vAve,vDisp);
-		ComputeVelocityDispersion(vRadSquaredAve,vRadAve,vRadDisp);
-		ComputeVelocityDispersion(vTanSquaredAve,vTanAve,vTanDisp);
+		//ComputeVelocityDispersion(vSquaredAve,vAve,vDisp);
+		//ComputeVelocityDispersion(vRadSquaredAve,vRadAve,vRadDisp);
+		//ComputeVelocityDispersion(vTanSquaredAve,vTanAve,vTanDisp);
 		// add vAve, vRadAve, vTanAve,, vAveDisp, vRadAveDisp, vTanAveDisp and j
 		// to the ouput table.
 	
