@@ -242,7 +242,7 @@ void vtkProfileFilter::UpdateBinStatistics(vtkPolyData* input,
 	// Many of the quantities explicitely require the velocity
 	double* v=GetDataValue(input,"velocity",pointGlobalId);
 	int binNum=this->GetBinNumber(x);
-	assert(0<=binNum<=this->BinNum);
+	assert(0<=binNum<=this->BinNumber);
 	// Updating quanties for the input data arrays
 	for(int i = 0; i < input->GetPointData()->GetNumberOfArrays(); ++i)
 		{
