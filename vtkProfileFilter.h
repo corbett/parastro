@@ -158,8 +158,8 @@ protected:
 		vtkIdType pointGlobalId,vtkTable* output);
 	
 	// Description:
-	// returns the bin number in which this radius lies.
-	int GetBinNumber(double r[]);
+	// returns the bin number in which this point lies.
+	int GetBinNumber(double x[]);
 	
 	// Description:
 	// Updates the data values of attribute specified in attributeName

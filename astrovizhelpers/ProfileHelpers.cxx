@@ -76,6 +76,28 @@ double IllinoisRootFinder(double (*func)(double,void *),void *ctx,\
 }
 
 //----------------------------------------------------------------------------
+/* TODO: brute forcing this and seeing if it outputs the right answer*/
+double ComputeMaxR(vtkPointSet* input,double point[])
+{
+	double maxR=0;
+	double* testPoint;
+	cout << "center to test: " << point[0] << "," << point[1] << ","
+		<< point[2] << "\n";
+	for(int nextPointId = 0;
+	 		nextPointId < input->GetPoints()->GetNumberOfPoints();
+	 		++nextPointId)
+		{
+		 	testPoint = GetPoint(input,nextPointId);
+			double testR=sqrt(vtkMath::Distance2BetweenPoints(testPoint,point));
+			cout << "testR is " << testR << "\n";
+			maxR=std::max(maxR,testR);
+		}
+	delete [] testPoint;
+	cout << "max R as calculated is " << maxR << "\n";
+	return maxR;
+}
+
+/* TODO: brute forcing this and seeing if it outputs the right answer
 double ComputeMaxR(vtkPointSet* input,double point[])
 {
 	double bounds[6]; //xmin,xmax,ymin,ymax,zmin,zmax
@@ -100,7 +122,7 @@ double ComputeMaxR(vtkPointSet* input,double point[])
 		}
 	return maxR;
 }
-
+*/
 //----------------------------------------------------------------------------
 double OverDensityInSphere(double r,void* inputVirialRadiusInfo)
 {

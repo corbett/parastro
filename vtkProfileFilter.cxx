@@ -128,10 +128,10 @@ void vtkProfileFilter::CalculateAndSetBounds(vtkPolyData* input,
 }
 
 //----------------------------------------------------------------------------
-int vtkProfileFilter::GetBinNumber(double r[])
+int vtkProfileFilter::GetBinNumber(double x[])
 {
 	double distanceToCenter = \
-		vtkMath::Norm(PointVectorDifference(this->Center,r));
+		sqrt(vtkMath::Distance2BetweenPoints(this->Center,x));
 	return floor(distanceToCenter/this->BinSpacing);
 }
 
@@ -222,8 +222,8 @@ void vtkProfileFilter::UpdateBinStatistics(vtkPolyData* input,
 	// TODO: debug this function, for now placing everything in
 	// bin 0 as this is returning results > number of bins!
 	// DO AN ASSERT TO MAKE SURE THIS DOESN'T HAPPEN!
-	//int binNum=this->GetBinNumber(r);
-	int binNum=0;
+	int binNum=this->GetBinNumber(x);
+	assert(0<=binNum<=this->BinNum);
 	// Updating quanties for the input data arrays
 	for(int i = 0; i < input->GetPointData()->GetNumberOfArrays(); ++i)
 		{
