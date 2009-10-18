@@ -25,7 +25,8 @@
 enum BinUpdateType
 {
 	ADD, 
-	MULTIPLY 
+	MULTIPLY,
+	SET
 };
 
 enum ColumnType

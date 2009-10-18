@@ -36,12 +36,15 @@ vtkProfileFilter::vtkProfileFilter()
 		"tangential velocity dispersion","angular momentum"}; 	
 	this->AdditionalProfileQuantities = vtkStringArray::New();
 		this->AdditionalProfileQuantities->InsertNextValue("number in bin");
+		this->AdditionalProfileQuantities->InsertNextValue("circular velocity");
+		this->AdditionalProfileQuantities->InsertNextValue("density");
 
 	// TODO: doesn't actually initialize like this, but shorthand for now
 	// for what I have in mind
 	//this->CumulativeQuantities ={"mass","number in bin"};	
 	this->CumulativeQuantities = vtkStringArray::New();
 		this->CumulativeQuantities->InsertNextValue("number in bin");
+		this->CumulativeQuantities->InsertNextValue("mass");
 
 	this->MaxR=1.0;
 	this->Delta=0.0;
@@ -205,13 +208,15 @@ void vtkProfileFilter::CalculateAndSetBinExtents(vtkPolyData* input,
 {
 	this->BinSpacing=this->MaxR/this->BinNumber;
 	// the first column will be the bin radius
-	AllocateDataArray(output,"bin radius",1,this->BinNumber);
+	string binRadiusColumnName=this->GetColumnName("bin radius",
+		TOTAL,0);
+	AllocateDataArray(output,binRadiusColumnName.c_str(),1,this->BinNumber);
 	// setting the bin radii in the output
 	for(int binNum = 0; binNum < this->BinNumber; ++binNum)
 	{
-		this->UpdateBin(binNum,ADD,"bin radius",binNum*this->BinSpacing,output);
+	this->UpdateBin(binNum,SET,binRadiusColumnName,(binNum+1)*this->BinSpacing,
+		output);
 	}
-	
 }
 
 //----------------------------------------------------------------------------
@@ -307,6 +312,9 @@ void vtkProfileFilter::UpdateBin(int binNum, BinUpdateType updateType,
 		case MULTIPLY:
 			data*=dataToAdd;
 			break;
+		case SET:
+			data=dataToAdd;
+			break;
 		}
 	output->SetValueByName(binNum,attributeName.c_str(),data);
 }
@@ -363,10 +371,12 @@ double* vtkProfileFilter::CalculateAdditionalProfileQuantity(
 		}
 	else
 		{
-		vtkWarningMacro("input arrray requested not found, quantity returned as \
+		vtkDebugMacro("input arrray requested not found, quantity returned as \
 			array of zero");
+		// sometimes the quantities should be 0, only updated at post-processing
+		// final step
 		double* numberInBinDummy = new double[1];
-		numberInBinDummy[0]=1.0;
+		numberInBinDummy[0]=0.0;
 		return numberInBinDummy;
 		}
 }
@@ -398,18 +408,41 @@ void 	vtkProfileFilter::BinAveragesAndPostprocessing(
 						double totalData=output->GetValueByName(binNum,
 							totalName.c_str()).ToDouble();
 						string averageName = GetColumnName(baseName,AVERAGE,comp); 
-						UpdateBin(binNum,ADD,averageName.c_str(),
+						this->UpdateBin(binNum,ADD,averageName.c_str(),
 							totalData/binSize,output);
 						}	
 					}
 				}
-		// For each additional quantity we also divide by N
+		// For each additional quantity we also divide by N in the average, 
 
-		// For the velocity dispersions we do something special, actually creating 
-		//  arrays and adding them to the output, calculating and updating
+		// Special handling should come last
+		// For the velocity dispersions we do something special, 
+		// calculating and updating
 
-		// For the circular velocity we do something special, actually creating
-		// array and adding them to the output, calculating and updating
+		// For the circular velocity and density, we do something special,
+		// calculating and updating
+		// computing the circular velocity (sqrt(M(<r)/r))
+		// Column names
+		string binRadiusColumnName= GetColumnName("bin radius",TOTAL,0);
+		string cumulativeMassColumnName=GetColumnName("mass",CUMULATIVE,0);
+		string circularVelocityColumnName = \
+			GetColumnName("circular velocity",AVERAGE,0);
+		string densityColumnName = \
+			GetColumnName("density",AVERAGE,0);
+		// Column data
+		double cumulativeMass=output->GetValueByName(binNum,
+			cumulativeMassColumnName.c_str()).ToDouble();
+		double binRadius=output->GetValueByName(binNum,
+			binRadiusColumnName.c_str()).ToDouble();
+		// Computation and updating
+		double circularVelocity = sqrt(cumulativeMass/binRadius);
+		this->UpdateBin(binNum,SET,circularVelocityColumnName,circularVelocity,
+			output);
+		// computing the density M(<r)/(4/3 pi r^3)
+		double density=cumulativeMass/(4./3*vtkMath::Pi()*pow(binRadius,3));
+		this->UpdateBin(binNum,SET,densityColumnName,
+			density,output);
+
 		}
 	/*
 	for(bin in this->BinNumber)
@@ -433,16 +466,7 @@ void 	vtkProfileFilter::BinAveragesAndPostprocessing(
 		//
 	/*
 		 finally getting and computing
-			// computing the circular velocity (sqrt(M(<r)/r))
-			float binCircularVelocity = sqrt(totalMass/binRadius);
-			output->SetValueByName(rowId,"circular velocity",binCircularVelocity);
-
-			// computing the density M(<r)/(4/3 pi r^3)
-			float binDensity=totalMass/(4./3*M_PI*pow(binRadius,3));
-			output->SetValueByName(rowId,"density",binDensity);
-			// computing the radial velocity
-			// computing the tangential velocity
-			// computing the specific angular momentum
+		
 			
 			}
 	*/
