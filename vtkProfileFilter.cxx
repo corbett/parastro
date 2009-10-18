@@ -148,6 +148,8 @@ void vtkProfileFilter::InitializeBins(vtkPolyData* input,
 	vtkTable* output)
 {
 	this->CalculateAndSetBinExtents(input);
+	// For all quantities we will keep track of the number of items in the bin
+	AllocateDataArray(output,"total in bin",1,this->BinNumber);	
 	vtkSmartPointer<vtkDataArray> nextArray;
 	for(int i = 0; i < input->GetPointData()->GetNumberOfArrays(); ++i)
 		{
@@ -189,6 +191,8 @@ void vtkProfileFilter::InitializeBins(vtkPolyData* input,
 			AllocateDataArray(output,cumulativeName.c_str(),1,this->BinNumber);
 			}
 		}
+		
+		
 }
 
 //----------------------------------------------------------------------------
@@ -220,10 +224,8 @@ void vtkProfileFilter::UpdateBinStatistics(vtkPolyData* input,
 	double* r=PointVectorDifference(x,this->Center);
 	// Many of the quantities explicitely require the velocity
 	double* v=GetDataValue(input,"velocity",pointGlobalId);
-	// TODO: debug this function, for now placing everything in
-	// bin 0 as this is returning results > number of bins!
-	// DO AN ASSERT TO MAKE SURE THIS DOESN'T HAPPEN!
 	int binNum=this->GetBinNumber(x);
+	this->UpdateBin(binNum,ADD,"total in bin",1,output);
 	assert(0<=binNum<=this->BinNum);
 	// Updating quanties for the input data arrays
 	for(int i = 0; i < input->GetPointData()->GetNumberOfArrays(); ++i)
@@ -238,9 +240,11 @@ void vtkProfileFilter::UpdateBinStatistics(vtkPolyData* input,
 			{
 			string baseName = nextArray->GetName();
 			string totalName =GetColumnName(baseName,TOTAL,comp);		
-//			cout << "updating bin " << binNum << " total name " << totalName \
-				<< "with data " << nextData[comp] << "\n";
-			this->UpdateBin(binNum,ADD,totalName, nextData[comp], output);
+			this->UpdateBin(binNum,ADD,totalName, nextData[comp], output);	
+			// updating the average bins by the sum, we will divide by 
+			// number in bin during post processing.
+			string averageName =GetColumnName(baseName,AVERAGE,comp);		
+			this->UpdateBin(binNum,ADD,averageName, nextData[comp], output);			
 			if(this->CumulativeQuantities->LookupValue(baseName)>=0)
 				{
 				// we should also consider this a cumulative quantity

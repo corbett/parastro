@@ -19,7 +19,7 @@ void InitializeDataArray(vtkDataArray* dataArray, const char* arrayName,\
 	dataArray->SetNumberOfTuples(numTuples);
 	dataArray->SetName(arrayName);
 	//initializes everything to zero
-	for(int i; i < numComponents; ++i)
+	for(int i=0; i < numComponents; ++i)
 		{
 		dataArray->FillComponent(i, 0.0);
 		}
