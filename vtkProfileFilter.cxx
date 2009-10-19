@@ -159,7 +159,8 @@ void vtkProfileFilter::InitializeBins(vtkPolyData* input,
 	this->CalculateAndSetBinExtents(input,output);
 	vtkSmartPointer<vtkDataArray> nextArray;
 	// always need this for averages
-	AllocateDataArray(output,"number in bin",1,this->BinNumber);
+	AllocateDataArray(output,GetColumnName("number in bin",TOTAL,0),
+		1,this->BinNumber);
 	for(int i = 0; i < input->GetPointData()->GetNumberOfArrays(); ++i)
 		{
 		nextArray = input->GetPointData()->GetArray(i);
@@ -242,7 +243,8 @@ void vtkProfileFilter::UpdateBinStatistics(vtkPolyData* input,
 	// Many of the quantities explicitely require the velocity
 	double* v=GetDataValue(input,"velocity",pointGlobalId);
 	int binNum=this->GetBinNumber(x);
-	this->UpdateBin(binNum,ADD,"number in bin",1,output);	
+	this->UpdateBin(binNum,ADD,GetColumnName(
+		"number in bin",TOTAL,0).c_str(),1,output);	
 	assert(0<=binNum<=this->BinNumber);
 	// Updating quanties for the input data arrays
 	for(int i = 0; i < input->GetPointData()->GetNumberOfArrays(); ++i)
@@ -380,9 +382,8 @@ void 	vtkProfileFilter::BinAveragesAndPostprocessing(
 	// TODO: finish implementation
 	for(int binNum = 0; binNum < this->BinNumber; ++binNum)
 		{
-		string numberInBinColumnName= GetColumnName("number in bin",TOTAL,0);
 		int binSize=output->GetValueByName(binNum,
-			numberInBinColumnName.c_str()).ToInt();
+			GetColumnName("number in bin",TOTAL,0).c_str()).ToInt();
 		// For each input array, update its average column by getting
 		// the total from the total column then dividing by 
 		// the number in the bin. Only do this if the number in the bin
