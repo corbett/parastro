@@ -28,7 +28,6 @@ vtkProfileFilter::vtkProfileFilter()
 {
   this->SetNumberOfInputPorts(2);
 	this->AdditionalProfileQuantities = vtkStringArray::New();
-		this->AdditionalProfileQuantities->InsertNextValue("number in bin");
 		this->AdditionalProfileQuantities->InsertNextValue("circular velocity");
 		this->AdditionalProfileQuantities->InsertNextValue("density");
 		this->AdditionalProfileQuantities->InsertNextValue("radial velocity");
@@ -159,6 +158,8 @@ void vtkProfileFilter::InitializeBins(vtkPolyData* input,
 {
 	this->CalculateAndSetBinExtents(input,output);
 	vtkSmartPointer<vtkDataArray> nextArray;
+	// always need this for averages
+	AllocateDataArray(output,"number in bin",1,this->BinNumber);
 	for(int i = 0; i < input->GetPointData()->GetNumberOfArrays(); ++i)
 		{
 		nextArray = input->GetPointData()->GetArray(i);
@@ -241,6 +242,7 @@ void vtkProfileFilter::UpdateBinStatistics(vtkPolyData* input,
 	// Many of the quantities explicitely require the velocity
 	double* v=GetDataValue(input,"velocity",pointGlobalId);
 	int binNum=this->GetBinNumber(x);
+	this->UpdateBin(binNum,ADD,"number in bin",1,output);	
 	assert(0<=binNum<=this->BinNumber);
 	// Updating quanties for the input data arrays
 	for(int i = 0; i < input->GetPointData()->GetNumberOfArrays(); ++i)
@@ -356,15 +358,6 @@ double* vtkProfileFilter::CalculateAdditionalProfileQuantity(
 	else if(additionalQuantityName == "tangential velocity squared")
 		{
 		return ComputeTangentialVelocitySquared(v,r);
-		}
-	else if(additionalQuantityName=="number in bin")
-		{
-			double* numberInBin = new double[3];
-			//the norm of this is one
-			numberInBin[0]=1.0;
-			numberInBin[1]=0.0;
-			numberInBin[2]=0.0;
-			return numberInBin;
 		}
 	else
 		{
