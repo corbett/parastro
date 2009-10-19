@@ -159,7 +159,7 @@ void vtkProfileFilter::InitializeBins(vtkPolyData* input,
 	this->CalculateAndSetBinExtents(input,output);
 	vtkSmartPointer<vtkDataArray> nextArray;
 	// always need this for averages
-	AllocateDataArray(output,GetColumnName("number in bin",TOTAL,0),
+	AllocateDataArray(output,GetColumnName("number in bin",TOTAL,0).c_str(),
 		1,this->BinNumber);
 	for(int i = 0; i < input->GetPointData()->GetNumberOfArrays(); ++i)
 		{
