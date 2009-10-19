@@ -220,8 +220,8 @@ void vtkProfileFilter::CalculateAndSetBinExtents(vtkPolyData* input,
 	// setting the bin radii in the output
 	for(int binNum = 0; binNum < this->BinNumber; ++binNum)
 	{
-	this->UpdateBin(binNum,SET,binRadiusColumnName,(binNum+1)*this->BinSpacing,
-		output);
+	this->UpdateBin(binNum,SET,
+		"bin radius",TOTAL,0,(binNum+1)*this->BinSpacing,output);
 	}
 }
 
@@ -248,11 +248,9 @@ void vtkProfileFilter::UpdateBinStatistics(vtkPolyData* input,
 	// Many of the quantities explicitely require the velocity
 	double* v=GetDataValue(input,"velocity",pointGlobalId);
 	int binNum=this->GetBinNumber(x);
-	this->UpdateBin(binNum,ADD,GetColumnName(
-		"number in bin",TOTAL,0).c_str(),1,output);	
-	this->UpdateCumulativeBins(binNum,ADD,GetColumnName(
-		"number in bin",CUMULATIVE,0).c_str(),1,output);
-	
+	this->UpdateBin(binNum,ADD,"number in bin",TOTAL,0,1.0,output);	
+	this->UpdateCumulativeBins(binNum,ADD,
+		"number in bin",CUMULATIVE,0,1.0,output);	
 	assert(0<=binNum<=this->BinNumber);
 	// Updating quanties for the input data arrays
 	for(int i = 0; i < input->GetPointData()->GetNumberOfArrays(); ++i)
@@ -266,13 +264,11 @@ void vtkProfileFilter::UpdateBinStatistics(vtkPolyData* input,
 		for(int comp = 0; comp <	nextArray->GetNumberOfComponents(); ++comp)
 			{
 			string baseName = nextArray->GetName();
-			string totalName =GetColumnName(baseName,TOTAL,comp);		
-			this->UpdateBin(binNum,ADD,totalName, nextData[comp], output);	
+			this->UpdateBin(binNum,ADD,baseName,TOTAL,comp,nextData[comp], output);	
 			if(this->CumulativeQuantities->LookupValue(baseName)>=0)
 				{
 				// we should also consider this a cumulative quantity
-				string cumulativeName =GetColumnName(baseName,CUMULATIVE,comp); 
-				this->UpdateCumulativeBins(binNum,ADD,cumulativeName,
+				this->UpdateCumulativeBins(binNum,ADD,baseName,CUMULATIVE,comp,
 					nextData[comp],output);
 				}
 			}
@@ -288,14 +284,13 @@ void vtkProfileFilter::UpdateBinStatistics(vtkPolyData* input,
 			this->CalculateAdditionalProfileQuantity(baseName,v,r);
 		// updating the totalbin
 		for(int comp = 0; comp < 3; ++comp)
-			{
-			string totalName=GetColumnName(baseName,TOTAL,comp);
-			this->UpdateBin(binNum,ADD,totalName,additionalData[comp],output);
+			{			
+			this->UpdateBin(binNum,ADD,baseName,TOTAL,comp,
+				additionalData[comp],output);
 			if(this->CumulativeQuantities->LookupValue(baseName)>=comp)
 				{
 				// we should also consider this a cumulative quantity
-				string cumulativeName =GetColumnName(baseName,CUMULATIVE,comp); 
-				this->UpdateCumulativeBins(binNum,ADD,cumulativeName,
+				this->UpdateCumulativeBins(binNum,ADD,baseName,CUMULATIVE,comp,
 					additionalData[comp],output);
 				}
 			}
@@ -309,35 +304,8 @@ void vtkProfileFilter::UpdateBinStatistics(vtkPolyData* input,
 
 
 
-//----------------------------------------------------------------------------
-void vtkProfileFilter::UpdateBin(int binNum, BinUpdateType updateType,
- 	string attributeName, double dataToAdd, vtkTable* output)
-{
-	double data=output->GetValueByName(binNum,attributeName.c_str()).ToDouble();
-	switch(updateType)
-		{
-		case ADD:
-			data+=dataToAdd;
-			break;
-		case MULTIPLY:
-			data*=dataToAdd;
-			break;
-		case SET:
-			data=dataToAdd;
-			break;
-		}
-	output->SetValueByName(binNum,attributeName.c_str(),data);
-}
 
-//----------------------------------------------------------------------------
-void vtkProfileFilter::UpdateCumulativeBins(int binNum, BinUpdateType 		
-	updateType, string attributeName, double dataToAdd, vtkTable* output)
-{
-	for(int bin = binNum; bin < this->BinNumber; ++bin)
-		{
-		this->UpdateBin(bin,updateType,attributeName,dataToAdd,output);
-		}
-}
+
 
 //----------------------------------------------------------------------------
 double* vtkProfileFilter::CalculateAdditionalProfileQuantity(
@@ -406,11 +374,8 @@ void 	vtkProfileFilter::BinAveragesAndPostprocessing(
 					string baseName = nextArray->GetName();
 					for(int comp = 0; comp < nextArray->GetNumberOfComponents(); ++comp)
 						{
-						string totalName = GetColumnName(baseName,TOTAL,comp); 
-						double totalData=output->GetValueByName(binNum,
-							totalName.c_str()).ToDouble();
-						string averageName = GetColumnName(baseName,AVERAGE,comp); 
-						this->UpdateBin(binNum,SET,averageName.c_str(),
+						double totalData=GetData(binNum,baseName,TOTAL,comp,output);
+						this->UpdateBin(binNum,SET,baseName,AVERAGE,comp,
 							totalData/binSize,output);
 						}	
 					}
@@ -422,11 +387,8 @@ void 	vtkProfileFilter::BinAveragesAndPostprocessing(
 						string baseName=this->AdditionalProfileQuantities->GetValue(i);
 						for(int comp = 0; comp < 3; ++comp)
 							{
-							string totalName = GetColumnName(baseName,TOTAL,comp); 
-							double totalData=output->GetValueByName(binNum,
-								totalName.c_str()).ToDouble();
-							string averageName = GetColumnName(baseName,AVERAGE,comp); 
-							this->UpdateBin(binNum,SET,averageName.c_str(),
+							double totalData=GetData(binNum,baseName,TOTAL,comp,output);
+							this->UpdateBin(binNum,SET,baseName,AVERAGE,comp,
 								totalData/binSize,output);
 							}
 						}
@@ -473,22 +435,19 @@ void 	vtkProfileFilter::BinAveragesAndPostprocessing(
 		// computing the circular velocity (sqrt(M(<r)/r))
 		// Column names
 		// Column data
-		double cumulativeMass=output->GetValueByName(binNum,
-			GetColumnName("mass",CUMULATIVE,0).c_str()).ToDouble();
-		double binRadius=output->GetValueByName(binNum,
-			GetColumnName("bin radius",TOTAL,0).c_str()).ToDouble();
+		double cumulativeMass=this->GetData(binNum,"mass",CUMULATIVE,0,output);
+		double binRadius=this->GetData(binNum,"bin radius",TOTAL,0,output);
 		// Computation and updating
 		double circularVelocity = sqrt(cumulativeMass/binRadius);
-		this->UpdateBin(binNum,SET,
-			GetColumnName("circular velocity",AVERAGE,0),circularVelocity,
+		this->UpdateBin(binNum,SET,"circular velocity",AVERAGE,0,circularVelocity,
 			output);
 		// computing the density M(<r)/(4/3 pi r^3)
 		double density=cumulativeMass/(4./3*vtkMath::Pi()*pow(binRadius,3));
-		this->UpdateBin(binNum,SET,GetColumnName("density",AVERAGE,0),
-			density,output);
+		this->UpdateBin(binNum,SET,"density",AVERAGE,0,density,output);
 		}
 }
 
+//----------------------------------------------------------------------------
 string vtkProfileFilter::GetColumnName(string baseName, 
 	ColumnType columnType, int dataIndex)
 {
@@ -506,7 +465,58 @@ string vtkProfileFilter::GetColumnName(string baseName,
 		}
 }
 
+//----------------------------------------------------------------------------
+void vtkProfileFilter::UpdateBin(int binNum, BinUpdateType updateType,
+ 	string baseName, ColumnType columnType, int dataIndex,
+ 	double dataToAdd, vtkTable* output)
+{
+	double data=GetData(binNum,baseName,columnType,dataIndex,output);
+	switch(updateType)
+		{
+		case ADD:
+			data+=dataToAdd;
+			break;
+		case MULTIPLY:
+			data*=dataToAdd;
+			break;
+		case SET:
+			data=dataToAdd;
+			break;
+		}
+	output->SetValueByName(binNum,
+		GetColumnName(baseName,columnType,dataIndex).c_str(),data);
+}
 
+//----------------------------------------------------------------------------
+void vtkProfileFilter::UpdateCumulativeBins(int binNum, BinUpdateType 		
+	updateType, string baseName, ColumnType columnType, int dataIndex, 
+	double dataToAdd, vtkTable* output)
+{
+	for(int bin = binNum; bin < this->BinNumber; ++bin)
+		{
+		this->UpdateBin(bin,updateType, baseName, columnType,
+			dataIndex,dataToAdd,output);
+		}
+}
+//----------------------------------------------------------------------------
+double vtkProfileFilter::GetData(int binNum, string baseName,
+	ColumnType columnType, int dataIndex, vtkTable* output)
+{
+	return output->GetValueByName(binNum,
+		GetColumnName(baseName,columnType,dataIndex).c_str()).ToDouble();	
+}
+
+//----------------------------------------------------------------------------
+double* vtkProfileFilter::GetThreeVectorData(int binNum,
+	string baseName,ColumnType columnType,vtkTable* output)
+{
+	double* vectorData=new double[3];
+	for(int i = 0; i < 3; ++i)
+	{
+	vectorData[i]=GetData(binNum,baseName,columnType,i,output);
+	}
+	return vectorData;
+}
 
 
 

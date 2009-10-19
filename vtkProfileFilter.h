@@ -167,14 +167,16 @@ protected:
 	// in the bin specified by binNum, either additively or 	
 	// multiplicatively as specified by updateddType by dataToAdd
 	void UpdateBin(int binNum, BinUpdateType updateType,
-		vtkstd::string attributeName, double dataToAdd, vtkTable* output);
+	 	vtkstd::string baseName, ColumnType columnType, int dataIndex,
+	 	double dataToAdd, vtkTable* output);
 		
 	// Description:
 	// This function is useful for those data items who want to keep track of 
 	// a cumulative number. E.g. N(<=r), calls updateBin on all bins >= binNum
 	// updating the attribute specified
-	void UpdateCumulativeBins(int binNum, BinUpdateType updateType, 
-		vtkstd::string attributeName, double dataToAdd,	vtkTable* output);
+	void UpdateCumulativeBins(int binNum, 
+		BinUpdateType updateType, vtkstd::string baseName,
+		ColumnType columnType, int dataIndex, double dataToAdd, vtkTable* output);
 
 	// Description:
 	// Based upon the additionalQuantityName, returns a double
@@ -200,6 +202,17 @@ protected:
 	// this data column's name
 	vtkstd::string GetColumnName(vtkstd::string baseName, ColumnType columnType,
 		int dataIndex);
+
+	// Description:
+	// If this quantity is described by a 3-vector (i.e. three columns)
+	// places its data in a single array and returns
+	double* GetThreeVectorData(int binNum,
+		vtkstd::string baseName,ColumnType columnType,vtkTable* output);
+
+	// Description:
+	// Gets a column's data
+	double GetData(int binNum, vtkstd::string baseName,
+		ColumnType columnType, int dataIndex, vtkTable* output);
 
   virtual int FillInputPortInformation (int port, vtkInformation *info);
 private:
