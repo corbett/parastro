@@ -40,7 +40,11 @@ vtkProfileFilter::vtkProfileFilter()
 		this->AdditionalProfileQuantities->InsertNextValue("radial velocity");
 		this->AdditionalProfileQuantities->InsertNextValue("tangential velocity");
 		this->AdditionalProfileQuantities->InsertNextValue("angular momentum");
-
+		this->AdditionalProfileQuantities->InsertNextValue("velocity dispersion");
+		this->AdditionalProfileQuantities->InsertNextValue("radial velocity\
+			dispersion");
+	 this->AdditionalProfileQuantities->InsertNextValue("tangential\
+		velocity dispersion");	
 	// TODO: doesn't actually initialize like this, but shorthand for now
 	// for what I have in mind
 	//this->CumulativeQuantities ={"mass","number in bin"};	
@@ -371,7 +375,7 @@ double* vtkProfileFilter::CalculateAdditionalProfileQuantity(
 		}
 	else
 		{
-		vtkWarningMacro("input arrray requested not found, quantity returned as \
+		vtkDebugMacro("input arrray requested not found, quantity returned as \
 			array of zero");
 		// sometimes the quantities should be 0, only updated at post-processing
 		// final step
