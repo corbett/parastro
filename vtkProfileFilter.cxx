@@ -277,20 +277,18 @@ void vtkProfileFilter::UpdateBinStatistics(vtkPolyData* input,
 		++i)
 		{
 		string baseName=this->AdditionalProfileQuantities->GetValue(i);
-		double* additionalData = \
-			this->CalculateAdditionalProfileQuantity(baseName,v,r);
+		double additionalData = \
+			vtkMath::Norm(this->CalculateAdditionalProfileQuantity(baseName,v,r));
 		// updating the totalbin
 		string totalName=GetColumnName(baseName,TOTAL,0);
-		this->UpdateBin(binNum,ADD,totalName,additionalData[0],output);
+		this->UpdateBin(binNum,ADD,totalName,additionalData,output);
 		if(this->CumulativeQuantities->LookupValue(baseName)>=0)
 			{
 			// we should also consider this a cumulative quantity
 			string cumulativeName =GetColumnName(baseName,CUMULATIVE,0); 
 			this->UpdateCumulativeBins(binNum,ADD,cumulativeName,
-				additionalData[0],output);
+				additionalData,output);
 			}
-			//Finally some memory management
-			delete [] additionalData;
 		}
 	// Finally some memory management
 	delete [] x;
@@ -338,9 +336,6 @@ double* vtkProfileFilter::CalculateAdditionalProfileQuantity(
 	// Some inefficiency by recomputing quantities, but paid for with 
 	// flexibility, i.e don't have to call in a certain order or can compute
 	// one quantity without storing the other
-	// TODO: probably not string == here, just a proxy for
-	// the function I should use throwing unimplemented until
-	// I implement
 	if(additionalQuantityName == "radial velocity")
 		{
 		return ComputeRadialVelocity(v,r);
@@ -367,9 +362,12 @@ double* vtkProfileFilter::CalculateAdditionalProfileQuantity(
 		}
 	else if(additionalQuantityName=="number in bin")
 		{
-			double* numberInBinDummy = new double[1];
-			numberInBinDummy[0]=1.0;
-			return numberInBinDummy;
+			double* numberInBin = new double[3];
+			//the norm of this is one
+			numberInBin[0]=1.0;
+			numberInBin[1]=0.0;
+			numberInBin[2]=0.0;
+			return numberInBin;
 		}
 	else
 		{
@@ -377,9 +375,11 @@ double* vtkProfileFilter::CalculateAdditionalProfileQuantity(
 			array of zero");
 		// sometimes the quantities should be 0, only updated at post-processing
 		// final step
-		double* numberInBinDummy = new double[1];
-		numberInBinDummy[0]=0.0;
-		return numberInBinDummy;
+		double* emptyBin = new double[3];
+		emptyBin[0]=0.0;
+		emptyBin[1]=0.0;
+		emptyBin[2]=0.0;
+		return emptyBin;
 		}
 }
 

@@ -177,8 +177,12 @@ protected:
 		vtkstd::string attributeName, double dataToAdd,	vtkTable* output);
 
 	// Description:
-	// Base upon the additionalQuantityName, returns a double array representing
-	// the computation of this quantity. Currently all of these are calculated
+	// Based upon the additionalQuantityName, returns a double
+	// array representing the computation of this quantity. 
+	// Always outputs a 3-vector, for quantities such as number in bin
+	// which are scalars, result will be in the first position of the vector
+	// and equal to the norm of the vector.
+	// Currently all of these are calculated
 	// from v and from r, which are 3-vectors taken as inputs. Would have to be 
 	// rediefined to be more general if other quantities were desired.
 	double* CalculateAdditionalProfileQuantity(vtkstd::string
