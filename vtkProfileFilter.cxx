@@ -394,56 +394,55 @@ void 	vtkProfileFilter::BinAveragesAndPostprocessing(
 						}
 				}
 
-		// TODO: code repetition, clean this up (perhaps keep track of
-		// which quantities to compute dispersions for)
 		// Special handling should come last
-		/* Dispersions */
-/*
-
-		vDispColumnName=GetColumnName("velocity dispersion",AVERAGE,0);
-		vRadDispColumnName=GetColumnName("radial velocity dispersion",AVERAGE,0);
-		vTanDispColumnName=GetColumnName("tangential velocity dispersion",AVERAGE,0);		
-		// column data
-		double vAve=output->GetValueByName(binNum,
-			GetColumnName("velocity",AVERAGE,0).c_str()).ToDouble();
-		double vSquaredAve=output->GetValueByName(binNum,
-			GetColumnName("velocity squared",AVERAGE,0).c_str()).ToDouble();
-
-		double vRadAve=output->GetValueByName(binNum,
-			GetColumnName("radial velocity",AVERAGE,0).c_str()).ToDouble();
-		double vRadSquaredAve=output->GetValueByName(binNum,
-			GetColumnName("radial velocity squared",AVERAGE,0).c_str()).ToDouble();
-
-		double vTanAve=output->GetValueByName(binNum,
-			GetColumnName("tangential velocity",AVERAGE,0).c_str()).ToDouble();
-		double vTanSquaredAve=output->GetValueByName(binNum,
-			GetColumnName("tangential velocity squared",
-			AVERAGE,0).c_str()).ToDouble();
-
-		// computing quantities
-		double vDisp=vtkMath::Norm(ComputeVelocityDispersion(vSquaredAve,vAve));
-		double vRadDisp = \
-			vtkMath::Norm(ComputeVelocityDispersion(vRadSquaredAve,vRadAve));
-		double vTanDisp = vtkMath::Norm(ComputeVelocityDispersion(vTanSquaredAve,\
-			vTanAve,vTanDisp));
-		// updating output
-		this->UpdateBin(binNum,SET,vDispColumnName,vDisp,output);
-		this->UpdateBin(binNum,SET,vRadDispColumnName,vRadDisp,output);
-		this->UpdateBin(binNum,SET,vTanDispColumnName,vTanDisp,output);
-*/
 		/* Circular velocity and density */
-		// computing the circular velocity (sqrt(M(<r)/r))
-		// Column names
-		// Column data
+
 		double cumulativeMass=this->GetData(binNum,"mass",CUMULATIVE,0,output);
 		double binRadius=this->GetData(binNum,"bin radius",TOTAL,0,output);
 		// Computation and updating
 		double circularVelocity = sqrt(cumulativeMass/binRadius);
 		this->UpdateBin(binNum,SET,"circular velocity",AVERAGE,0,circularVelocity,
 			output);
-		// computing the density M(<r)/(4/3 pi r^3)
 		double density=cumulativeMass/(4./3*vtkMath::Pi()*pow(binRadius,3));
 		this->UpdateBin(binNum,SET,"density",AVERAGE,0,density,output);
+		/* Dispersions */
+		// column data we need to compute dispersions
+		double* vAve=this->GetThreeVectorData(binNum,
+			"velocity",AVERAGE,output);
+		double* vSquaredAve=this->GetThreeVectorData(binNum,
+			"velocity squared",AVERAGE,output);
+		double* vRadAve=this->GetThreeVectorData(binNum,
+			"radial velocity",AVERAGE,output);
+		double* vRadSquaredAve=this->GetThreeVectorData(binNum,
+			"radial velocity squared",AVERAGE,output);
+		double* vTanAve=this->GetThreeVectorData(binNum,
+			"tangential velocity",AVERAGE,output);
+		double* vTanSquaredAve=this->GetThreeVectorData(binNum,
+			"tangential velocity squared",AVERAGE,output);
+		// computing dispersions
+		double* vDisp=ComputeVelocityDispersion(vSquaredAve,vAve);
+		double* vRadDisp=ComputeVelocityDispersion(vRadSquaredAve,vRadAve);
+		double* vTanDisp=ComputeVelocityDispersion(vTanSquaredAve,vTanAve);
+		// updating output		
+		for(int coord = 0; coord < 3; ++coord)
+			{
+			this->UpdateBin(binNum,SET,"velocity dispersion",AVERAGE,
+				coord,vDisp[coord],output);
+			this->UpdateBin(binNum,SET,"radial velocity dispersion",AVERAGE,
+				coord,vRadDisp[coord],output);
+			this->UpdateBin(binNum,SET,"tangential velocity dispersion",AVERAGE,
+				coord,vTanDisp[coord],output);
+			}
+		// finally some memory management
+		delete [] vAve;
+		delete [] vSquaredAve;
+		delete [] vDisp;
+		delete [] vRadAve;
+		delete [] vRadSquaredAve;
+		delete [] vRadDisp;
+		delete [] vTanAve;
+		delete [] vTanSquaredAve;
+		delete [] vTanDisp;
 		}
 }
 
