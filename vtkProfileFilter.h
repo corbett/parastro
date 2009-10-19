@@ -110,7 +110,7 @@ protected:
 	// input data or in the array AdditionalProfileQuantities, with 
 	// corresponding modification to CalculateAdditionalProfileQuantity
 	vtkStringArray* CumulativeQuantities; 	
-	
+
 	// Description:
 	// Generates the desired profile quantities and places them
 	// in the output table by bin.

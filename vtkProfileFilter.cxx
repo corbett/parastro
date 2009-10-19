@@ -27,12 +27,6 @@ vtkStandardNewMacro(vtkProfileFilter);
 vtkProfileFilter::vtkProfileFilter()
 {
   this->SetNumberOfInputPorts(2);
-	// TODO: doesn't actually initialize like this, but shorthand for now
-	// for what I have in mind
-	//this->AdditionalProfileQuantities = {"number in bin",\
-		"circular velocity","density","radial velocity",\
-		"radial velocity dispersion","tangential velocity",\
-		"tangential velocity dispersion","angular momentum"}; 	
 	this->AdditionalProfileQuantities = vtkStringArray::New();
 		this->AdditionalProfileQuantities->InsertNextValue("number in bin");
 		this->AdditionalProfileQuantities->InsertNextValue("circular velocity");
@@ -41,11 +35,12 @@ vtkProfileFilter::vtkProfileFilter()
 		this->AdditionalProfileQuantities->InsertNextValue("tangential velocity");
 		this->AdditionalProfileQuantities->InsertNextValue("angular momentum");
 		this->AdditionalProfileQuantities->InsertNextValue("velocity squared");
+		this->AdditionalProfileQuantities->InsertNextValue("velocity dispersion");
 		this->AdditionalProfileQuantities->InsertNextValue("radial velocity squared");
-	 	this->AdditionalProfileQuantities->InsertNextValue("tangential	velocity squared");	
-	// TODO: doesn't actually initialize like this, but shorthand for now
-	// for what I have in mind
-	//this->CumulativeQuantities ={"mass","number in bin"};	
+		this->AdditionalProfileQuantities->InsertNextValue("radial velocity dispersion");
+	 	this->AdditionalProfileQuantities->InsertNextValue("tangential velocity squared");
+	 	this->AdditionalProfileQuantities->InsertNextValue("tangential velocity dispersion");
+	
 	this->CumulativeQuantities = vtkStringArray::New();
 		this->CumulativeQuantities->InsertNextValue("number in bin");
 		this->CumulativeQuantities->InsertNextValue("mass");
@@ -431,16 +426,47 @@ void 	vtkProfileFilter::BinAveragesAndPostprocessing(
 						}
 				}
 
-
+		// TODO: code repetition, clean this up (perhaps keep track of
+		// which quantities to compute dispersions for)
 		// Special handling should come last
-		// For the velocity dispersions we do something special, 
-		// calculating and updating
+		/* Dispersions */
+/*
 
-		// For the circular velocity and density, we do something special,
-		// calculating and updating
+		vDispColumnName=GetColumnName("velocity dispersion",AVERAGE,0);
+		vRadDispColumnName=GetColumnName("radial velocity dispersion",AVERAGE,0);
+		vTanDispColumnName=GetColumnName("tangential velocity dispersion",AVERAGE,0);		
+		// column data
+		double vAve=output->GetValueByName(binNum,
+			GetColumnName("velocity",AVERAGE,0).c_str()).ToDouble();
+		double vSquaredAve=output->GetValueByName(binNum,
+			GetColumnName("velocity squared",AVERAGE,0).c_str()).ToDouble();
+
+		double vRadAve=output->GetValueByName(binNum,
+			GetColumnName("radial velocity",AVERAGE,0).c_str()).ToDouble();
+		double vRadSquaredAve=output->GetValueByName(binNum,
+			GetColumnName("radial velocity squared",AVERAGE,0).c_str()).ToDouble();
+
+		double vTanAve=output->GetValueByName(binNum,
+			GetColumnName("tangential velocity",AVERAGE,0).c_str()).ToDouble();
+		double vTanSquaredAve=output->GetValueByName(binNum,
+			GetColumnName("tangential velocity squared",
+			AVERAGE,0).c_str()).ToDouble();
+
+		// computing quantities
+		double vDisp=vtkMath::Norm(ComputeVelocityDispersion(vSquaredAve,vAve));
+		double vRadDisp = \
+			vtkMath::Norm(ComputeVelocityDispersion(vRadSquaredAve,vRadAve));
+		double vTanDisp = vtkMath::Norm(ComputeVelocityDispersion(vTanSquaredAve,\
+			vTanAve,vTanDisp));
+		// updating output
+		this->UpdateBin(binNum,SET,vDispColumnName,vDisp,output);
+		this->UpdateBin(binNum,SET,vRadDispColumnName,vRadDisp,output);
+		this->UpdateBin(binNum,SET,vTanDispColumnName,vTanDisp,output);
+*/
+		/* Circular velocity and density */
 		// computing the circular velocity (sqrt(M(<r)/r))
 		// Column names
-		string binRadiusColumnName= GetColumnName("bin radius",TOTAL,0);
+		string binRadiusColumnName=GetColumnName("bin radius",TOTAL,0);
 		string cumulativeMassColumnName=GetColumnName("mass",CUMULATIVE,0);
 		string circularVelocityColumnName = \
 			GetColumnName("circular velocity",AVERAGE,0);
@@ -461,20 +487,6 @@ void 	vtkProfileFilter::BinAveragesAndPostprocessing(
 			density,output);
 
 		}
-		// calculate velocity dispersions, taking the necessary square roots	
-		//ComputeVelocityDispersion(vSquaredAve,vAve,vDisp);
-		//ComputeVelocityDispersion(vRadSquaredAve,vRadAve,vRadDisp);
-		//ComputeVelocityDispersion(vTanSquaredAve,vTanAve,vTanDisp);
-		// add vAve, vRadAve, vTanAve,, vAveDisp, vRadAveDisp, vTanAveDisp and j
-		// to the ouput table.
-	
-		//
-	/*
-		 finally getting and computing
-		
-			
-			}
-	*/
 }
 
 string vtkProfileFilter::GetColumnName(string baseName, 

@@ -298,13 +298,14 @@ double* ComputeTangentialVelocitySquared(double v[],double r[])
 }
 
 //----------------------------------------------------------------------------
-double* ComputeVelocityDispersion(double vSquaredAve[], double  vAve[],
-	double velocityDispersion[])
+double* ComputeVelocityDispersion(double vSquaredAve[], double  vAve[])
 {
+	double* velocityDispersion = new double[3];
 	for(int i = 0; i < 3; ++i)
 	{
 		velocityDispersion[i] = sqrt(vSquaredAve[i] - pow(vAve[i],2));
 	}
+	return velocityDispersion;
 }
 
 
