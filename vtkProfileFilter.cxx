@@ -40,11 +40,9 @@ vtkProfileFilter::vtkProfileFilter()
 		this->AdditionalProfileQuantities->InsertNextValue("radial velocity");
 		this->AdditionalProfileQuantities->InsertNextValue("tangential velocity");
 		this->AdditionalProfileQuantities->InsertNextValue("angular momentum");
-		this->AdditionalProfileQuantities->InsertNextValue("velocity dispersion");
-		this->AdditionalProfileQuantities->InsertNextValue("radial velocity\
-			dispersion");
-	 this->AdditionalProfileQuantities->InsertNextValue("tangential\
-		velocity dispersion");	
+		this->AdditionalProfileQuantities->InsertNextValue("velocity squared");
+		this->AdditionalProfileQuantities->InsertNextValue("radial velocity squared");
+	 	this->AdditionalProfileQuantities->InsertNextValue("tangential	velocity squared");	
 	// TODO: doesn't actually initialize like this, but shorthand for now
 	// for what I have in mind
 	//this->CumulativeQuantities ={"mass","number in bin"};	
@@ -352,15 +350,15 @@ double* vtkProfileFilter::CalculateAdditionalProfileQuantity(
 		{
 		return ComputeAngularMomentum(v,r);
 		}
-	else if(additionalQuantityName == "velocity dispersion")
+	else if(additionalQuantityName == "velocity squared")
 		{
 		return ComputeVelocitySquared(v,r);
 		}
-	else if(additionalQuantityName == "radial velocity dispersion")
+	else if(additionalQuantityName == "radial velocity squared")
 		{
 		return ComputeRadialVelocitySquared(v,r);
 		}
-	else if(additionalQuantityName == "tangential velocity dispersion")
+	else if(additionalQuantityName == "tangential velocity squared")
 		{
 		return ComputeTangentialVelocitySquared(v,r);
 		}
