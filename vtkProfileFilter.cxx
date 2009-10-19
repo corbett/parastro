@@ -184,23 +184,26 @@ void vtkProfileFilter::InitializeBins(vtkPolyData* input,
 			}
 		}
 	// For our additional quantities, allocating a column for the average 
-	// and the sum. These are restricted to be scalars
+	// and the sum. These are restricted to be 3-vectors
 	for(int i = 0; 
 		i < this->AdditionalProfileQuantities->GetNumberOfValues();
 	 	++i)
 		{
 		string baseName=this->AdditionalProfileQuantities->GetValue(i);
-		string totalName = GetColumnName(baseName,TOTAL,0); 
-		// Allocating an column for the total sum of the existing quantities
-		AllocateDataArray(output,totalName.c_str(),1,this->BinNumber);
-		// Allocating an column for the averages of the existing quantities
-		string averageName = GetColumnName(baseName,AVERAGE,0); 
-		AllocateDataArray(output,averageName.c_str(),1,this->BinNumber);
-		if(this->CumulativeQuantities->LookupValue(baseName)>=0)
+		for(int comp = 0; comp < 3; ++comp)
 			{
-			// we should also consider this a cumulative quantity
-			string cumulativeName = GetColumnName(baseName,CUMULATIVE,0);
-			AllocateDataArray(output,cumulativeName.c_str(),1,this->BinNumber);
+			string totalName = GetColumnName(baseName,TOTAL,comp); 
+			// Allocating an column for the total sum of the existing quantities
+			AllocateDataArray(output,totalName.c_str(),1,this->BinNumber);
+			// Allocating an column for the averages of the existing quantities
+			string averageName = GetColumnName(baseName,AVERAGE,comp); 
+			AllocateDataArray(output,averageName.c_str(),1,this->BinNumber);
+			if(this->CumulativeQuantities->LookupValue(baseName)>=0)
+				{
+				// we should also consider this a cumulative quantity
+				string cumulativeName = GetColumnName(baseName,CUMULATIVE,comp);
+				AllocateDataArray(output,cumulativeName.c_str(),1,this->BinNumber);
+				}
 			}
 		}
 }
@@ -281,17 +284,20 @@ void vtkProfileFilter::UpdateBinStatistics(vtkPolyData* input,
 		++i)
 		{
 		string baseName=this->AdditionalProfileQuantities->GetValue(i);
-		double additionalData = \
-			vtkMath::Norm(this->CalculateAdditionalProfileQuantity(baseName,v,r));
+		double* additionalData = \
+			this->CalculateAdditionalProfileQuantity(baseName,v,r);
 		// updating the totalbin
-		string totalName=GetColumnName(baseName,TOTAL,0);
-		this->UpdateBin(binNum,ADD,totalName,additionalData,output);
-		if(this->CumulativeQuantities->LookupValue(baseName)>=0)
+		for(int comp = 0; comp < 3; ++comp)
 			{
-			// we should also consider this a cumulative quantity
-			string cumulativeName =GetColumnName(baseName,CUMULATIVE,0); 
-			this->UpdateCumulativeBins(binNum,ADD,cumulativeName,
-				additionalData,output);
+			string totalName=GetColumnName(baseName,TOTAL,comp);
+			this->UpdateBin(binNum,ADD,totalName,additionalData[comp],output);
+			if(this->CumulativeQuantities->LookupValue(baseName)>=comp)
+				{
+				// we should also consider this a cumulative quantity
+				string cumulativeName =GetColumnName(baseName,CUMULATIVE,comp); 
+				this->UpdateCumulativeBins(binNum,ADD,cumulativeName,
+					additionalData[comp],output);
+				}
 			}
 		}
 	// Finally some memory management
@@ -414,12 +420,15 @@ void 	vtkProfileFilter::BinAveragesAndPostprocessing(
 					 	++i)
 						{
 						string baseName=this->AdditionalProfileQuantities->GetValue(i);
-						string totalName = GetColumnName(baseName,TOTAL,0); 
-						double totalData=output->GetValueByName(binNum,
-							totalName.c_str()).ToDouble();
-						string averageName = GetColumnName(baseName,AVERAGE,0); 
-						this->UpdateBin(binNum,SET,averageName.c_str(),
-							totalData/binSize,output);
+						for(int comp = 0; comp < 3; ++comp)
+							{
+							string totalName = GetColumnName(baseName,TOTAL,comp); 
+							double totalData=output->GetValueByName(binNum,
+								totalName.c_str()).ToDouble();
+							string averageName = GetColumnName(baseName,AVERAGE,comp); 
+							this->UpdateBin(binNum,SET,averageName.c_str(),
+								totalData/binSize,output);
+							}
 						}
 				}
 
