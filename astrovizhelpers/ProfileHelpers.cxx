@@ -301,6 +301,7 @@ double* ComputeTangentialVelocitySquared(double v[],double r[])
 double* ComputeVelocityDispersion(double vSquaredAve[], double  vAve[])
 {
 	// TODO: for now taking absolute value but should figure out
+	double* velocityDispersion = new double[3];
 	// if this is kosher
 	for(int i = 0; i < 3; ++i)
 	{
