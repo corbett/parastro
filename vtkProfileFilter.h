@@ -206,7 +206,7 @@ protected:
 	// a cumulative number. E.g. N(<=r), calls updateBin on all bins >= binNum
 	// updating the attribute specified. Identical to the one above, but calls
 	// the double dataToAdd version of UpdatBin instead of the double*
-	void vtkProfileFilter::UpdateCumulativeBins(int binNum, BinUpdateType 		
+	void UpdateCumulativeBins(int binNum, BinUpdateType 		
 		updateType, vtkstd::string baseName, ColumnType columnType, 
 		double dataToAdd, vtkTable* output);
 
