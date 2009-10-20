@@ -513,6 +513,8 @@ void vtkProfileFilter::UpdateCumulativeBins(int binNum, BinUpdateType
 vtkAbstractArray* vtkProfileFilter::GetData(int binNum, string baseName,
 	ColumnType columnType, vtkTable* output)
 {
+	cout << "getting column name " << GetColumnName(baseName,columnType) \
+	<< "\n" << "bin num" << binNum << "\n\n";
 	return output->GetValueByName(binNum,
 		GetColumnName(baseName,columnType).c_str()).ToArray();
 }
