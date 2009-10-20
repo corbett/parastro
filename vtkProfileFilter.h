@@ -202,6 +202,15 @@ protected:
 		double* dataToAdd, vtkTable* output);
 
 	// Description:
+	// This function is useful for those data items who want to keep track of 
+	// a cumulative number. E.g. N(<=r), calls updateBin on all bins >= binNum
+	// updating the attribute specified. Identical to the one above, but calls
+	// the double dataToAdd version of UpdatBin instead of the double*
+	void vtkProfileFilter::UpdateCumulativeBins(int binNum, BinUpdateType 		
+		updateType, vtkstd::string baseName, ColumnType columnType, 
+		double dataToAdd, vtkTable* output);
+
+	// Description:
 	// Based upon the additionalQuantityName, returns a double
 	// array representing the computation of this quantity. 
 	// Always outputs a 3-vector, for quantities such as number in bin
