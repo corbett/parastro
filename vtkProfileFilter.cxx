@@ -370,33 +370,33 @@ void 	vtkProfileFilter::BinAveragesAndPostprocessing(
 					this->UpdateBin(binNum,MULTIPLY,baseName,AVERAGE,1./binSize,output);
 					}
 				}
+
+		double cumulativeMass = \
+		 	this->GetData(binNum,"mass",CUMULATIVE,output).ToDouble();
+		double binRadius=this->GetData(binNum,"bin radius",
+			TOTAL,output).ToDouble();
+		// Computation and updating
+		this->UpdateBin(binNum,SET,"circular velocity",
+			AVERAGE,cumulativeMass/binRadius,output);
+		double density = cumulativeMass/(4./3*vtkMath::Pi()*pow(binRadius,3));
+		this->UpdateBin(binNum,SET,"density",AVERAGE,density,output);
+		// column data we need to compute dispersions
+		vtkSmartPointer<vtkAbstractArray> vAve = \
+			this->GetData(binNum,"velocity",AVERAGE,output).ToArray();
+		vtkSmartPointer<vtkAbstractArray> vSquaredAve = \
+		 	this->GetData(binNum,"velocity squared",AVERAGE,output).ToArray();
+		vtkSmartPointer<vtkAbstractArray> vRadAve = \
+			this->GetData(binNum,"radial velocity",AVERAGE,output).ToArray();
+		vtkSmartPointer<vtkAbstractArray> vRadSquaredAve = \
+			this->GetData(binNum,
+			"radial velocity squared",AVERAGE,output).ToArray();
+		vtkSmartPointer<vtkAbstractArray> vTanAve = \
+			this->GetData(binNum,"tangential velocity",AVERAGE,output).ToArray();
+		vtkSmartPointer<vtkAbstractArray> vTanSquaredAve = \
+			this->GetData(binNum,
+			"tangential velocity squared",AVERAGE,output).ToArray();
 		// TODO: add back later when I have the rest working
 		/*
-
-		// Special handling should come last
-
-		double cumulativeMass=this->GetData(binNum,"mass",CUMULATIVE,0,output);
-		double binRadius=this->GetData(binNum,"bin radius",TOTAL,0,output);
-		// Computation and updating
-		double circularVelocity = sqrt(cumulativeMass/binRadius);
-		this->UpdateBin(binNum,SET,"circular velocity",AVERAGE,0,circularVelocity,
-			output);
-		double density=cumulativeMass/(4./3*vtkMath::Pi()*pow(binRadius,3));
-		this->UpdateBin(binNum,SET,"density",AVERAGE,0,density,output);
-
-		// column data we need to compute dispersions
-		double* vAve=this->GetThreeVectorData(binNum,
-			"velocity",AVERAGE,output);
-		double* vSquaredAve=this->GetThreeVectorData(binNum,
-			"velocity squared",AVERAGE,output);
-		double* vRadAve=this->GetThreeVectorData(binNum,
-			"radial velocity",AVERAGE,output);
-		double* vRadSquaredAve=this->GetThreeVectorData(binNum,
-			"radial velocity squared",AVERAGE,output);
-		double* vTanAve=this->GetThreeVectorData(binNum,
-			"tangential velocity",AVERAGE,output);
-		double* vTanSquaredAve=this->GetThreeVectorData(binNum,
-			"tangential velocity squared",AVERAGE,output);
 		// computing dispersions
 		double* vDisp=ComputeVelocityDispersion(vSquaredAve,vAve);
 		double* vRadDisp=ComputeVelocityDispersion(vRadSquaredAve,vRadAve);
