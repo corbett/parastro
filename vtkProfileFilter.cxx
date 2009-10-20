@@ -163,6 +163,8 @@ void vtkProfileFilter::InitializeBins(vtkPolyData* input,
 		1,this->BinNumber);
 	AllocateDataArray(output,GetColumnName("number in bin",
 		CUMULATIVE).c_str(),1,this->BinNumber);
+	// TODO removing for debuggin purposes add back in
+	/*
 	for(int i = 0; i < input->GetPointData()->GetNumberOfArrays(); ++i)
 		{
 		// Next array data
@@ -204,6 +206,7 @@ void vtkProfileFilter::InitializeBins(vtkPolyData* input,
 				GetColumnName(baseName,CUMULATIVE).c_str(),3,this->BinNumber);
 			}
 		}
+	*/
 }
 
 //----------------------------------------------------------------------------
