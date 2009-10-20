@@ -161,7 +161,6 @@ void vtkProfileFilter::InitializeBins(vtkPolyData* input,
 	// TODO: fix
 	this->CalculateAndSetBinExtents(input,output);
 	// TODO removing for debugging purposes add back in
-	/*
 	// always need this for averages
 	AllocateDataArray(output,GetColumnName("number in bin",TOTAL).c_str(),
 		1,this->BinNumber);
@@ -208,7 +207,6 @@ void vtkProfileFilter::InitializeBins(vtkPolyData* input,
 				GetColumnName(baseName,CUMULATIVE).c_str(),3,this->BinNumber);
 			}
 		}
-	*/
 }
 
 //----------------------------------------------------------------------------
