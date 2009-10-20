@@ -161,6 +161,8 @@ void vtkProfileFilter::InitializeBins(vtkPolyData* input,
 	// always need this for averages
 	AllocateDataArray(output,GetColumnName("number in bin",TOTAL,0).c_str(),
 		1,this->BinNumber);
+	AllocateDataArray(output,GetColumnName("test vector data",TOTAL,0).c_str(),
+		3,this->BinNumber);
 	AllocateDataArray(output,GetColumnName("number in bin",
 		CUMULATIVE,0).c_str(),1,this->BinNumber);
 	for(int i = 0; i < input->GetPointData()->GetNumberOfArrays(); ++i)
