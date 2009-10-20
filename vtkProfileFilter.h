@@ -165,10 +165,25 @@ protected:
 	// Description:
 	// Updates the data values of attribute specified in attributeName
 	// in the bin specified by binNum, either additively or 	
-	// multiplicatively as specified by updateddType by dataToAdd
+	// multiplicatively as specified by updatetype by dataToAdd. Calls
+	// either UpdateArrayBin or UpdateDoubleBin depending on the
+	// type of data in the bin.
 	void UpdateBin(int binNum, BinUpdateType updateType,
 	 	vtkstd::string baseName, ColumnType columnType, double* updateData,
 	 	vtkTable* output);
+	
+	// Description:
+	// If this bin contains an array, update with this method. size(updateData)
+	// should be equal to size(oldData)
+	void UpdateArrayBin(int binNum, BinUpdateType updateType,
+	 	vtkstd::string baseName, ColumnType columnType, double* updateData,
+		vtkAbstractArray* oldData, vtkTable* output);
+
+	// Description:
+	// If this bin contains a double, update with this method. 	
+	void UpdateDoubleBin(int binNum, BinUpdateType updateType,
+		vtkstd::string baseName, ColumnType columnType, double updateData,
+	 	double oldData, vtkTable* output);
 		
 	// Description:
 	// This function is useful for those data items who want to keep track of 
@@ -203,15 +218,10 @@ protected:
 	vtkstd::string GetColumnName(vtkstd::string baseName, 
 		ColumnType columnType);
 
-	// Description:
-	// If this quantity is described by a 3-vector (i.e. three columns)
-	// places its data in a single array and returns
-	double* GetThreeVectorData(int binNum,
-		vtkstd::string baseName,ColumnType columnType,vtkTable* output);
 
 	// Description:
 	// Gets a column's data
-	vtkAbstractArray* GetData(int binNum, vtkstd::string baseName,
+	vtkVariant GetData(int binNum, vtkstd::string baseName,
 		ColumnType columnType, vtkTable* output);
 
   virtual int FillInputPortInformation (int port, vtkInformation *info);

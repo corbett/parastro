@@ -217,7 +217,6 @@ void vtkProfileFilter::CalculateAndSetBinExtents(vtkPolyData* input,
 	// setting the bin radii in the output
 	for(int binNum = 0; binNum < this->BinNumber; ++binNum)
 	{
-	// TODO: this segfaults, fix
 	double updateBinRadius[1] = {(binNum+1)*this->BinSpacing};
 	this->UpdateBin(binNum,SET,
 		"bin radius",TOTAL,updateBinRadius,output);
@@ -464,11 +463,48 @@ void vtkProfileFilter::UpdateBin(int binNum, BinUpdateType updateType,
  	string baseName, ColumnType columnType, double* updateData,
  	vtkTable* output)
 {
-	// TODO this segfaults, fix
-	vtkSmartPointer<vtkAbstractArray> oldData = \
-		this->GetData(binNum,baseName,columnType,output);
-	cout << "number of componenets of old data" \
-		<< oldData->GetNumberOfComponents();
+	vtkVariant oldData = this->GetData(binNum,baseName,columnType,output);
+	if(oldData.IsArray())
+		{
+		this->UpdateArrayBin(binNum,updateType,baseName,columnType,
+			updateData,oldData.ToArray(),output);
+		}
+	else
+		{
+		this->UpdateDoubleBin(binNum,updateType,baseName,columnType,
+			updateData[0],oldData.ToDouble(),output);
+		}
+
+}
+//----------------------------------------------------------------------------
+void vtkProfileFilter::UpdateDoubleBin(int binNum, BinUpdateType updateType,
+ 	string baseName, ColumnType columnType, double updateData, double oldData,
+ 	vtkTable* output)
+{
+	// TODO: commenting out for debugging, add back in
+	/*
+	switch(updateType)
+		{
+		case ADD:
+			updateData+=oldData;
+			break;
+		case MULTIPLY:
+			updateData*=oldData;
+			break;
+		case SET:
+			break;
+		}
+		output->SetValueByName(binNum,
+			GetColumnName(baseName,columnType).c_str(),updateData)
+	*/
+}
+
+//----------------------------------------------------------------------------
+void vtkProfileFilter::UpdateArrayBin(int binNum, BinUpdateType updateType,
+ 	string baseName, ColumnType columnType, double* updateData,
+ 	vtkAbstractArray* oldData, vtkTable* output)
+{
+	// TODO: commenting out for debugging, add back in
 	/*
 	for(int comp = 0; comp < oldData->GetNumberOfComponents(); ++comp)
 		{
@@ -504,19 +540,11 @@ void vtkProfileFilter::UpdateCumulativeBins(int binNum, BinUpdateType
 		}
 }
 //----------------------------------------------------------------------------
-vtkAbstractArray* vtkProfileFilter::GetData(int binNum, string baseName,
+vtkVariant vtkProfileFilter::GetData(int binNum, string baseName,
 	ColumnType columnType, vtkTable* output)
 {
-	cout << "\ngetting column name " << GetColumnName(baseName,columnType) \
-	<< "\n" << " bin num " << binNum << "\n";
-	cout << " getting output " << output->GetValueByName(binNum,
-		GetColumnName(baseName,columnType).c_str()) << "\n";
-	cout << " output is array " << output->GetValueByName(binNum,
-		GetColumnName(baseName,columnType).c_str()).ToArray() << "\n";
-	return vtkDoubleArray::New();
-// TODO: removing for debugging, add back in
-//	return output->GetValueByName(binNum,
-//		GetColumnName(baseName,columnType).c_str()).ToArray();
+	return output->GetValueByName(binNum,
+		GetColumnName(baseName,columnType).c_str());
 }
 
 
