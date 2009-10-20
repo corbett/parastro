@@ -224,8 +224,7 @@ void vtkProfileFilter::CalculateAndSetBinExtents(vtkPolyData* input,
 	for(int binNum = 0; binNum < this->BinNumber; ++binNum)
 	{
 	// TODO: this segfaults, fix
-	double* updateBinRadius = new double[1];
-	updateBinRadius[0]=(binNum+1)*this->BinSpacing;
+	double updateBinRadius[1] = {(binNum+1)*this->BinSpacing};
 	this->UpdateBin(binNum,SET,
 		"bin radius",TOTAL,updateBinRadius,output);
 	}
@@ -471,8 +470,12 @@ void vtkProfileFilter::UpdateBin(int binNum, BinUpdateType updateType,
  	string baseName, ColumnType columnType, double* updateData,
  	vtkTable* output)
 {
+	// TODO this segfaults, fix
 	vtkSmartPointer<vtkAbstractArray> oldData = \
 		this->GetData(binNum,baseName,columnType,output);
+	cout << "number of componenets of old data" \
+		<< oldData->GetNumberOfComponents();
+	/*
 	for(int comp = 0; comp < oldData->GetNumberOfComponents(); ++comp)
 		{
 		switch(updateType)
@@ -493,6 +496,7 @@ void vtkProfileFilter::UpdateBin(int binNum, BinUpdateType updateType,
 	vtkVariant tableData = vtkVariant(newData);
 	output->SetValueByName(binNum,
 		GetColumnName(baseName,columnType).c_str(),tableData);
+	*/
 }
 
 //----------------------------------------------------------------------------
