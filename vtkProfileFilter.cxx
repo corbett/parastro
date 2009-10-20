@@ -149,18 +149,14 @@ int vtkProfileFilter::GetBinNumber(double x[])
 void vtkProfileFilter::GenerateProfile(vtkPolyData* input,vtkTable* output)
 {	
 	this->InitializeBins(input,output);
-	//TODO: commenting out for debugging add back in
-//	this->ComputeStatistics(input,output);
+	this->ComputeStatistics(input,output);
 }
 
 //----------------------------------------------------------------------------
 void vtkProfileFilter::InitializeBins(vtkPolyData* input,
 	vtkTable* output)
 {
-	// This is ssegfaulting,
-	// TODO: fix
 	this->CalculateAndSetBinExtents(input,output);
-	// TODO removing for debugging purposes add back in
 	// always need this for averages
 	AllocateDataArray(output,GetColumnName("number in bin",TOTAL).c_str(),
 		1,this->BinNumber);
