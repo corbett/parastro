@@ -41,6 +41,7 @@ public:
   vtkSetMacro(NeighborNumber, int);
   vtkGetMacro(NeighborNumber, int);
 
+//BTX
 protected:
   vtkNSmoothFilter();
   ~vtkNSmoothFilter();
@@ -61,7 +62,12 @@ private:
 	// calculates the density by taking 4/3 pi r^3 to be the volume
 	// where r=dist(pointOne,pointTwo), and diving the smoothed mass
 	// which is the average mass in that volume by the volume
-	double CalculateDensity(double pointOne[],double pointTwo[], double smoothedMass);
-};
 
+	double CalculateDensity(double pointOne[],double pointTwo[], double smoothedMass);
+	// Description:
+	// returns a string representing the name of the smoothed array
+	vtkstd::string GetSmoothedArrayName(vtkstd::string baseName, int dataIndex);
+
+//ETX
+};
 #endif

@@ -4,7 +4,6 @@
   Module:    $RCSfile: vtkNSmoothFilter.cxx,v $
 =========================================================================*/
 #include "vtkNSmoothFilter.h"
-
 #include "vtkIdList.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
@@ -18,6 +17,7 @@
 #include "vtkDataArray.h"
 #include "vtkMath.h"
 #include "astrovizhelpers/DataSetHelpers.h"
+using vtkstd::string;
 
 vtkCxxRevisionMacro(vtkNSmoothFilter, "$Revision: 1.72 $");
 vtkStandardNewMacro(vtkNSmoothFilter);
@@ -91,96 +91,122 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 	// copies the point attributes
   output->CopyAttributes(input);
 	// Building the Kd tree
-  vtkDebugMacro("1a. Building Kd tree.");
 	vtkSmartPointer<vtkPKdTree> pointTree = vtkSmartPointer<vtkPKdTree>::New();
-	pointTree->BuildLocatorFromPoints(output);
-	vtkDebugMacro("1b. Allocating arrays to store our smoothed values.");
-	// allocating an arrays for each of our smoothed values
- 	AllocateDoubleDataArray(output,"smoothed mass", 
+	pointTree->BuildLocatorFromPoints(input);
+	// Allocating arrays to store our smoothed values
+	// smoothed density
+ 	AllocateDoubleDataArray(output,"smoothed density", 
 		1,output->GetPoints()->GetNumberOfPoints());
-	 AllocateDoubleDataArray(output,"smoothed density", 
-		1,output->GetPoints()->GetNumberOfPoints()); 
-	/*
-	//TODO: add these later
-	AllocateDoubleDataArray(output,"smoothed velocity", \
-		3,output->GetPoints()->GetNumberOfPoints());
-	AllocateDoubleDataArray(output,"smoothed  speed",\
-		1,output->GetPoints()->GetNumberOfPoints());
-	*/
-  vtkDebugMacro("2. Calculating the smoothed quantities we are interested in.");
+	// smoothing each quantity in the input
+	for(int i = 0; i < input->GetPointData()->GetNumberOfArrays(); ++i)
+		{
+		vtkSmartPointer<vtkDataArray> nextArray = \
+		 	input->GetPointData()->GetArray(i);
+		string baseName = nextArray->GetName();
+		for(int comp = 0; comp < nextArray->GetNumberOfComponents(); ++comp)
+			{
+			string totalName = GetSmoothedArrayName(baseName,comp);
+			// Allocating an column for the total sum of the existing quantities
+			AllocateDoubleDataArray(output,totalName.c_str(),
+				1,output->GetPoints()->GetNumberOfPoints());
+			}
+		}
 	for(int nextPointId = 0;
-		nextPointId < output->GetPoints()->GetNumberOfPoints();
+		nextPointId < input->GetPoints()->GetNumberOfPoints();
 	 	++nextPointId)
 		{
-		double* nextPoint=GetPoint(output,nextPointId);
-		vtkDebugMacro("next point is " << nextPoint[0] << "," \
-									<< nextPoint[1] << ","<< nextPoint[2]);
+		double* nextPoint=GetPoint(input,nextPointId);
 		// finding the closest N points
-		vtkDebugMacro("2. Finding the closeset N points");
 		vtkSmartPointer<vtkIdList> closestNPoints = \
 			vtkSmartPointer<vtkIdList>::New();
 		pointTree->FindClosestNPoints(this->NeighborNumber,
 																	nextPoint,closestNPoints);
-		vtkDebugMacro("found " << closestNPoints->GetNumberOfIds() \
-									<< " closest points");
 		// looping over the closestNPoints, 
 		// only if we have more neighbors than ourselves
 		if(closestNPoints->GetNumberOfIds()>0)
 			{
-			double totalMass=0.0;
 			for(int neighborPointLocalId = 0;
 		 		neighborPointLocalId < closestNPoints->GetNumberOfIds();
 				++neighborPointLocalId)
 				{
 				vtkIdType neighborPointGlobalId = \
 										closestNPoints->GetId(neighborPointLocalId);
-				double* neighborPoint=GetPoint(output,neighborPointGlobalId);
-				vtkDebugMacro("the " << neighborPointLocalId \
-											<< "th nearest point coordiates are (" \
-				 							<< neighborPoint[0] << "," << neighborPoint[1] \
-				 							<< "," << neighborPoint[2] << ")");
-				// extracting the mass
-				// has to be double as this version of VTK doesn't have 
-				double* mass=GetDataValue(output,"mass",neighborPointGlobalId);
-				totalMass+=mass[0];
+				double* neighborPoint=GetPoint(input,neighborPointGlobalId);
+			// keeps track of the totals for each quantity inside
+			// the output, only dividing by N at the end
+				for(int i = 0; i < input->GetPointData()->GetNumberOfArrays(); ++i)
+					{
+					vtkSmartPointer<vtkDataArray> nextArray = \
+						input->GetPointData()->GetArray(i);
+					string baseName = nextArray->GetName();
+					double* data=GetDataValue(input,baseName.c_str(),
+						neighborPointGlobalId);
+					for(int comp = 0; comp < nextArray->GetNumberOfComponents(); ++comp)
+						{
+						string totalName = GetSmoothedArrayName(baseName,comp);
+						// adds data[comp] to value in column totalName
+						double* total = \
+							GetDataValue(output,totalName.c_str(),nextPointId);
+						total[0]+=data[comp];
+						SetDataValue(output,totalName.c_str(),
+							nextPointId,total);
+						// memory management
+						delete [] total;
+						}
+					delete [] data;
+					}
 				// Finally, some memory management
-				delete [] mass;
 				delete [] neighborPoint;
 				}
-			double* smoothedMass=new double[1];
-			// storing the smoothed mass in the output vector
-			smoothedMass[0]=totalMass/(closestNPoints->GetNumberOfIds());
-			SetDataValue(output,"smoothed mass",nextPointId,smoothedMass);
+			// dividing by N at the end
+			double numberPoints = closestNPoints->GetNumberOfIds();
+			for(int i = 0; i < input->GetPointData()->GetNumberOfArrays(); ++i)
+				{
+				vtkSmartPointer<vtkDataArray> nextArray = \
+					input->GetPointData()->GetArray(i);
+				string baseName = nextArray->GetName();
+				for(int comp = 0; comp < nextArray->GetNumberOfComponents(); ++comp)
+					{
+					string totalName = GetSmoothedArrayName(baseName,comp);
+					// adds data[comp] to value in column totalName
+					double* smoothedData = \
+						GetDataValue(output,totalName.c_str(),nextPointId);
+					smoothedData[0]/=numberPoints;
+					SetDataValue(output,totalName.c_str(),nextPointId,smoothedData);
+					// memory management
+					delete [] smoothedData;
+					}
+				}
 			// for the smoothed Density we need the identity of the 
 			// last neighbor point, as this is farthest from the original point
-			double* smoothedDensity=new double[1];
+			// we use this to calculate the volume over which to smooth
 			vtkIdType lastNeighborPointGlobalId = \
 									closestNPoints->GetId(closestNPoints->GetNumberOfIds()-1);
 			double* lastNeighborPoint=GetPoint(output,lastNeighborPointGlobalId);		
+			// there MUST be an array named mass in the input.
+			double* smoothedMass = \
+				GetDataValue(output,GetSmoothedArrayName("mass",0).c_str(),
+				nextPointId);
+			double* smoothedDensity=new double[1];
 			smoothedDensity[0]=\
-			 				CalculateDensity(nextPoint,lastNeighborPoint,smoothedMass[0]);
-			vtkDebugMacro("smoothed density is " << smoothedDensity[0]); 
+			 	CalculateDensity(nextPoint,lastNeighborPoint,smoothedMass[0]);
 			//storing the smooth density
 			SetDataValue(output,"smoothed density",nextPointId,smoothedDensity);
 			// Finally, some memory management
 			delete [] lastNeighborPoint;
-			delete [] smoothedDensity;
 			delete [] smoothedMass;
+			delete [] smoothedDensity;
 			}
 		else
 			{
 			// This point has no neighbors, so smoothed mass is identicle to 
 			// this point's mass, and smoothed density is meaningless, set to -1
 			// to indicate it is useless
-			double* mass=GetDataValue(output,"mass",nextPointId);
-			SetDataValue(output,"smoothed mass",nextPointId,mass);
-			// TODO: removing density references, add back in
 			double* density=new double[1];
 			density[0]=-1;
 			SetDataValue(output,"smoothed density",nextPointId,density);
 			// Finally, some memory management
 			delete [] density;
-			delete [] mass;
 			}
 		// Finally, some memory management
 		delete [] nextPoint;
@@ -188,4 +214,8 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 	// Finally, some memory management
   output->Squeeze();
   return 1;
+}
+
+string vtkNSmoothFilter::GetSmoothedArrayName(string baseName, int comp){
+	return "smoothed_"+baseName+"_"+ToString(comp);
 }
