@@ -149,7 +149,8 @@ int vtkProfileFilter::GetBinNumber(double x[])
 void vtkProfileFilter::GenerateProfile(vtkPolyData* input,vtkTable* output)
 {	
 	this->InitializeBins(input,output);
-	this->ComputeStatistics(input,output);
+	//TODO: commenting out for debugging add back in
+//	this->ComputeStatistics(input,output);
 }
 
 //----------------------------------------------------------------------------
