@@ -173,6 +173,14 @@ protected:
 	 	vtkTable* output);
 	
 	// Description:
+	// Overloaded updated bin, taking in a single double. If column to update
+	// contains an array, also makes an array out of update data by replicating
+	// it in each entry, then finally calls UpdateArrayBin
+	void UpdateBin(int binNum, BinUpdateType updateType,
+	 	vtkstd::string baseName, ColumnType columnType, double updateData,
+		vtkTable* output);
+	
+	// Description:
 	// If this bin contains an array, update with this method. size(updateData)
 	// should be equal to size(oldData)
 	void UpdateArrayBin(int binNum, BinUpdateType updateType,

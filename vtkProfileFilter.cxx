@@ -217,9 +217,8 @@ void vtkProfileFilter::CalculateAndSetBinExtents(vtkPolyData* input,
 	// setting the bin radii in the output
 	for(int binNum = 0; binNum < this->BinNumber; ++binNum)
 	{
-	double updateBinRadius[1] = {(binNum+1)*this->BinSpacing};
 	this->UpdateBin(binNum,SET,
-		"bin radius",TOTAL,updateBinRadius,output);
+		"bin radius",TOTAL,(binNum+1)*this->BinSpacing,output);
 	}
 }
 
@@ -246,10 +245,9 @@ void vtkProfileFilter::UpdateBinStatistics(vtkPolyData* input,
 	// Many of the quantities explicitely require the velocity
 	double* v=GetDataValue(input,"velocity",pointGlobalId);
 	int binNum=this->GetBinNumber(x);
-	double updateBinNum[1]={1.0};
-	this->UpdateBin(binNum,ADD,"number in bin",TOTAL,updateBinNum,output);	
+	this->UpdateBin(binNum,ADD,"number in bin",TOTAL,1.0,output);	
 	this->UpdateCumulativeBins(binNum,ADD,
-		"number in bin",CUMULATIVE,updateBinNum,output);	
+		"number in bin",CUMULATIVE,1.0,output);	
 	assert(0<=binNum<=this->BinNumber);
 	// Updating quanties for the input data arrays
 	for(int i = 0; i < input->GetPointData()->GetNumberOfArrays(); ++i)
@@ -262,6 +260,8 @@ void vtkProfileFilter::UpdateBinStatistics(vtkPolyData* input,
 		// Updating the total bin
 		string baseName = nextArray->GetName();
 		this->UpdateBin(binNum,ADD,baseName,TOTAL,nextData, output);	
+		// updating the average bin as well, we will later divide by N
+		this->UpdateBin(binNum,ADD,baseName,AVERAGE,nextData, output);	
 		if(this->CumulativeQuantities->LookupValue(baseName)>=0)
 			{
 			// we should also consider this a cumulative quantity
@@ -280,6 +280,8 @@ void vtkProfileFilter::UpdateBinStatistics(vtkPolyData* input,
 			this->CalculateAdditionalProfileQuantity(baseName,v,r);
 		// updating the totalbin
 		this->UpdateBin(binNum,ADD,baseName,TOTAL,additionalData,output);
+		// updating the average bin as well, we will later divide by N
+		this->UpdateBin(binNum,ADD,baseName,AVERAGE,additionalData,output);
 		if(this->CumulativeQuantities->LookupValue(baseName)>=0)
 			{
 			// we should also consider this a cumulative quantity
@@ -292,12 +294,6 @@ void vtkProfileFilter::UpdateBinStatistics(vtkPolyData* input,
 	delete [] r;
 	delete [] v;
 }
-
-
-
-
-
-
 
 //----------------------------------------------------------------------------
 double* vtkProfileFilter::CalculateAdditionalProfileQuantity(
@@ -348,12 +344,10 @@ double* vtkProfileFilter::CalculateAdditionalProfileQuantity(
 void 	vtkProfileFilter::BinAveragesAndPostprocessing(
 	vtkPolyData* input,vtkTable* output)
 {
-	// TODO: add back later when I have the rest working
-	/*
 	for(int binNum = 0; binNum < this->BinNumber; ++binNum)
 		{
 		int binSize=output->GetValueByName(binNum,
-			GetColumnName("number in bin",TOTAL,0).c_str()).ToInt();
+			GetColumnName("number in bin",TOTAL).c_str()).ToInt();
 		// For each input array, update its average column by getting
 		// the total from the total column then dividing by 
 		// the number in the bin. Only do this if the number in the bin
@@ -365,13 +359,7 @@ void 	vtkProfileFilter::BinAveragesAndPostprocessing(
 					{
 					nextArray = input->GetPointData()->GetArray(i);
 					string baseName = nextArray->GetName();
-					// TODO: 
-					double totalData=GetData(binNum,baseName,TOTAL,comp,output);
-					this->UpdateBin(binNum,SET,baseName,AVERAGE,comp,
-						totalData,output);
-					this->UpdateBin(binNum,MULTIPLY,baseName,AVERAGE,comp,
-						1./binSize,output);
-
+					this->UpdateBin(binNum,MULTIPLY,baseName,AVERAGE,1./binSize,output);
 					}
 					// For each additional quantity we also divide by N in the average, 
 					for(int i = 0; 
@@ -382,11 +370,13 @@ void 	vtkProfileFilter::BinAveragesAndPostprocessing(
 						for(int comp = 0; comp < 3; ++comp)
 							{
 							double totalData=GetData(binNum,baseName,TOTAL,comp,output);
-							this->UpdateBin(binNum,SET,baseName,AVERAGE,comp,
-								totalData/binSize,output);
+							this->UpdateBin(binNum,MULTIPLY,baseName,AVERAGE,comp,
+								1./binSize,output);
 							}
 						}
 				}
+		// TODO: add back later when I have the rest working
+		/*
 
 		// Special handling should come last
 
@@ -474,8 +464,34 @@ void vtkProfileFilter::UpdateBin(int binNum, BinUpdateType updateType,
 		this->UpdateDoubleBin(binNum,updateType,baseName,columnType,
 			updateData[0],oldData.ToDouble(),output);
 		}
-
 }
+
+//----------------------------------------------------------------------------
+void vtkProfileFilter::UpdateBin(int binNum, BinUpdateType updateType,
+ 	string baseName, ColumnType columnType, double updateData,
+ 	vtkTable* output)
+{
+	vtkVariant oldData = this->GetData(binNum,baseName,columnType,output);
+	if(oldData.IsArray())
+		{
+		int sizeOfUpdateData = oldData->GetNumberOfComponents();
+		double arrayUpdateData = new double[sizeOfUpdateData];
+		for(int comp = 0; comp < sizeOfUpdateData; ++comp)
+			{
+			arrayUpdateData[comp] = updateType;
+			}
+		this->UpdateArrayBin(binNum,updateType,baseName,columnType,
+			arrayUpdateData,oldData.ToArray(),output);
+		// finally some memory management
+		delete [] arrayUpdateData;
+		}
+	else
+		{
+		this->UpdateDoubleBin(binNum,updateType,baseName,columnType,
+			updateData,oldData.ToDouble(),output);
+		}
+}
+
 //----------------------------------------------------------------------------
 void vtkProfileFilter::UpdateDoubleBin(int binNum, BinUpdateType updateType,
  	string baseName, ColumnType columnType, double updateData, double oldData,
