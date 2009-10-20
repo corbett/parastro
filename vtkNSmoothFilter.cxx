@@ -119,7 +119,10 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 		// finding the closest N points
 		vtkSmartPointer<vtkIdList> closestNPoints = \
 			vtkSmartPointer<vtkIdList>::New();
-		pointTree->FindClosestNPoints(this->NeighborNumber,
+		// plus one as the first point returned by locator is always one's self, 
+		// and the user expects specifying 1 neighbor will actually find
+		// one neighbor 
+		pointTree->FindClosestNPoints(this->NeighborNumber+1,
 																	nextPoint,closestNPoints);
 		// looping over the closestNPoints, 
 		// only if we have more neighbors than ourselves
