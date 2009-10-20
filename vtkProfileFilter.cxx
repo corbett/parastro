@@ -515,6 +515,8 @@ vtkAbstractArray* vtkProfileFilter::GetData(int binNum, string baseName,
 {
 	cout << "getting column name " << GetColumnName(baseName,columnType) \
 	<< "\n" << "bin num" << binNum << "\n\n";
+	cout << "getting output " << output->GetValueByName(binNum,
+		GetColumnName(baseName,columnType).c_str()) << "\n";
 	return output->GetValueByName(binNum,
 		GetColumnName(baseName,columnType).c_str()).ToArray();
 }
