@@ -501,8 +501,7 @@ void vtkProfileFilter::UpdateArrayBin(int binNum, BinUpdateType updateType,
  	string baseName, ColumnType columnType, double* updateData,
  	vtkAbstractArray* oldData, vtkTable* output)
 {
-	// TODO: commenting out for debugging, add back in
-	/*
+
 	for(int comp = 0; comp < oldData->GetNumberOfComponents(); ++comp)
 		{
 		switch(updateType)
@@ -523,7 +522,6 @@ void vtkProfileFilter::UpdateArrayBin(int binNum, BinUpdateType updateType,
 	vtkVariant tableData = vtkVariant(newData);
 	output->SetValueByName(binNum,
 		GetColumnName(baseName,columnType).c_str(),tableData);
-	*/
 }
 
 //----------------------------------------------------------------------------
