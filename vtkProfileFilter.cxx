@@ -219,18 +219,16 @@ void vtkProfileFilter::CalculateAndSetBinExtents(vtkPolyData* input,
 	// the first column will be the bin radius
 	string binRadiusColumnName=this->GetColumnName("bin radius",
 		TOTAL);
-	cout << binRadiusColumnName << "\n";
 	AllocateDataArray(output,binRadiusColumnName.c_str(),1,this->BinNumber);
 	// setting the bin radii in the output
-	//TODO: removing for debugging add back in
-/*
 	for(int binNum = 0; binNum < this->BinNumber; ++binNum)
 	{
-	double updateBinRadius[1] = {(binNum+1)*this->BinSpacing};
+	// TODO: this segfaults, fix
+	double* updateBinRadius = new double[1];
+	updateBinRadius[0]=(binNum+1)*this->BinSpacing;
 	this->UpdateBin(binNum,SET,
 		"bin radius",TOTAL,updateBinRadius,output);
 	}
-*/
 }
 
 //----------------------------------------------------------------------------
