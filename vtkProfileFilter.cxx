@@ -493,7 +493,7 @@ void vtkProfileFilter::UpdateDoubleBin(int binNum, BinUpdateType updateType,
 			break;
 		}
 		output->SetValueByName(binNum,
-			GetColumnName(baseName,columnType).c_str(),updateData)
+			GetColumnName(baseName,columnType).c_str(),updateData);
 }
 
 //----------------------------------------------------------------------------
