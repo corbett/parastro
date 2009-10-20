@@ -474,7 +474,7 @@ void vtkProfileFilter::UpdateBin(int binNum, BinUpdateType updateType,
 		double* arrayUpdateData = new double[sizeOfUpdateData];
 		for(int comp = 0; comp < sizeOfUpdateData; ++comp)
 			{
-			arrayUpdateData[comp] = updateType;
+			arrayUpdateData[comp] = updateData;
 			}
 		this->UpdateArrayBin(binNum,updateType,baseName,columnType,
 			arrayUpdateData,oldData.ToArray(),output);
