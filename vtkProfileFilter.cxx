@@ -507,21 +507,20 @@ void vtkProfileFilter::UpdateArrayBin(int binNum, BinUpdateType updateType,
 		switch(updateType)
 			{
 			case ADD:
-				updateData[comp]+=oldData->GetVariantValue(comp).ToDouble();
+				oldData->InsertVariantValue(comp,
+					updateData[comp]+oldData->GetVariantValue(comp).ToDouble());
 				break;
 			case MULTIPLY:
-				updateData[comp]*=oldData->GetVariantValue(comp).ToDouble();
+				oldData->InsertVariantValue(comp,
+					updateData[comp]*oldData->GetVariantValue(comp).ToDouble());
 				break;
 			case SET:
+				oldData->InsertVariantValue(comp,updateData[comp]);
 				break;
 			}
 		}
-	vtkSmartPointer<vtkDoubleArray> newData = \
-	 vtkSmartPointer<vtkDoubleArray>::New();
-	newData->SetArray(updateData,oldData->GetNumberOfComponents(),0);
-	vtkVariant tableData = vtkVariant(newData);
-	output->SetValueByName(binNum,
-		GetColumnName(baseName,columnType).c_str(),tableData);
+	output->SetValueByName(binNum,GetColumnName(baseName,columnType).c_str(),
+		oldData);
 }
 
 //----------------------------------------------------------------------------
