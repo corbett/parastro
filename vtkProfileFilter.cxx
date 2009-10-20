@@ -481,8 +481,6 @@ void vtkProfileFilter::UpdateDoubleBin(int binNum, BinUpdateType updateType,
  	string baseName, ColumnType columnType, double updateData, double oldData,
  	vtkTable* output)
 {
-	// TODO: commenting out for debugging, add back in
-	/*
 	switch(updateType)
 		{
 		case ADD:
@@ -496,7 +494,6 @@ void vtkProfileFilter::UpdateDoubleBin(int binNum, BinUpdateType updateType,
 		}
 		output->SetValueByName(binNum,
 			GetColumnName(baseName,columnType).c_str(),updateData)
-	*/
 }
 
 //----------------------------------------------------------------------------

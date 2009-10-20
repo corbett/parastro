@@ -7,6 +7,6 @@
 	 <Filter name="Mass Function Filter" />
 	 <Filter name="Profile Filter" />
 	 <Filter name="Most Bound" />
-	 <Filter name="Plot Data" />	
+	 <Filter name="PlotAttributes" />	
    </Category>
  </ParaViewFilters>
