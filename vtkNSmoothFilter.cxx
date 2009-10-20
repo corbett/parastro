@@ -98,9 +98,8 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 	// allocating an arrays for each of our smoothed values
  	AllocateDoubleDataArray(output,"smoothed mass", 
 		1,output->GetPoints()->GetNumberOfPoints());
-	// TODO: removing density references, add back in
-	/* AllocateDoubleDataArray(output,"smoothed density", 
-		1,output->GetPoints()->GetNumberOfPoints()); */
+	 AllocateDoubleDataArray(output,"smoothed density", 
+		1,output->GetPoints()->GetNumberOfPoints()); 
 	/*
 	//TODO: add these later
 	AllocateDoubleDataArray(output,"smoothed velocity", \
@@ -152,9 +151,7 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 			// storing the smoothed mass in the output vector
 			smoothedMass[0]=totalMass/(closestNPoints->GetNumberOfIds());
 			SetDataValue(output,"smoothed mass",nextPointId,smoothedMass);
-			// TODO: removing density references, add back in
-			/*
-			//for the smoothed Density we need the identity of the 
+			// for the smoothed Density we need the identity of the 
 			// last neighbor point, as this is farthest from the original point
 			double* smoothedDensity=new double[1];
 			vtkIdType lastNeighborPointGlobalId = \
@@ -168,7 +165,6 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 			// Finally, some memory management
 			delete [] lastNeighborPoint;
 			delete [] smoothedDensity;
-			*/
 			delete [] smoothedMass;
 			}
 		else
@@ -179,13 +175,11 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 			double* mass=GetDataValue(output,"mass",nextPointId);
 			SetDataValue(output,"smoothed mass",nextPointId,mass);
 			// TODO: removing density references, add back in
-			/*
 			double* density=new double[1];
 			density[0]=-1;
 			SetDataValue(output,"smoothed density",nextPointId,density);
 			// Finally, some memory management
 			delete [] density;
-			*/
 			delete [] mass;
 			}
 		// Finally, some memory management
