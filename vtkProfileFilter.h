@@ -113,8 +113,8 @@ protected:
 		// with functionPtr.
 		ProfileElement(vtkstd::string baseName, int numberComponents,
 			double* (*funcPtr)(vtkVariant, vtkVariant),
-			ProfileElement postProcessArgumentOne, 
-			ProfileElement postProcessArgumentTwo);
+			ProfileElement &postProcessArgumentOne, 
+			ProfileElement &postProcessArgumentTwo);
 		~ProfileElement();
  	};
 

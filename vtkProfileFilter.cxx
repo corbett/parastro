@@ -46,11 +46,12 @@ vtkProfileFilter::vtkProfileFilter()
 	// at the end with the function given in the constructor taking two 
 	// arguments based on the value of two columns computed along the way
 	// as given by the two ProfileElement objects in the constructor
+	ProfileElement cumulativeMass = ProfileElement("mass",1,0,CUMULATIVE);
+	ProfileElement totalBinRadius =	ProfileElement("bin radius",1,0,TOTAL);
 	this->AdditionalProfileQuantities.push_back(
 		ProfileElement("circular velocity",1,
 		&ComputeCircularVelocity,
-		ProfileElement("mass",1,0,CUMULATIVE),
-		ProfileElement("bin radius",1,0,TOTAL)));
+		cumulativeMass,totalBinRadius));
 	this->MaxR=1.0;
 	this->Delta=0.0;
 	this->BinNumber=30;
@@ -551,8 +552,8 @@ vtkProfileFilter::ProfileElement::ProfileElement(string baseName,
 
 vtkProfileFilter::ProfileElement::ProfileElement(string baseName, 
 	int numberComponents, double* (*funcPtr)(vtkVariant, vtkVariant),
-	ProfileElement postProcessArgumentOne, 
-	ProfileElement postProcessArgumentTwo)
+	ProfileElement &postProcessArgumentOne, 
+	ProfileElement &postProcessArgumentTwo)
 {
 	this->BaseName = baseName;
 	this->NumberComponents = numberComponents;
