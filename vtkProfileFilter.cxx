@@ -330,13 +330,21 @@ void 	vtkProfileFilter::BinAveragesAndPostprocessing(
 					nextElement.PostProcessArgumentOne->BaseName,
 					nextElement.PostProcessArgumentOne->ProfileColumnType,
 					output);
-				cout << "argument one " << argumentOne.ToDouble() << "\n";
+				cout << "argument one " 
+					<< nextElement.PostProcessArgumentOne->BaseName
+					<< " type: " 
+					<< nextElement.PostProcessArgumentOne->ProfileColumnType
+					<< " value: " << argumentOne.ToDouble() << "\n";
 				vtkVariant argumentTwo = \
 					this->GetData(binNum,
 					nextElement.PostProcessArgumentTwo->BaseName,
 					nextElement.PostProcessArgumentTwo->ProfileColumnType,
 					output);
-				cout << "argument two " <<  argumentOne.ToDouble() << "\n";
+				cout << "argument two " 
+					<< nextElement.PostProcessArgumentTwo->BaseName
+					<< " type: " 
+					<< nextElement.PostProcessArgumentTwo->ProfileColumnType
+					<< " value: " << argumentTwo.ToDouble() << "\n";
 				double* updateData = \
 					nextElement.PostProcessFunction(argumentOne,argumentTwo);
 				this->UpdateBin(binNum,SET,nextElement.BaseName,TOTAL,
