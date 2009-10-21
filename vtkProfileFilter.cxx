@@ -64,11 +64,13 @@ vtkProfileFilter::vtkProfileFilter()
 		&ComputeVelocityDispersion,
 		"tangential velocity squared",AVERAGE,
 		"tangential velocity",AVERAGE));
+	/*
 	this->AdditionalProfileQuantities.push_back(
 		ProfileElement("radial velocity dispersion",3,
 		&ComputeVelocityDispersion,
 		"radial velocity squared",AVERAGE,
 		"radial velocity",AVERAGE));
+	*/
 	// Defaults for quantities which will be computed based on user's
 	// later input
 	this->MaxR=1.0;
