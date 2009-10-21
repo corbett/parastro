@@ -28,12 +28,12 @@ vtkProfileFilter::vtkProfileFilter()
 {
   this->SetNumberOfInputPorts(2);
 	this->AdditionalProfileQuantities.push_back(
-		ProfileElement("angular momentum",3,&ComputeAngularMomentum,TOTAL));
+		ProfileElement("angular momentum",3,&ComputeAngularMomentum,AVERAGE));
 	this->AdditionalProfileQuantities.push_back(
-		ProfileElement("radial velocity",3,&ComputeRadialVelocity,TOTAL));
+		ProfileElement("radial velocity",3,&ComputeRadialVelocity,AVERAGE));
 	this->AdditionalProfileQuantities.push_back(
 		ProfileElement("tangential velocity",3,&ComputeTangentialVelocity,
-		TOTAL));
+		AVERAGE));
 	this->AdditionalProfileQuantities.push_back(
 		ProfileElement("velocity squared",1,&ComputeVelocitySquared,AVERAGE));
 	this->AdditionalProfileQuantities.push_back(
@@ -64,13 +64,11 @@ vtkProfileFilter::vtkProfileFilter()
 		&ComputeVelocityDispersion,
 		"tangential velocity squared",AVERAGE,
 		"tangential velocity",AVERAGE));
-	/*
 	this->AdditionalProfileQuantities.push_back(
 		ProfileElement("radial velocity dispersion",3,
 		&ComputeVelocityDispersion,
 		"radial velocity squared",AVERAGE,
 		"radial velocity",AVERAGE));
-	*/
 	// Defaults for quantities which will be computed based on user's
 	// later input
 	this->MaxR=1.0;
@@ -360,48 +358,6 @@ void 	vtkProfileFilter::BinAveragesAndPostprocessing(
 				delete [] updateData;
 				}
 			}
-		// TODO: add back later when I have the rest working
-		// Computation and updating
-		// TODO: these are scalars, but are currently being initialized
-		// as vectors so all componenets are the same. make initialization
-		// more general.
-		/*
-		this->UpdateBin(binNum,SET,"density",AVERAGE,
-			cumulativeMass/(4./3*vtkMath::Pi()*pow(binRadius,3)),output);
-		// column data we need to compute dispersions
-		vtkSmartPointer<vtkAbstractArray> vAve = \
-			this->GetData(binNum,"velocity",AVERAGE,output).ToArray();
-		vtkSmartPointer<vtkAbstractArray> vSquaredAve = \
-		 	this->GetData(binNum,"velocity squared",AVERAGE,output).ToArray();
-		vtkSmartPointer<vtkAbstractArray> vRadAve = \
-			this->GetData(binNum,"radial velocity",AVERAGE,output).ToArray();
-		vtkSmartPointer<vtkAbstractArray> vRadSquaredAve = \
-			this->GetData(binNum,
-			"radial velocity squared",AVERAGE,output).ToArray();
-		vtkSmartPointer<vtkAbstractArray> vTanAve = \
-			this->GetData(binNum,"tangential velocity",AVERAGE,output).ToArray();
-		vtkSmartPointer<vtkAbstractArray> vTanSquaredAve = \
-			this->GetData(binNum,
-			"tangential velocity squared",AVERAGE,output).ToArray();
-		*/
-
-		// computing dispersions
-		/*
-		double* vDisp=ComputeVelocityDispersion(vSquaredAve,vAve);
-		double* vRadDisp=ComputeVelocityDispersion(vRadSquaredAve,vRadAve);
-		double* vTanDisp=ComputeVelocityDispersion(vTanSquaredAve,vTanAve);
-		// updating output		
-		this->UpdateBin(binNum,SET,"velocity dispersion",AVERAGE,
-			coord,vDisp[coord],output);
-		this->UpdateBin(binNum,SET,"radial velocity dispersion",AVERAGE,
-			coord,vRadDisp[coord],output);
-		this->UpdateBin(binNum,SET,"tangential velocity dispersion",AVERAGE,
-			coord,vTanDisp[coord],output);
-		// finally some memory management
-		delete [] vDisp;
-		delete [] vRadDisp;
-		delete [] vTanDisp;
-		*/
 	}
 }
 
