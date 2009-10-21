@@ -49,15 +49,16 @@ vtkProfileFilter::vtkProfileFilter()
 		ProfileElement("tangential velocity",3,&ComputeTangentialVelocity,
 		0,1,0,0));
 	this->AdditionalProfileQuantities.push_back(
-		ProfileElement("velocity squared",3,&ComputeVelocitySquared,
+		ProfileElement("velocity squared",1,&ComputeVelocitySquared,
+		0,1,0,0));
+	/*
+	this->AdditionalProfileQuantities.push_back(
+		ProfileElement("radial velocity squared",1,&ComputeRadialVelocitySquared,
 		0,1,0,0));
 	this->AdditionalProfileQuantities.push_back(
-		ProfileElement("radial velocity squared",3,&ComputeRadialVelocitySquared,
-		0,1,0,0));
-	this->AdditionalProfileQuantities.push_back(
-		ProfileElement("tangential velocity squared",3,
+		ProfileElement("tangential velocity squared",1,
 		&ComputeTangentialVelocitySquared,0,1,0,0));
-
+	*/
 
 //	ProfileElement 
 /*

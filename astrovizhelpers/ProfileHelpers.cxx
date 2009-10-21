@@ -274,7 +274,9 @@ double* ComputeAngularMomentum(double v[], double r[])
 //----------------------------------------------------------------------------
 double* ComputeVelocitySquared(double v[],double r[])
 {
-	return ComputeProjection(v,v);
+	double* velocitySquared = new double[1];
+	velocitySquared[0]=vtkMath::Dot(v,v);
+	return velocitySquared;
 }
 
 //----------------------------------------------------------------------------
