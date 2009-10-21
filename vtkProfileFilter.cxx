@@ -27,37 +27,24 @@ vtkStandardNewMacro(vtkProfileFilter);
 vtkProfileFilter::vtkProfileFilter()
 {
   this->SetNumberOfInputPorts(2);
-
-// Trying out a different way of initializing
-	/*struct ProfileElement
-	{
-		vtkstd::string baseName;
-		int numberElements;
-		vtkVariant (*funcPtr)(double [], double []);
-		int average;
-		int total;
-		int cumulative;
-		int postprocessing
-	};
-	*/
-
 	this->AdditionalProfileQuantities.push_back(
-		ProfileElement("angular momentum",3,&ComputeAngularMomentum,0,1,0,0));
+		ProfileElement("angular momentum",3,&ComputeAngularMomentum,TOTAL));
 	this->AdditionalProfileQuantities.push_back(
-		ProfileElement("radial velocity",3,&ComputeRadialVelocity,0,1,0,0));
+		ProfileElement("radial velocity",3,&ComputeRadialVelocity,TOTAL));
 	this->AdditionalProfileQuantities.push_back(
 		ProfileElement("tangential velocity",3,&ComputeTangentialVelocity,
-		0,1,0,0));
+		TOTAL));
 	this->AdditionalProfileQuantities.push_back(
-		ProfileElement("velocity squared",1,&ComputeVelocitySquared,
-		0,1,0,0));
+		ProfileElement("velocity squared",1,&ComputeVelocitySquared,TOTAL));
 	this->AdditionalProfileQuantities.push_back(
 		ProfileElement("radial velocity squared",1,&ComputeRadialVelocitySquared,
-		0,1,0,0));
+		TOTAL));
 	this->AdditionalProfileQuantities.push_back(
 		ProfileElement("tangential velocity squared",1,
-		&ComputeTangentialVelocitySquared,0,1,0,0));
-
+		&ComputeTangentialVelocitySquared,TOTAL));
+//	this->AdditionalProfileQuantities.push_back(
+//		ProfileElement("circular velocity",1,
+//		&ComputeCircularVelocity,0,1,0,1);
 //	ProfileElement 
 /*
 	this->AdditionalProfileQuantities = vtkStringArray::New();
@@ -216,27 +203,10 @@ void vtkProfileFilter::InitializeBins(vtkPolyData* input,
 	 	++i)
 		{
 		ProfileElement nextElement = this->AdditionalProfileQuantities[i];
-		if(nextElement.Total)
-			{
-			// Allocating an column for the total sum of the existing quantities
-			AllocateDataArray(output,
-				GetColumnName(nextElement.BaseName,TOTAL).c_str(),
-				nextElement.NumberComponents,this->BinNumber);
-			}
-		if(nextElement.Average)
-			{
-			// Allocating an column for the averages of the existing quantities
-			AllocateDataArray(output,
-				GetColumnName(nextElement.BaseName,AVERAGE).c_str(),
-				nextElement.NumberComponents,this->BinNumber);
-			}
-		if(nextElement.Cumulative)
-			{
-			// we should also consider this a cumulative quantity
-			AllocateDataArray(output,
-				GetColumnName(nextElement.BaseName,CUMULATIVE).c_str(),
-				nextElement.NumberComponents,this->BinNumber);
-			}
+		AllocateDataArray(output,
+			GetColumnName(nextElement.BaseName,
+			nextElement.ProfileColumnType).c_str(),nextElement.NumberComponents,
+			this->BinNumber);
 		}
 }
 
@@ -310,21 +280,8 @@ void vtkProfileFilter::UpdateBinStatistics(vtkPolyData* input,
 			{
 			double* additionalData = \
 				nextElement.Function(v,r);
-			if(nextElement.Total)
-				{
-				this->UpdateBin(binNum,ADD,nextElement.BaseName,
-					TOTAL,additionalData,output);
-				}
-			if(nextElement.Average)
-				{
-				this->UpdateBin(binNum,ADD,nextElement.BaseName,
-					AVERAGE,additionalData,output);
-				}
-			if(nextElement.Cumulative)
-				{
-				this->UpdateCumulativeBins(binNum,ADD,nextElement.BaseName,CUMULATIVE,
-					additionalData,output);
-				}
+			this->UpdateBin(binNum,ADD,nextElement.BaseName,
+				nextElement.ProfileColumnType,additionalData,output);
 			}
 		}
 	// Finally some memory management
@@ -332,53 +289,6 @@ void vtkProfileFilter::UpdateBinStatistics(vtkPolyData* input,
 	delete [] r;
 	delete [] v;
 }
-
-//----------------------------------------------------------------------------
-/*
-double* vtkProfileFilter::CalculateAdditionalProfileQuantity(
-	string additionalQuantityName, double v[], double r[])
-{
-	// Some inefficiency by recomputing quantities, but paid for with 
-	// flexibility, i.e don't have to call in a certain order or can compute
-	// one quantity without storing the other
-	if(additionalQuantityName == "radial velocity")
-		{
-		return ComputeRadialVelocity(v,r);
-		}
-	else if(additionalQuantityName == "tangential velocity")
-		{
-		return ComputeTangentialVelocity(v,r);
-		}
-	else if(additionalQuantityName == "angular momentum")
-		{
-		return ComputeAngularMomentum(v,r);
-		}
-	else if(additionalQuantityName == "velocity squared")
-		{
-		return ComputeVelocitySquared(v,r);
-		}
-	else if(additionalQuantityName == "radial velocity squared")
-		{
-		return ComputeRadialVelocitySquared(v,r);
-		}
-	else if(additionalQuantityName == "tangential velocity squared")
-		{
-		return ComputeTangentialVelocitySquared(v,r);
-		}
-	else
-		{
-		vtkDebugMacro("input arrray requested not found, quantity returned as \
-			array of zero");
-		// sometimes the quantities should be 0, only updated at post-processing
-		// final step
-		double* emptyBin = new double[3];
-		emptyBin[0]=0.0;
-		emptyBin[1]=0.0;
-		emptyBin[2]=0.0;
-		return emptyBin;
-		}
-}
-*/
 
 //----------------------------------------------------------------------------
 void 	vtkProfileFilter::BinAveragesAndPostprocessing(
@@ -408,7 +318,7 @@ void 	vtkProfileFilter::BinAveragesAndPostprocessing(
 					{
 					ProfileElement nextElement = \
 						this->AdditionalProfileQuantities[i];
-					if(nextElement.Average)
+					if(nextElement.ProfileColumnType==AVERAGE)
 						{
 						this->UpdateBin(binNum,MULTIPLY,nextElement.BaseName,
 							AVERAGE,1./binSize,output);
@@ -416,14 +326,35 @@ void 	vtkProfileFilter::BinAveragesAndPostprocessing(
 					}
 				}
 
-		double cumulativeMass = \
-		 	this->GetData(binNum,"mass",CUMULATIVE,output).ToDouble();
-		double binRadius=this->GetData(binNum,"bin radius",
-			TOTAL,output).ToDouble();
+		// Finally post processing those items we must
+		// For each additional quantity we also divide by N in the average, 
+/*
+		for(int i = 0; 
+			i < this->AdditionalProfileQuantities.size();
+		 	++i)
+			{
+			ProfileElement nextElement = \
+				this->AdditionalProfileQuantities[i];
+			if(nextElement.PostProcess)
+				{
+				// TODO fill in
+				vtkVariant argumentOne = \
+		 			this->GetData(binNum,"mass",CUMULATIVE,output);
+				vtkVariant argumentTwo=this->GetData(binNum,"bin radius",
+					TOTAL,output);
+				double* updateData = \
+					nextElement.PostProcessFunction(argumentOne,argumentTwo);
+				this->UpdateBin(binNum,SET,nextElement.BaseName,TOTAL,
+					updateData,output);
+				}
+			}
+		*/
+		// TODO: add back later when I have the rest working
 		// Computation and updating
 		// TODO: these are scalars, but are currently being initialized
 		// as vectors so all componenets are the same. make initialization
 		// more general.
+		/*
 		this->UpdateBin(binNum,SET,"circular velocity",
 			AVERAGE,cumulativeMass/binRadius,output);
 		this->UpdateBin(binNum,SET,"density",AVERAGE,
@@ -443,7 +374,8 @@ void 	vtkProfileFilter::BinAveragesAndPostprocessing(
 		vtkSmartPointer<vtkAbstractArray> vTanSquaredAve = \
 			this->GetData(binNum,
 			"tangential velocity squared",AVERAGE,output).ToArray();
-		// TODO: add back later when I have the rest working
+		*/
+
 		// computing dispersions
 		/*
 		double* vDisp=ComputeVelocityDispersion(vSquaredAve,vAve);
@@ -605,17 +537,30 @@ vtkVariant vtkProfileFilter::GetData(int binNum, string baseName,
 //----------------------------------------------------------------------------
 vtkProfileFilter::ProfileElement::ProfileElement(string baseName, 
 	int numberComponents, double* (*funcPtr)(double [], double []),
-	int average, int total, int cumulative, int postprocess)
+	ColumnType columnType)
 {
 	this->BaseName = baseName;
 	this->NumberComponents = numberComponents;
 	this->Function = funcPtr;
-	this->Average = average;
-	this->Total = total;
-	this->Cumulative = cumulative;
-	this->Postprocess = postprocess;
+	this->ProfileColumnType = columnType;
+	this->Postprocess = 0;	
+}
+
+vtkProfileFilter::ProfileElement::ProfileElement(string baseName, 
+	int numberComponents, double* (*funcPtr)(vtkVariant, vtkVariant),
+	ProfileElement postProcessArgumentOne, 
+	ProfileElement postProcessArgumentTwo)
+{
+	this->BaseName = baseName;
+	this->NumberComponents = numberComponents;
+	this->PostProcessFunction = funcPtr;
+	this->ProfileColumnType = TOTAL;
+	this->Postprocess = 1;
+	this->PostProcessArgumentOne=&postProcessArgumentOne;
+	this->PostProcessArgumentTwo=&postProcessArgumentTwo;
 	
 }
+
 //----------------------------------------------------------------------------
 vtkProfileFilter::ProfileElement::~ProfileElement()
 {

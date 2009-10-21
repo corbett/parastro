@@ -74,32 +74,6 @@ struct VirialRadiusInfo
 	double virialRadius;
 };
 
-// Description:
-// the ProfileElement struct holds all the information
-// necessary to initialize and at runtime compute the value
-// of an additional profile element.
-// name : unique string name describing this element, 
-// only the base name, an affix will be added for any
-// quantities desired to be computed
-// number elements : the number of elements in each entry
-// funcPtr : the function to use to evaluate an update
-// average : if 1 compute the average of this quantity
-// total : if 1 compute the total of this quantity
-// cumulative: if 1 compute the cumulative value of this quantity
-// postprocess: if 1 only update during post processing
-/*
-struct ProfileElement
-{
-	vtkstd::string baseName;
-	int numberElements;
-	double* (*funcPtr)(double [], double []);
-	int average;
-	int total;
-	int cumulative;
-	int postprocess;
-};
-*/
-
 
 // Description:
 // Computes the virial radius >=0 base upon the user defined 

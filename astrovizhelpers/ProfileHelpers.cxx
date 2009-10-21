@@ -315,7 +315,14 @@ double* ComputeVelocityDispersion(double vSquaredAve[], double  vAve[])
 	}
 	return velocityDispersion;
 }
-
+//----------------------------------------------------------------------------
+double* ComputeCircularVelocity(vtkVariant cumulativeMass, 
+	vtkVariant binRadius)
+{
+	double* circularVelocity = new double[1];
+	circularVelocity[0]=cumulativeMass.ToDouble()/binRadius.ToDouble();
+	return circularVelocity;
+}
 
 //----------------------------------------------------------------------------
 double* ComputeProjection(double  vectorOne[],double vectorTwo[])

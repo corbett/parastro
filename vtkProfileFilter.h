@@ -99,13 +99,22 @@ protected:
 		vtkstd::string BaseName;
 		int NumberComponents;
 		double* (*Function)(double [], double []);
-		int Average;
-		int Total;
-		int Cumulative;
+		double* (*PostProcessFunction)(vtkVariant, vtkVariant);
+		ColumnType ProfileColumnType;
 		int Postprocess;
+		ProfileElement* PostProcessArgumentOne;
+		ProfileElement* PostProcessArgumentTwo;
 		ProfileElement(vtkstd::string baseName, int numberComponents,
 			double* (*funcPtr)(double [], double []),
-			int average, int total, int cumulative,int postprocess);
+			ColumnType columnType);
+		// if post processing is desired, then must specify two arguments, which
+		// are profile elements. Their data (all computed) will be retrieved from
+		// the output in postprocessing and a final computation will be performed
+		// with functionPtr.
+		ProfileElement(vtkstd::string baseName, int numberComponents,
+			double* (*funcPtr)(vtkVariant, vtkVariant),
+			ProfileElement postProcessArgumentOne, 
+			ProfileElement postProcessArgumentTwo);
 		~ProfileElement();
  	};
 
