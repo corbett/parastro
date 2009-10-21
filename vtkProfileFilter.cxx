@@ -27,6 +27,24 @@ vtkStandardNewMacro(vtkProfileFilter);
 vtkProfileFilter::vtkProfileFilter()
 {
   this->SetNumberOfInputPorts(2);
+
+// Trying out a different way of initializing
+	/*struct ProfileElement
+	{
+		vtkstd::string baseName;
+		int numberElements;
+		vtkVariant (*funcPtr)(double [], double []);
+		int average;
+		int total;
+		int cumulative;
+	};
+	*/
+	ProfileElement angularMomentum = ProfileElement(
+		"angular momentum",3,&ComputeAngularMomentum,0,1,0,0);
+	this->AdditionalProfileQuantities.push_back(angularMomentum);
+	cout << "angular momentum pushback sucessful ";
+//	ProfileElement 
+/*
 	this->AdditionalProfileQuantities = vtkStringArray::New();
 		this->AdditionalProfileQuantities->InsertNextValue("circular velocity");
 		this->AdditionalProfileQuantities->InsertNextValue("density");
@@ -43,7 +61,7 @@ vtkProfileFilter::vtkProfileFilter()
 	this->CumulativeQuantities = vtkStringArray::New();
 		this->CumulativeQuantities->InsertNextValue("number in bin");
 		this->CumulativeQuantities->InsertNextValue("mass");
-
+*/
 	this->MaxR=1.0;
 	this->Delta=0.0;
 	this->BinNumber=30;
@@ -169,38 +187,40 @@ void vtkProfileFilter::InitializeBins(vtkPolyData* input,
 		 	input->GetPointData()->GetArray(i);
 		int numComponents = nextArray->GetNumberOfComponents();
 		string baseName = nextArray->GetName();
-		// Allocating an column for the total sum of the existing quantities
 		AllocateDataArray(output,GetColumnName(baseName,TOTAL).c_str(),
 				numComponents,this->BinNumber);
-		// Allocating an column for the averages of the existing quantities
 		AllocateDataArray(output,GetColumnName(baseName,AVERAGE).c_str(),
 			numComponents,this->BinNumber);
-		if(this->CumulativeQuantities->LookupValue(baseName)>=0)
-			{
-			// we should also consider this a cumulative quantity
-			AllocateDataArray(output,
-				GetColumnName(baseName,CUMULATIVE).c_str(),
-				numComponents,this->BinNumber);
-			}
+		AllocateDataArray(output,GetColumnName(baseName,CUMULATIVE).c_str(),
+			numComponents,this->BinNumber);
 		}
 	// For our additional quantities, allocating a column for the average 
 	// and the sum. These are currently restricted to be 3-vectors
 	for(int i = 0; 
-		i < this->AdditionalProfileQuantities->GetNumberOfValues();
+		i < this->AdditionalProfileQuantities.size();
 	 	++i)
 		{
-		string baseName=this->AdditionalProfileQuantities->GetValue(i);
-		// Allocating an column for the total sum of the existing quantities
-		AllocateDataArray(output,GetColumnName(baseName,TOTAL).c_str(),
-			3,this->BinNumber);
-		// Allocating an column for the averages of the existing quantities
-		AllocateDataArray(output,GetColumnName(baseName,AVERAGE).c_str(),
-			3,this->BinNumber);
-		if(this->CumulativeQuantities->LookupValue(baseName)>=0)
+		ProfileElement nextElement = this->AdditionalProfileQuantities[i];
+		if(nextElement.Total)
+			{
+			// Allocating an column for the total sum of the existing quantities
+			AllocateDataArray(output,
+				GetColumnName(nextElement.BaseName,TOTAL).c_str(),
+				nextElement.NumberComponents,this->BinNumber);
+			}
+		if(nextElement.Average)
+			{
+			// Allocating an column for the averages of the existing quantities
+			AllocateDataArray(output,
+				GetColumnName(nextElement.BaseName,AVERAGE).c_str(),
+				nextElement.NumberComponents,this->BinNumber);
+			}
+		if(nextElement.Cumulative)
 			{
 			// we should also consider this a cumulative quantity
 			AllocateDataArray(output,
-				GetColumnName(baseName,CUMULATIVE).c_str(),3,this->BinNumber);
+				GetColumnName(nextElement.BaseName,CUMULATIVE).c_str(),
+				nextElement.NumberComponents,this->BinNumber);
 			}
 		}
 }
@@ -260,33 +280,36 @@ void vtkProfileFilter::UpdateBinStatistics(vtkPolyData* input,
 		// Updating the total bin
 		string baseName = nextArray->GetName();
 		this->UpdateBin(binNum,ADD,baseName,TOTAL,nextData, output);	
-		// updating the average bin as well, we will later divide by N
 		this->UpdateBin(binNum,ADD,baseName,AVERAGE,nextData, output);	
-		if(this->CumulativeQuantities->LookupValue(baseName)>=0)
-			{
-			// we should also consider this a cumulative quantity
-			this->UpdateCumulativeBins(binNum,ADD,baseName,CUMULATIVE,nextData,
-				output);
-			}
+		this->UpdateCumulativeBins(binNum,ADD,baseName,CUMULATIVE,nextData,
+			output);
 		//Finally some memory management
 		delete [] nextData;
 		}
 	for(int i = 0; i < 
-		this->AdditionalProfileQuantities->GetNumberOfValues(); 
+		this->AdditionalProfileQuantities.size(); 
 		++i)
 		{
-		string baseName=this->AdditionalProfileQuantities->GetValue(i);
-		double* additionalData = \
-			this->CalculateAdditionalProfileQuantity(baseName,v,r);
-		// updating the totalbin
-		this->UpdateBin(binNum,ADD,baseName,TOTAL,additionalData,output);
-		// updating the average bin as well, we will later divide by N
-		this->UpdateBin(binNum,ADD,baseName,AVERAGE,additionalData,output);
-		if(this->CumulativeQuantities->LookupValue(baseName)>=0)
+		ProfileElement nextElement=this->AdditionalProfileQuantities[i];
+		if(!nextElement.Postprocess)
 			{
-			// we should also consider this a cumulative quantity
-			this->UpdateCumulativeBins(binNum,ADD,baseName,CUMULATIVE,
-				additionalData,output);
+			double* additionalData = \
+				nextElement.Function(v,r);
+			if(nextElement.Total)
+				{
+				this->UpdateBin(binNum,ADD,nextElement.BaseName,
+					TOTAL,additionalData,output);
+				}
+			if(nextElement.Average)
+				{
+				this->UpdateBin(binNum,ADD,nextElement.BaseName,
+					AVERAGE,additionalData,output);
+				}
+			if(nextElement.Cumulative)
+				{
+				this->UpdateCumulativeBins(binNum,ADD,nextElement.BaseName,CUMULATIVE,
+					additionalData,output);
+				}
 			}
 		}
 	// Finally some memory management
@@ -296,6 +319,7 @@ void vtkProfileFilter::UpdateBinStatistics(vtkPolyData* input,
 }
 
 //----------------------------------------------------------------------------
+/*
 double* vtkProfileFilter::CalculateAdditionalProfileQuantity(
 	string additionalQuantityName, double v[], double r[])
 {
@@ -339,6 +363,7 @@ double* vtkProfileFilter::CalculateAdditionalProfileQuantity(
 		return emptyBin;
 		}
 }
+*/
 
 //----------------------------------------------------------------------------
 void 	vtkProfileFilter::BinAveragesAndPostprocessing(
@@ -363,11 +388,16 @@ void 	vtkProfileFilter::BinAveragesAndPostprocessing(
 					}
 				// For each additional quantity we also divide by N in the average, 
 				for(int i = 0; 
-					i < this->AdditionalProfileQuantities->GetNumberOfValues();
+					i < this->AdditionalProfileQuantities.size();
 				 	++i)
 					{
-					string baseName=this->AdditionalProfileQuantities->GetValue(i);
-					this->UpdateBin(binNum,MULTIPLY,baseName,AVERAGE,1./binSize,output);
+					ProfileElement nextElement = \
+						this->AdditionalProfileQuantities[i];
+					if(nextElement.Average)
+						{
+						this->UpdateBin(binNum,MULTIPLY,nextElement.BaseName,
+							AVERAGE,1./binSize,output);
+						}
 					}
 				}
 
@@ -376,10 +406,13 @@ void 	vtkProfileFilter::BinAveragesAndPostprocessing(
 		double binRadius=this->GetData(binNum,"bin radius",
 			TOTAL,output).ToDouble();
 		// Computation and updating
+		// TODO: these are scalars, but are currently being initialized
+		// as vectors so all componenets are the same. make initialization
+		// more general.
 		this->UpdateBin(binNum,SET,"circular velocity",
 			AVERAGE,cumulativeMass/binRadius,output);
-		double density = cumulativeMass/(4./3*vtkMath::Pi()*pow(binRadius,3));
-		this->UpdateBin(binNum,SET,"density",AVERAGE,density,output);
+		this->UpdateBin(binNum,SET,"density",AVERAGE,
+			cumulativeMass/(4./3*vtkMath::Pi()*pow(binRadius,3)),output);
 		// column data we need to compute dispersions
 		vtkSmartPointer<vtkAbstractArray> vAve = \
 			this->GetData(binNum,"velocity",AVERAGE,output).ToArray();
@@ -396,33 +429,23 @@ void 	vtkProfileFilter::BinAveragesAndPostprocessing(
 			this->GetData(binNum,
 			"tangential velocity squared",AVERAGE,output).ToArray();
 		// TODO: add back later when I have the rest working
-		/*
 		// computing dispersions
+		/*
 		double* vDisp=ComputeVelocityDispersion(vSquaredAve,vAve);
 		double* vRadDisp=ComputeVelocityDispersion(vRadSquaredAve,vRadAve);
 		double* vTanDisp=ComputeVelocityDispersion(vTanSquaredAve,vTanAve);
 		// updating output		
-		for(int coord = 0; coord < 3; ++coord)
-			{
-			this->UpdateBin(binNum,SET,"velocity dispersion",AVERAGE,
-				coord,vDisp[coord],output);
-			this->UpdateBin(binNum,SET,"radial velocity dispersion",AVERAGE,
-				coord,vRadDisp[coord],output);
-			this->UpdateBin(binNum,SET,"tangential velocity dispersion",AVERAGE,
-				coord,vTanDisp[coord],output);
-			}
+		this->UpdateBin(binNum,SET,"velocity dispersion",AVERAGE,
+			coord,vDisp[coord],output);
+		this->UpdateBin(binNum,SET,"radial velocity dispersion",AVERAGE,
+			coord,vRadDisp[coord],output);
+		this->UpdateBin(binNum,SET,"tangential velocity dispersion",AVERAGE,
+			coord,vTanDisp[coord],output);
 		// finally some memory management
-		delete [] vAve;
-		delete [] vSquaredAve;
 		delete [] vDisp;
-		delete [] vRadAve;
-		delete [] vRadSquaredAve;
 		delete [] vRadDisp;
-		delete [] vTanAve;
-		delete [] vTanSquaredAve;
 		delete [] vTanDisp;
-
-	*/
+		*/
 	}
 }
 
@@ -564,8 +587,25 @@ vtkVariant vtkProfileFilter::GetData(int binNum, string baseName,
 		GetColumnName(baseName,columnType).c_str());
 }
 
-
-
+//----------------------------------------------------------------------------
+vtkProfileFilter::ProfileElement::ProfileElement(string baseName, 
+	int numberComponents, double* (*funcPtr)(double [], double []),
+	int average, int total, int cumulative, int postprocess)
+{
+	this->BaseName = baseName;
+	this->NumberComponents = numberComponents;
+	this->Function = funcPtr;
+	this->Average = average;
+	this->Total = total;
+	this->Cumulative = cumulative;
+	this->Postprocess = postprocess;
+	
+}
+//----------------------------------------------------------------------------
+vtkProfileFilter::ProfileElement::~ProfileElement()
+{
+	
+}
 
 
 

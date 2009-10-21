@@ -36,6 +36,7 @@ enum ColumnType
 	CUMULATIVE
 };
 
+
 //----------------------------------------------------------------------------
 class VTK_EXPORT vtkProfileFilter : public vtkTableAlgorithm
 {
@@ -78,6 +79,36 @@ protected:
   virtual int RequestData(vtkInformation*, 
                           vtkInformationVector**, 
                           vtkInformationVector*);
+	// Description:
+	// the ProfileElement protected nested class holds all the information
+	// necessary to initialize and at runtime compute the value
+	// of an additional profile element. Each of these are initialized
+	// via the constructor
+	// name : unique string name describing this element, 
+	// only the base name, an affix will be added for any
+	// quantities desired to be computed
+	// number elements : the number of elements in each entry
+	// funcPtr : the function to use to evaluate an update
+	// average : if 1 compute the average of this quantity
+	// total : if 1 compute the total of this quantity
+	// cumulative: if 1 compute the cumulative value of this quantity
+	// postprocess: if 1 only update during post processing
+  class ProfileElement
+  {
+  public:
+		vtkstd::string BaseName;
+		int NumberComponents;
+		double* (*Function)(double [], double []);
+		int Average;
+		int Total;
+		int Cumulative;
+		int Postprocess;
+		ProfileElement(vtkstd::string baseName, int numberComponents,
+			double* (*funcPtr)(double [], double []),
+			int average, int total, int cumulative,int postprocess);
+		~ProfileElement();
+ 	};
+
   // Description:
 	// Set in GUI, with defaults
 	// Overdensity
@@ -100,17 +131,8 @@ protected:
 	// the virial radius if applicable
 	double MaxR;
 	// Description:
-	// Quantities to add to the input computing averages for. Note:
-	// if you were to add to this, you would also have to update the function
-	// CalculateAdditionalProfileQuantity
-	vtkStringArray* AdditionalProfileQuantities;
-  // Description:
- 	// Quantities to compute cumulative Sum(<=binR) for in the output table.
- 	// Note: the name of this quantity must either be definined in the 
-	// input data or in the array AdditionalProfileQuantities, with 
-	// corresponding modification to CalculateAdditionalProfileQuantity
-	vtkStringArray* CumulativeQuantities; 	
-
+	// Quantities to add to the input
+	vtkstd::vector<ProfileElement> AdditionalProfileQuantities;
 	// Description:
 	// Generates the desired profile quantities and places them
 	// in the output table by bin.
