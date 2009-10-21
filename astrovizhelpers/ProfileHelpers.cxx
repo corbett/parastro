@@ -302,17 +302,17 @@ double* ComputeTangentialVelocitySquared(double v[],double r[])
 }
 
 //----------------------------------------------------------------------------
-double* ComputeVelocityDispersion(double vSquaredAve[], double  vAve[])
+double* ComputeVelocityDispersion(vtkVariant vSquaredAve, vtkVariant vAve)
 {
-	// TODO: for now taking absolute value but should figure out
-	// if this is kosher
-	// also need to make sure I am calculating vsquaredave correctly
-	// it is currently a scalar
+	// vSquared ave required to be a variant which holds a double,
+	// vAve required to be a variant which holds a double array with 3 
+	// components
 	double* velocityDispersion = new double[3];
-	for(int i = 0; i < 3; ++i)
-	{
-	velocityDispersion[i] = sqrt(fabs(vSquaredAve[0] - pow(vAve[i],2)));
-	}
+	for(int comp = 0; comp < 3; ++comp)
+		{
+		velocityDispersion[comp] = sqrt(fabs(vSquaredAve.ToDouble() -
+			pow(vAve.ToArray()->GetVariantValue(comp).ToDouble(),2)));
+		}
 	return velocityDispersion;
 }
 //----------------------------------------------------------------------------
@@ -329,7 +329,7 @@ double* ComputeDensity(vtkVariant cumulativeMass,
 	vtkVariant binRadius)
 {
 	double* density = new double[1];
-	density[0] = cumulativeMass.ToDouble()/(4./3*vtkMath::Pi()*pow(\
+	density[0] = cumulativeMass.ToDouble()/(4./3*vtkMath::Pi()*pow(
 		binRadius.ToDouble(),3));
 	return density;
 }

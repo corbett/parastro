@@ -35,13 +35,13 @@ vtkProfileFilter::vtkProfileFilter()
 		ProfileElement("tangential velocity",3,&ComputeTangentialVelocity,
 		TOTAL));
 	this->AdditionalProfileQuantities.push_back(
-		ProfileElement("velocity squared",1,&ComputeVelocitySquared,TOTAL));
+		ProfileElement("velocity squared",1,&ComputeVelocitySquared,AVERAGE));
 	this->AdditionalProfileQuantities.push_back(
 		ProfileElement("radial velocity squared",1,&ComputeRadialVelocitySquared,
-		TOTAL));
+		AVERAGE));
 	this->AdditionalProfileQuantities.push_back(
 		ProfileElement("tangential velocity squared",1,
-		&ComputeTangentialVelocitySquared,TOTAL));
+		&ComputeTangentialVelocitySquared,AVERAGE));
 	// These use a different constructor as they are elements to be
 	// postprocessed. The last four arguments specify which two columns
 	// data should be handed to the postprocessing function, which
@@ -56,6 +56,11 @@ vtkProfileFilter::vtkProfileFilter()
 		&ComputeDensity,
 		"mass",CUMULATIVE,
 		"bin radius",TOTAL));
+	this->AdditionalProfileQuantities.push_back(
+		ProfileElement("velocity dispersion",3,
+		&ComputeVelocityDispersion,
+		"velocity squared",AVERAGE,
+		"velociaty",AVERAGE));
 	// Defaults for quantities which will be computed based on user's
 	// later input
 	this->MaxR=1.0;
@@ -68,9 +73,6 @@ vtkProfileFilter::~vtkProfileFilter()
 {
 	// TODO: here I want to destroy the elements in the
 	// AdditionalProfileQuantities array
-/*	this->CumulativeQuantities->Delete();
-	this->AdditionalProfileQuantities->Delete(); */ 
-	// removed this--get	paraview(54834,0xa01ef500) malloc: *** error for object 0x21c8f8c0: incorrect checksum for freed object - object was probably modified after being freed. *** set a breakpoint in malloc_error_break to debug
 }
 
 //----------------------------------------------------------------------------

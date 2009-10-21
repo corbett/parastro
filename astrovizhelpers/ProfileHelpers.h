@@ -140,7 +140,7 @@ void VecMultConstant(double vector[],double constant);
 // Description
 // Given a vSquaredAve and a vAve calculates the velocity dispersion
 // placing it in the output vector velocityDispersion
-double* ComputeVelocityDispersion(double vSquaredAve[], double  vAve[]);
+double* ComputeVelocityDispersion(vtkVariant vSquaredAve, vtkVariant vAve);
 	
 // Description:
 // helper function to compute radial velocity
