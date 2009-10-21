@@ -325,6 +325,16 @@ double* ComputeCircularVelocity(vtkVariant cumulativeMass,
 }
 
 //----------------------------------------------------------------------------
+double* ComputeDensity(vtkVariant cumulativeMass, 
+	vtkVariant binRadius)
+{
+	double* density = new double[1];
+	density[0] = cumulativeMass.ToDouble()/(4./3*vtkMath::Pi()*pow(\
+		binRadius.ToDouble(),3));
+	return density;
+}
+
+//----------------------------------------------------------------------------
 double* ComputeProjection(double  vectorOne[],double vectorTwo[])
 {
 	double normVectorTwo = vtkMath::Norm(vectorTwo);

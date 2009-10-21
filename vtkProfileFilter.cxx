@@ -44,12 +44,20 @@ vtkProfileFilter::vtkProfileFilter()
 		&ComputeTangentialVelocitySquared,TOTAL));
 	// These use a different constructor as they are elements to be
 	// postprocessed. The last four arguments specify which two columns
-	// data should be handed to the postprocessing function.
+	// data should be handed to the postprocessing function, which
+	// takes two vtkVariants as arguments and returns a double*
 	this->AdditionalProfileQuantities.push_back(
 		ProfileElement("circular velocity",1,
 		&ComputeCircularVelocity,
 		"mass",CUMULATIVE,
 		"bin radius",TOTAL));
+	this->AdditionalProfileQuantities.push_back(
+		ProfileElement("density",1,
+		&ComputeDensity,
+		"mass",CUMULATIVE,
+		"bin radius",TOTAL));
+	// Defaults for quantities which will be computed based on user's
+	// later input
 	this->MaxR=1.0;
 	this->Delta=0.0;
 	this->BinNumber=30;
@@ -58,6 +66,8 @@ vtkProfileFilter::vtkProfileFilter()
 //----------------------------------------------------------------------------
 vtkProfileFilter::~vtkProfileFilter()
 {
+	// TODO: here I want to destroy the elements in the
+	// AdditionalProfileQuantities array
 /*	this->CumulativeQuantities->Delete();
 	this->AdditionalProfileQuantities->Delete(); */ 
 	// removed this--get	paraview(54834,0xa01ef500) malloc: *** error for object 0x21c8f8c0: incorrect checksum for freed object - object was probably modified after being freed. *** set a breakpoint in malloc_error_break to debug
@@ -327,24 +337,15 @@ void 	vtkProfileFilter::BinAveragesAndPostprocessing(
 				vtkVariant argumentOne = \
 		 			this->GetData(binNum, nextElement.ArgOneBaseName,
 					nextElement.ArgOneColumnType, output);
-				cout << "argument one " 
-					<< nextElement.ArgOneBaseName
-					<< " type: " 
-					<< nextElement.ArgOneColumnType
-					<< " value: " << argumentOne.ToDouble() << "\n";
 				vtkVariant argumentTwo = \
 					this->GetData(binNum, nextElement.ArgTwoBaseName,
 					nextElement.ArgTwoColumnType,	output);
-				cout << "argument two " 
-					<< nextElement.ArgTwoBaseName
-					<< " type: " 
-					<< nextElement.ArgTwoColumnType
-					<< " value: " << argumentTwo.ToDouble() << "\n";
 				double* updateData = \
 					nextElement.PostProcessFunction(argumentOne,argumentTwo);
 				this->UpdateBin(binNum,SET,nextElement.BaseName,TOTAL,
 					updateData,output);
-				cout << "update data " << updateData[0] << "\n\n";
+				// memory management
+				delete [] updateData;
 				}
 			}
 		// TODO: add back later when I have the rest working
@@ -353,8 +354,6 @@ void 	vtkProfileFilter::BinAveragesAndPostprocessing(
 		// as vectors so all componenets are the same. make initialization
 		// more general.
 		/*
-		this->UpdateBin(binNum,SET,"circular velocity",
-			AVERAGE,cumulativeMass/binRadius,output);
 		this->UpdateBin(binNum,SET,"density",AVERAGE,
 			cumulativeMass/(4./3*vtkMath::Pi()*pow(binRadius,3)),output);
 		// column data we need to compute dispersions

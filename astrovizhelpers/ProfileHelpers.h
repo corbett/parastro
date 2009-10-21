@@ -171,5 +171,11 @@ double* ComputeTangentialVelocitySquared(double v[],double r[]);
 double* ComputeCircularVelocity(vtkVariant cumulativeMass, 
 	vtkVariant binRadius);
 
+// Description:
+// helper function to compute density
+double* ComputeDensity(vtkVariant cumulativeMass, 
+	vtkVariant binRadius);
+
+
 
 
