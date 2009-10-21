@@ -46,12 +46,15 @@ vtkProfileFilter::vtkProfileFilter()
 	// at the end with the function given in the constructor taking two 
 	// arguments based on the value of two columns computed along the way
 	// as given by the two ProfileElement objects in the constructor
-	ProfileElement cumulativeMass = ProfileElement("mass",1,0,CUMULATIVE);
-	ProfileElement totalBinRadius =	ProfileElement("bin radius",1,0,TOTAL);
+	// TODO: just a test to make sure I understand the issues here
+	// should probably make arguments to profile element nonpointers
+	// so that I don't have to worry about allocation, de-allocation
+	ProfileElement* cumulativeMass = new ProfileElement("mass",1,0,CUMULATIVE);
+	ProfileElement* totalBinRadius = new ProfileElement("bin radius",1,0,TOTAL);
 	this->AdditionalProfileQuantities.push_back(
 		ProfileElement("circular velocity",1,
 		&ComputeCircularVelocity,
-		&cumulativeMass,&totalBinRadius));
+		cumulativeMass,totalBinRadius));
 	this->MaxR=1.0;
 	this->Delta=0.0;
 	this->BinNumber=30;
