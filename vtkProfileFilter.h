@@ -106,13 +106,25 @@ protected:
 		ColumnType ArgOneColumnType;
 		vtkstd::string ArgTwoBaseName;
 		ColumnType ArgTwoColumnType;
+		// Description:
+		// quantities to be processed for each element in each bin with the
+		// function *functPtr which takes in a radius and a velocity given
+		// by double arrays
 		ProfileElement(vtkstd::string baseName, int numberComponents,
 			double* (*funcPtr)(double [], double []),
 			ColumnType columnType);
+		// Description:
 		// if post processing is desired, then must specify two arguments, which
 		// are profile elements. Their data (all computed) will be retrieved from
 		// the output in postprocessing and a final computation will be performed
 		// with functionPtr.
+		//
+		// The last four arguments specify which two columns
+		// data should be handed to the postprocessing function, which
+		// takes two vtkVariants as arguments and returns a double*,
+		// thus requires that they are part of the input (for which
+		//  CUMULATIVE,AVERAGE and TOTAL are computed for each array name)
+		// or that they are specified as an additional profile element above
 		ProfileElement(vtkstd::string baseName, int numberComponents,
 			double* (*funcPtr)(vtkVariant, vtkVariant),
 			vtkstd::string argOneBaseName, ColumnType argOneColumnType, 

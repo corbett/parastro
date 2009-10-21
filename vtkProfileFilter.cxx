@@ -43,9 +43,7 @@ vtkProfileFilter::vtkProfileFilter()
 		ProfileElement("tangential velocity squared",1,
 		&ComputeTangentialVelocitySquared,AVERAGE));
 	// These use a different constructor as they are elements to be
-	// postprocessed. The last four arguments specify which two columns
-	// data should be handed to the postprocessing function, which
-	// takes two vtkVariants as arguments and returns a double*
+	// postprocessed. 
 	this->AdditionalProfileQuantities.push_back(
 		ProfileElement("circular velocity",1,
 		&ComputeCircularVelocity,
@@ -61,6 +59,16 @@ vtkProfileFilter::vtkProfileFilter()
 		&ComputeVelocityDispersion,
 		"velocity squared",AVERAGE,
 		"velocity",AVERAGE));
+	this->AdditionalProfileQuantities.push_back(
+		ProfileElement("velocity dispersion",3,
+		&ComputeVelocityDispersion,
+		"tangential velocity squared",AVERAGE,
+		"tangential velocity",AVERAGE));
+	this->AdditionalProfileQuantities.push_back(
+		ProfileElement("velocity dispersion",3,
+		&ComputeVelocityDispersion,
+		"radial velocity squared",AVERAGE,
+		"radial velocity",AVERAGE));
 	// Defaults for quantities which will be computed based on user's
 	// later input
 	this->MaxR=1.0;
