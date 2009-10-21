@@ -283,7 +283,8 @@ double* ComputeVelocitySquared(double v[],double r[])
 double* ComputeRadialVelocitySquared(double v[],double r[])
 {
 	double* vRad=ComputeRadialVelocity(v,r);
-	double* vRadSquared=ComputeProjection(vRad,vRad);
+	double* vRadSquared=new double[1];
+	vRadSquared[0]=vtkMath::Dot(vRad,vRad);
 	delete [] vRad;
 	return vRadSquared;
 }
@@ -293,7 +294,8 @@ double* ComputeTangentialVelocitySquared(double v[],double r[])
 {
 	double* vRad=ComputeRadialVelocity(v,r);
 	double* vTan=ComputeTangentialVelocity(v,r);
-	double* vTanSquared=ComputeProjection(vTan,vTan);
+	double* vTanSquared=new double[1];
+	vTanSquared[0]=vtkMath::Dot(vTan,vTan);
 	delete [] vRad;
 	delete [] vTan;
 	return vTanSquared;	
@@ -303,11 +305,13 @@ double* ComputeTangentialVelocitySquared(double v[],double r[])
 double* ComputeVelocityDispersion(double vSquaredAve[], double  vAve[])
 {
 	// TODO: for now taking absolute value but should figure out
-	double* velocityDispersion = new double[3];
 	// if this is kosher
+	// also need to make sure I am calculating vsquaredave correctly
+	// it is currently a scalar
+	double* velocityDispersion = new double[3];
 	for(int i = 0; i < 3; ++i)
 	{
-	velocityDispersion[i] = sqrt(fabs(vSquaredAve[i] - pow(vAve[i],2)));
+	velocityDispersion[i] = sqrt(fabs(vSquaredAve[0] - pow(vAve[i],2)));
 	}
 	return velocityDispersion;
 }
