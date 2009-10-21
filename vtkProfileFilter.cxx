@@ -42,19 +42,14 @@ vtkProfileFilter::vtkProfileFilter()
 	this->AdditionalProfileQuantities.push_back(
 		ProfileElement("tangential velocity squared",1,
 		&ComputeTangentialVelocitySquared,TOTAL));
-	// each of the following are postprocessed ProfileElements, computed only
-	// at the end with the function given in the constructor taking two 
-	// arguments based on the value of two columns computed along the way
-	// as given by the two ProfileElement objects in the constructor
-	// TODO: just a test to make sure I understand the issues here
-	// should probably make arguments to profile element nonpointers
-	// so that I don't have to worry about allocation, de-allocation
-	ProfileElement* cumulativeMass = new ProfileElement("mass",1,0,CUMULATIVE);
-	ProfileElement* totalBinRadius = new ProfileElement("bin radius",1,0,TOTAL);
+	// These use a different constructor as they are elements to be
+	// postprocessed. The last four arguments specify which two columns
+	// data should be handed to the postprocessing function.
 	this->AdditionalProfileQuantities.push_back(
 		ProfileElement("circular velocity",1,
 		&ComputeCircularVelocity,
-		cumulativeMass,totalBinRadius));
+		"mass",CUMULATIVE,
+		"bin radius",TOTAL));
 	this->MaxR=1.0;
 	this->Delta=0.0;
 	this->BinNumber=30;
@@ -330,24 +325,20 @@ void 	vtkProfileFilter::BinAveragesAndPostprocessing(
 			if(nextElement.Postprocess)
 				{
 				vtkVariant argumentOne = \
-		 			this->GetData(binNum,
-					nextElement.PostProcessArgumentOne->BaseName,
-					nextElement.PostProcessArgumentOne->ProfileColumnType,
-					output);
+		 			this->GetData(binNum, nextElement.ArgOneBaseName,
+					nextElement.ArgOneColumnType, output);
 				cout << "argument one " 
-					<< nextElement.PostProcessArgumentOne->BaseName
+					<< nextElement.ArgOneBaseName
 					<< " type: " 
-					<< nextElement.PostProcessArgumentOne->ProfileColumnType
+					<< nextElement.ArgOneColumnType
 					<< " value: " << argumentOne.ToDouble() << "\n";
 				vtkVariant argumentTwo = \
-					this->GetData(binNum,
-					nextElement.PostProcessArgumentTwo->BaseName,
-					nextElement.PostProcessArgumentTwo->ProfileColumnType,
-					output);
+					this->GetData(binNum, nextElement.ArgTwoBaseName,
+					nextElement.ArgTwoColumnType,	output);
 				cout << "argument two " 
-					<< nextElement.PostProcessArgumentTwo->BaseName
+					<< nextElement.ArgTwoBaseName
 					<< " type: " 
-					<< nextElement.PostProcessArgumentTwo->ProfileColumnType
+					<< nextElement.ArgTwoColumnType
 					<< " value: " << argumentTwo.ToDouble() << "\n";
 				double* updateData = \
 					nextElement.PostProcessFunction(argumentOne,argumentTwo);
@@ -555,17 +546,18 @@ vtkProfileFilter::ProfileElement::ProfileElement(string baseName,
 
 vtkProfileFilter::ProfileElement::ProfileElement(string baseName, 
 	int numberComponents, double* (*funcPtr)(vtkVariant, vtkVariant),
-	ProfileElement* postProcessArgumentOne, 
-	ProfileElement* postProcessArgumentTwo)
+	string argOneBaseName, ColumnType argOneColumnType, 
+	string argTwoBaseName, ColumnType argTwoColumnType)
 {
 	this->BaseName = baseName;
 	this->NumberComponents = numberComponents;
 	this->PostProcessFunction = funcPtr;
 	this->ProfileColumnType = TOTAL;
 	this->Postprocess = 1;
-	this->PostProcessArgumentOne=postProcessArgumentOne;
-	this->PostProcessArgumentTwo=postProcessArgumentTwo;
-	
+	this->ArgOneBaseName=argOneBaseName;
+	this->ArgOneColumnType=argOneColumnType;
+	this->ArgTwoBaseName=argTwoBaseName;
+	this->ArgTwoColumnType=argTwoColumnType;
 }
 
 //----------------------------------------------------------------------------

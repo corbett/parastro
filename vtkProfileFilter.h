@@ -102,8 +102,10 @@ protected:
 		double* (*PostProcessFunction)(vtkVariant, vtkVariant);
 		ColumnType ProfileColumnType;
 		int Postprocess;
-		ProfileElement* PostProcessArgumentOne;
-		ProfileElement* PostProcessArgumentTwo;
+		vtkstd::string ArgOneBaseName;
+		ColumnType ArgOneColumnType;
+		vtkstd::string ArgTwoBaseName;
+		ColumnType ArgTwoColumnType;
 		ProfileElement(vtkstd::string baseName, int numberComponents,
 			double* (*funcPtr)(double [], double []),
 			ColumnType columnType);
@@ -113,8 +115,8 @@ protected:
 		// with functionPtr.
 		ProfileElement(vtkstd::string baseName, int numberComponents,
 			double* (*funcPtr)(vtkVariant, vtkVariant),
-			ProfileElement *postProcessArgumentOne, 
-			ProfileElement *postProcessArgumentTwo);
+			vtkstd::string argOneBaseName, ColumnType argOneColumnType, 
+			vtkstd::string argTwoBaseName, ColumnType argTwoColumnType);
 		~ProfileElement();
  	};
 
