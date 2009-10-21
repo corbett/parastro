@@ -37,12 +37,28 @@ vtkProfileFilter::vtkProfileFilter()
 		int average;
 		int total;
 		int cumulative;
+		int postprocessing
 	};
 	*/
-	ProfileElement angularMomentum = ProfileElement(
-		"angular momentum",3,&ComputeAngularMomentum,0,1,0,0);
-	this->AdditionalProfileQuantities.push_back(angularMomentum);
-	cout << "angular momentum pushback sucessful ";
+
+	this->AdditionalProfileQuantities.push_back(
+		ProfileElement("angular momentum",3,&ComputeAngularMomentum,0,1,0,0));
+	this->AdditionalProfileQuantities.push_back(
+		ProfileElement("radial velocity",3,&ComputeRadialVelocity,0,1,0,0));
+	this->AdditionalProfileQuantities.push_back(
+		ProfileElement("tangential velocity",3,&ComputeTangentialVelocity,
+		0,1,0,0));
+	this->AdditionalProfileQuantities.push_back(
+		ProfileElement("velocity squared",3,&ComputeVelocitySquared,
+		0,1,0,0));
+	this->AdditionalProfileQuantities.push_back(
+		ProfileElement("radial velocity squared",3,&ComputeRadialVelocitySquared,
+		0,1,0,0));
+	this->AdditionalProfileQuantities.push_back(
+		ProfileElement("tangential velocity squared",3,
+		&ComputeTangentialVelocitySquared,0,1,0,0));
+
+
 //	ProfileElement 
 /*
 	this->AdditionalProfileQuantities = vtkStringArray::New();
