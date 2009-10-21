@@ -60,12 +60,12 @@ vtkProfileFilter::vtkProfileFilter()
 		"velocity squared",AVERAGE,
 		"velocity",AVERAGE));
 	this->AdditionalProfileQuantities.push_back(
-		ProfileElement("velocity dispersion",3,
+		ProfileElement("tangential velocity dispersion",3,
 		&ComputeVelocityDispersion,
 		"tangential velocity squared",AVERAGE,
 		"tangential velocity",AVERAGE));
 	this->AdditionalProfileQuantities.push_back(
-		ProfileElement("velocity dispersion",3,
+		ProfileElement("radial velocity dispersion",3,
 		&ComputeVelocityDispersion,
 		"radial velocity squared",AVERAGE,
 		"radial velocity",AVERAGE));
