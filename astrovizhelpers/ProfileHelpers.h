@@ -166,5 +166,10 @@ double* ComputeRadialVelocitySquared(double v[],double r[]);
 // helper function to compute tangential velocity squared
 double* ComputeTangentialVelocitySquared(double v[],double r[]);
 
+// Description:
+// helper function to compute circular velocity
+double* ComputeCircularVelocity(vtkVariant cumulativeMass, 
+	vtkVariant binRadius);
+
 
 

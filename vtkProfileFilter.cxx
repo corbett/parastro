@@ -42,28 +42,15 @@ vtkProfileFilter::vtkProfileFilter()
 	this->AdditionalProfileQuantities.push_back(
 		ProfileElement("tangential velocity squared",1,
 		&ComputeTangentialVelocitySquared,TOTAL));
-//	this->AdditionalProfileQuantities.push_back(
-//		ProfileElement("circular velocity",1,
-//		&ComputeCircularVelocity,0,1,0,1);
-//	ProfileElement 
-/*
-	this->AdditionalProfileQuantities = vtkStringArray::New();
-		this->AdditionalProfileQuantities->InsertNextValue("circular velocity");
-		this->AdditionalProfileQuantities->InsertNextValue("density");
-		this->AdditionalProfileQuantities->InsertNextValue("radial velocity");
-		this->AdditionalProfileQuantities->InsertNextValue("tangential velocity");
-		this->AdditionalProfileQuantities->InsertNextValue("angular momentum");
-		this->AdditionalProfileQuantities->InsertNextValue("velocity squared");
-		this->AdditionalProfileQuantities->InsertNextValue("velocity dispersion");
-		this->AdditionalProfileQuantities->InsertNextValue("radial velocity squared");
-		this->AdditionalProfileQuantities->InsertNextValue("radial velocity dispersion");
-	 	this->AdditionalProfileQuantities->InsertNextValue("tangential velocity squared");
-	 	this->AdditionalProfileQuantities->InsertNextValue("tangential velocity dispersion");
-	
-	this->CumulativeQuantities = vtkStringArray::New();
-		this->CumulativeQuantities->InsertNextValue("number in bin");
-		this->CumulativeQuantities->InsertNextValue("mass");
-*/
+	// each of the following are postprocessed ProfileElements, computed only
+	// at the end with the function given in the constructor taking two 
+	// arguments based on the value of two columns computed along the way
+	// as given by the two ProfileElement objects in the constructor
+	this->AdditionalProfileQuantities.push_back(
+		ProfileElement("circular velocity",1,
+		&ComputeCircularVelocity,
+		ProfileElement("mass",1,0,CUMULATIVE),
+		ProfileElement("bin radius",1,0,TOTAL)));
 	this->MaxR=1.0;
 	this->Delta=0.0;
 	this->BinNumber=30;
@@ -311,7 +298,8 @@ void 	vtkProfileFilter::BinAveragesAndPostprocessing(
 					string baseName = nextArray->GetName();
 					this->UpdateBin(binNum,MULTIPLY,baseName,AVERAGE,1./binSize,output);
 					}
-				// For each additional quantity we also divide by N in the average, 
+				// For each additional quantity we also divide by N in the average
+				// if requested
 				for(int i = 0; 
 					i < this->AdditionalProfileQuantities.size();
 				 	++i)
@@ -326,29 +314,33 @@ void 	vtkProfileFilter::BinAveragesAndPostprocessing(
 					}
 				}
 
-		// Finally post processing those items we must
-		// For each additional quantity we also divide by N in the average, 
-/*
+		// Finally post processing those items which are marked as such, don't
+		// do this within the average loop as these quantities are allowed
+		// to depend on averages themselves
 		for(int i = 0; 
 			i < this->AdditionalProfileQuantities.size();
 		 	++i)
 			{
 			ProfileElement nextElement = \
 				this->AdditionalProfileQuantities[i];
-			if(nextElement.PostProcess)
+			if(nextElement.Postprocess)
 				{
-				// TODO fill in
 				vtkVariant argumentOne = \
-		 			this->GetData(binNum,"mass",CUMULATIVE,output);
-				vtkVariant argumentTwo=this->GetData(binNum,"bin radius",
-					TOTAL,output);
+		 			this->GetData(binNum,
+					nextElement.PostProcessArgumentOne->BaseName,
+					nextElement.PostProcessArgumentOne->ProfileColumnType,
+					output);
+				vtkVariant argumentTwo = \
+					this->GetData(binNum,
+					nextElement.PostProcessArgumentTwo->BaseName,
+					nextElement.PostProcessArgumentTwo->ProfileColumnType,
+					output);
 				double* updateData = \
 					nextElement.PostProcessFunction(argumentOne,argumentTwo);
 				this->UpdateBin(binNum,SET,nextElement.BaseName,TOTAL,
 					updateData,output);
 				}
 			}
-		*/
 		// TODO: add back later when I have the rest working
 		// Computation and updating
 		// TODO: these are scalars, but are currently being initialized
