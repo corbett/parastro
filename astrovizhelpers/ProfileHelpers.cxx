@@ -140,7 +140,7 @@ double OverDensityInSphere(double r,void* inputVirialRadiusInfo)
 		double overdensity = density - \
 	 	virialRadiusInfo->criticalDensity;
 	cout << "density is " << density << " ";
-	cout << "over density is "<< density << "\n";
+	cout << "over density is "<< density - overdensity << "\n";
 }
 
 VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,
