@@ -138,6 +138,7 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 				GetDatasetWithinVirialRadius(virialRadiusInfo);	
 			if(newDataSet->GetNumberOfPoints()>0)
 				{
+				this->MaxR=virialRadiusInfo.virialRadius;
 				this->GenerateProfile(newDataSet,output);
 				newDataSet->Delete();
 				return 1;
