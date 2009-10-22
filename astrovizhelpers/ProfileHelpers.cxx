@@ -113,7 +113,7 @@ double OverDensityInSphere(double r,void* inputVirialRadiusInfo)
 		virialRadiusInfo->center,
 		pointsInRadius);
 	cout << "there are " << pointsInRadius->GetNumberOfIds() << " points "
-	<< "within radius " << r << "\n";
+	<< "within radius " << r << " ";
 	// calculating the average mass, dividing this by the volume of the sphere
 	// to get the density
 	double totalMass=0;
@@ -136,7 +136,11 @@ double OverDensityInSphere(double r,void* inputVirialRadiusInfo)
 		delete [] nextPoint;
 		}
 	// Returning the density minus the critical density
-	return totalMass/(4./3*M_PI*pow(r,3)) - virialRadiusInfo->criticalDensity;
+		double density = totalMass/(4./3*M_PI*pow(r,3));
+		double overdensity = density - \
+	 	virialRadiusInfo->criticalDensity;
+	cout << "density is " << density << " ";
+	cout << "over density is "<< density << "\n";
 }
 
 VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,
