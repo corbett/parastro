@@ -125,21 +125,26 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 		{
 		VirialRadiusInfo virialRadiusInfo = \
 		 	ComputeVirialRadius(dataSet,this->Delta,this->MaxR,this->Center);
-		vtkErrorMacro("virial radius is " << virialRadiusInfo.virialRadius);
 		// note that if there was an error finding the virialRadius the 
 		// radius returned is < 0
 		//setting the dataSet to this newInput
 		if(virialRadiusInfo.virialRadius>0)
 			{
-			dataSet = \
+			vtkWarningMacro("virial radius is " << virialRadiusInfo.virialRadius);
+			vtkPolyData* newDataSet = \
 				GetDatasetWithinVirialRadius(virialRadiusInfo);	
-			this->GenerateProfile(dataSet,output);
-			dataSet->Delete();
-			return 1;
-			}
-		else
-			{
-			vtkErrorMacro("Something has gone wrong with the virial radius finding. Perhaps change your delta, or your center, or if you are truely puzzled check out ProfileHelpers.cxx. For now binning out to the max radius instead of the virial.");
+			if(newDataSet->GetNumberOfPoints()>0)
+				{
+				this->GenerateProfile(newDataSet,output);
+				newDataSet->Delete();
+				return 1;
+				}
+			vtkErrorMacro(
+			"There are no points which lie within the virial radius: " 
+			<< virialRadiusInfo.virialRadius << " found for overdensity "
+			<<  this->Delta << " about point (" << this->Center[0] << "," 
+			<< this->Center[1] << "," << this->Center[2]
+			<< "). Considering changing your delta or selecting a different point around which to search. For now binning out to the max radius instead of the virial");
 			}
 		}
 	this->GenerateProfile(dataSet,output);
