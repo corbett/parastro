@@ -128,6 +128,9 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 		// note that if there was an error finding the virialRadius the 
 		// radius returned is < 0
 		//setting the dataSet to this newInput
+		// TODO: manually setting this for testing purposes, later add back in
+		// compute virial radius computation
+		virialRadiusInfo.virialRadius=0.005;
 		if(virialRadiusInfo.virialRadius>0)
 			{
 			vtkWarningMacro("virial radius is " << virialRadiusInfo.virialRadius);
