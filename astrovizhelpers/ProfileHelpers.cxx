@@ -112,6 +112,8 @@ double OverDensityInSphere(double r,void* inputVirialRadiusInfo)
 	virialRadiusInfo->locator->FindPointsWithinRadius(r,
 		virialRadiusInfo->center,
 		pointsInRadius);
+	cout << "there are " << pointsInRadius->GetNumberOfIds() << " points "
+	<< "within radius " << r << "\n";
 	// calculating the average mass, dividing this by the volume of the sphere
 	// to get the density
 	double totalMass=0;

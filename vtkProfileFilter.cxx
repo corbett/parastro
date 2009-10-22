@@ -140,7 +140,6 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 				{
 				this->MaxR=virialRadiusInfo.virialRadius;
 				this->GenerateProfile(newDataSet,output);
-				newDataSet->Delete();
 				return 1;
 				}
 			vtkErrorMacro(
@@ -149,6 +148,7 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 			<<  this->Delta << " about point (" << this->Center[0] << "," 
 			<< this->Center[1] << "," << this->Center[2]
 			<< "). Considering changing your delta or selecting a different point around which to search. For now binning out to the max radius instead of the virial");
+			newDataSet->Delete();
 			}
 		}
 	this->GenerateProfile(dataSet,output);
