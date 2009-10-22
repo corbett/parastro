@@ -141,6 +141,7 @@ double OverDensityInSphere(double r,void* inputVirialRadiusInfo)
 	 	virialRadiusInfo->criticalDensity;
 	cout << "density is " << density << " ";
 	cout << "over density is "<< overdensity << "\n";
+	return overdensity;
 }
 
 VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,
@@ -155,7 +156,6 @@ VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,
 		// 2. Building the struct
 		VirialRadiusInfo virialRadiusInfo;
 		virialRadiusInfo.locator=locator;
-		// copies the contents of center to virialRadiusInfo's arg center
 		for(int i = 0; i < 3; ++i)
 		{
 			virialRadiusInfo.center[i]=center[i];
@@ -168,12 +168,12 @@ VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,
 		try
 			{
 			virialRadiusInfo.virialRadius=IllinoisRootFinder(OverDensityInSphere,
-				pntrVirialRadiusInfo,\
+				pntrVirialRadiusInfo,
 				maxR,1e-11f,//minR is almost zero
 				1e-3,1e-3,
 			  &numIter);
 			}
-		catch (const char* e)
+		catch(const char* e)
 			{
 				// This indicates that something has gone wrong with the root finding
 				virialRadiusInfo.virialRadius=-1; 
