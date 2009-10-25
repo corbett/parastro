@@ -1,6 +1,7 @@
 <ServerManagerConfiguration>
 	<ProxyGroup name="sources">
-		<SourceProxy name="TipsyReader" class="vtkTipsyReader">
+		<SourceProxy name="TipsyReader" 
+					 class="vtkTipsyReader">
 			<StringVectorProperty
 				name="FileName"
 				command="SetFileName"
@@ -10,7 +11,6 @@
 					Reads in points from a tipsy binary file.
 				</Documentation>
 			</StringVectorProperty>
-
 			<StringVectorProperty
 				name="MarkFileName"
 				command="SetMarkFileName"

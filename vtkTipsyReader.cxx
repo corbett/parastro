@@ -280,20 +280,20 @@ void vtkTipsyReader::AllocateAllTipsyVariableArrays(TipsyHeader& tipsyHeader,\
 	  AllocateDataArray(output,"velocity",3,tipsyHeader.h_nBodies);
 		}
 }
+/*
+* Reads a file, optionally only the marked particles from the file, 
+* in the following order:
+* 1. Open Tipsy binary
+* 2. Read Tipsy header (tells us the number of particles of each type we are 
+*    dealing with)
+* 3. Read mark file indices from marked particle file, if there is one
+* 4. Read either marked particles only or all particles
+*/
 //----------------------------------------------------------------------------
 int vtkTipsyReader::RequestData(vtkInformation*,
                                        vtkInformationVector**,
                                        vtkInformationVector* outputVector)
 {
-	/*
-	* Reads a file, optionally only the marked particles from the file, 
-	* in the following order:
-	* 1. Open Tipsy binary
-	* 2. Read Tipsy header (tells us the number of particles of each type we are 
-	*    dealing with)
-	* 3. Read mark file indices from marked particle file, if there is one
-	* 4. Read either marked particles only or all particles
-	*/
 	// Make sure we have a file to read.
   if(!this->FileName)
 	  {
@@ -319,8 +319,8 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 		{
 		vtkDebugMacro("Reading marked point indices from file:" \
 									<< this->MarkFileName);
-		markedParticleIndices=this->ReadMarkedParticleIndices(tipsyHeader,\
-																													tipsyInfile);
+		markedParticleIndices=this->ReadMarkedParticleIndices(tipsyHeader,
+			tipsyInfile);
 		}
   // Read every particle and add their position to be displayed, 
 	// as well as relevant scalars
