@@ -11,6 +11,7 @@
 #include "vtkCellArray.h"
 #include "vtkFloatArray.h"
 #include "vtkTable.h"
+#include "vtkPointSet.h"
 // Description:
 // Uses the Illinois root finding method to find the root of the function
 // func. The root must lie between r and s. Root is returned when it is found 
@@ -175,7 +176,36 @@ double* ComputeCircularVelocity(vtkVariant cumulativeMass,
 // helper function to compute density
 double* ComputeDensity(vtkVariant cumulativeMass, 
 	vtkVariant binRadius);
+	
+// Description:
+// helper function to compute center of mass of point set
+double* ComputeCOM(vtkPointSet* input);
 
+// Description:
+// ComputeCOM helper function to calculate [m*x,m*y,m*z]
+double* ComputeWeightedMass(double& mass,double* point);
 
+// Description:
+// helper function to compute the moment of inertia tensor, returns
+// result in inertiaTensor
+// I=[[I00,-I01,-I02],[-I10,I11,-I12],[-I20,-I21,I22]]
+// I00=sum i=1 to n: m_i(y_i^2+z_i^2)
+// I11=sum i=1 to n: m_i(x_i^2+z_i^2)
+// I22=sum i=1 to n: m_i(x_i^2+y_i^2)
+// I01=sum i=1 to n: m_i*x_i*y_i
+// I02=sum i=1 to n: m_i*x_i*y_i
+// I12=sum i=1 to n: m_i*x_i*y_i
+// And I is symmetric so
+// I10=I01
+// I20=I02
+// I21=I12
+void ComputeInertiaTensor(vtkPointSet* input, double* centerPoint,
+	double inertiaTensor[3][3]);
 
-
+// Description:
+// Create three lines to display in the output, one for each vector
+// extending from the center point in the direction of the vector
+// until the bounds of the data set
+void DisplayVectorsAsLines(vtkPointSet* input, vtkPolyData* output,
+	double vectors[3][3], double* centerPoint);
+	

@@ -1,11 +1,13 @@
 #include "ProfileHelpers.h"
 #include "vtkPointData.h"
-#include "vtkCellArray.h"
 #include "vtkFloatArray.h"
 #include "vtkDoubleArray.h"
 #include "vtkIntArray.h"
 #include "vtkSmartPointer.h"
 #include "DataSetHelpers.h"
+#include "vtkCellData.h"
+#include "vtkPoints.h"
+#include "vtkLine.h"
 #include <assert.h>
 #include <cmath>
 #include "vtkMath.h"
@@ -372,11 +374,127 @@ void VecMultConstant(double vector[],double constant)
 }
 
 	
+double* ComputeCOM(vtkPointSet* input)
+{
+	double totalMass=0;
+	double totalWeightedMass[3];
+	for(int nextPointId = 0;\
+	 		nextPointId < input->GetPoints()->GetNumberOfPoints();\
+	 		++nextPointId)
+		{
+		double* nextPoint=GetPoint(input,nextPointId);
+		// extracting the mass
+		// has to be double as this version of VTK doesn't have 
+		// GetTuple function which operates with float
+		double* mass=GetDataValue(input,"mass",nextPointId);
+		//calculating the weighted mass
+		double* weightedMass=ComputeWeightedMass(mass[0],nextPoint);
+		// updating the mass and the weighted mass
+		totalMass+=mass[0];
+		for(int i = 0; i < 3; ++i)
+			{
+			totalWeightedMass[i]+=weightedMass[i];
+			}
+		// Finally, some memory management
+		delete [] weightedMass;
+		delete [] mass;
+		delete [] nextPoint;
+		}
+	// calculating the result
+	// our final data is in float, as Tipsy's data is stored in float
+	double* dbCenterOfMass=new double[3]; // this is needed for the virial calc
+	if(totalMass!=0)
+		{
+		for(int i = 0; i < 3; ++i)
+			{
+			dbCenterOfMass[i]=totalWeightedMass[i]/totalMass;
+			}
+		}
+	else
+		{
+		// TODO: change this to be class so I can use error macros
+		cout << "total mass is zero, cannot calculate center of mass, setting center to 0,0,0\n";
+		// vtkErrorMacro("total mass is zero, cannot calculate center of mass, setting center to 0,0,0");
+		for(int i = 0; i < 3; ++i)
+			{
+			dbCenterOfMass[i]=0;	
+			}
+		}
+	return dbCenterOfMass;
+}
 	
-	
-	
-	
-	
+double* ComputeWeightedMass(double& mass,double* point)
+{
+	double* weightedMass = new double[3];
+	for(int i = 0; i < 3; ++i)
+	{
+	weightedMass[i]=mass*point[i];
+	}
+	return weightedMass;
+}
+
+void ComputeInertiaTensor(vtkPointSet* input, double* centerPoint,\
+	double inertiaTensor[3][3])
+{
+	for(int nextPointId = 0;\
+	 		nextPointId < input->GetPoints()->GetNumberOfPoints();\
+	 		++nextPointId)
+		{
+		double* nextPoint=GetPoint(input,nextPointId);
+		// extracting the mass
+		// has to be double as this version of VTK doesn't have 
+		// GetTuple function which operates with float
+		double* mass=GetDataValue(input,"mass",nextPointId);
+		// get distance from nextPoint to center point
+		double* radius = PointVectorDifference(nextPoint,centerPoint);
+		// update the components of the inertia tensor
+		inertiaTensor[0][0]+=mass[0]*(pow(nextPoint[1],2)+pow(nextPoint[2],2));
+		inertiaTensor[1][1]+=mass[0]*(pow(nextPoint[0],2)+pow(nextPoint[2],2));
+		inertiaTensor[2][2]+=mass[0]*(pow(nextPoint[0],2)+pow(nextPoint[1],2));
+		inertiaTensor[0][1]+=mass[0]*nextPoint[0]*nextPoint[1];		
+		inertiaTensor[0][2]+=mass[0]*nextPoint[0]*nextPoint[2];		
+		inertiaTensor[1][2]+=mass[0]*nextPoint[1]*nextPoint[2];		
+		// Finally, some memory management
+		delete [] radius;
+		delete [] mass;
+		delete [] nextPoint;
+		}
+	// Update the signs of off diagonal elements
+	inertiaTensor[0][1]*=-1;		
+	inertiaTensor[0][2]*=-1;		
+	inertiaTensor[1][2]*=-1;
+	// We didn't compute these components as we know the tensor is symmetric
+	// symmetrizing
+	inertiaTensor[1][0]=inertiaTensor[0][1];
+	inertiaTensor[2][0]=inertiaTensor[0][2];		
+	inertiaTensor[2][1]=inertiaTensor[1][2];
+}
+
+void DisplayVectorsAsLines(vtkPointSet* input, vtkPolyData* output,
+	double vectors[3][3], double* centerPoint)
+{
+	vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
+	vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
+	// setting origin
+	points->InsertNextPoint(centerPoint);
+	double scale=ComputeMaxR(input,centerPoint);
+	for(int i = 0; i < 3; ++i)
+		{
+		VecMultConstant(vectors[i],scale);
+		points->InsertNextPoint(vectors[i]);
+		// creating the lines
+		vtkSmartPointer<vtkLine> nextLine = vtkSmartPointer<vtkLine>::New();
+			// setting the first point of the line to be the origin
+			nextLine->GetPointIds()->SetId(0,0); 
+			// setting the second point of the line to be the scaled vector
+			nextLine->GetPointIds()->SetId(0,i+1); // i+1 as origin is 0
+		// adding the line to the cell array
+		lines->InsertNextCell(nextLine);
+		}
+	// ready to update the output
+	output->SetPoints(points);
+	output->SetLines(lines);
+}
 	
 	
 	

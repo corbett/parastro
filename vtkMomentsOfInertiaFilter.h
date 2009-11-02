@@ -1,7 +1,7 @@
 /*=========================================================================
 
   Program:   AstroViz plugin for ParaView
-  Module:    $RCSfile: vtkCenterOfMassFilter.h,v $
+  Module:    $RCSfile: vtkMomentsOfInertiaFilter.h,v $
 
   Copyright (c) Christine Corbett Moran
   All rights reserved.
@@ -10,33 +10,28 @@
      PURPOSE.  See the above copyright notice for more information.
 
 =========================================================================*/
-// .NAME vtkCenterOfMassFilter - shrink cells composing an arbitrary data set
+// .NAME vtkMomentsOfInertiaFilter - shrink cells composing an arbitrary data set
 // .SECTION Description
-// vtkCenterOfMassFilter 
-// finds the center of mass of a collection of particles. Either of all marked
-// particles or of all particles
+// vtkMomentsOfInertiaFilter 
+// finds the moment of inertia tensor of a collection of particles, then
+// displays graphically the principle moments of inertia
 // .SECTION See Also
 // vtkKdTree
 
-#ifndef __vtkCenterOfMassFilter_h
-#define __vtkCenterOfMassFilter_h
+#ifndef __vtkMomentsOfInertiaFilter_h
+#define __vtkMomentsOfInertiaFilter_h
 
 #include "vtkPointSetAlgorithm.h"
 
-class VTK_GRAPHICS_EXPORT vtkCenterOfMassFilter : public vtkPointSetAlgorithm
+class VTK_GRAPHICS_EXPORT vtkMomentsOfInertiaFilter : public vtkPointSetAlgorithm
 {
 public:
-  static vtkCenterOfMassFilter *New();
-  vtkTypeRevisionMacro(vtkCenterOfMassFilter,vtkPointSetAlgorithm);
+  static vtkMomentsOfInertiaFilter *New();
+  vtkTypeRevisionMacro(vtkMomentsOfInertiaFilter,vtkPointSetAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent);
-  // Description:
-  // Get/Set the density parameter
-  vtkSetMacro(Overdensity, double);
-  vtkGetMacro(Overdensity, double);
-
 protected:
-  vtkCenterOfMassFilter();
-  ~vtkCenterOfMassFilter();
+  vtkMomentsOfInertiaFilter();
+  ~vtkMomentsOfInertiaFilter();
 
   // Override to specify support for any vtkDataSet input type.
   virtual int FillInputPortInformation(int port, vtkInformation* info);
@@ -45,11 +40,9 @@ protected:
   virtual int RequestData(vtkInformation*,
                           vtkInformationVector**,
                           vtkInformationVector*);
-	double Overdensity;
-
 private:
-  vtkCenterOfMassFilter(const vtkCenterOfMassFilter&);  // Not implemented.
-  void operator=(const vtkCenterOfMassFilter&);  // Not implemented.
+  vtkMomentsOfInertiaFilter(const vtkMomentsOfInertiaFilter&);  // Not implemented.
+  void operator=(const vtkMomentsOfInertiaFilter&);  // Not implemented.
 };
 
 #endif

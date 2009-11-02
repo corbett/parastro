@@ -7,6 +7,7 @@
 	 <Filter name="Mass Function Filter" />
 	 <Filter name="Profile Filter" />
 	 <Filter name="Most Bound" />
-	 <Filter name="PlotAttributes" />	
+	 <Filter name="PlotAttributes" />
+	 <Filter name="Principle Moments of Inertia" />
    </Category>
  </ParaViewFilters>

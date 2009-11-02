@@ -40,7 +40,7 @@ public:
 
 // The BTX, ETX comments bracket the portion of the code which should not be
 // attempted to wrap for use by python, specifically the code which uses
-// C++ templates as this code is unable to be wrapped. DO NOT REMOVE.
+// C++ templates as this code is unable to be wrapped. DO NOT REMOVE. 
 //BTX
 protected:
   vtkTipsyReader();

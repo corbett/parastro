@@ -43,17 +43,6 @@ int vtkCenterOfMassFilter::FillInputPortInformation(int, vtkInformation* info)
   return 1;
 }
 
-double* vtkCenterOfMassFilter::CalculateWeightedMass(double& mass,\
-																double* point)
-{
-	double* weightedMass = new double[3];
-	for(int i = 0; i < 3; ++i)
-	{
-		weightedMass[i]=mass*point[i];
-	}
-	return weightedMass;
-}
-
 //----------------------------------------------------------------------------
 int vtkCenterOfMassFilter::RequestData(vtkInformation*,
                                  vtkInformationVector** inputVector,
@@ -62,52 +51,15 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
   // Get input and output data.
   vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
   vtkPolyData* output = vtkPolyData::GetData(outputVector);
-	double totalMass=0;
-	double totalWeightedMass[3];
-	for(int nextPointId = 0;\
-	 		nextPointId < input->GetPoints()->GetNumberOfPoints();\
-	 		++nextPointId)
-		{
-		double* nextPoint=GetPoint(input,nextPointId);
-		// extracting the mass
-		// has to be double as this version of VTK doesn't have 
-		// GetTuple function which operates with float
-		double* mass=GetDataValue(input,"mass",nextPointId);
-		//calculating the weighted mass
-		double* weightedMass=CalculateWeightedMass(mass[0],nextPoint);
-		// updating the mass and the weighted mass
-		totalMass+=mass[0];
-		for(int i = 0; i < 3; ++i)
-			{
-			totalWeightedMass[i]+=weightedMass[i];
-			}
-		// Finally, some memory management
-		delete [] weightedMass;
-		delete [] mass;
-		delete [] nextPoint;
-		}
-	// calculating the result
-	// our final data is in float, as Tipsy's data is stored in float
-	double* dbCenterOfMass=new double[3]; // this is needed for the virial calc
-	float* centerOfMass=new float[3];
-	if(totalMass!=0)
-		{
-		for(int i = 0; i < 3; ++i)
-			{
-			// casting to float to be the same precision as other Tipsy
-			// variables.	
-			dbCenterOfMass[i]=totalWeightedMass[i]/totalMass;
-			centerOfMass[i]=static_cast<float>(dbCenterOfMass[i]);
-			}
-		}
-	else
-		{
-		vtkErrorMacro("total mass is zero, cannot calculate center of mass");
-		return 0; 
-		}			
 	// we will create one point in the output: the center of mass point
 	output->SetPoints(vtkSmartPointer<vtkPoints>::New());
 	output->SetVerts(vtkSmartPointer<vtkCellArray>::New()); 
+	double* dbCenterOfMass = ComputeCOM(input);
+	float* centerOfMass = new float[3];
+	for(int i = 0; i < 3; ++i)
+		{
+		centerOfMass[i]=static_cast<float>(dbCenterOfMass[i]);
+		}
 	// if the Overdensity is non zero and we are able to find a
 	// virial radius then we set the output to the sphere
 	// around the COM at the virial radius.
@@ -139,7 +91,7 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 			SetPointValue(output,centerOfMass);
 		}
 	// finally, some memory management
-	delete [] centerOfMass;
 	delete [] dbCenterOfMass;
+	delete [] centerOfMass;
   return 1;
 }
