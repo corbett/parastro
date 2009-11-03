@@ -479,7 +479,8 @@ void DisplayVectorsAsLines(vtkPointSet* input, vtkPolyData* output,
 	//setup the colors array
   vtkSmartPointer<vtkUnsignedCharArray> momentNumber = \
  		vtkSmartPointer<vtkUnsignedCharArray>::New();
-		momentNumber->SetNumberOfComponents(3);
+		momentNumber->SetNumberOfComponents(1);
+		momentNumber->SetNumberOfValues(3);
 		momentNumber->SetName("moment number");
 	// setting origin
 	points->InsertNextPoint(centerPoint);

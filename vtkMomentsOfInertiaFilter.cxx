@@ -54,7 +54,6 @@ int vtkMomentsOfInertiaFilter::RequestData(vtkInformation*,
   vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
   vtkPolyData* output = vtkPolyData::GetData(outputVector);
 	// computing the center of mass
-	// TODO: this has a problem, something with memory, fix
 	double* centerOfMass = ComputeCOM(input);
 	// computing the moment of inertia tensor 3x3 matrix, and its
 	// eigenvalues and eigenvectors
