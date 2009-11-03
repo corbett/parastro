@@ -23,7 +23,7 @@
 				</Documentation>
 			</StringVectorProperty>  
 		<StringVectorProperty
-			name="AaaaaAFileName"
+			name="FileName"
 			command="SetFileName"
 			number_of_elements="1">
 			<FileListDomain name="files"/>
@@ -44,7 +44,7 @@
 
 			<Property name="MarkFileName" show="1"/>
 			<Property name="AdditionalAttributeFiles" show="1"/>
-			<Property name="AaaaaAFileName" show="1"/>
+			<Property name="FileName" show="1"/>
 		</Hints>  
 		</SourceProxy>
 	</ProxyGroup>
