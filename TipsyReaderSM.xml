@@ -2,15 +2,21 @@
 	<ProxyGroup name="sources">
 		<SourceProxy name="TipsyReader" 
 					 class="vtkTipsyReader">
-			<StringVectorProperty name="bogus"
-			    number_of_elements="1">
-			    <FileListDomain name="files"/>
-			</StringVectorProperty>
+			<StringVectorProperty
+				name="AdditionalAttributeFiles"
+				command="SetAttributeFile"
+				number_of_elements="1">
+				<FileListDomain name="files"/>
+				<Documentation>
+			    Additional attribute files set are merged into existing database.
+				</Documentation>
+			</StringVectorProperty>  
+
 			<StringVectorProperty
 				name="FileName"
 				command="SetFileName"
 				number_of_elements="1">
-
+				<FileListDomain name="files"/>
 				<Documentation>
 					Reads in points from a tipsy binary file.
 				</Documentation>
@@ -25,15 +31,6 @@
 				</Documentation>
 			</StringVectorProperty>
 
-			<StringVectorProperty
-				name="AdditionalAttributeFiles"
-				command="SetAttributeFile"
-				number_of_elements="1">
-				<FileListDomain name="files"/>
-				<Documentation>
-			    Additional attribute files set are merged into existing database.
-				</Documentation>
-			</StringVectorProperty>  -
 
   	     <IntVectorProperty name="ReadPositionsOnly"
 	       command="SetReadPositionsOnly"
@@ -48,7 +45,7 @@
 			<Property name="FileName" show="1"/>
 			<Property name="MarkFileName" show="1"/>
 			<Property name="AdditionalAttributeFiles" show="1"/>
-		</Hints>  -->
+		</Hints> 
 		</SourceProxy>
 	</ProxyGroup>
 </ServerManagerConfiguration>
