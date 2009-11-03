@@ -8,9 +8,10 @@
 #include "vtkCellData.h"
 #include "vtkPoints.h"
 #include "vtkLine.h"
+#include "vtkMath.h"
+#include "vtkUnsignedCharArray.h"
 #include <assert.h>
 #include <cmath>
-#include "vtkMath.h"
 //----------------------------------------------------------------------------
 double IllinoisRootFinder(double (*func)(double,void *),void *ctx,\
 											double r,double s,double xacc,double yacc,\
@@ -475,6 +476,19 @@ void DisplayVectorsAsLines(vtkPointSet* input, vtkPolyData* output,
 {
 	vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
 	vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
+	//setup the colors array
+  vtkSmartPointer<vtkUnsignedCharArray> colors = \
+ 		vtkSmartPointer<vtkUnsignedCharArray>::New();
+		colors->SetNumberOfComponents(3);
+		colors->SetName("Colors");
+		// creting red, green, and blue colors one for each line
+		unsigned char red[3]={255,0,0};
+		unsigned char green[3]={0,255,0};
+		unsigned char blue[3]={0,0,255};
+		//add the colors we created to the colors array
+		colors->InsertNextTupleValue(red);
+		colors->InsertNextTupleValue(green);
+		colors->InsertNextTupleValue(blue);
 	// setting origin
 	points->InsertNextPoint(centerPoint);
 	double scale=ComputeMaxR(input,centerPoint);
@@ -494,6 +508,7 @@ void DisplayVectorsAsLines(vtkPointSet* input, vtkPolyData* output,
 	// ready to update the output
 	output->SetPoints(points);
 	output->SetLines(lines);
+	output->GetCellData()->AddArray(colors);
 }
 	
 	
