@@ -23,7 +23,7 @@
 				</Documentation>
 			</StringVectorProperty>  
 		<StringVectorProperty
-			name="FileName"
+			name="AaaaaAFileName"
 			command="SetFileName"
 			number_of_elements="1">
 			<FileListDomain name="files"/>
