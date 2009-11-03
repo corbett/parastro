@@ -8,10 +8,10 @@
 #include "vtkCellData.h"
 #include "vtkPoints.h"
 #include "vtkLine.h"
-#include "vtkMath.h"
 #include "vtkUnsignedCharArray.h"
 #include <assert.h>
 #include <cmath>
+#include "vtkMath.h"
 //----------------------------------------------------------------------------
 double IllinoisRootFinder(double (*func)(double,void *),void *ctx,\
 											double r,double s,double xacc,double yacc,\
@@ -477,21 +477,10 @@ void DisplayVectorsAsLines(vtkPointSet* input, vtkPolyData* output,
 	vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
 	vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
 	//setup the colors array
-  vtkSmartPointer<vtkUnsignedCharArray> colors = \
+  vtkSmartPointer<vtkUnsignedCharArray> momentNumber = \
  		vtkSmartPointer<vtkUnsignedCharArray>::New();
-		colors->SetNumberOfComponents(3);
-		colors->SetName("Colors");
-		// creting red, green, and blue colors one for each line
-		unsigned char red[3];
-		red[0]=255;red[1]=0;red[2]=0;
-		unsigned char green[3];
-		green[0]=0;green[1]=255;green[2]=0;
-		unsigned char blue[3];
-		blue[0]=0;blue[1]=0;blue[2]=255;
-		//add the colors we created to the colors array
-		colors->InsertNextTupleValue(red);
-		colors->InsertNextTupleValue(green);
-		colors->InsertNextTupleValue(blue);
+		momentNumber->SetNumberOfComponents(3);
+		momentNumber->SetName("moment number");
 	// setting origin
 	points->InsertNextPoint(centerPoint);
 	double scale=ComputeMaxR(input,centerPoint);
@@ -507,11 +496,13 @@ void DisplayVectorsAsLines(vtkPointSet* input, vtkPolyData* output,
 			nextLine->GetPointIds()->SetId(0,i+1); // i+1 as origin is 0
 		// adding the line to the cell array
 		lines->InsertNextCell(nextLine);
+		// saving the moment number so the lines can be colored by this
+		momentNumber->SetValue(i,i+1); // i+1 as want to index array by 1
 		}
 	// ready to update the output
 	output->SetPoints(points);
 	output->SetLines(lines);
-	output->GetCellData()->AddArray(colors);
+	output->GetCellData()->AddArray(momentNumber);
 }
 	
 	
