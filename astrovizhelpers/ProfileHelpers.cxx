@@ -482,9 +482,12 @@ void DisplayVectorsAsLines(vtkPointSet* input, vtkPolyData* output,
 		colors->SetNumberOfComponents(3);
 		colors->SetName("Colors");
 		// creting red, green, and blue colors one for each line
-		unsigned char red[3]={255,0,0};
-		unsigned char green[3]={0,255,0};
-		unsigned char blue[3]={0,0,255};
+		unsigned char red[3];={255,0,0};
+		red[0]=255;red[1]=0;red[2]=0;
+		unsigned char green[3];
+		green[0]=0;green[1]=255;green[2]=0;
+		unsigned char blue[3];
+		blue[0]=0;blue[1]=0;blue[2]=255;
 		//add the colors we created to the colors array
 		colors->InsertNextTupleValue(red);
 		colors->InsertNextTupleValue(green);
