@@ -63,8 +63,6 @@ int vtkMomentsOfInertiaFilter::RequestData(vtkInformation*,
 	ComputeInertiaTensor(input,centerOfMass,inertiaTensor);
 	vtkMath::Diagonalize3x3(inertiaTensor,eigenvalues,eigenvectors);
 	// displaying eigenvectors
-	//TODO: displaying eigenvectors
-	cout << "displaying eigenvectors\n";
 	DisplayVectorsAsLines(input,output,eigenvectors,centerOfMass);
 	delete [] centerOfMass;
   return 1;
