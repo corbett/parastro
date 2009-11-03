@@ -465,7 +465,7 @@ void ComputeInertiaTensor(vtkPointSet* input, double* centerPoint,\
 	inertiaTensor[0][2]*=-1;		
 	inertiaTensor[1][2]*=-1;
 	// We didn't compute these components as we know the tensor is symmetric
-	// symmetrizing
+	// so symmetrizing based on the components we computed
 	inertiaTensor[1][0]=inertiaTensor[0][1];
 	inertiaTensor[2][0]=inertiaTensor[0][2];		
 	inertiaTensor[2][1]=inertiaTensor[1][2];
