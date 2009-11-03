@@ -3,16 +3,6 @@
 		<SourceProxy name="TipsyReader" 
 					 class="vtkTipsyReader">
 			<StringVectorProperty
-				name="AdditionalAttributeFiles"
-				command="SetAttributeFile"
-				number_of_elements="1">
-				<FileListDomain name="files"/>
-				<Documentation>
-			    Additional attribute files set are merged into existing database.
-				</Documentation>
-			</StringVectorProperty>  
-
-			<StringVectorProperty
 				name="FileName"
 				command="SetFileName"
 				number_of_elements="1">
@@ -31,7 +21,15 @@
 				</Documentation>
 			</StringVectorProperty>
 
-
+			<StringVectorProperty
+				name="AdditionalAttributeFiles"
+				command="SetAttributeFileBlah"
+				number_of_elements="1">
+				<FileListDomain name="files"/>
+				<Documentation>
+			    Additional attribute files set are merged into existing database.
+				</Documentation>
+			</StringVectorProperty>  
   	     <IntVectorProperty name="ReadPositionsOnly"
 	       command="SetReadPositionsOnly"
 	       number_of_elements="1"
@@ -45,7 +43,7 @@
 			<Property name="FileName" show="1"/>
 			<Property name="MarkFileName" show="1"/>
 			<Property name="AdditionalAttributeFiles" show="1"/>
-		</Hints> 
+		</Hints>  
 		</SourceProxy>
 	</ProxyGroup>
 </ServerManagerConfiguration>
