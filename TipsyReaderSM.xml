@@ -23,7 +23,7 @@
 
 			<StringVectorProperty
 				name="AdditionalAttributeFiles"
-				command="SetAttributeFileBlah"
+				command="SetAttributeFile"
 				number_of_elements="1">
 				<FileListDomain name="files"/>
 				<Documentation>
