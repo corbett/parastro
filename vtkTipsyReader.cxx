@@ -46,7 +46,9 @@ void vtkTipsyReader::PrintSelf(ostream& os, vtkIndent indent)
   os << indent << "FileName: "
      << (this->FileName ? this->FileName : "(none)") << "\n"
 		 << indent << "MarkFileName: "
-     << (this->MarkFileName ? this->MarkFileName : "(none)") << "\n";
+     << (this->MarkFileName ? this->MarkFileName : "(none)") << "\n"
+		 << indent << "AttributeFile: "
+		 << (this->AttributeFile ? this->AttributeFile : "(none)") << "\n";
 }
 
 //----------------------------------------------------------------------------
@@ -60,11 +62,11 @@ TipsyHeader vtkTipsyReader::ReadTipsyHeader(ifTipsy& tipsyInfile)
 }
 
 //----------------------------------------------------------------------------
-queue<int> vtkTipsyReader::ReadMarkedParticleIndices(\
+vector<int> vtkTipsyReader::ReadMarkedParticleIndices(\
 														TipsyHeader& tipsyHeader,ifTipsy& tipsyInfile)
 {
 	ifstream markInFile(this->MarkFileName);
-	queue<int> markedParticleIndices;
+	vector<int> markedParticleIndices;
 	if(!markInFile)
  		{
  		vtkErrorMacro("Error opening marked particle file: " 
@@ -95,10 +97,10 @@ queue<int> vtkTipsyReader::ReadMarkedParticleIndices(\
 				// Read in the rest of the file file, noting the marked particles
 				while(markInFile >> mfIndex)
 					{
-					// Insert the next marked particle index into the queue
+					// Insert the next marked particle index into the vector
 					// subtracting one as the indices in marked particle file
 					// begin at 1, not 0
-					markedParticleIndices.push(mfIndex-1);
+					markedParticleIndices.push_back(mfIndex-1);
 					}
 				// closing file
 				markInFile.close();
@@ -127,7 +129,7 @@ void vtkTipsyReader::ReadAllParticles(TipsyHeader& tipsyHeader,\
 
 //----------------------------------------------------------------------------
 void vtkTipsyReader::ReadMarkedParticles(\
-											queue<int> markedParticleIndices,\
+											vector<int> markedParticleIndices,\
 											TipsyHeader& tipsyHeader,\
 											ifTipsy& tipsyInfile,\
 											vtkPolyData* output)
@@ -137,35 +139,35 @@ void vtkTipsyReader::ReadMarkedParticles(\
 	// now equals the number of marked particles
 	this->AllocateAllTipsyVariableArrays(tipsyHeader,output);
 	int nextMarkedParticleIndex;
-  while(!markedParticleIndices.empty())
+	for (vector<int>::iterator it = markedParticleIndices.begin();
+		it != markedParticleIndices.end(); ++it)		
 		{
-			nextMarkedParticleIndex=markedParticleIndices.front();
-			markedParticleIndices.pop();
-			// navigating to the next marked particle
-			if(nextMarkedParticleIndex < tipsyHeader.h_nSph)
-				{
-				// we are seeking a gas particle
-				tipsyInfile.seekg(tipsypos(tipsypos::gas,nextMarkedParticleIndex));	
-				}
-			else if(nextMarkedParticleIndex <\
-			 				tipsyHeader.h_nDark+tipsyHeader.h_nSph)
-				{
-				// we are seeking a dark particle
-				tipsyInfile.seekg(tipsypos(tipsypos::dark,nextMarkedParticleIndex));	
-				}
-			else if (nextMarkedParticleIndex < tipsyHeader.h_nBodies)
-				{
-				// we are seeking a star particle
-				tipsyInfile.seekg(tipsypos(tipsypos::star,nextMarkedParticleIndex));	
-				}
-			else
-				{
-				vtkErrorMacro("A marked particle index is greater than \
-											the number of particles in the file, unable to read")	
-				break;
-				}
-			// reading in the particle
-			ReadParticle(tipsyInfile,output);
+ 		nextMarkedParticleIndex=*it;
+		// navigating to the next marked particle
+		if(nextMarkedParticleIndex < tipsyHeader.h_nSph)
+			{
+			// we are seeking a gas particle
+			tipsyInfile.seekg(tipsypos(tipsypos::gas,nextMarkedParticleIndex));	
+			}
+		else if(nextMarkedParticleIndex <\
+		 				tipsyHeader.h_nDark+tipsyHeader.h_nSph)
+			{
+			// we are seeking a dark particle
+			tipsyInfile.seekg(tipsypos(tipsypos::dark,nextMarkedParticleIndex));	
+			}
+		else if (nextMarkedParticleIndex < tipsyHeader.h_nBodies)
+			{
+			// we are seeking a star particle
+			tipsyInfile.seekg(tipsypos(tipsypos::star,nextMarkedParticleIndex));	
+			}
+		else
+			{
+			vtkErrorMacro("A marked particle index is greater than \
+										the number of particles in the file, unable to read")	
+			break;
+			}
+		// reading in the particle
+		ReadParticle(tipsyInfile,output);
 		}
 }
 
@@ -314,7 +316,7 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 	TipsyHeader tipsyHeader=this->ReadTipsyHeader(tipsyInfile);
 	// Next considering whether to read in a mark file, 
 	// and if so whether that reading was a success 
-	queue<int> markedParticleIndices;
+	vector<int> markedParticleIndices;
 	if(strcmp(this->MarkFileName,"")!=0)
 		{
 		vtkDebugMacro("Reading marked point indices from file:" \

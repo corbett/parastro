@@ -12,7 +12,7 @@ Modified from vtkSimplePointsReader and from Doug Potter's Tipsylib
 #include "vtkSmartPointer.h" // needed for the functions to initialize arrays
 #include "vtkPolyData.h" // needed as most helper functions modify output which is vtkPolyData
 #include <queue> // needed for FIFO queue used to store marked particles
-using std::queue;
+using std::vector;
 class vtkCharArray;
 class VTK_IO_EXPORT vtkTipsyReader : public vtkPolyDataReader
 {
@@ -81,11 +81,11 @@ private:
 	vtkIdType ReadDarkParticle(vtkPolyData* output, TipsyDarkParticle& d);
 	// Description:
 	// Reads only Marked particles from the tipsy file. Must be called after function ReadMarkedParticleIndices.
-	void ReadMarkedParticles(queue<int> markedParticleIndices,TipsyHeader& tipsyHeader,ifTipsy& tipsyInfile,vtkPolyData* output);
+	void ReadMarkedParticles(vector<int> markedParticleIndices,TipsyHeader& tipsyHeader,ifTipsy& tipsyInfile,vtkPolyData* output);
 	// Description:
 	// reads in an array of the indices of marked particles from a file, returns a queue of marked particles
 	// which is empty if reading was unsucessful.
-	queue<int> ReadMarkedParticleIndices(TipsyHeader& tipsyHeader,ifTipsy& tipsyInfile);
+	vector<int> ReadMarkedParticleIndices(TipsyHeader& tipsyHeader,ifTipsy& tipsyInfile);
 	/* Helper functions for storing data in output vector*/
 	// Description:
 	// allocates all vtk arrays for Tipsy variables and places them in the output vector
