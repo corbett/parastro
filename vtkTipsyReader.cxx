@@ -117,29 +117,28 @@ vector<int> vtkTipsyReader::ReadMarkedParticleIndices(\
 
 //----------------------------------------------------------------------------
 void vtkTipsyReader::ReadAllParticles(TipsyHeader& tipsyHeader,\
-											ifTipsy& tipsyInfile,vtkPolyData* output)
+	ifTipsy& tipsyInfile,vtkPolyData* output)
 {
 	// Allocates vtk scalars and vector arrays to hold particle data, 
 	this->AllocateAllTipsyVariableArrays(tipsyHeader,output);
 	for(int i=0; i<tipsyHeader.h_nBodies; i++)  // we could have many bodies
   	{ 
-			this->ReadParticle(tipsyInfile,output);
+		this->ReadParticle(tipsyInfile,output);
   	}
 }
 
 //----------------------------------------------------------------------------
-void vtkTipsyReader::ReadMarkedParticles(\
-											vector<int> markedParticleIndices,\
-											TipsyHeader& tipsyHeader,\
-											ifTipsy& tipsyInfile,\
-											vtkPolyData* output)
+void vtkTipsyReader::ReadMarkedParticles(vector<int>& markedParticleIndices,
+	TipsyHeader& tipsyHeader,
+	ifTipsy& tipsyInfile,
+	vtkPolyData* output)
 {
 	// Allocates vtk scalars and vector arrays to hold particle data, 
 	// As marked file was read, only allocates numBodies which 
 	// now equals the number of marked particles
 	this->AllocateAllTipsyVariableArrays(tipsyHeader,output);
 	int nextMarkedParticleIndex;
-	for (vector<int>::iterator it = markedParticleIndices.begin();
+	for(vector<int>::iterator it = markedParticleIndices.begin();
 		it != markedParticleIndices.end(); ++it)		
 		{
  		nextMarkedParticleIndex=*it;
@@ -169,6 +168,54 @@ void vtkTipsyReader::ReadMarkedParticles(\
 		// reading in the particle
 		ReadParticle(tipsyInfile,output);
 		}
+}
+
+//----------------------------------------------------------------------------
+int vtkTipsyReader::ReadAdditionalAttributeFile(
+	vector<int>& markedParticleIndices, TipsyHeader& tipsyHeader, 
+	vtkPolyData* output)
+{
+	//TODO: implement
+
+	// open file
+	ifstream attributeInFile(this->AttributeFile);
+	if(!attributeInFile)
+ 		{
+ 		vtkErrorMacro("Error opening marked particle file: " 
+			<< this->AttributeFile 
+			<< " reading only attributes defined in binary.");
+ 		}
+	else
+		{
+		int numBodies;
+		attributeInFile >> numBodies;
+		if(numBodies==tipsyHeader.h_nBodies)
+			{
+			// ready to read in
+			AllocateDataArray(output,"additional attribute",1,
+				tipsyHeader.h_nBodies);
+			double attributeData;
+			int index=0;
+			while(attributeInFile >> attributeData && index < tipsyHeader.h_nBodies)
+				{
+				// place attribute data in output
+				SetDataValue(output,"additional attribute",index,&attributeData);
+				index++;
+				}
+			// closing file
+			attributeInFile.close();
+			// successful
+			return 1;
+			}
+		else
+			{
+			vtkErrorMacro("Error opening marked particle file: " 
+				<< this->AttributeFile 
+				<< " reading only attributes defined in binary.");
+			}
+		}
+	// unsuccessful
+	return 0;
 }
 
 //----------------------------------------------------------------------------
@@ -290,6 +337,8 @@ void vtkTipsyReader::AllocateAllTipsyVariableArrays(TipsyHeader& tipsyHeader,\
 *    dealing with)
 * 3. Read mark file indices from marked particle file, if there is one
 * 4. Read either marked particles only or all particles
+* 5. If an attribute file is additionally specified, reads this additional
+* 	 attribute into a data array, reading only those marked if necessary.
 */
 //----------------------------------------------------------------------------
 int vtkTipsyReader::RequestData(vtkInformation*,
@@ -343,6 +392,11 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 		}
   // Close the tipsy in file.
 	tipsyInfile.close();
+	// Read an additional attribute file if necessary
+	if(strcmp(this->AttributeFile,"")!=0)
+		{
+		ReadAdditionalAttributeFile(markedParticleIndices,tipsyHeader,output);
+		}
 	// Read Successfully
 	vtkDebugMacro("Read " << output->GetPoints()->GetNumberOfPoints() \
 								<< " points.");

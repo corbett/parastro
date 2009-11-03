@@ -1,7 +1,3 @@
-/*=========================================================================
-Modified from vtkSimplePointsReader and from Doug Potter's Tipsylib
- -christine
-=========================================================================*/
 // .NAME vtkTipsyReader - Read points from a Tipsy standard binary file
 // .SECTION Description
 // here is the desciprtion
@@ -63,9 +59,11 @@ private:
 	TipsyHeader ReadTipsyHeader(ifTipsy& tipsyInfile);
 	// Description:
 	// Reads all particles from the tipsy file
-	void ReadAllParticles(TipsyHeader& tipsyHeader,ifTipsy& tipsyInfile,vtkPolyData* output);
+	void ReadAllParticles(TipsyHeader& tipsyHeader,
+		ifTipsy& tipsyInfile,vtkPolyData* output);
 	// Description:
-	// reads in a particle (either gas, dark or star as appropriate) from the tipsy in file of this class
+	// reads in a particle (either gas, dark or star as appropriate) 
+	//from the tipsy in file of this class
 	vtkIdType ReadParticle(ifTipsy& tipsyInFile,vtkPolyData* output);
 	// Description:
 	// reads variables common to all particles
@@ -80,16 +78,30 @@ private:
 	// reads variables common to all dark particles
 	vtkIdType ReadDarkParticle(vtkPolyData* output, TipsyDarkParticle& d);
 	// Description:
-	// Reads only Marked particles from the tipsy file. Must be called after function ReadMarkedParticleIndices.
-	void ReadMarkedParticles(vector<int> markedParticleIndices,TipsyHeader& tipsyHeader,ifTipsy& tipsyInfile,vtkPolyData* output);
+	// Reads only Marked particles from the tipsy file.
+	// Must be called after function ReadMarkedParticleIndices.
+	void ReadMarkedParticles(vector<int>& markedParticleIndices,
+		TipsyHeader& tipsyHeader,ifTipsy& tipsyInfile,vtkPolyData* output);
 	// Description:
-	// reads in an array of the indices of marked particles from a file, returns a queue of marked particles
+	// reads in an array of the indices of marked particles from a file, 
+	// returns a queue of marked particles
 	// which is empty if reading was unsucessful.
-	vector<int> ReadMarkedParticleIndices(TipsyHeader& tipsyHeader,ifTipsy& tipsyInfile);
+	vector<int> ReadMarkedParticleIndices(TipsyHeader& tipsyHeader,
+		ifTipsy& tipsyInfile);
+	// Description:
+	// If an additional attribute file is specified, reads this file in as 
+	// an additional attribute array. The points in the tipsy file must have
+	// already been read in, and an additional attribute file must have
+	// been input by the user. If a marked file was specified, it reads in 
+	// only the particles at indices which were marked
+	int ReadAdditionalAttributeFile(vector<int>& markedParticleIndices,
+		TipsyHeader& tipsyHeader, vtkPolyData* output);
 	/* Helper functions for storing data in output vector*/
 	// Description:
-	// allocates all vtk arrays for Tipsy variables and places them in the output vector
-	void AllocateAllTipsyVariableArrays(TipsyHeader& tipsyHeader,vtkPolyData* output);
+	// allocates all vtk arrays for Tipsy variables and places them 
+	// in the output vector
+	void AllocateAllTipsyVariableArrays(TipsyHeader& tipsyHeader,
+		vtkPolyData* output);
 //ETX
 
 };
