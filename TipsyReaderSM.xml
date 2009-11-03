@@ -2,6 +2,10 @@
 	<ProxyGroup name="sources">
 		<SourceProxy name="TipsyReader" 
 					 class="vtkTipsyReader">
+			<StringVectorProperty name="bogus"
+			    number_of_elements="1">
+			    <FileListDomain name="files"/>
+			</StringVectorProperty>
 			<StringVectorProperty
 				name="FileName"
 				command="SetFileName"
