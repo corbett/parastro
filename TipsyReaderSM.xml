@@ -14,7 +14,7 @@
 			</StringVectorProperty>
 
 			<StringVectorProperty
-				name="TheAdditionalAttributeFiles"
+				name="AdditionalAttributeFile"
 				command="SetAttributeFile"
 				number_of_elements="1">
 				<FileListDomain name="files"/>
@@ -22,8 +22,11 @@
 			    Additional attribute files set are merged into existing database.
 				</Documentation>
 			</StringVectorProperty>  
+	    <!--named Aaa as currently ParaView decides which file is the
+		main data file by that file with the name which is alphabetically
+		first -->
 		<StringVectorProperty
-			name="FileName"
+			name="AaaFileName" 
 			command="SetFileName"
 			number_of_elements="1">
 			<FileListDomain name="files"/>
@@ -41,9 +44,8 @@
 	       </Documentation>
 	     </IntVectorProperty>
 		<Hints>
-
 			<Property name="MarkFileName" show="1"/>
-			<Property name="TheAdditionalAttributeFiles" show="1"/>
+			<Property name="AdditionalAttributeFile" show="1"/>
 		</Hints>  
 		</SourceProxy>
 	</ProxyGroup>
