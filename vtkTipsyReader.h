@@ -46,9 +46,9 @@ public:
 protected:
   vtkTipsyReader();
   ~vtkTipsyReader();
+	char* AttributeFile;
 	char* MarkFileName;
 	char* FileName;
-	char* AttributeFile;
 	int ReadPositionsOnly;
 
   int RequestData(vtkInformation*,
