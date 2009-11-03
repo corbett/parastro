@@ -10,7 +10,7 @@
 				name="FileName"
 				command="SetFileName"
 				number_of_elements="1">
-				<FileListDomain name="files"/>
+
 				<Documentation>
 					Reads in points from a tipsy binary file.
 				</Documentation>
@@ -33,7 +33,7 @@
 				<Documentation>
 			    Additional attribute files set are merged into existing database.
 				</Documentation>
-			</StringVectorProperty>  
+			</StringVectorProperty>  -
 
   	     <IntVectorProperty name="ReadPositionsOnly"
 	       command="SetReadPositionsOnly"
