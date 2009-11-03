@@ -494,7 +494,7 @@ void DisplayVectorsAsLines(vtkPointSet* input, vtkPolyData* output,
 			// setting the first point of the line to be the origin
 			nextLine->GetPointIds()->SetId(0,0); 
 			// setting the second point of the line to be the scaled vector
-			nextLine->GetPointIds()->SetId(0,i+1); // i+1 as origin is 0
+			nextLine->GetPointIds()->SetId(1,i+1); // i+1 as origin is 0
 		// adding the line to the cell array
 		lines->InsertNextCell(nextLine);
 		// saving the moment number so the lines can be colored by this
