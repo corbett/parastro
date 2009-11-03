@@ -65,6 +65,5 @@ int vtkMomentsOfInertiaFilter::RequestData(vtkInformation*,
 	// displaying eigenvectors
 	DisplayVectorsAsLines(input,output,eigenvectors,centerOfMass);
 	delete [] centerOfMass;
-	delete [] dbCenterOfMass;
   return 1;
 }
