@@ -135,7 +135,7 @@ void vtkTipsyReader::ReadMarkedParticles(vector<int>& markedParticleIndices,
 	// As marked file was read, only allocates numBodies which 
 	// now equals the number of marked particles
 	this->AllocateAllTipsyVariableArrays(markedParticleIndices.size(),output);
-	int nextMarkedParticleIndex;
+	int nextMarkedParticleIndex=0;
 	for(vector<int>::iterator it = markedParticleIndices.begin();
 		it != markedParticleIndices.end(); ++it)		
 		{
@@ -185,20 +185,49 @@ int vtkTipsyReader::ReadAdditionalAttributeFile(
 		{
 		int numBodies;
 		attributeInFile >> numBodies;
-		int readNumBodies = markedParticleIndices.empty() ? \
-			tipsyHeader.h_nBodies : markedParticleIndices.size();
 		if(numBodies==tipsyHeader.h_nBodies)
 			{
 			// ready to read in
-			AllocateDataArray(output,"additional attribute",1,
-				readNumBodies);
+			int dataIndex=0;
 			double attributeData;
-			int index=0;
-			while(attributeInFile >> attributeData && index < tipsyHeader.h_nBodies)
+			if(markedParticleIndices.empty())
 				{
-				// place attribute data in output
-				SetDataValue(output,"additional attribute",index,&attributeData);
-				index++;
+				AllocateDataArray(output,"additional attribute",1,
+					tipsyHeader.h_nBodies);
+				while(attributeInFile >> attributeData)
+					{
+					// place attribute data in output
+					SetDataValue(output,"additional attribute",dataIndex,
+						&attributeData);
+					dataIndex++;
+					}
+				}
+			else
+				{
+				AllocateDataArray(output,"additional attribute",1,
+					markedParticleIndices.size());
+				int nextMarkedParticleIndex=0;
+				for(vector<int>::iterator it = markedParticleIndices.begin();
+					it != markedParticleIndices.end(); ++it)		
+					{
+			 		nextMarkedParticleIndex=*it;
+					while(attributeInFile >> attributeData)
+						{
+						if(nextMarkedParticleIndex == dataIndex)
+							{
+							// nextMarkedParticleIndex == dataIndex so store
+							SetDataValue(output,"additional attribute",
+								dataIndex,&attributeData);
+							dataIndex++;
+							break;
+							}
+						else
+							{
+							// skipping, not marked
+							dataIndex++;
+							}
+						}
+					}
 				}
 			// closing file
 			attributeInFile.close();
