@@ -175,8 +175,6 @@ int vtkTipsyReader::ReadAdditionalAttributeFile(
 	vector<int>& markedParticleIndices, TipsyHeader& tipsyHeader, 
 	vtkPolyData* output)
 {
-	//TODO: implement
-
 	// open file
 	ifstream attributeInFile(this->AttributeFile);
 	if(!attributeInFile)
@@ -189,14 +187,16 @@ int vtkTipsyReader::ReadAdditionalAttributeFile(
 		{
 		int numBodies;
 		attributeInFile >> numBodies;
-		if(numBodies==tipsyHeader.h_nBodies)
+		int readNumBodies = markedParticleIndices.empty() ? \
+			tipsyHeader.h_nBodies : markedParticleIndices.size();
+		if(numBodies==readNumBodies)
 			{
 			// ready to read in
 			AllocateDataArray(output,"additional attribute",1,
-				tipsyHeader.h_nBodies);
+				readNumBodies);
 			double attributeData;
 			int index=0;
-			while(attributeInFile >> attributeData && index < tipsyHeader.h_nBodies)
+			while(attributeInFile >> attributeData && index < readNumBodies)
 				{
 				// place attribute data in output
 				SetDataValue(output,"additional attribute",index,&attributeData);
