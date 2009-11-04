@@ -61,6 +61,16 @@ double ComputeMaxR(vtkPointSet* input,double point[]);
 // 
 double OverDensityInSphere(double r, void* locatorStruct);
 
+
+// Description:
+// This assumes locatorStruct is a VirialRadiusInfo struct, which contains
+// a locator for a given vtkdataset, a center from which to calculate
+// the volume 
+// Given a radius, a center, calculates the number density of within the
+// sphere of radius r around the center and subtracts the critical density of 
+// the user's choice.
+double OverNumberInSphere(double r, void* locatorStruct);
+
 // Description:
 // The VirialRadiusInfo struct is an containing:
 // .locator which is a vtkPointLocator
@@ -71,7 +81,7 @@ struct VirialRadiusInfo
 {
 	vtkPointLocator* locator;
 	double center[3];
-	double criticalDensity;
+	double criticalValue;
 	double virialRadius;
 };
 

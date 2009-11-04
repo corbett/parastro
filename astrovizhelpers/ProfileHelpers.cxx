@@ -141,12 +141,28 @@ double OverDensityInSphere(double r,void* inputVirialRadiusInfo)
 	// Returning the density minus the critical density
 		double density = totalMass/(4./3*M_PI*pow(r,3));
 		double overdensity = density - \
-	 	virialRadiusInfo->criticalDensity;
+	 	virialRadiusInfo->criticalValue;
 	cout << "density is " << density << " ";
 	cout << "over density is "<< overdensity << "\n";
 	return overdensity;
 }
 
+//----------------------------------------------------------------------------
+double OverNumberInSphere(double r,void* inputVirialRadiusInfo)
+{
+	VirialRadiusInfo* virialRadiusInfo = \
+		static_cast<VirialRadiusInfo*>(inputVirialRadiusInfo);
+	vtkSmartPointer<vtkIdList> pointsInRadius = \
+		vtkSmartPointer<vtkIdList>::New();
+	virialRadiusInfo->locator->FindPointsWithinRadius(r,
+		virialRadiusInfo->center,
+		pointsInRadius);
+	// Returning the number minus the critical number
+	return pointsInRadius->GetNumberOfIds() - \
+	 	virialRadiusInfo->criticalValue;
+}
+
+//----------------------------------------------------------------------------
 VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,
 	double overdensity,double maxR,double center[])
 {
@@ -163,23 +179,56 @@ VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,
 		{
 			virialRadiusInfo.center[i]=center[i];
 		}
-		virialRadiusInfo.criticalDensity=overdensity;
+		// If this value doesn't change to a positive one, it indicates 
+		// that something has gone wrong with finding the virial radius
+		virialRadiusInfo.virialRadius=-1;
 		// but IllinoisRootFinder takes in a void pointer
 		void* pntrVirialRadiusInfo = &virialRadiusInfo;
-		// 3. Now we are ready to run the root finder
-		int numIter=0;
-		try
+		// 3. Now we are ready to run the root finding
+		// The basic idea is to successively search for the radius 
+		// with the critical density in between 0 and the radius which contains
+		// 10 points, then between the radius which contains 10 points and
+		// the radius which contains 100 points, then between the radius which
+		// contains 100... until the number of points is too big for the data
+		// set, at which point the root finding is considered to have failed
+		// and a value of -1 is returned.
+		int numIter=0; // don't ever use this info, but root finder needs it
+		double tolerance=1e-3;
+		int maxN=10;
+		double minRToSearch=1e-11f; // starting out at nearly zero
+		const double maxRToNumSearch=maxR; // never updated
+		double maxRToDenSearch=0; // updated each iteration
+		while(maxN<input->GetNumberOfPoints())
 			{
-			virialRadiusInfo.virialRadius=IllinoisRootFinder(OverDensityInSphere,
-				pntrVirialRadiusInfo,
-				maxR,1e-11f,//minR is almost zero
-				1e-3,1e-3,
-			  &numIter);
-			}
-		catch(const char* e)
-			{
+			// try catch, as root finder throws exception if there are problems
+			// e.g. if the root is improperly bracketed, which is a possibility
+			// as the method in 3. is heuristic. shouldn't throw for maxRToDenSearch
+			// as function for which it is trying to find root is monotonically
+			// increasing.
+			try
+				{
+				virialRadiusInfo.criticalValue=maxN;
+				maxRToDenSearch=IllinoisRootFinder(OverNumberInSphere,
+					pntrVirialRadiusInfo,
+					maxRToNumSearch,minRToSearch,
+					tolerance,tolerance,
+				  &numIter);
+				virialRadiusInfo.criticalValue=overdensity;
+				virialRadiusInfo.virialRadius=IllinoisRootFinder(OverDensityInSphere,
+					pntrVirialRadiusInfo,
+					maxRToDenSearch,minRToSearch,
+					tolerance,tolerance,
+				  &numIter);
+				// if we had no exceptions, search was successful
+				break;
+				}
+			catch(const char* e)
+				{
 				// This indicates that something has gone wrong with the root finding
-				virialRadiusInfo.virialRadius=-1; 
+				// try again to bracket the root, by increasing maxN
+				maxN *= 10;
+				minRToSearch=maxRToDenSearch;
+				}
 			}
   	return virialRadiusInfo;
 }
