@@ -100,8 +100,7 @@ private:
 	// Description:
 	// allocates all vtk arrays for Tipsy variables and places them 
 	// in the output vector
-	void AllocateAllTipsyVariableArrays(TipsyHeader& tipsyHeader,
-		vtkPolyData* output);
+	void AllocateAllTipsyVariableArrays(int numBodies,vtkPolyData* output);
 //ETX
 
 };

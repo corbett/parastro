@@ -104,8 +104,6 @@ vector<int> vtkTipsyReader::ReadMarkedParticleIndices(\
 					}
 				// closing file
 				markInFile.close();
-				// now the number of bodies is equal to the number of marked particles
-				tipsyHeader.h_nBodies=markedParticleIndices.size();
 				// read file successfully
 				vtkDebugMacro("Read " << numBodies<< " marked point indices.");
 				}	
@@ -120,7 +118,7 @@ void vtkTipsyReader::ReadAllParticles(TipsyHeader& tipsyHeader,\
 	ifTipsy& tipsyInfile,vtkPolyData* output)
 {
 	// Allocates vtk scalars and vector arrays to hold particle data, 
-	this->AllocateAllTipsyVariableArrays(tipsyHeader,output);
+	this->AllocateAllTipsyVariableArrays(tipsyHeader.h_nBodies,output);
 	for(int i=0; i<tipsyHeader.h_nBodies; i++)  // we could have many bodies
   	{ 
 		this->ReadParticle(tipsyInfile,output);
@@ -136,7 +134,7 @@ void vtkTipsyReader::ReadMarkedParticles(vector<int>& markedParticleIndices,
 	// Allocates vtk scalars and vector arrays to hold particle data, 
 	// As marked file was read, only allocates numBodies which 
 	// now equals the number of marked particles
-	this->AllocateAllTipsyVariableArrays(tipsyHeader,output);
+	this->AllocateAllTipsyVariableArrays(markedParticleIndices.size(),output);
 	int nextMarkedParticleIndex;
 	for(vector<int>::iterator it = markedParticleIndices.begin();
 		it != markedParticleIndices.end(); ++it)		
@@ -154,7 +152,7 @@ void vtkTipsyReader::ReadMarkedParticles(vector<int>& markedParticleIndices,
 			// we are seeking a dark particle
 			tipsyInfile.seekg(tipsypos(tipsypos::dark,nextMarkedParticleIndex));	
 			}
-		else if (nextMarkedParticleIndex < tipsyHeader.h_nBodies)
+		else if(nextMarkedParticleIndex < tipsyHeader.h_nBodies)
 			{
 			// we are seeking a star particle
 			tipsyInfile.seekg(tipsypos(tipsypos::star,nextMarkedParticleIndex));	
@@ -189,14 +187,14 @@ int vtkTipsyReader::ReadAdditionalAttributeFile(
 		attributeInFile >> numBodies;
 		int readNumBodies = markedParticleIndices.empty() ? \
 			tipsyHeader.h_nBodies : markedParticleIndices.size();
-		if(numBodies==readNumBodies)
+		if(numBodies==tipsyHeader.h_nBodies)
 			{
 			// ready to read in
 			AllocateDataArray(output,"additional attribute",1,
 				readNumBodies);
 			double attributeData;
 			int index=0;
-			while(attributeInFile >> attributeData && index < readNumBodies)
+			while(attributeInFile >> attributeData && index < tipsyHeader.h_nBodies)
 				{
 				// place attribute data in output
 				SetDataValue(output,"additional attribute",index,&attributeData);
@@ -304,7 +302,7 @@ vtkIdType vtkTipsyReader::ReadDarkParticle(vtkPolyData* output,\
 }
 		
 //----------------------------------------------------------------------------
-void vtkTipsyReader::AllocateAllTipsyVariableArrays(TipsyHeader& tipsyHeader,\
+void vtkTipsyReader::AllocateAllTipsyVariableArrays(int numBodies,\
 											vtkPolyData* output)
 {
   // Allocate objects to hold points and vertex cells. 
@@ -316,17 +314,17 @@ void vtkTipsyReader::AllocateAllTipsyVariableArrays(TipsyHeader& tipsyHeader,\
 		{
 		// the default scalars to be displayed
 		// Only allocate if we are to read thes in
-	  AllocateDataArray(output,"potential",1,tipsyHeader.h_nBodies);
+	  AllocateDataArray(output,"potential",1,numBodies);
 		// the rest of the scalars
-	  AllocateDataArray(output,"mass",1,tipsyHeader.h_nBodies);
-	  AllocateDataArray(output,"eps",1,tipsyHeader.h_nBodies);
-	  AllocateDataArray(output,"rho",1,tipsyHeader.h_nBodies);
-	  AllocateDataArray(output,"hsmooth",1,tipsyHeader.h_nBodies);
-	  AllocateDataArray(output,"temperature",1,tipsyHeader.h_nBodies);
-	  AllocateDataArray(output,"metals",1,tipsyHeader.h_nBodies);
-	  AllocateDataArray(output,"tform",1,tipsyHeader.h_nBodies);
+	  AllocateDataArray(output,"mass",1,numBodies);
+	  AllocateDataArray(output,"eps",1,numBodies);
+	  AllocateDataArray(output,"rho",1,numBodies);
+	  AllocateDataArray(output,"hsmooth",1,numBodies);
+	  AllocateDataArray(output,"temperature",1,numBodies);
+	  AllocateDataArray(output,"metals",1,numBodies);
+	  AllocateDataArray(output,"tform",1,numBodies);
 		// the default vectors to be displayed
-	  AllocateDataArray(output,"velocity",3,tipsyHeader.h_nBodies);
+	  AllocateDataArray(output,"velocity",3,numBodies);
 		}
 }
 /*
