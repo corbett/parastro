@@ -192,6 +192,7 @@ int vtkTipsyReader::ReadAdditionalAttributeFile(
 			double attributeData;
 			if(markedParticleIndices.empty())
 				{
+				// read additional attribute for all particles
 				AllocateDataArray(output,"additional attribute",1,
 					tipsyHeader.h_nBodies);
 				while(attributeInFile >> attributeData)
@@ -204,6 +205,7 @@ int vtkTipsyReader::ReadAdditionalAttributeFile(
 				}
 			else
 				{
+				// read additional attribute only for marked particles
 				AllocateDataArray(output,"additional attribute",1,
 					markedParticleIndices.size());
 				int nextMarkedParticleIndex=0;
@@ -215,10 +217,13 @@ int vtkTipsyReader::ReadAdditionalAttributeFile(
 						{
 						if(nextMarkedParticleIndex == dataIndex)
 							{
-							// nextMarkedParticleIndex == dataIndex so store
+							// nextMarkedParticleIndex == current particle so store
 							SetDataValue(output,"additional attribute",
 								dataIndex,&attributeData);
 							dataIndex++;
+							// break as we are done reading current marked particle's 
+							// data and want to get the index of the next marked particle,
+							// if there are more marked particles
 							break;
 							}
 						else
