@@ -170,6 +170,7 @@ void vtkProfileFilter::CalculateAndSetBounds(vtkPolyData* input,
 		// we are dealing with a line
 		double* pointOne=source->GetPoint(0);
 		double* pointTwo=source->GetPoint(source->GetNumberOfPoints()-1);
+		// TODO: fix this is currently == pointTwo (for some reason p1=p2?)
 		center=ComputeMidpoint(pointOne,pointTwo);
 		}
 	for(int i = 0; i < 3; ++i)
