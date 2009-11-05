@@ -114,8 +114,6 @@ double OverDensityInSphere(double r,void* inputVirialRadiusInfo)
 	virialRadiusInfo->locator->FindPointsWithinRadius(r,
 		virialRadiusInfo->center,
 		pointsInRadius);
-	cout << "there are " << pointsInRadius->GetNumberOfIds() << " points "
-	<< "within radius " << r << " ";
 	// calculating the average mass, dividing this by the volume of the sphere
 	// to get the density
 	double totalMass=0;
@@ -195,17 +193,19 @@ VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,
 			// in density, then try to calculate the root
 			if(denGuessR[0]>denGuessR[1]>denGuessR[2])
 				{
+				cout << "searching for virial radius!\n";
 				virialRadiusInfo.criticalValue=overdensity;
 				virialRadiusInfo.virialRadius = \
 					IllinoisRootFinder(OverDensityInSphere,
 					pntrVirialRadiusInfo,
-					guessR[0],guessR[1],
+					guessR[0],guessR[2],
 					tolerance,tolerance,
 					&numIter);
 				// we are done trying to find the root if the virial radius found is 
 				// greater than zero, as rootfinder returns -1 if there were problems 
 				if(virialRadiusInfo.virialRadius>0)
 					{
+					cout << "virial radius found\n";
 					break;
 					}
 				}
@@ -213,12 +213,15 @@ VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,
 			// updating the fibonacci sequence
 			shiftLeftUpdate(fib,2,nextFib);
 			// Updating guessR
-			shiftLeftUpdate(guessR,3,nextFib*virialRadiusInfo.softening);
+			double nextR=nextFib*virialRadiusInfo.softening;
+			shiftLeftUpdate(guessR,3,nextR);
 			// Updating density estimates
 			// Means that OverDensityInSphere will just return DensityInSphere
 			virialRadiusInfo.criticalValue=0; 
-			shiftLeftUpdate(denGuessR,3,OverDensityInSphere(guessR[2],
+			shiftLeftUpdate(denGuessR,3,OverDensityInSphere(nextR,
 				pntrVirialRadiusInfo));
+			cout << "density current searching: " << denGuessR[0] << "," 
+				<< denGuessR[1] << "," << denGuessR[2] << "\n";
 		}
   	return virialRadiusInfo;
 }
