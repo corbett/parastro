@@ -186,7 +186,7 @@ VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,
 		int numIter=0; // don't ever use this info, but root finder needs it
 		double tolerance=1e-3;
 	 // keeps track of our guesses and their associated overdensities
-		double guessR[3]={tolerance,tolerance,tolerance};
+		double guessR[3]={softening,softening,softening};
 		double denGuessR[3]={0,0,0}; // keeps track of the density within each R
 		int fib[2]={1,1};
 		while(guessR[2]<maxR)
@@ -211,6 +211,7 @@ VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,
 				}
 			int nextFib=fib[1]+fib[2];
 			// updating the fibonacci sequence
+			cout << "fib is: " << fib[0] << ","<< fib[1] << "\n";
 			shiftLeftUpdate(fib,2,nextFib);
 			// Updating guessR
 			shiftLeftUpdate(guessR,3,nextFib*virialRadiusInfo.softening);
