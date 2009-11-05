@@ -45,6 +45,10 @@ public:
   vtkTypeRevisionMacro(vtkProfileFilter, vtkTableAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent);
   // Description:
+  // Get/Set the softening parameter
+  vtkSetMacro(Softening, double);
+  vtkGetMacro(Softening, double);
+  // Description:
   // Get/Set the density parameter
   vtkSetMacro(Delta, double);
   vtkGetMacro(Delta, double);
@@ -61,7 +65,6 @@ public:
 	// radius
 	vtkSetMacro(CutOffAtVirialRadius,int);
 	vtkGetMacro(CutOffAtVirialRadius,int);
-
   // Description:
   // Specify the point locations used to probe input. Any geometry
   // can be used. New style. Equivalent to SetInputConnection(1, algOutput).
@@ -131,7 +134,11 @@ protected:
 			vtkstd::string argTwoBaseName, ColumnType argTwoColumnType);
 		~ProfileElement();
  	};
-
+	// Description:
+	// Set in GUI, with defaults
+	// Describes the softening of the simulation which can influence the 
+	// root finding
+	double Softening;
   // Description:
 	// Set in GUI, with defaults
 	// Overdensity

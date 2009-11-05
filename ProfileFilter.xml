@@ -60,7 +60,18 @@
          If the value of this property is 1, then the bins are only from the center up to the virial radius.
        </Documentation>
      </IntVectorProperty>
-	<!--Allows the user to type into a text field their desired overdensity-->
+	<!--Allows the user to type into a text field the softening of their
+	simulation -->
+	  <DoubleVectorProperty
+			name="Softening"
+			command="SetSoftening"
+			number_of_elements="1"
+			default_values="1e-6">
+			<Documentation>
+			Set the softening. This parameter influences the search for
+			the viral radius.
+			</Documentation>
+	  </DoubleVectorProperty>
 	  <DoubleVectorProperty
 			name="Delta"
 			command="SetDelta"

@@ -74,6 +74,7 @@ vtkProfileFilter::vtkProfileFilter()
 	this->MaxR=1.0;
 	this->Delta=0.0;
 	this->BinNumber=30;
+	this->Softening=1e-6f;
 }
 
 //----------------------------------------------------------------------------
@@ -124,7 +125,8 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 	if(this->CutOffAtVirialRadius)
 		{
 		VirialRadiusInfo virialRadiusInfo = \
-		 	ComputeVirialRadius(dataSet,this->Delta,this->MaxR,this->Center);
+		 	ComputeVirialRadius(dataSet,this->Softening,
+			this->Delta,this->MaxR,this->Center);
 		// note that if there was an error finding the virialRadius the 
 		// radius returned is < 0
 		if(virialRadiusInfo.virialRadius>0)

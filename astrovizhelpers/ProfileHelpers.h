@@ -16,7 +16,8 @@
 // Uses the Illinois root finding method to find the root of the function
 // func. The root must lie between r and s. Root is returned when it is found 
 // within the accuracy xacc, yacc. pnIter indicates how many iterations the
-// algorithm took to converge.
+// algorithm took to converge. Returns -1 if there are problems finding the 
+// root, thus can only be used to find positive roots.
 double IllinoisRootFinder(double (*func)(double,void *),void *ctx,double r,double s,double xacc,double yacc,int *pnIter);
 
 // Description:
@@ -83,13 +84,19 @@ struct VirialRadiusInfo
 	double center[3];
 	double criticalValue;
 	double virialRadius;
+	double softening;
 };
 
 
 // Description:
 // Computes the virial radius >=0 base upon the user defined 
 // overdensity and center. Returns -1 if there is a problem. 
-VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,double overdensity,double maxR,double center[]);
+VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,double softening,double overdensity,double maxR,double center[]);
+
+// Description:
+// shifts every item in array one to left (the first element is thrown away)
+// then sets inserts updateValue in the last, free slot
+template <class T> void shiftLeftUpdate(T* array,int size, T updateValue);
 
 // Description:
 // From dataSet, initializes a newDataSet with point and cell arrays (empty),

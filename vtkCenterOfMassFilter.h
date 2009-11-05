@@ -30,6 +30,10 @@ public:
   vtkTypeRevisionMacro(vtkCenterOfMassFilter,vtkPointSetAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent);
   // Description:
+  // Get/Set the softening parameter
+  vtkSetMacro(Softening, double);
+  vtkGetMacro(Softening, double);
+  // Description:
   // Get/Set the density parameter
   vtkSetMacro(Overdensity, double);
   vtkGetMacro(Overdensity, double);
@@ -45,6 +49,14 @@ protected:
   virtual int RequestData(vtkInformation*,
                           vtkInformationVector**,
                           vtkInformationVector*);
+	// Description:
+	// Set in GUI, with defaults
+	// Describes the softening of the simulation which can influence the 
+	// root finding
+	double Softening;
+	// Description:
+	// Set in GUI, with defaults
+	// Overdensity
 	double Overdensity;
 
 private:

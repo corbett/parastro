@@ -19,7 +19,8 @@ vtkStandardNewMacro(vtkMostBoundFilter);
 //----------------------------------------------------------------------------
 vtkMostBoundFilter::vtkMostBoundFilter()
 {
-	this->Overdensity = 0; // this file is also optional
+	this->Overdensity = 0; 
+	this->Softening = 1e-6f; 
 }
 
 //----------------------------------------------------------------------------
@@ -76,8 +77,9 @@ int vtkMostBoundFilter::RequestData(vtkInformation*,
 	if(this->Overdensity>0)
 		{
 			double maxR=ComputeMaxR(input,dbMostBound);
-			VirialRadiusInfo virialRadiusInfo=\
-								ComputeVirialRadius(input,this->Overdensity,maxR,dbMostBound);
+			VirialRadiusInfo virialRadiusInfo = \
+				ComputeVirialRadius(input,this->Softening,
+				this->Overdensity,maxR,dbMostBound);
 			if(virialRadiusInfo.virialRadius>0)
 				{
 				//Here is where we create the sphere around the COM to display

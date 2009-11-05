@@ -21,6 +21,16 @@
            </DataTypeDomain>
       </InputProperty>
 	  <DoubleVectorProperty
+			name="Softening"
+			command="SetSoftening"
+			number_of_elements="1"
+			default_values="1e-6">
+			<Documentation>
+			Set the softening. This parameter influences the search for
+			the viral radius.
+			</Documentation>
+	  </DoubleVectorProperty>
+	  <DoubleVectorProperty
 			name="Overdensity"
 			command="SetOverdensity"
 			number_of_elements="1"

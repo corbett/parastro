@@ -19,7 +19,7 @@ double IllinoisRootFinder(double (*func)(double,void *),void *ctx,\
 {
 	// This code copied from Doug Potter's and Joachim Stadel's
 	// pkdgrav, class master.c, method illinois
-	// NOTE: Only use for positive roots. 
+	// Changed to return -1 if there are problems finding root
   const int maxIter = 100;
   double t,fr,fs,ft,phis,phir,gamma;
   int i;
@@ -28,8 +28,7 @@ double IllinoisRootFinder(double (*func)(double,void *),void *ctx,\
   fs = func(s,ctx);
 	if(fr*fs>0)
 		{
-			// used to be an assert, but removing 
-			throw "something went wrong with the root finding";
+			return -1;
 		}
   t = (s*fr - r*fs)/(fr - fs);
 
@@ -164,7 +163,7 @@ double OverNumberInSphere(double r,void* inputVirialRadiusInfo)
 
 //----------------------------------------------------------------------------
 VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,
-	double overdensity,double maxR,double center[])
+	double softening,double overdensity,double maxR,double center[])
 {
 		// Building the point locator and the struct to use as an 
 		// input to the rootfinder.
@@ -179,60 +178,62 @@ VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,
 		{
 			virialRadiusInfo.center[i]=center[i];
 		}
-		// If this value doesn't change to a positive one, it indicates 
-		// that something has gone wrong with finding the virial radius
-		virialRadiusInfo.virialRadius=-1;
+		virialRadiusInfo.softening=softening;
 		// but IllinoisRootFinder takes in a void pointer
 		void* pntrVirialRadiusInfo = &virialRadiusInfo;
-		// 3. Now we are ready to run the root finding
-		// The basic idea is to successively search for the radius 
-		// with the critical density in between 0 and the radius which contains
-		// 10 points, then between the radius which contains 10 points and
-		// the radius which contains 100 points, then between the radius which
-		// contains 100... until the number of points is too big for the data
-		// set, at which point the root finding is considered to have failed
-		// and a value of -1 is returned.
+		// 3. Define necessary variables to find virial radius, then search for 
+		// it
 		int numIter=0; // don't ever use this info, but root finder needs it
 		double tolerance=1e-3;
-		int maxN=10;
-		double minRToSearch=1e-11f; // starting out at nearly zero
-		const double maxRToNumSearch=maxR; // never updated
-		double maxRToDenSearch=0; // updated each iteration
-		while(maxN<input->GetNumberOfPoints())
+	 // keeps track of our guesses and their associated overdensities
+		double guessR[3]={tolerance,tolerance,tolerance};
+		double denGuessR[3]={0,0,0}; // keeps track of the density within each R
+		int fib[2]={1,1};
+		while(guessR[2]<maxR)
 			{
-			// try catch, as root finder throws exception if there are problems
-			// e.g. if the root is improperly bracketed, which is a possibility
-			// as the method in 3. is heuristic. shouldn't throw for maxRToDenSearch
-			// as function for which it is trying to find root is monotonically
-			// increasing.
-			try
+			// if our last three guesses have been monotonically decreasing
+			// in density, then try to calculate the root
+			if(denGuessR[0]>denGuessR[1]>denGuessR[2])
 				{
-				virialRadiusInfo.criticalValue=maxN;
-				maxRToDenSearch=IllinoisRootFinder(OverNumberInSphere,
-					pntrVirialRadiusInfo,
-					maxRToNumSearch,minRToSearch,
-					tolerance,tolerance,
-				  &numIter);
 				virialRadiusInfo.criticalValue=overdensity;
-				virialRadiusInfo.virialRadius=IllinoisRootFinder(OverDensityInSphere,
+				virialRadiusInfo.virialRadius = \
+					IllinoisRootFinder(OverDensityInSphere,
 					pntrVirialRadiusInfo,
-					maxRToDenSearch,minRToSearch,
+					guessR[0],guessR[1],
 					tolerance,tolerance,
-				  &numIter);
-				// if we had no exceptions, search was successful
-				break;
+					&numIter);
+				// we are done trying to find the root if the virial radius found is 
+				// greater than zero, as rootfinder returns -1 if there were problems 
+				if(virialRadiusInfo.virialRadius>0)
+					{
+					break;
+					}
 				}
-			catch(const char* e)
-				{
-				// This indicates that something has gone wrong with the root finding
-				// try again to bracket the root, by increasing maxN
-				maxN *= 10;
-				minRToSearch=maxRToDenSearch;
-				}
+			int nextFib=fib[1]+fib[2];
+			// updating the fibonacci sequence
+			shiftLeftUpdate(fib,2,nextFib);
+			// Updating guessR
+			shiftLeftUpdate(guessR,3,nextFib*virialRadiusInfo.softening);
+			// Updating density estimates
+			// Means that OverDensityInSphere will just return DensityInSphere
+			virialRadiusInfo.criticalValue=0; 
+			shiftLeftUpdate(denGuessR,3,OverDensityInSphere(denGuessR[3],
+				pntrVirialRadiusInfo));
 			}
   	return virialRadiusInfo;
 }
 
+//----------------------------------------------------------------------------
+template <class T> void shiftLeftUpdate(T* array,int size, T updateValue)
+{
+	// for everything but the last, value is equal to item one to right
+	for(int i = 0; i < size-1; ++i)
+		{
+		array[i]=array[i+1];
+		}
+	// for last item, value is equal to updateValue
+	array[size-1]=updateValue;
+}
 //----------------------------------------------------------------------------
 vtkPolyData* CopyPolyPointsAndData(vtkPolyData* dataSet, vtkIdList*
  	pointsInRadius)

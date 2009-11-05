@@ -20,7 +20,8 @@ vtkStandardNewMacro(vtkCenterOfMassFilter);
 //----------------------------------------------------------------------------
 vtkCenterOfMassFilter::vtkCenterOfMassFilter()
 {
-	this->Overdensity = 0; // this file is also optional
+	this->Overdensity = 0; 
+	this->Softening=1e-6f;
 }
 
 //----------------------------------------------------------------------------
@@ -67,7 +68,7 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 		{
 			double maxR=ComputeMaxR(input,dbCenterOfMass);
 			VirialRadiusInfo virialRadiusInfo=\
-			ComputeVirialRadius(input,
+			ComputeVirialRadius(input,this->Softening,
 				this->Overdensity,maxR,dbCenterOfMass);
 			if(virialRadiusInfo.virialRadius>0)
 				{

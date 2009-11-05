@@ -45,6 +45,14 @@ protected:
   virtual int RequestData(vtkInformation*,
                           vtkInformationVector**,
                           vtkInformationVector*);
+	// Description:
+	// Set in GUI, with defaults
+	// Describes the softening of the simulation which can influence the 
+	// root finding
+	double Softening;
+	// Description:
+	// Set in GUI, with defaults
+	// Overdensity
 	double Overdensity;
 
 private:
