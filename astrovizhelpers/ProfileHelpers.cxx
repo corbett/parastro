@@ -167,7 +167,9 @@ VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,
 		vtkPointLocator* locator = vtkPointLocator::New();
 			locator->SetDataSet(input);
 			locator->BuildLocator();
-		// 2. Building the struct
+		// 2. Building the struct to use as argument to root finder and density
+		// functions. Contains locator, center, softening info and stores virial
+		// radius info for output
 		VirialRadiusInfo virialRadiusInfo;
 		virialRadiusInfo.locator=locator;
 		for(int i = 0; i < 3; ++i)
@@ -192,7 +194,6 @@ VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,
 			// in density, then try to calculate the root
 			if(denGuessR[0]>denGuessR[1]>denGuessR[2])
 				{
-				cout << "searching for virial radius!\n";
 				virialRadiusInfo.criticalValue=overdensity;
 				virialRadiusInfo.virialRadius = \
 					IllinoisRootFinder(OverDensityInSphere,
@@ -204,7 +205,6 @@ VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,
 				// greater than zero, as rootfinder returns -1 if there were problems 
 				if(virialRadiusInfo.virialRadius>0)
 					{
-					cout << "virial radius found\n";
 					break;
 					}
 				}
@@ -219,8 +219,6 @@ VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,
 			virialRadiusInfo.criticalValue=0; 
 			shiftLeftUpdate(denGuessR,3,OverDensityInSphere(nextR,
 				pntrVirialRadiusInfo));
-			cout << "density current searching: " << denGuessR[0] << "," 
-				<< denGuessR[1] << "," << denGuessR[2] << "\n";
 		}
   	return virialRadiusInfo;
 }
