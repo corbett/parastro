@@ -175,12 +175,8 @@ void vtkProfileFilter::CalculateAndSetBounds(vtkPolyData* input,
 			<< pointOne[2] << "\n";
 		cout << "pointTwo=" << pointTwo[0] << "," << pointTwo[1] << "," 
 			<< pointTwo[2] << "\n";
-		/*
 		// TODO: add back in
-//		center=ComputeMidpoint(pointOne,pointTwo);
-		*/
-		delete [] pointOne;
-		delete [] pointTwo;
+		center=ComputeMidpoint(pointOne,pointTwo);
 		}
 	for(int i = 0; i < 3; ++i)
 		{
@@ -190,7 +186,6 @@ void vtkProfileFilter::CalculateAndSetBounds(vtkPolyData* input,
 		}
 	// calculating the the max R
 	this->MaxR=ComputeMaxR(input,this->Center);
-	delete [] center;
 }
 
 //----------------------------------------------------------------------------
