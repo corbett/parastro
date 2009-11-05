@@ -189,7 +189,7 @@ void vtkProfileFilter::CalculateAndSetBounds(vtkPolyData* input,
 		}
 	// calculating the the max R
 	this->MaxR=ComputeMaxR(input,this->Center);
-	delete [] center;
+//	delete [] center;
 }
 
 //----------------------------------------------------------------------------
