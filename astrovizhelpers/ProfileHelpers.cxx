@@ -175,13 +175,12 @@ VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,
 			virialRadiusInfo.center[i]=center[i];
 		}
 		virialRadiusInfo.softening=softening;
-		virialRadiusInfo.virialRadius = -1;
+		virialRadiusInfo.virialRadius = -1; // if stays -1 means not found
 		// but IllinoisRootFinder takes in a void pointer
 		void* pntrVirialRadiusInfo = &virialRadiusInfo;
 		// 3. Define necessary variables to find virial radius, then search for 
 		// it
 		int numIter=0; // don't ever use this info, but root finder needs it
-		double tolerance=1e-3;
 	 // keeps track of our guesses and their associated overdensities
 	 /// initial guess is the softening
 		double guessR[3]={softening,softening,softening};
@@ -199,7 +198,7 @@ VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,
 					IllinoisRootFinder(OverDensityInSphere,
 					pntrVirialRadiusInfo,
 					guessR[0],guessR[2],
-					tolerance,tolerance,
+					softening,softening,
 					&numIter);
 				// we are done trying to find the root if the virial radius found is 
 				// greater than zero, as rootfinder returns -1 if there were problems 
