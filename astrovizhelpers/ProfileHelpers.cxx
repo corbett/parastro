@@ -116,7 +116,6 @@ double OverDensityInSphere(double r,void* inputVirialRadiusInfo)
 		pointsInRadius);
 	cout << "there are " << pointsInRadius->GetNumberOfIds() << " points "
 	<< "within radius " << r << " ";
-
 	// calculating the average mass, dividing this by the volume of the sphere
 	// to get the density
 	double totalMass=0;
@@ -130,9 +129,8 @@ double OverDensityInSphere(double r,void* inputVirialRadiusInfo)
 		vtkIdType pointGlobalId = pointsInRadius->GetId(pointLocalId);
 		double* nextPoint=GetPoint(dataSet,pointGlobalId);
 		// extracting the mass
-		// has to be double as this version of VTK doesn't have 
-		double* mass=GetDataValue(dataSet,
-															"mass",pointGlobalId);
+		// has to be double as this version of VTK doesn't have float method
+		double* mass=GetDataValue(dataSet,"mass",pointGlobalId);
 		totalMass+=mass[0];
 		// Finally, some memory management
 		delete [] mass;
@@ -219,7 +217,7 @@ VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,
 			// Updating density estimates
 			// Means that OverDensityInSphere will just return DensityInSphere
 			virialRadiusInfo.criticalValue=0; 
-			shiftLeftUpdate(denGuessR,3,OverDensityInSphere(denGuessR[2],
+			shiftLeftUpdate(denGuessR,3,OverDensityInSphere(guessR[2],
 				pntrVirialRadiusInfo));
 		}
   	return virialRadiusInfo;
