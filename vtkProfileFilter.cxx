@@ -159,7 +159,7 @@ void vtkProfileFilter::CalculateAndSetBounds(vtkPolyData* input,
 	//TODO: this can later be done as in the XML documentation for this filter; 	  
 	// for now, only getting the first point. this is the point selected in the
  // GUI, or the midpoint of the line selected in the GUI
-	double* center=new double[3];
+	double* center;
 	if(source->GetNumberOfPoints()==1)
 		{
 		// we are dealing with a point
@@ -167,20 +167,16 @@ void vtkProfileFilter::CalculateAndSetBounds(vtkPolyData* input,
 		}
 	else
 		{
-		// TODO: fix this, segfault
 		// we are dealing with a line
 		double* pointOne=source->GetPoint(0);
 		double* pointTwo=source->GetPoint(source->GetNumberOfPoints()-1);
-		// TODO: add back in
 		center=ComputeMidpoint(pointOne,pointTwo);
-		cout << "center=" << center[0] << "," << center[1] << "," 
-			<< center[2] << "\n";
 		}
 	for(int i = 0; i < 3; ++i)
 		{
 		this->Center[i]=center[i];
 		}
-	// calculating the the max R
+ 	// calculating the the max R
 	this->MaxR=ComputeMaxR(input,this->Center);
 }
 
