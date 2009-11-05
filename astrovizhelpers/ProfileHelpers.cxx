@@ -416,6 +416,17 @@ double* PointVectorDifference(double vectorOne[], double vectorTwo[])
 }
 
 //----------------------------------------------------------------------------
+double* ComputeMidpoint(double pointOne[], double pointTwo[])
+{
+	double* midpoint = new double[3];
+	for(int i = 0; i < 3; ++i)
+	{
+		midpoint[i] = (pointOne[i] + pointTwo[i])/2;
+	}
+	return midpoint;
+}
+
+//----------------------------------------------------------------------------
 void VecMultConstant(double vector[],double constant)
 {
 	for(int i = 0; i < 3; ++i)

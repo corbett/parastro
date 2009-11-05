@@ -203,6 +203,10 @@ double* ComputeCOM(vtkPointSet* input);
 double* ComputeWeightedMass(double& mass,double* point);
 
 // Description:
+// Helper function to compute the midpoint between two points
+double* ComputeMidpoint(double pointOne[], double pointTwo[]);
+
+// Description:
 // helper function to compute the moment of inertia tensor, returns
 // result in inertiaTensor
 // I=[[I00,-I01,-I02],[-I10,I11,-I12],[-I20,-I21,I22]]
