@@ -234,9 +234,11 @@ template <class T> void shiftLeftUpdate(T* array,int size, T updateValue)
 	for(int i = 0; i < size-1; ++i)
 		{
 		array[i]=array[i+1];
+		cout << "new value of index " << i << " is " << array[i] << "\n";
 		}
 	// for last item, value is equal to updateValue
 	array[size-1]=updateValue;
+	cout << "new value of index " << size-1 << " is " << array[size-1] << "\n";
 }
 //----------------------------------------------------------------------------
 vtkPolyData* CopyPolyPointsAndData(vtkPolyData* dataSet, vtkIdList*
