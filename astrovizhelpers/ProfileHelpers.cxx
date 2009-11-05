@@ -185,6 +185,8 @@ VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,
 		// it
 		int numIter=0; // don't ever use this info, but root finder needs it
 		double tolerance=1e-3;
+		virialRadiusInfo.virialRadius = -1;
+		cout << "softening is: "<< softening << "\n";
 	 // keeps track of our guesses and their associated overdensities
 	 /// initial guess is the softening
 		double guessR[3]={softening,softening,softening};
@@ -221,7 +223,7 @@ VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,
 			virialRadiusInfo.criticalValue=0; 
 			shiftLeftUpdate(denGuessR,3,OverDensityInSphere(denGuessR[3],
 				pntrVirialRadiusInfo));
-			}
+		}
   	return virialRadiusInfo;
 }
 
