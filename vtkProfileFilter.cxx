@@ -178,9 +178,9 @@ void vtkProfileFilter::CalculateAndSetBounds(vtkPolyData* input,
 		/*
 		// TODO: add back in
 //		center=ComputeMidpoint(pointOne,pointTwo);
+		*/
 		delete [] pointOne;
 		delete [] pointTwo;
-		*/
 		}
 	for(int i = 0; i < 3; ++i)
 		{
