@@ -170,7 +170,7 @@ void vtkProfileFilter::CalculateAndSetBounds(vtkPolyData* input,
 		// TODO: fix this, segfault
 		// we are dealing with a line
 		double* pointOne=source->GetPoint(0);
-		double* pointTwo=source->GetPoint(1);
+		double* pointTwo=source->GetPoint(source->GetNumberOfPoints()-1);
 		cout << "pointOne=" << pointOne[0] << "," << pointOne[1] << "," 
 			<< pointOne[2] << "\n";
 		cout << "pointTwo=" << pointTwo[0] << "," << pointTwo[1] << "," 
