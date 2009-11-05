@@ -116,6 +116,7 @@ double OverDensityInSphere(double r,void* inputVirialRadiusInfo)
 		pointsInRadius);
 	cout << "there are " << pointsInRadius->GetNumberOfIds() << " points "
 	<< "within radius " << r << " ";
+
 	// calculating the average mass, dividing this by the volume of the sphere
 	// to get the density
 	double totalMass=0;
@@ -137,12 +138,11 @@ double OverDensityInSphere(double r,void* inputVirialRadiusInfo)
 		delete [] mass;
 		delete [] nextPoint;
 		}
-	// Returning the density minus the critical density
-		double density = totalMass/(4./3*M_PI*pow(r,3));
-		double overdensity = density - \
-	 	virialRadiusInfo->criticalValue;
-	cout << "density is " << density << " ";
-	cout << "over density is "<< overdensity << "\n";
+	// Returning the density minus the critical density. Density is defined
+	// as zero if the number points within the radius is zero
+	double density = (pointsInRadius->GetNumberOfIds() > 0) ? \
+		totalMass/(4./3*M_PI*pow(r,3)) : 0;
+	double overdensity = density - 	virialRadiusInfo->criticalValue;
 	return overdensity;
 }
 
@@ -213,9 +213,7 @@ VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,
 				}
 			int nextFib=fib[0]+fib[1];
 			// updating the fibonacci sequence
-			cout << "fib before is: " << fib[0] << ","<< fib[1] << "\n";
 			shiftLeftUpdate(fib,2,nextFib);
-			cout << "fib after is: " << fib[0] << ","<< fib[1] << "\n";
 			// Updating guessR
 			shiftLeftUpdate(guessR,3,nextFib*virialRadiusInfo.softening);
 			// Updating density estimates
@@ -234,11 +232,9 @@ template <class T> void shiftLeftUpdate(T* array,int size, T updateValue)
 	for(int i = 0; i < size-1; ++i)
 		{
 		array[i]=array[i+1];
-		cout << "new value of index " << i << " is " << array[i] << "\n";
 		}
 	// for last item, value is equal to updateValue
 	array[size-1]=updateValue;
-	cout << "new value of index " << size-1 << " is " << array[size-1] << "\n";
 }
 //----------------------------------------------------------------------------
 vtkPolyData* CopyPolyPointsAndData(vtkPolyData* dataSet, vtkIdList*
