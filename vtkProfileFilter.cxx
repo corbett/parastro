@@ -159,7 +159,7 @@ void vtkProfileFilter::CalculateAndSetBounds(vtkPolyData* input,
 	//TODO: this can later be done as in the XML documentation for this filter; 	  
 	// for now, only getting the first point. this is the point selected in the
  // GUI, or the midpoint of the line selected in the GUI
-	double* center;
+	double* center = new double[3];
 	if(source->GetNumberOfPoints()==1)
 		{
 		// we are dealing with a point
