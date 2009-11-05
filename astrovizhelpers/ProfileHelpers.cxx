@@ -211,7 +211,7 @@ VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,
 					break;
 					}
 				}
-			int nextFib=fib[1]+fib[2];
+			int nextFib=fib[0]+fib[1];
 			// updating the fibonacci sequence
 			cout << "fib before is: " << fib[0] << ","<< fib[1] << "\n";
 			shiftLeftUpdate(fib,2,nextFib);
@@ -221,7 +221,7 @@ VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,
 			// Updating density estimates
 			// Means that OverDensityInSphere will just return DensityInSphere
 			virialRadiusInfo.criticalValue=0; 
-			shiftLeftUpdate(denGuessR,3,OverDensityInSphere(denGuessR[3],
+			shiftLeftUpdate(denGuessR,3,OverDensityInSphere(denGuessR[2],
 				pntrVirialRadiusInfo));
 		}
   	return virialRadiusInfo;
