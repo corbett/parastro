@@ -179,14 +179,13 @@ VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,
 			virialRadiusInfo.center[i]=center[i];
 		}
 		virialRadiusInfo.softening=softening;
+		virialRadiusInfo.virialRadius = -1;
 		// but IllinoisRootFinder takes in a void pointer
 		void* pntrVirialRadiusInfo = &virialRadiusInfo;
 		// 3. Define necessary variables to find virial radius, then search for 
 		// it
 		int numIter=0; // don't ever use this info, but root finder needs it
 		double tolerance=1e-3;
-		virialRadiusInfo.virialRadius = -1;
-		cout << "softening is: "<< softening << "\n";
 	 // keeps track of our guesses and their associated overdensities
 	 /// initial guess is the softening
 		double guessR[3]={softening,softening,softening};
@@ -214,8 +213,9 @@ VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,
 				}
 			int nextFib=fib[1]+fib[2];
 			// updating the fibonacci sequence
-			cout << "fib is: " << fib[0] << ","<< fib[1] << "\n";
+			cout << "fib before is: " << fib[0] << ","<< fib[1] << "\n";
 			shiftLeftUpdate(fib,2,nextFib);
+			cout << "fib after is: " << fib[0] << ","<< fib[1] << "\n";
 			// Updating guessR
 			shiftLeftUpdate(guessR,3,nextFib*virialRadiusInfo.softening);
 			// Updating density estimates
