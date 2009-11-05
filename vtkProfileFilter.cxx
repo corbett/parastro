@@ -167,6 +167,7 @@ void vtkProfileFilter::CalculateAndSetBounds(vtkPolyData* input,
 		}
 	else
 		{
+		center = new double[3];
 		/*
 		cout << source->GetNumberOfPoints() << " number of points";
 		// TODO: fix this, segfault
@@ -189,7 +190,7 @@ void vtkProfileFilter::CalculateAndSetBounds(vtkPolyData* input,
 		}
 	// calculating the the max R
 	this->MaxR=ComputeMaxR(input,this->Center);
-//	delete [] center;
+	delete [] center;
 }
 
 //----------------------------------------------------------------------------
