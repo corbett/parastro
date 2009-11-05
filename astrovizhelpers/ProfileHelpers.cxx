@@ -186,6 +186,7 @@ VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,
 		int numIter=0; // don't ever use this info, but root finder needs it
 		double tolerance=1e-3;
 	 // keeps track of our guesses and their associated overdensities
+	 /// initial guess is the softening
 		double guessR[3]={softening,softening,softening};
 		double denGuessR[3]={0,0,0}; // keeps track of the density within each R
 		int fib[2]={1,1};
