@@ -103,8 +103,6 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 					{
 					totalWeightedMass[i]+=recTotalWeightedMass[i];
 					}
-				delete [] recTotalMass;
-				delete [] recTotalWeightedMass;
 				}
 			}
 		}
