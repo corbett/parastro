@@ -119,31 +119,26 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 	cout << "set points\n";
 	output->SetVerts(vtkSmartPointer<vtkCellArray>::New()); 
 	cout << "set vert\n";
-	// TODO: remove this
-	float* centerOfMass = new float[3];
-	for(int i = 0; i < 3; ++i)
-		{
-		centerOfMass[i]=0;
-		}
-	cout << "set point\n";
-	SetPointValue(output,centerOfMass); 
-	cout << "totally done\n";
-
 	// TODO: add back in
-	/*
+	cout << "compute com\n";
 	double* dbCenterOfMass = ComputeCOM(input,totalMass[0],totalWeightedMass);
 	float* centerOfMass = new float[3];
 	for(int i = 0; i < 3; ++i)
 		{
+		cout << " com " << i << " is " << dbCenterOfMass[i] << "\n";
 		centerOfMass[i]=static_cast<float>(dbCenterOfMass[i]);
 		}
+	cout << "set point\n"
 	// Placing the point's data in the output
 	SetPointValue(output,centerOfMass); 
 	// finally, some memory management
+	// TODO: add back in
+	/*
 	delete [] totalMass;
 	delete [] totalWeightedMass;
 	delete [] dbCenterOfMass;
 	delete [] centerOfMass;
 	*/
+	cout << " totally done\n";
   return 1;
 }
