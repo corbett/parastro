@@ -446,7 +446,7 @@ double* ComputeCOM(vtkPointSet* input)
 
 //----------------------------------------------------------------------------
 double* ComputeCOM(vtkPointSet* input,double& totalMass, 
-	double totalWeightedMass[3])
+	double totalWeightedMass[])
 {
 	// calculating the result
 	// our final data is in float, as Tipsy's data is stored in float
@@ -473,7 +473,7 @@ double* ComputeCOM(vtkPointSet* input,double& totalMass,
 
 //----------------------------------------------------------------------------
 void UpdateCOMVars(vtkPointSet* input,double& totalMass, 
-	double totalWeightedMass[3])
+	double totalWeightedMass[])
 {
 	for(int nextPointId = 0;
 	 		nextPointId < input->GetPoints()->GetNumberOfPoints();
@@ -490,6 +490,7 @@ void UpdateCOMVars(vtkPointSet* input,double& totalMass,
 		totalMass+=mass[0];
 		for(int i = 0; i < 3; ++i)
 			{
+			cout << "updating total mass by " << weightedMass[i] << "\n";
 			totalWeightedMass[i]+=weightedMass[i];
 			}
 		// Finally, some memory management

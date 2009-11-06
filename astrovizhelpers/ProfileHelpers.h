@@ -201,13 +201,13 @@ double* ComputeDensity(vtkVariant cumulativeMass,
 // compute COM is called with these variables as input
 // at the very last stage
 void UpdateCOMVars(vtkPointSet* input,double& totalMass, 
-	double totalWeightedMass[3]);
+	double totalWeightedMass[]);
 
 // Description:
 // helper function to compute center of mass of point set, must be called
 // at last stage, once update COM vars has been called on each process
 double* ComputeCOM(vtkPointSet* input,double& totalMass, 
-	double totalWeightedMass[3]);
+	double totalWeightedMass[]);
 
 // Description
 // For those applications which don't care about parallel funcitonality
