@@ -94,7 +94,7 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 					1,proc,TOTAL_MASS);
 				this->Controller->Receive(recTotalWeightedMass,
 					3,proc,TOTAL_WEIGHTED_MASS);
-				
+				/
 				// TODO: add back in
 				/*
 				// Updating
@@ -114,15 +114,16 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 		// we aren't using MPI or have only one process
 		UpdateCOMVars(input,totalMass[0],totalWeightedMass);
 		}
-	// TODO: add back in
-	/*
+
 	// Place result in output
 	double* dbCenterOfMass = ComputeCOM(input,
 		totalMass[0],totalWeightedMass);
 	float* centerOfMass = new float[3];
 	for(int i = 0; i < 3; ++i)
 		{
-		centerOfMass[i]=static_cast<float>(dbCenterOfMass[i]);
+		// TODO: add back in
+		//centerOfMass[i]=static_cast<float>(dbCenterOfMass[i]);
+		centerOfMass[i]=0;
 		}
 	// we will create one point in the output: the center of mass point
 	output->SetPoints(vtkSmartPointer<vtkPoints>::New());
@@ -134,6 +135,5 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 	delete [] totalWeightedMass;
 	delete [] dbCenterOfMass;
 	delete [] centerOfMass;
-	*/
   return 1;
 }
