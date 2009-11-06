@@ -128,7 +128,7 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 		cout << " com " << i << " is " << dbCenterOfMass[i] << "\n";
 		centerOfMass[i]=static_cast<float>(dbCenterOfMass[i]);
 		}
-	cout << "set point\n"
+	cout << "set point\n";
 	// Placing the point's data in the output
 	SetPointValue(output,centerOfMass); 
 	// finally, some memory management
