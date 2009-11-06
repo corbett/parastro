@@ -53,7 +53,8 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
                                  vtkInformationVector* outputVector)
 {
   // Get input and output data.
-  vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
+  vtkPolyData* input = vtkPolyData::GetData(inputVector[0]);
+//  vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
 	// Place result in output
   vtkPolyData* output = vtkPolyData::GetData(outputVector);
 	// TODO: trying this out
@@ -120,6 +121,7 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 		centerOfMass[i]=static_cast<float>(dbCenterOfMass[i]);
 		}
 	// Placing the point's data in the output
+	// TODO: add back in
 //	SetPointValue(output,centerOfMass); 
 	// finally, some memory management
 	delete [] totalMass;
