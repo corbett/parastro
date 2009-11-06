@@ -20,15 +20,19 @@
 
 #ifndef __vtkCenterOfMassFilter_h
 #define __vtkCenterOfMassFilter_h
-
 #include "vtkPointSetAlgorithm.h"
 
+class vtkMultiProcessController;
 class VTK_GRAPHICS_EXPORT vtkCenterOfMassFilter : public vtkPointSetAlgorithm
 {
 public:
   static vtkCenterOfMassFilter *New();
   vtkTypeRevisionMacro(vtkCenterOfMassFilter,vtkPointSetAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent);
+  // Description:
+  // By defualt this filter uses the global controller,
+  // but this method can be used to set another instead.
+  virtual void SetController(vtkMultiProcessController*);
   // Description:
   // Get/Set the softening parameter
   vtkSetMacro(Softening, double);
@@ -59,6 +63,7 @@ protected:
 	// Overdensity
 	double Overdensity;
 
+  vtkMultiProcessController *Controller;
 private:
   vtkCenterOfMassFilter(const vtkCenterOfMassFilter&);  // Not implemented.
   void operator=(const vtkCenterOfMassFilter&);  // Not implemented.
