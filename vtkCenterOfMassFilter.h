@@ -23,6 +23,12 @@
 #include "vtkPointSetAlgorithm.h"
 #include "vtkMultiProcessController.h"
 
+enum Data 
+{
+	TOTAL_MASS,
+	TOTAL_WEIGHTED_MASS
+};
+
 class VTK_GRAPHICS_EXPORT vtkCenterOfMassFilter : public vtkPointSetAlgorithm
 {
 public:
@@ -33,14 +39,6 @@ public:
   // By defualt this filter uses the global controller,
   // but this method can be used to set another instead.
   virtual void SetController(vtkMultiProcessController*);
-  // Description:
-  // Get/Set the softening parameter
-  vtkSetMacro(Softening, double);
-  vtkGetMacro(Softening, double);
-  // Description:
-  // Get/Set the density parameter
-  vtkSetMacro(Overdensity, double);
-  vtkGetMacro(Overdensity, double);
 
 protected:
   vtkCenterOfMassFilter();
@@ -53,23 +51,10 @@ protected:
   virtual int RequestData(vtkInformation*,
                           vtkInformationVector**,
                           vtkInformationVector*);
-	// Description:
-	// Set in GUI, with defaults
-	// Describes the softening of the simulation which can influence the 
-	// root finding
-	double Softening;
-	// Description:
-	// Set in GUI, with defaults
-	// Overdensity
-	double Overdensity;
-
   vtkMultiProcessController *Controller;
 private:
   vtkCenterOfMassFilter(const vtkCenterOfMassFilter&);  // Not implemented.
   void operator=(const vtkCenterOfMassFilter&);  // Not implemented.
-	// Private variables to aid computation of COM
-	double TotalMass;
-	double TotalWeightedMass[3];
 };
 
 #endif
