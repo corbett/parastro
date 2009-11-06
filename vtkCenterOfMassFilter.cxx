@@ -94,7 +94,8 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 					1,proc,TOTAL_MASS);
 				this->Controller->Receive(recTotalWeightedMass,
 					3,proc,TOTAL_WEIGHTED_MASS);
-				cout << "done receiving data\n";
+				cout << "done receiving data, recTotalMass=" 
+					<< recTotalMass[0] << "\n";
 				/*
 				// Updating
 				totalMass[0]+=recTotalMass[0];
