@@ -62,8 +62,7 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 //	output->SetVerts(vtkSmartPointer<vtkCellArray>::New());
 	output->ShallowCopy(input);
 	// Allocating data arrays and setting to zero
-	//TODO: add back in
-	double* totalMass =new double[0];
+	double* totalMass =new double[1];
 	totalMass[0]=0;
 	double* totalWeightedMass = new double[3];
 	for(int i = 0; i < 3; ++i)
