@@ -20,9 +20,9 @@
 
 #ifndef __vtkCenterOfMassFilter_h
 #define __vtkCenterOfMassFilter_h
-#include "vtkPointSetAlgorithm.h"
-#include "vtkMultiProcessController.h"
+#include "vtkPointSetAlgorithm.h" // superclass
 
+class vtkMultiProcessController;
 enum Data 
 {
 	TOTAL_MASS,

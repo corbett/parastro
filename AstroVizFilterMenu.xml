@@ -4,9 +4,7 @@
      <Filter name="Neighbor Smooth" />
      <Filter name="ExtractHistogram" />
      <Filter name="Center Of Mass" />
-	 <Filter name="Mass Function Filter" />
 	 <Filter name="Profile Filter" />
-	 <Filter name="Most Bound" />
 	 <Filter name="PlotAttributes" />
 	 <Filter name="Principle Moments of Inertia" />
    </Category>

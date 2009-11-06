@@ -15,6 +15,7 @@ Only reads in standard format Tipsy files.
 #include "vtkCellArray.h"
 #include "vtkFloatArray.h" 
 #include "vtkIntArray.h"
+#include "vtkPolyData.h" // needed as most helper functions modify output
 #include "astrovizhelpers/DataSetHelpers.h"
 
 vtkCxxRevisionMacro(vtkTipsyReader, "$Revision: 1.0 $");
@@ -62,11 +63,11 @@ TipsyHeader vtkTipsyReader::ReadTipsyHeader(ifTipsy& tipsyInfile)
 }
 
 //----------------------------------------------------------------------------
-vector<int> vtkTipsyReader::ReadMarkedParticleIndices(\
+vtkstd::vector<int> vtkTipsyReader::ReadMarkedParticleIndices(\
 														TipsyHeader& tipsyHeader,ifTipsy& tipsyInfile)
 {
 	ifstream markInFile(this->MarkFileName);
-	vector<int> markedParticleIndices;
+	vtkstd::vector<int> markedParticleIndices;
 	if(!markInFile)
  		{
  		vtkErrorMacro("Error opening marked particle file: " 
@@ -126,7 +127,8 @@ void vtkTipsyReader::ReadAllParticles(TipsyHeader& tipsyHeader,\
 }
 
 //----------------------------------------------------------------------------
-void vtkTipsyReader::ReadMarkedParticles(vector<int>& markedParticleIndices,
+void vtkTipsyReader::ReadMarkedParticles(
+	vtkstd::vector<int>& markedParticleIndices,
 	TipsyHeader& tipsyHeader,
 	ifTipsy& tipsyInfile,
 	vtkPolyData* output)
@@ -136,7 +138,7 @@ void vtkTipsyReader::ReadMarkedParticles(vector<int>& markedParticleIndices,
 	// now equals the number of marked particles
 	this->AllocateAllTipsyVariableArrays(markedParticleIndices.size(),output);
 	int nextMarkedParticleIndex=0;
-	for(vector<int>::iterator it = markedParticleIndices.begin();
+	for(vtkstd::vector<int>::iterator it = markedParticleIndices.begin();
 		it != markedParticleIndices.end(); ++it)		
 		{
  		nextMarkedParticleIndex=*it;
@@ -170,7 +172,7 @@ void vtkTipsyReader::ReadMarkedParticles(vector<int>& markedParticleIndices,
 
 //----------------------------------------------------------------------------
 int vtkTipsyReader::ReadAdditionalAttributeFile(
-	vector<int>& markedParticleIndices, TipsyHeader& tipsyHeader, 
+	vtkstd::vector<int>& markedParticleIndices, TipsyHeader& tipsyHeader, 
 	vtkPolyData* output)
 {
 	// open file
@@ -209,7 +211,7 @@ int vtkTipsyReader::ReadAdditionalAttributeFile(
 				AllocateDataArray(output,"additional attribute",1,
 					markedParticleIndices.size());
 				int nextMarkedParticleIndex=0;
-				for(vector<int>::iterator it = markedParticleIndices.begin();
+				for(vtkstd::vector<int>::iterator it = markedParticleIndices.begin();
 					it != markedParticleIndices.end(); ++it)		
 					{
 			 		nextMarkedParticleIndex=*it;
@@ -374,8 +376,7 @@ void vtkTipsyReader::AllocateAllTipsyVariableArrays(int numBodies,\
 */
 //----------------------------------------------------------------------------
 int vtkTipsyReader::RequestData(vtkInformation*,
-                                       vtkInformationVector**,
-                                       vtkInformationVector* outputVector)
+	vtkInformationVector**,vtkInformationVector* outputVector)
 {
 	// Make sure we have a file to read.
   if(!this->FileName)
@@ -397,7 +398,7 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 	TipsyHeader tipsyHeader=this->ReadTipsyHeader(tipsyInfile);
 	// Next considering whether to read in a mark file, 
 	// and if so whether that reading was a success 
-	vector<int> markedParticleIndices;
+	vtkstd::vector<int> markedParticleIndices;
 	if(strcmp(this->MarkFileName,"")!=0)
 		{
 		vtkDebugMacro("Reading marked point indices from file:" \

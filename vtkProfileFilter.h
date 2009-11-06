@@ -17,10 +17,10 @@
 
 #ifndef __vtkProfileFilter_h
 #define __vtkProfileFilter_h
-
-#include "vtkTableAlgorithm.h" 
+#include "vtkTableAlgorithm.h" // super class
 #include "vtkStringArray.h" // some class variables are vtkStringArrays
-#include "vtkPolyData.h" // helper functions take this as argument
+
+class vtkPolyData;
 //----------------------------------------------------------------------------
 enum BinUpdateType
 {

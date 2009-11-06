@@ -17,6 +17,7 @@
 #include "vtkSortDataArray.h"
 #include "vtkMath.h"
 #include "vtkInformationDataObjectKey.h"
+#include "vtkPolyData.h" // helper functions take this as argument
 #include <cmath>
 using vtkstd::string;
 

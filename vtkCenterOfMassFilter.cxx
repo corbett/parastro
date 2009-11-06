@@ -10,6 +10,7 @@
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include "vtkStringArray.h"
 #include "vtkSphereSource.h"
+#include "vtkMultiProcessController.h"
 #include "astrovizhelpers/DataSetHelpers.h"
 #include "astrovizhelpers/ProfileHelpers.h"
 
@@ -82,6 +83,11 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 			// Sending to root
 			this->Controller->Send(totalMass,1,0,TOTAL_MASS);
 			this->Controller->Send(totalWeightedMass,3,0,TOTAL_WEIGHTED_MASS);
+			// TODO: add back in
+			/*
+			delete [] totalMass;
+			delete [] totalWeightedMass;
+			*/
 			return 1;
 			}
 		else
@@ -91,8 +97,8 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 			// Now gather results from each process other than this one
 			for(int proc = 1; proc < numProc; ++proc)
 				{
-				double* recTotalMass;
-				double* recTotalWeightedMass;
+				double* recTotalMass = new double[1];
+				double* recTotalWeightedMass = new double[3];
 				// Receiving
 				this->Controller->Receive(recTotalMass,
 					1,proc,TOTAL_MASS);
@@ -104,6 +110,11 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 					{
 					totalWeightedMass[i]+=recTotalWeightedMass[i];
 					}
+				// TODO: add back in
+				/*
+				delete [] recTotalMass;
+				delete [] recTotalWeightedMass;
+				*/
 				}
 			}
 		}

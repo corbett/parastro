@@ -3,13 +3,16 @@
 // here is the desciprtion
 #ifndef __vtkTipsyReader_h
 #define __vtkTipsyReader_h
-#include "vtkPolyDataReader.h"
-#include "tipsylib/ftipsy.hpp" // needed for functions which take Tipsy particles as arguments
+
+#include "vtkPolyDataReader.h" // superclass
 #include "vtkSmartPointer.h" // needed for the functions to initialize arrays
-#include "vtkPolyData.h" // needed as most helper functions modify output which is vtkPolyData
-#include <queue> // needed for FIFO queue used to store marked particles
-using std::vector;
+#include "tipsylib/ftipsy.hpp" // functions take tipsy particle objects
+#include <vtkstd/vector>
+
+class vtkPolyData;
 class vtkCharArray;
+
+
 class VTK_IO_EXPORT vtkTipsyReader : public vtkPolyDataReader
 {
 public:
@@ -80,13 +83,13 @@ private:
 	// Description:
 	// Reads only Marked particles from the tipsy file.
 	// Must be called after function ReadMarkedParticleIndices.
-	void ReadMarkedParticles(vector<int>& markedParticleIndices,
+	void ReadMarkedParticles(vtkstd::vector<int>& markedParticleIndices,
 		TipsyHeader& tipsyHeader,ifTipsy& tipsyInfile,vtkPolyData* output);
 	// Description:
 	// reads in an array of the indices of marked particles from a file, 
 	// returns a queue of marked particles
 	// which is empty if reading was unsucessful.
-	vector<int> ReadMarkedParticleIndices(TipsyHeader& tipsyHeader,
+	vtkstd::vector<int> ReadMarkedParticleIndices(TipsyHeader& tipsyHeader,
 		ifTipsy& tipsyInfile);
 	// Description:
 	// If an additional attribute file is specified, reads this file in as 
@@ -94,7 +97,7 @@ private:
 	// already been read in, and an additional attribute file must have
 	// been input by the user. If a marked file was specified, it reads in 
 	// only the particles at indices which were marked
-	int ReadAdditionalAttributeFile(vector<int>& markedParticleIndices,
+	int ReadAdditionalAttributeFile(vtkstd::vector<int>& markedParticleIndices,
 		TipsyHeader& tipsyHeader, vtkPolyData* output);
 	/* Helper functions for storing data in output vector*/
 	// Description:
