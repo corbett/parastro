@@ -125,6 +125,7 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 	// TODO: add back in
 //	SetPointValue(output,centerOfMass); 
 	// finally, some memory management
+	
 	delete [] totalMass;
 	delete [] totalWeightedMass;
 	delete [] dbCenterOfMass;
