@@ -60,7 +60,19 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 		}
 	else
 		{
-		cout << "\nPARALLEL\n";
+		if(vtkMultiProcessController::GetGlobalController()->\
+			GetNumberOfProcesses()>1)
+			{
+				cout << "\nPARALLEL with "
+				<< 	vtkMultiProcessController::GetGlobalController()->\
+						GetNumberOfProcesses() << " processes\n";
+			}
+		else
+			{
+				cout << "\nSerial with "
+				<< 	vtkMultiProcessController::GetGlobalController()->\
+						GetNumberOfProcesses() << " processes\n";
+			}
 		}
 	// we will create one point in the output: the center of mass point
 	output->SetPoints(vtkSmartPointer<vtkPoints>::New());
