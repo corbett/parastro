@@ -23,11 +23,14 @@ vtkCenterOfMassFilter::vtkCenterOfMassFilter()
 {
 	this->Overdensity = 0; 
 	this->Softening=1e-6f;
+  this->Controller = NULL;
+  this->SetController(vtkMultiProcessController::GetGlobalController());
 }
 
 //----------------------------------------------------------------------------
 vtkCenterOfMassFilter::~vtkCenterOfMassFilter()
 {
+  this->SetController(0);
 }
 
 //----------------------------------------------------------------------------
@@ -54,24 +57,23 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
   vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
   vtkPolyData* output = vtkPolyData::GetData(outputVector);
 	// TODO: playing around with Parallel PV, checking if serial or parallel
-	if (vtkMultiProcessController::GetGlobalController() == NULL)
+	if (this->Controller == NULL)
 		{
 		cout << "\nSERIAL\n";
 		}
 	else
 		{
-		if(vtkMultiProcessController::GetGlobalController()->\
-			GetNumberOfProcesses()>1)
+		if(this->Controller->GetNumberOfProcesses()>1)
 			{
 				cout << "\nPARALLEL with "
-				<< 	vtkMultiProcessController::GetGlobalController()->\
-						GetNumberOfProcesses() << " processes\n";
+				<< 	this->Controller->GetNumberOfProcesses() << " processes "
+				<< " this process is number " 
+				<<  this->Controller->GetLocalProcessId() << " \n";
 			}
 		else
 			{
 				cout << "\nSerial with "
-				<< 	vtkMultiProcessController::GetGlobalController()->\
-						GetNumberOfProcesses() << " processes\n";
+				<< 	this->Controller->GetNumberOfProcesses() << " processes\n";
 			}
 		}
 	// we will create one point in the output: the center of mass point
