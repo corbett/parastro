@@ -497,7 +497,6 @@ void UpdateCOMVars(vtkPointSet* input,double& totalMass,
 		delete [] mass;
 		delete [] nextPoint;
 		}
-
 }
 
 //----------------------------------------------------------------------------	
