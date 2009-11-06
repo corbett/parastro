@@ -10,6 +10,7 @@
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include "vtkStringArray.h"
 #include "vtkSphereSource.h"
+#include "vtkMultiProcessController.h"
 #include "astrovizhelpers/DataSetHelpers.h"
 #include "astrovizhelpers/ProfileHelpers.h"
 
@@ -53,7 +54,7 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
   vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
   vtkPolyData* output = vtkPolyData::GetData(outputVector);
 	// TODO: playing around with Parallel PV, checking if serial or parallel
-	if (this->Controller == NULL)
+	if (vtkMultiProcessController::GetGlobalController() == NULL)
 		{
 		cout << "\nSERIAL\n";
 		}
