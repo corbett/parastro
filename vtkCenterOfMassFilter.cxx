@@ -63,7 +63,6 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 	output->ShallowCopy(input);
 	// Allocating data arrays and setting to zero
 	//TODO: add back in
-/*
 	double* totalMass =new double[0];
 	totalMass[0]=0;
 	double* totalWeightedMass = new double[3];
@@ -130,7 +129,6 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 	delete [] totalWeightedMass;
 	delete [] dbCenterOfMass;
 	delete [] centerOfMass;
-	*/
 	cout << " totally done\n";
   return 1;
 }
