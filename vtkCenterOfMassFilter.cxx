@@ -54,6 +54,8 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 {
   // Get input and output data.
   vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
+	output->SetPoints(vtkSmartPointer<vtkPoints>::New());
+	output->SetVerts(vtkSmartPointer<vtkCellArray>::New());
 	// Allocating data arrays and setting to zero
 	double* totalMass =new double[0];
 	totalMass[0]=0;
@@ -75,8 +77,9 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 			// Sending to root
 			this->Controller->Send(totalMass,1,0,TOTAL_MASS);
 			this->Controller->Send(totalWeightedMass,3,0,TOTAL_WEIGHTED_MASS);
-			// hopefully this should signal not to try to collect/display
-			return 0;
+			// TODO: remove, just testing to see if this gets rid of segfault
+			SetPointValue(output,totalWeightedMass);
+			return 1;
 			}
 		else
 			{
@@ -109,8 +112,6 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 	// Place result in output
   vtkPolyData* output = vtkPolyData::GetData(outputVector);
 	// we will create one point in the output: the center of mass point
-	output->SetPoints(vtkSmartPointer<vtkPoints>::New());
-	output->SetVerts(vtkSmartPointer<vtkCellArray>::New()); 
 	double* dbCenterOfMass = ComputeCOM(input,totalMass[0],totalWeightedMass);
 	float* centerOfMass = new float[3];
 	for(int i = 0; i < 3; ++i)
