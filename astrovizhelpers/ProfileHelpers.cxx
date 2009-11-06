@@ -490,7 +490,6 @@ void UpdateCOMVars(vtkPointSet* input,double& totalMass,
 		totalMass+=mass[0];
 		for(int i = 0; i < 3; ++i)
 			{
-			cout << "updating total mass by " << weightedMass[i] << "\n";
 			totalWeightedMass[i]+=weightedMass[i];
 			}
 		// Finally, some memory management
