@@ -94,12 +94,12 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 					1,proc,TOTAL_MASS);
 				this->Controller->Receive(recTotalWeightedMass,
 					3,proc,TOTAL_WEIGHTED_MASS);
-				cout << "done receiving data, recTotalMass=" 
-					<< recTotalMass[0] << "\n";
+				
+				// TODO: add back in
 				/*
 				// Updating
 				totalMass[0]+=recTotalMass[0];
-				for(size_t i = 0; i < 3; ++i)
+				for(int i = 0; i < 3; ++i)
 					{
 					totalWeightedMass[i]+=recTotalWeightedMass[i];
 					}
@@ -107,7 +107,6 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 				delete [] recTotalWeightedMass;
 				*/
 				}
-
 			}
 		}
 	else
@@ -115,6 +114,8 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 		// we aren't using MPI or have only one process
 		UpdateCOMVars(input,totalMass[0],totalWeightedMass);
 		}
+	// TODO: add back in
+	/*
 	// Place result in output
 	double* dbCenterOfMass = ComputeCOM(input,
 		totalMass[0],totalWeightedMass);
@@ -133,5 +134,6 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 	delete [] totalWeightedMass;
 	delete [] dbCenterOfMass;
 	delete [] centerOfMass;
+	*/
   return 1;
 }
