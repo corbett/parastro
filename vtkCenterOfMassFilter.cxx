@@ -77,6 +77,8 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 			this->Controller->Send(totalMass,1,0,TOTAL_MASS);
 			this->Controller->Send(totalWeightedMass,3,0,TOTAL_WEIGHTED_MASS);
 			// TODO: trying this out
+			
+			
 			cout << "setting non-used polydata output";
 			output->SetPoints(vtkSmartPointer<vtkPoints>::New());
 			output->SetVerts(vtkSmartPointer<vtkCellArray>::New()); 
