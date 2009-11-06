@@ -63,7 +63,7 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 	totalMass[0]=0;
 	double* totalWeightedMass = new double[3];
 	// TODO: remove
-	float* test = new double[3];
+	float* test = new float[3];
 	for(int i = 0; i < 3; ++i)
 		{
 		// TODO: remove
