@@ -74,11 +74,8 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 			// Private variables to aid computation of COM
 			UpdateCOMVars(input,totalMass[0],totalWeightedMass);
 			// Sending to root
-			cout << "sending to root from " << procId 
-				<< " total mass=" << totalMass[0] << "\n";
 			this->Controller->Send(totalMass,1,0,TOTAL_MASS);
 			this->Controller->Send(totalWeightedMass,3,0,TOTAL_WEIGHTED_MASS);
-			cout << "done sending to root\n";
 			return 1;
 			}
 		else
@@ -87,16 +84,18 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 			UpdateCOMVars(input,totalMass[0],totalWeightedMass);
 			// Now gather results from each process other than this one
 			// TODO: add back in
-			/*
 			for(int proc = 1; proc < numProc; ++proc)
 				{
 				double* recTotalMass;
 				double* recTotalWeightedMass;
 				// Receiving
+				cout << " receiving data from proc " << proc << "\n";
 				this->Controller->Receive(recTotalMass,
 					1,proc,TOTAL_MASS);
 				this->Controller->Receive(recTotalWeightedMass,
 					3,proc,TOTAL_WEIGHTED_MASS);
+				cout << "done receiving data\n";
+				/*
 				// Updating
 				totalMass[0]+=recTotalMass[0];
 				for(size_t i = 0; i < 3; ++i)
@@ -105,8 +104,9 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 					}
 				delete [] recTotalMass;
 				delete [] recTotalWeightedMass;
+				*/
 				}
-			*/
+
 			}
 		}
 	else
