@@ -67,6 +67,7 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 			// forcing serial execution, only works on piece that processor
 			// zero has. 
 			// TODO: make work for all processes in parallel
+			UpdateCOMVars(input,this->TotalMass,this->TotalWeightedMass);
 			return 1;
 			}
 		}
