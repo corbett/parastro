@@ -74,8 +74,11 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 			// Private variables to aid computation of COM
 			UpdateCOMVars(input,totalMass[0],totalWeightedMass);
 			// Sending to root
-			this->Controller->Send(totalMass,1,procId,TOTAL_MASS);
-			this->Controller->Send(totalWeightedMass,3,procId,TOTAL_WEIGHTED_MASS);
+			cout << "sending to root from " << procId 
+			" total mass=" << totalMass[0] << "\n";
+			this->Controller->Send(totalMass,1,0,TOTAL_MASS);
+			this->Controller->Send(totalWeightedMass,3,0,TOTAL_WEIGHTED_MASS);
+			cout << "done sending to root\n";
 			return 1;
 			}
 		else
@@ -83,6 +86,8 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 			// We are at root process so update results from root process 
 			UpdateCOMVars(input,totalMass[0],totalWeightedMass);
 			// Now gather results from each process other than this one
+			// TODO: add back in
+			/*
 			for(int proc = 1; proc < numProc; ++proc)
 				{
 				double* recTotalMass;
@@ -101,6 +106,7 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 				delete [] recTotalMass;
 				delete [] recTotalWeightedMass;
 				}
+			*/
 			}
 		}
 	else
@@ -116,7 +122,6 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 		{
 		centerOfMass[i]=static_cast<float>(dbCenterOfMass[i]);
 		}
-
 	// we will create one point in the output: the center of mass point
 	output->SetPoints(vtkSmartPointer<vtkPoints>::New());
 	output->SetVerts(vtkSmartPointer<vtkCellArray>::New()); 
