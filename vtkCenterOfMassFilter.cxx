@@ -75,7 +75,7 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 			UpdateCOMVars(input,totalMass[0],totalWeightedMass);
 			// Sending to root
 			cout << "sending to root from " << procId 
-			" total mass=" << totalMass[0] << "\n";
+				<< " total mass=" << totalMass[0] << "\n";
 			this->Controller->Send(totalMass,1,0,TOTAL_MASS);
 			this->Controller->Send(totalWeightedMass,3,0,TOTAL_WEIGHTED_MASS);
 			cout << "done sending to root\n";
