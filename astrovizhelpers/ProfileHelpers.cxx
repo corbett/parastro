@@ -435,33 +435,19 @@ void VecMultConstant(double vector[],double constant)
 	}
 }
 
-	
+//----------------------------------------------------------------------------
 double* ComputeCOM(vtkPointSet* input)
 {
-	double totalMass=0;
+	double totalMass;
 	double totalWeightedMass[3];
-	for(int nextPointId = 0;\
-	 		nextPointId < input->GetPoints()->GetNumberOfPoints();\
-	 		++nextPointId)
-		{
-		double* nextPoint=GetPoint(input,nextPointId);
-		// extracting the mass
-		// has to be double as this version of VTK doesn't have 
-		// GetTuple function which operates with float
-		double* mass=GetDataValue(input,"mass",nextPointId);
-		//calculating the weighted mass
-		double* weightedMass=ComputeWeightedMass(mass[0],nextPoint);
-		// updating the mass and the weighted mass
-		totalMass+=mass[0];
-		for(int i = 0; i < 3; ++i)
-			{
-			totalWeightedMass[i]+=weightedMass[i];
-			}
-		// Finally, some memory management
-		delete [] weightedMass;
-		delete [] mass;
-		delete [] nextPoint;
-		}
+	UpdateCOMVars(input,totalMass,totalWeightedMass);
+	return ComputeCOM(input,totalMass,totalWeightedMass);
+}
+
+//----------------------------------------------------------------------------
+double* ComputeCOM(vtkPointSet* input,double& totalMass, 
+	double totalWeightedMass[3])
+{
 	// calculating the result
 	// our final data is in float, as Tipsy's data is stored in float
 	double* dbCenterOfMass=new double[3]; // this is needed for the virial calc
@@ -484,7 +470,37 @@ double* ComputeCOM(vtkPointSet* input)
 		}
 	return dbCenterOfMass;
 }
-	
+
+//----------------------------------------------------------------------------
+void UpdateCOMVars(vtkPointSet* input,double& totalMass, 
+	double totalWeightedMass[3])
+{
+	for(int nextPointId = 0;
+	 		nextPointId < input->GetPoints()->GetNumberOfPoints();
+	 		++nextPointId)
+		{
+		double* nextPoint=GetPoint(input,nextPointId);
+		// extracting the mass
+		// has to be double as this version of VTK doesn't have 
+		// GetTuple function which operates with float
+		double* mass=GetDataValue(input,"mass",nextPointId);
+		//calculating the weighted mass
+		double* weightedMass=ComputeWeightedMass(mass[0],nextPoint);
+		// updating the mass and the weighted mass
+		totalMass+=mass[0];
+		for(int i = 0; i < 3; ++i)
+			{
+			totalWeightedMass[i]+=weightedMass[i];
+			}
+		// Finally, some memory management
+		delete [] weightedMass;
+		delete [] mass;
+		delete [] nextPoint;
+		}
+
+}
+
+//----------------------------------------------------------------------------	
 double* ComputeWeightedMass(double& mass,double* point)
 {
 	double* weightedMass = new double[3];
@@ -495,6 +511,7 @@ double* ComputeWeightedMass(double& mass,double* point)
 	return weightedMass;
 }
 
+//----------------------------------------------------------------------------
 void ComputeInertiaTensor(vtkPointSet* input, double* centerPoint,\
 	double inertiaTensor[3][3])
 {
@@ -532,6 +549,7 @@ void ComputeInertiaTensor(vtkPointSet* input, double* centerPoint,\
 	inertiaTensor[2][1]=inertiaTensor[1][2];
 }
 
+//----------------------------------------------------------------------------
 void DisplayVectorsAsLines(vtkPointSet* input, vtkPolyData* output,
 	double vectors[3][3], double* centerPoint)
 {

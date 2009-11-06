@@ -24,6 +24,7 @@ vtkCenterOfMassFilter::vtkCenterOfMassFilter()
 {
 	this->Overdensity = 0; 
 	this->Softening=1e-6f;
+	this->TotalMass=0;
   this->Controller = NULL;
   this->SetController(vtkMultiProcessController::GetGlobalController());
 }
@@ -72,7 +73,9 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 	// we will create one point in the output: the center of mass point
 	output->SetPoints(vtkSmartPointer<vtkPoints>::New());
 	output->SetVerts(vtkSmartPointer<vtkCellArray>::New()); 
-	double* dbCenterOfMass = ComputeCOM(input);
+	UpdateCOMVars(input,this->TotalMass,this->TotalWeightedMass);
+	double* dbCenterOfMass = ComputeCOM(input,
+		this->TotalMass,this->TotalWeightedMass);
 	float* centerOfMass = new float[3];
 	for(int i = 0; i < 3; ++i)
 		{

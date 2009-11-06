@@ -67,6 +67,9 @@ protected:
 private:
   vtkCenterOfMassFilter(const vtkCenterOfMassFilter&);  // Not implemented.
   void operator=(const vtkCenterOfMassFilter&);  // Not implemented.
+	// Private variables to aid computation of COM
+	double TotalMass;
+	double TotalWeightedMass[3];
 };
 
 #endif
