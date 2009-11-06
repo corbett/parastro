@@ -29,7 +29,8 @@ vtkCenterOfMassFilter::vtkCenterOfMassFilter()
 //----------------------------------------------------------------------------
 vtkCenterOfMassFilter::~vtkCenterOfMassFilter()
 {
-  this->SetController(0);
+	cout << "destructor\n";
+ // this->SetController(0);
 }
 
 //----------------------------------------------------------------------------
