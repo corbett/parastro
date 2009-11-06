@@ -83,11 +83,8 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 			// Sending to root
 			this->Controller->Send(totalMass,1,0,TOTAL_MASS);
 			this->Controller->Send(totalWeightedMass,3,0,TOTAL_WEIGHTED_MASS);
-			// TODO: add back in
-			/*
 			delete [] totalMass;
 			delete [] totalWeightedMass;
-			*/
 			return 1;
 			}
 		else
@@ -110,7 +107,6 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 					{
 					totalWeightedMass[i]+=recTotalWeightedMass[i];
 					}
-				// TODO: add back in
 				delete [] recTotalMass;
 				delete [] recTotalWeightedMass;
 				}
