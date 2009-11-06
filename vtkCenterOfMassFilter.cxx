@@ -55,6 +55,9 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
   // Get input and output data.
   vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
   vtkPolyData* output = vtkPolyData::GetData(outputVector);
+	// we will create one point in the output: the center of mass point
+	output->SetPoints(vtkSmartPointer<vtkPoints>::New());
+	output->SetVerts(vtkSmartPointer<vtkCellArray>::New()); 
 	// Allocating data arrays and setting to zero
 	double* totalMass =new double[0];
 	totalMass[0]=0;
@@ -70,6 +73,7 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 		int numProc=this->Controller->GetNumberOfProcesses();
 		if(procId!=0)
 			{
+			cout << " updating and sending data to root\n";
 			// We are at non-root process so simply update and move on
 			// Private variables to aid computation of COM
 			UpdateCOMVars(input,totalMass[0],totalWeightedMass);
@@ -80,6 +84,7 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 			}
 		else
 			{
+			cout << "updating root process\n";
 			// We are at root process so update results from root process 
 			UpdateCOMVars(input,totalMass[0],totalWeightedMass);
 			// Now gather results from each process other than this one
@@ -103,21 +108,22 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 					{
 					totalWeightedMass[i]+=recTotalWeightedMass[i];
 					}
+				*/
 				delete [] recTotalMass;
 				delete [] recTotalWeightedMass;
-				*/
 				}
 			}
 		}
 	else
 		{
+		cout << " not using mpi\n";
 		// we aren't using MPI or have only one process
 		UpdateCOMVars(input,totalMass[0],totalWeightedMass);
 		}
-
+	cout << "done\n";
 	// Place result in output
-// TODO: add back in
-/*
+	// TODO: add back in
+	/*
 	double* dbCenterOfMass = ComputeCOM(input,totalMass[0],totalWeightedMass);
 	float* centerOfMass = new float[3];
 	for(int i = 0; i < 3; ++i)
@@ -126,20 +132,13 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 		centerOfMass[i]=static_cast<float>(dbCenterOfMass[i]);
 		centerOfMass[i]=0;
 		}
-*/
-	cout << "ready to output\n";
-	// we will create one point in the output: the center of mass point
-	output->SetPoints(vtkSmartPointer<vtkPoints>::New());
-	output->SetVerts(vtkSmartPointer<vtkCellArray>::New()); 
-	cout << "done with output\n"
 	// Placing the point's data in the output
-	// TODO: add back in
-/*	SetPointValue(output,centerOfMass); */
+	SetPointValue(output,centerOfMass); 
 	// finally, some memory management
 	delete [] totalMass;
 	delete [] totalWeightedMass;
-//TODO: add back in
-/*	delete [] dbCenterOfMass;
-	delete [] centerOfMass;*/
+	delete [] dbCenterOfMass;
+	delete [] centerOfMass;
+	*/
   return 1;
 }
