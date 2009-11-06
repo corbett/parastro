@@ -10,7 +10,6 @@
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include "vtkStringArray.h"
 #include "vtkSphereSource.h"
-#include "vtkMultiProcessController.h"
 #include "astrovizhelpers/DataSetHelpers.h"
 #include "astrovizhelpers/ProfileHelpers.h"
 

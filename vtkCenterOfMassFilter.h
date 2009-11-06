@@ -21,8 +21,8 @@
 #ifndef __vtkCenterOfMassFilter_h
 #define __vtkCenterOfMassFilter_h
 #include "vtkPointSetAlgorithm.h"
+#include "vtkMultiProcessController.h"
 
-class vtkMultiProcessController;
 class VTK_GRAPHICS_EXPORT vtkCenterOfMassFilter : public vtkPointSetAlgorithm
 {
 public:
