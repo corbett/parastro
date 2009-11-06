@@ -122,6 +122,12 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 	// we will create one point in the output: the center of mass point
 	output->SetPoints(vtkSmartPointer<vtkPoints>::New());
 	output->SetVerts(vtkSmartPointer<vtkCellArray>::New()); 
+	// TODO: remove this
+	for(int i = 0; i < 3; ++i)
+		{
+		centerOfMass[i]=static_cast<float>(dbCenterOfMass[i]);
+		}
+	SetPointValue(output,centerOfMass); 
 	// TODO: add back in
 	/*
 	double* dbCenterOfMass = ComputeCOM(input,totalMass[0],totalWeightedMass);
