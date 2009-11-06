@@ -123,9 +123,10 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 	output->SetPoints(vtkSmartPointer<vtkPoints>::New());
 	output->SetVerts(vtkSmartPointer<vtkCellArray>::New()); 
 	// TODO: remove this
+	float* centerOfMass = new float[3];
 	for(int i = 0; i < 3; ++i)
 		{
-		centerOfMass[i]=static_cast<float>(dbCenterOfMass[i]);
+		centerOfMass[i]=0;
 		}
 	SetPointValue(output,centerOfMass); 
 	// TODO: add back in
