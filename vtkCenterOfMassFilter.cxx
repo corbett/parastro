@@ -79,7 +79,7 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 			// TODO: trying this out
 			
 			
-			cout << "setting non-used polydata output";
+			cout << "setting non-used polydata output\n";
 			output->SetPoints(vtkSmartPointer<vtkPoints>::New());
 			output->SetVerts(vtkSmartPointer<vtkCellArray>::New()); 
 			return 1;
