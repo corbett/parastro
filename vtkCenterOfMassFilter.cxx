@@ -132,13 +132,10 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 	// Placing the point's data in the output
 	SetPointValue(output,centerOfMass); 
 	// finally, some memory management
-	// TODO: add back in
-	/*
 	delete [] totalMass;
 	delete [] totalWeightedMass;
 	delete [] dbCenterOfMass;
 	delete [] centerOfMass;
-	*/
 	cout << " totally done\n";
   return 1;
 }
