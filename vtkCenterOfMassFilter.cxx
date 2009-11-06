@@ -17,7 +17,7 @@
 vtkCxxRevisionMacro(vtkCenterOfMassFilter, "$Revision: 1.72 $");
 vtkStandardNewMacro(vtkCenterOfMassFilter);
 
-vtkCxxSetObjectMacro(vtkCollectPolyData,Controller, vtkMultiProcessController);
+vtkCxxSetObjectMacro(vtkCenterOfMassFilter,Controller, vtkMultiProcessController);
 
 //----------------------------------------------------------------------------
 vtkCenterOfMassFilter::vtkCenterOfMassFilter()
