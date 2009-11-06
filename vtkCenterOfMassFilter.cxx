@@ -58,23 +58,15 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
   vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
   vtkPolyData* output = vtkPolyData::GetData(outputVector);
 	// TODO: playing around with Parallel PV, checking if serial or parallel
-	if (this->Controller == NULL)
+	if (this->Controller != NULL && 
+		this->Controller->GetNumberOfProcesses() > 1)
 		{
-		cout << "\nSERIAL\n";
-		}
-	else
-		{
-		if(this->Controller->GetNumberOfProcesses()>1)
+		if(this->Controller->GetLocalProcessId()!=0)
 			{
-				cout << "\nPARALLEL with "
-				<< 	this->Controller->GetNumberOfProcesses() << " processes "
-				<< " this process is number " 
-				<<  this->Controller->GetLocalProcessId() << " \n";
-			}
-		else
-			{
-				cout << "\nSerial with "
-				<< 	this->Controller->GetNumberOfProcesses() << " processes\n";
+			// forcing serial execution, only works on piece that processor
+			// zero has. 
+			// TODO: make work for all processes in parallel
+			return 1;
 			}
 		}
 	// we will create one point in the output: the center of mass point
