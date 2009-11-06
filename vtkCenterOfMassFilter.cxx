@@ -67,6 +67,7 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 			// forcing serial execution, only works on piece that processor
 			// zero has. 
 			// TODO: make work for all processes in parallel
+			UpdateCOMVars(input,this->TotalMass,this->TotalWeightedMass);
 			return 1;
 			}
 		}
@@ -76,10 +77,6 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 	UpdateCOMVars(input,this->TotalMass,this->TotalWeightedMass);
 	double* dbCenterOfMass = ComputeCOM(input,
 		this->TotalMass,this->TotalWeightedMass);
-	cout << "total mass is " << this->TotalMass << ","
-		<< " total weighted mass x is " << this->TotalWeightedMass[0] << ","
-		<< " total weighted mass y is " << this->TotalWeightedMass[1] << ","
-		<< " total weighted mass z is " << this->TotalWeightedMass[2] << "\n";		
 	float* centerOfMass = new float[3];
 	for(int i = 0; i < 3; ++i)
 		{
