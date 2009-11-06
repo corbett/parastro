@@ -55,9 +55,6 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
   // Get input and output data.
   vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
   vtkPolyData* output = vtkPolyData::GetData(outputVector);
-	// we will create one point in the output: the center of mass point
-	output->SetPoints(vtkSmartPointer<vtkPoints>::New());
-	output->SetVerts(vtkSmartPointer<vtkCellArray>::New()); 
 	// Allocating data arrays and setting to zero
 	double* totalMass =new double[0];
 	totalMass[0]=0;
@@ -100,8 +97,6 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 				this->Controller->Receive(recTotalWeightedMass,
 					3,proc,TOTAL_WEIGHTED_MASS);
 				cout << "done recieving data";
-
-
 				// TODO: add back in
 				/*
 				// Updating
@@ -124,15 +119,16 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 		}
 	cout << "done\n";
 	// Place result in output
+	// we will create one point in the output: the center of mass point
+	output->SetPoints(vtkSmartPointer<vtkPoints>::New());
+	output->SetVerts(vtkSmartPointer<vtkCellArray>::New()); 
 	// TODO: add back in
 	/*
 	double* dbCenterOfMass = ComputeCOM(input,totalMass[0],totalWeightedMass);
 	float* centerOfMass = new float[3];
 	for(int i = 0; i < 3; ++i)
 		{
-		
 		centerOfMass[i]=static_cast<float>(dbCenterOfMass[i]);
-		centerOfMass[i]=0;
 		}
 	// Placing the point's data in the output
 	SetPointValue(output,centerOfMass); 
