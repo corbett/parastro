@@ -54,6 +54,8 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 {
   // Get input and output data.
   vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
+	// Place result in output
+  vtkPolyData* output = vtkPolyData::GetData(outputVector);
 	output->SetPoints(vtkSmartPointer<vtkPoints>::New());
 	output->SetVerts(vtkSmartPointer<vtkCellArray>::New());
 	// Allocating data arrays and setting to zero
@@ -109,8 +111,6 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 		// we aren't using MPI or have only one process
 		UpdateCOMVars(input,totalMass[0],totalWeightedMass);
 		}
-	// Place result in output
-  vtkPolyData* output = vtkPolyData::GetData(outputVector);
 	// we will create one point in the output: the center of mass point
 	double* dbCenterOfMass = ComputeCOM(input,totalMass[0],totalWeightedMass);
 	float* centerOfMass = new float[3];
