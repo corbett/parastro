@@ -29,8 +29,7 @@ vtkCenterOfMassFilter::vtkCenterOfMassFilter()
 //----------------------------------------------------------------------------
 vtkCenterOfMassFilter::~vtkCenterOfMassFilter()
 {
-	cout << "destructor\n";
- // this->SetController(0);
+ 	this->SetController(0);
 }
 
 //----------------------------------------------------------------------------
@@ -71,7 +70,6 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 		int numProc=this->Controller->GetNumberOfProcesses();
 		if(procId!=0)
 			{
-			cout << " updating and sending data to root\n";
 			// We are at non-root process so simply update and move on
 			// Private variables to aid computation of COM
 			UpdateCOMVars(input,totalMass[0],totalWeightedMass);
@@ -82,22 +80,18 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 			}
 		else
 			{
-			cout << "updating root process\n";
 			// We are at root process so update results from root process 
 			UpdateCOMVars(input,totalMass[0],totalWeightedMass);
 			// Now gather results from each process other than this one
-			// TODO: add back in
 			for(int proc = 1; proc < numProc; ++proc)
 				{
 				double* recTotalMass;
 				double* recTotalWeightedMass;
 				// Receiving
-				cout << " receiving data from proc " << proc << "\n";
 				this->Controller->Receive(recTotalMass,
 					1,proc,TOTAL_MASS);
 				this->Controller->Receive(recTotalWeightedMass,
 					3,proc,TOTAL_WEIGHTED_MASS);
-				cout << "done recieving data\n";
 				// Updating
 				totalMass[0]+=recTotalMass[0];
 				for(int i = 0; i < 3; ++i)
@@ -109,19 +103,13 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 		}
 	else
 		{
-		cout << " not using mpi\n";
 		// we aren't using MPI or have only one process
 		UpdateCOMVars(input,totalMass[0],totalWeightedMass);
 		}
-	cout << "done\n";
 	// Place result in output
 	// we will create one point in the output: the center of mass point
 	output->SetPoints(vtkSmartPointer<vtkPoints>::New());
-	cout << "set points\n";
 	output->SetVerts(vtkSmartPointer<vtkCellArray>::New()); 
-	cout << "set vert\n";
-	// TODO: add back in
-	cout << "compute com\n";
 	double* dbCenterOfMass = ComputeCOM(input,totalMass[0],totalWeightedMass);
 	float* centerOfMass = new float[3];
 	for(int i = 0; i < 3; ++i)
@@ -129,7 +117,6 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 		cout << " com " << i << " is " << dbCenterOfMass[i] << "\n";
 		centerOfMass[i]=static_cast<float>(dbCenterOfMass[i]);
 		}
-	cout << "set point\n";
 	// Placing the point's data in the output
 	SetPointValue(output,centerOfMass); 
 	// finally, some memory management
