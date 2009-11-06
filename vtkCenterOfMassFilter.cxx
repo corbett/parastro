@@ -70,6 +70,8 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 		test[i]=0;
 		totalWeightedMass[i]=0;
 		}
+	// todo: remove
+	SetPointValue(output,test);
 	if (this->Controller != NULL && 
 		this->Controller->GetNumberOfProcesses() > 1)
 		{
@@ -77,8 +79,6 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 		int numProc=this->Controller->GetNumberOfProcesses();
 		if(procId!=0)
 			{
-			// TODO: remove, just testing to see if this gets rid of segfault
-			SetPointValue(output,test);
 			// We are at non-root process so simply update and move on
 			// Private variables to aid computation of COM
 			UpdateCOMVars(input,totalMass[0],totalWeightedMass);
