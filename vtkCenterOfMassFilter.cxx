@@ -97,8 +97,6 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 				this->Controller->Receive(recTotalWeightedMass,
 					3,proc,TOTAL_WEIGHTED_MASS);
 				cout << "done recieving data\n";
-				// TODO: add back in
-				/*
 				// Updating
 				totalMass[0]+=recTotalMass[0];
 				for(int i = 0; i < 3; ++i)
@@ -107,7 +105,6 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 					}
 				delete [] recTotalMass;
 				delete [] recTotalWeightedMass;
-				*/
 				}
 			}
 		}
