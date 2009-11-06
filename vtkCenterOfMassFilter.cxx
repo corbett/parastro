@@ -54,7 +54,6 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 {
   // Get input and output data.
   vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
-  vtkPolyData* output = vtkPolyData::GetData(outputVector);
 	// Allocating data arrays and setting to zero
 	double* totalMass =new double[0];
 	totalMass[0]=0;
@@ -76,12 +75,6 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 			// Sending to root
 			this->Controller->Send(totalMass,1,0,TOTAL_MASS);
 			this->Controller->Send(totalWeightedMass,3,0,TOTAL_WEIGHTED_MASS);
-			// TODO: trying this out
-			
-			
-			cout << "setting non-used polydata output\n";
-			output->SetPoints(vtkSmartPointer<vtkPoints>::New());
-			output->SetVerts(vtkSmartPointer<vtkCellArray>::New()); 
 			return 1;
 			}
 		else
@@ -113,6 +106,7 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 		UpdateCOMVars(input,totalMass[0],totalWeightedMass);
 		}
 	// Place result in output
+  vtkPolyData* output = vtkPolyData::GetData(outputVector);
 	// we will create one point in the output: the center of mass point
 	output->SetPoints(vtkSmartPointer<vtkPoints>::New());
 	output->SetVerts(vtkSmartPointer<vtkCellArray>::New()); 
