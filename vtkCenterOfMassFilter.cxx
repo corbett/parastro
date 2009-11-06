@@ -111,10 +111,8 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 					totalWeightedMass[i]+=recTotalWeightedMass[i];
 					}
 				// TODO: add back in
-				/*
 				delete [] recTotalMass;
 				delete [] recTotalWeightedMass;
-				*/
 				}
 			}
 		}
