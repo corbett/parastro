@@ -52,6 +52,15 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
   // Get input and output data.
   vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
   vtkPolyData* output = vtkPolyData::GetData(outputVector);
+	// TODO: playing around with Parallel PV, checking if serial or parallel
+	if (this->Controller == NULL)
+		{
+		cout << "\nSERIAL\n";
+		}
+	else
+		{
+		cout << "\nPARALLEL\n";
+		}
 	// we will create one point in the output: the center of mass point
 	output->SetPoints(vtkSmartPointer<vtkPoints>::New());
 	output->SetVerts(vtkSmartPointer<vtkCellArray>::New()); 
