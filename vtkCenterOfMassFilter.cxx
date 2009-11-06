@@ -56,22 +56,18 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
   vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
 	// Place result in output
   vtkPolyData* output = vtkPolyData::GetData(outputVector);
-	output->SetPoints(vtkSmartPointer<vtkPoints>::New());
-	output->SetVerts(vtkSmartPointer<vtkCellArray>::New());
+	// TODO: trying this out
+	output->ShallowCopy(input);
+/*	output->SetPoints(vtkSmartPointer<vtkPoints>::New());
+	output->SetVerts(vtkSmartPointer<vtkCellArray>::New());*/
 	// Allocating data arrays and setting to zero
 	double* totalMass =new double[0];
 	totalMass[0]=0;
 	double* totalWeightedMass = new double[3];
-	// TODO: remove
-	float* test = new float[3];
 	for(int i = 0; i < 3; ++i)
 		{
-		// TODO: remove
-		test[i]=0;
 		totalWeightedMass[i]=0;
 		}
-	// todo: remove
-	SetPointValue(output,test);
 	if (this->Controller != NULL && 
 		this->Controller->GetNumberOfProcesses() > 1)
 		{
