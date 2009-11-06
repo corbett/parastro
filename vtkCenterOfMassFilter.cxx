@@ -62,8 +62,12 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 	double* totalMass =new double[0];
 	totalMass[0]=0;
 	double* totalWeightedMass = new double[3];
+	// TODO: remove
+	float* test = new double[3];
 	for(int i = 0; i < 3; ++i)
 		{
+		// TODO: remove
+		test[i]=0;
 		totalWeightedMass[i]=0;
 		}
 	if (this->Controller != NULL && 
@@ -74,14 +78,13 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 		if(procId!=0)
 			{
 			// TODO: remove, just testing to see if this gets rid of segfault
-			SetPointValue(output,totalWeightedMass);
+			SetPointValue(output,test);
 			// We are at non-root process so simply update and move on
 			// Private variables to aid computation of COM
 			UpdateCOMVars(input,totalMass[0],totalWeightedMass);
 			// Sending to root
 			this->Controller->Send(totalMass,1,0,TOTAL_MASS);
 			this->Controller->Send(totalWeightedMass,3,0,TOTAL_WEIGHTED_MASS);
-
 			return 1;
 			}
 		else
