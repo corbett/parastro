@@ -22,13 +22,6 @@ vtkCxxSetObjectMacro(vtkCenterOfMassFilter,Controller, vtkMultiProcessController
 //----------------------------------------------------------------------------
 vtkCenterOfMassFilter::vtkCenterOfMassFilter()
 {
-	this->Overdensity = 0; 
-	this->Softening=1e-6f;
-	this->TotalMass=0;
-	for(int i = 0; i < 3; ++i)
-		{
-		this->TotalWeightedMass[i]=0;
-		}
   this->Controller = NULL;
   this->SetController(vtkMultiProcessController::GetGlobalController());
 }
@@ -62,61 +55,76 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
   // Get input and output data.
   vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
   vtkPolyData* output = vtkPolyData::GetData(outputVector);
-	// TODO: playing around with Parallel PV, checking if serial or parallel
+	// Allocating data arrays and setting to zero
+	double* totalMass =new double[0];
+	totalMass[0]=0;
+	double* totalWeightedMass = new double[3];
+	for(int i = 0; i < 3; ++i)
+		{
+		totalWeightedMass[i]=0;
+		}
 	if (this->Controller != NULL && 
 		this->Controller->GetNumberOfProcesses() > 1)
 		{
-		if(this->Controller->GetLocalProcessId()!=0)
+		int procId=this->Controller->GetLocalProcessId();
+		int numProc=this->Controller->GetNumberOfProcesses();
+		if(procId!=0)
 			{
-			// forcing serial execution, only works on piece that processor
-			// zero has. 
-			// TODO: make work for all processes in parallel
-			UpdateCOMVars(input,this->TotalMass,this->TotalWeightedMass);
+			// We are at non-root process so simply update and move on
+			// Private variables to aid computation of COM
+			UpdateCOMVars(input,totalMass[0],totalWeightedMass);
+			// Sending to root
+			this->Controller->Send(totalMass,1,procId,TOTAL_MASS);
+			this->Controller->Send(totalWeightedMass,3,procId,TOTAL_WEIGHTED_MASS);
 			return 1;
 			}
+		else
+			{
+			// We are at root process so update results from root process 
+			UpdateCOMVars(input,totalMass[0],totalWeightedMass);
+			// Now gather results from each process other than this one
+			for(int proc = 1; proc < numProc; ++proc)
+				{
+				double* recTotalMass;
+				double* recTotalWeightedMass;
+				// Receiving
+				this->Controller->Receive(recTotalMass,
+					1,proc,TOTAL_MASS);
+				this->Controller->Receive(recTotalWeightedMass,
+					3,proc,TOTAL_WEIGHTED_MASS);
+				// Updating
+				totalMass[0]+=recTotalMass[0];
+				for(size_t i = 0; i < 3; ++i)
+					{
+					totalWeightedMass[i]+=recTotalWeightedMass[i];
+					}
+				delete [] recTotalMass;
+				delete [] recTotalWeightedMass;
+				}
+			}
 		}
-	// we will create one point in the output: the center of mass point
-	output->SetPoints(vtkSmartPointer<vtkPoints>::New());
-	output->SetVerts(vtkSmartPointer<vtkCellArray>::New()); 
-	UpdateCOMVars(input,this->TotalMass,this->TotalWeightedMass);
+	else
+		{
+		// we aren't using MPI or have only one process
+		UpdateCOMVars(input,totalMass[0],totalWeightedMass);
+		}
+	// Place result in output
 	double* dbCenterOfMass = ComputeCOM(input,
-		this->TotalMass,this->TotalWeightedMass);
+		totalMass[0],totalWeightedMass);
 	float* centerOfMass = new float[3];
 	for(int i = 0; i < 3; ++i)
 		{
 		centerOfMass[i]=static_cast<float>(dbCenterOfMass[i]);
 		}
-	// if the Overdensity is non zero and we are able to find a
-	// virial radius then we set the output to the sphere
-	// around the COM at the virial radius.
-	if(this->Overdensity>0)
-		{
-			double maxR=ComputeMaxR(input,dbCenterOfMass);
-			VirialRadiusInfo virialRadiusInfo=\
-			ComputeVirialRadius(input,this->Softening,
-				this->Overdensity,maxR,dbCenterOfMass);
-			if(virialRadiusInfo.virialRadius>0)
-				{
-				//Here is where we create the sphere around the COM to display
-				vtkWarningMacro("the virial radius is " 
-												<< virialRadiusInfo.virialRadius);
-				// Creating the sphere
-				CreateSphere(output,\
-										virialRadiusInfo.virialRadius,dbCenterOfMass);
-				}
-			else
-				{
-				vtkWarningMacro("unable to find the virial radius from over density you specified. Perhaps it is too high. For now displaying only the center of mass");
-				// Placing the point's data in the output
-				SetPointValue(output,centerOfMass);					
-				}
-		}
-	else
-		{
-			// Placing the point's data in the output
-			SetPointValue(output,centerOfMass);
-		}
+
+	// we will create one point in the output: the center of mass point
+	output->SetPoints(vtkSmartPointer<vtkPoints>::New());
+	output->SetVerts(vtkSmartPointer<vtkCellArray>::New()); 
+	// Placing the point's data in the output
+	SetPointValue(output,centerOfMass);
 	// finally, some memory management
+	delete [] totalMass;
+	delete [] totalWeightedMass;
 	delete [] dbCenterOfMass;
 	delete [] centerOfMass;
   return 1;
