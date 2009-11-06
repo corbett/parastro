@@ -25,6 +25,10 @@ vtkCenterOfMassFilter::vtkCenterOfMassFilter()
 	this->Overdensity = 0; 
 	this->Softening=1e-6f;
 	this->TotalMass=0;
+	for(int i = 0; i < 3; ++i)
+		{
+		this->TotalWeightedMass[i]=0;
+		}
   this->Controller = NULL;
   this->SetController(vtkMultiProcessController::GetGlobalController());
 }
@@ -67,8 +71,6 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 			// forcing serial execution, only works on piece that processor
 			// zero has. 
 			// TODO: make work for all processes in parallel
-			cout << "updating COM VARS on "
-			 	<< this->Controller->GetLocalProcessId() << "\n";
 			UpdateCOMVars(input,this->TotalMass,this->TotalWeightedMass);
 			return 1;
 			}
