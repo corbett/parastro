@@ -115,7 +115,9 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 	vtkTable* const output = vtkTable::GetData(outputVector,0);
 	output->Initialize();
 	this->CalculateAndSetBounds(dataSet,pointInfo);
-	this->GenerateProfile(dataSet,output);
+	//TODO: add back in
+	
+//	this->GenerateProfile(dataSet,output);
 	return 1;
 }
 
