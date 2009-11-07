@@ -187,14 +187,11 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 		{
 		// we are in serial or at process 0
 		float* centerOfMass = DoublePointToFloat(dbCenterOfMass);
-		cout << "COM is " << centerOfMass[0] << ","
-			<< centerOfMass[1] << "," << centerOfMass[2] << "\n";
 		// Placing the point's data in the output
 		SetPointValue(output,centerOfMass); 
 		// finally, some memory management
 		delete [] dbCenterOfMass;
 		delete [] centerOfMass;
-		cout << " totally done\n";
 		}
   return 1;
 }

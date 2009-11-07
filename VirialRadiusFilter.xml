@@ -19,6 +19,12 @@
           <DataTypeDomain name="input_type">
             <DataType value="vtkPointSet"/>
           </DataTypeDomain>
+          <InputArrayDomain name="input_array">
+             <RequiredProperties>
+                <Property name="SelectInputArray" 
+                          function="FieldDataSelection"/>
+             </RequiredProperties>
+          </InputArrayDomain>
           <Documentation>
             This property specifies the input to the Profile filter.
           </Documentation>

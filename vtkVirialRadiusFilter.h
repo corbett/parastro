@@ -45,6 +45,14 @@ public:
   vtkTypeRevisionMacro(vtkProfileFilter, vtkTableAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent);
   // Description:
+  // Get/Set the softening parameter
+  vtkSetMacro(Softening, double);
+  vtkGetMacro(Softening, double);
+  // Description:
+  // Get/Set the density parameter
+  vtkSetMacro(Delta, double);
+  vtkGetMacro(Delta, double);
+  // Description:
   // Get/Set the center
   vtkSetVector3Macro(Center,double);
   vtkGetVectorMacro(Center,double,3);
@@ -52,6 +60,11 @@ public:
   // Get/Set the number of bins
   vtkSetMacro(BinNumber,int);
   vtkGetMacro(BinNumber,int);
+  // Description:
+  // Get/Set whether the bins should be only from the center to the virial 
+	// radius
+	vtkSetMacro(CutOffAtVirialRadius,int);
+	vtkGetMacro(CutOffAtVirialRadius,int);
   // Description:
   // Specify the point locations used to probe input. Any geometry
   // can be used. New style. Equivalent to SetInputConnection(1, algOutput).
@@ -121,9 +134,21 @@ protected:
 			vtkstd::string argTwoBaseName, ColumnType argTwoColumnType);
 		~ProfileElement();
  	};
+	// Description:
+	// Set in GUI, with defaults
+	// Describes the softening of the simulation which can influence the 
+	// root finding
+	double Softening;
+  // Description:
+	// Set in GUI, with defaults
+	// Overdensity
+	double Delta; 
   // Description:
 	// Center around which to compute radial bins
 	double Center[3];
+  // Description:
+	// Whether to only compute the profile up to the virial radius
+	int CutOffAtVirialRadius;
   // Description:
 	// Number of bins to use
 	int BinNumber;
