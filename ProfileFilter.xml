@@ -11,24 +11,24 @@
         short_help="physical profile">
      </Documentation>
 	<!--Sets the input dataset-->
-    <InputProperty name="Input" command="SetInputConnection">
-         <ProxyGroupDomain name="groups">
-           <Group name="sources"/>
-           <Group name="filters"/>
-         </ProxyGroupDomain>
-         <DataTypeDomain name="input_type">
-           <DataType value="vtkPointSet"/>
-         </DataTypeDomain>
-         <InputArrayDomain name="input_array">
-            <RequiredProperties>
-               <Property name="SelectInputArray" 
-                         function="FieldDataSelection"/>
-            </RequiredProperties>
-         </InputArrayDomain>
-         <Documentation>
-           This property specifies the input to the Profile filter.
-         </Documentation>
-    </InputProperty>
+     <InputProperty name="Input" command="SetInputConnection">
+          <ProxyGroupDomain name="groups">
+            <Group name="sources"/>
+            <Group name="filters"/>
+          </ProxyGroupDomain>
+          <DataTypeDomain name="input_type">
+            <DataType value="vtkPointSet"/>
+          </DataTypeDomain>
+          <InputArrayDomain name="input_array">
+             <RequiredProperties>
+                <Property name="SelectInputArray" 
+                          function="FieldDataSelection"/>
+             </RequiredProperties>
+          </InputArrayDomain>
+          <Documentation>
+            This property specifies the input to the Profile filter.
+          </Documentation>
+     </InputProperty>
      <InputProperty
         name="Source"
         command="SetSourceConnection"
@@ -48,6 +48,39 @@
 	        	<Property name="NumberOfPoints" show="0"/> 
 	    	</Hints>
       </InputProperty>
+	<!--Adds a checkbox for the option Bin By Radius-->
+	<!--Adds a checkbox for the option Cut Off At Virial Radius-->
+     <IntVectorProperty 
+        name="CutOffAtVirialRadius" 
+        command="SetCutOffAtVirialRadius" 
+        number_of_elements="1"
+        default_values="1" > 
+       <BooleanDomain name="bool"/>
+       <Documentation>
+         If the value of this property is 1, then the bins are only from the center up to the virial radius.
+       </Documentation>
+     </IntVectorProperty>
+	<!--Allows the user to type into a text field the softening of their
+	simulation -->
+	  <DoubleVectorProperty
+			name="Softening"
+			command="SetSoftening"
+			number_of_elements="1"
+			default_values="1e-6">
+			<Documentation>
+			Set the softening. This parameter influences the search for
+			the viral radius.
+			</Documentation>
+	  </DoubleVectorProperty>
+	  <DoubleVectorProperty
+			name="Delta"
+			command="SetDelta"
+			number_of_elements="1"
+			default_values="1">
+			<Documentation>
+			Set the density parameter
+			</Documentation>
+	  </DoubleVectorProperty>
      <IntVectorProperty name="BinNumber" 
         command="SetBinNumber" 
         number_of_elements="1" 

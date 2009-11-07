@@ -73,7 +73,9 @@ vtkProfileFilter::vtkProfileFilter()
 	// Defaults for quantities which will be computed based on user's
 	// later input
 	this->MaxR=1.0;
+	this->Delta=0.0;
 	this->BinNumber=30;
+	this->Softening=1e-6f;
 }
 
 //----------------------------------------------------------------------------
@@ -86,7 +88,9 @@ vtkProfileFilter::~vtkProfileFilter()
 //----------------------------------------------------------------------------
 void vtkProfileFilter::PrintSelf(ostream& os, vtkIndent indent)
 {
-  os  << indent << "bin number: " << this->BinNumber  << "\n";
+  os << indent << "overdensity: " << this->Delta << "\n"
+		 << indent << "bin number: " << this->BinNumber 
+		<< "softening :" << this->Softening << "\n";
 }
 
 //----------------------------------------------------------------------------
@@ -96,7 +100,7 @@ void vtkProfileFilter::SetSourceConnection(vtkAlgorithmOutput* algOutput)
 }
 
 int vtkProfileFilter::FillInputPortInformation (int port, 
- vtkInformation *info)
+                                                   vtkInformation *info)
 {
   this->Superclass::FillInputPortInformation(port, info);
   info->Set(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), "vtkPolyData");
@@ -115,6 +119,36 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 	vtkTable* const output = vtkTable::GetData(outputVector,0);
 	output->Initialize();
 	this->CalculateAndSetBounds(dataSet,pointInfo);
+	// If we want to cut off at the virial radius, compute this, and remove the
+	// portion of the data set we don't care about
+	if(this->CutOffAtVirialRadius)
+		{
+		VirialRadiusInfo virialRadiusInfo = \
+		 	ComputeVirialRadius(dataSet,this->Softening,
+			this->Delta,this->MaxR,this->Center);
+		// note that if there was an error finding the virialRadius the 
+		// radius returned is < 0
+		if(virialRadiusInfo.virialRadius>0)
+			{
+			vtkWarningMacro("virial radius is " << virialRadiusInfo.virialRadius);
+			//setting the dataSet to this newInput
+			vtkPolyData* newDataSet = \
+				GetDatasetWithinVirialRadius(virialRadiusInfo);	
+			if(newDataSet->GetNumberOfPoints()>0)
+				{
+				this->MaxR=virialRadiusInfo.virialRadius;
+				this->GenerateProfile(newDataSet,output);
+				return 1;
+				}
+			vtkErrorMacro(
+			"There are no points which lie within the virial radius: " 
+			<< virialRadiusInfo.virialRadius << " found for overdensity "
+			<<  this->Delta << " about point (" << this->Center[0] << "," 
+			<< this->Center[1] << "," << this->Center[2]
+			<< "). Considering changing your delta or selecting a different point around which to search. For now binning out to the max radius instead of the virial");
+			newDataSet->Delete();
+			}
+		}
 	this->GenerateProfile(dataSet,output);
 	return 1;
 }
@@ -160,8 +194,7 @@ int vtkProfileFilter::GetBinNumber(double x[])
 void vtkProfileFilter::GenerateProfile(vtkPolyData* input,vtkTable* output)
 {	
 	this->InitializeBins(input,output);
-	//TODO: add back in, for debugging
-//	this->ComputeStatistics(input,output);
+	this->ComputeStatistics(input,output);
 }
 
 //----------------------------------------------------------------------------
