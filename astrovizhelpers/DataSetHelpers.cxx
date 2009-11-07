@@ -6,6 +6,7 @@
 #include "vtkIntArray.h"
 #include "vtkSphereSource.h"
 #include "vtkSmartPointer.h"
+#include "vtkMultiProcessController.h"
 #include <cmath>
 /*----------------------------------------------------------------------------
 *
@@ -155,4 +156,14 @@ vtkInformationVector** DeepCopyInputVector(vtkInformationVector** inputVector,
 												// see helper function DeleteDeepCopyInput below
 }
 
+/*----------------------------------------------------------------------------
+*
+* Work with vtkInformationVector and vtkInformation objets
+*
+*---------------------------------------------------------------------------*/
 //----------------------------------------------------------------------------
+bool RunInParallel(vtkMultiProcessController* controller)
+{
+	return (controller != NULL && controller->GetNumberOfProcesses() > 1);
+}
+

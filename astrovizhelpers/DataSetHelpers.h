@@ -14,17 +14,17 @@
 #include <iostream>
 #include <sstream>
 
+class vtkMultiProcessController;
+
 // The following methods take and modify vtkPolyData
 // Description:
 // sets the point vertices in the output vector, assigning the point 
 // a unique id and places one point per cell. Works only with PolyData
 vtkIdType SetPointValue(vtkPolyData* output,float pos[]);
 
-
 // Description:
 // creates a sphere of radius R, center center in the output.
 void CreateSphere(vtkPolyData* output,double radius,double center[]);
-
 
 // The following methods take and modify vtkPointSet data
 // Description:
@@ -35,8 +35,9 @@ void SetDataValue(vtkPointSet* output, const char* arrayName,\
 void SetDataValue(vtkPointSet* output, const char* arrayName,vtkIdType id,double data[]);
 
 // Description:
-// points the double* data to the value in the output vector in array arrayName at position id
-// would like to be float, but the version of vtk I am working with does not support 
+// points the double* data to the value in the output vector in 
+// array arrayName at position id would like to be float, but the 
+// version of vtk I am working with does not support 
 double* GetDataValue(vtkPointSet* output, const char* arrayName,\
  					vtkIdType id);
 
@@ -46,17 +47,13 @@ double* GetDataValue(vtkPointSet* output, const char* arrayName,\
 void AllocateDataArray(vtkPointSet* output, const char* arrayName,\
  			int numComponents, int numTuples);
 
-// float velocities
-void AllocateDataArray(vtkPointSet* output, const char* arrayName,\
- 			int numComponents, int numTuples);
-
 // Description:
 // create a vtkDataArray with the  name arrayName, number of components 
 // numComponents and number of tuples numTuples of type T. place it in
 // the vtkTable
-
 void AllocateDataArray(vtkTable* output, const char* arrayName,\
 			int numComponents, int numTuples);
+
 // Description:
 // create a vtkDataArray with the  name arrayName, number of components 
 // numComponents and number of tuples numTuples of type T
@@ -100,6 +97,11 @@ inline vtkstd::string ToString(double x)
 	o << x;
   return o.str();
 }
+// Description:
+// returns true if this process should be run in parallel
+// (i.e. we have  non-null controller and more than one process to work with)
+bool RunInParallel(vtkMultiProcessController* controller);
+
 
 
 

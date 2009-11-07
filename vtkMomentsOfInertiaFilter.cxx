@@ -63,7 +63,7 @@ int vtkMomentsOfInertiaFilter::RequestData(vtkInformation*,
 	vtkSmartPointer<vtkCenterOfMassFilter> centerOfMassFilter = \
 		vtkSmartPointer<vtkCenterOfMassFilter>::New();
 	centerOfMassFilter->SetController(this->Controller);
-	double* centerOfMass =\
+	double* centerOfMass = \
 	 	centerOfMassFilter->ComputeCenterOfMass(input,"mass");
 	double inertiaTensor[3][3];
 	double eigenvalues[3];
@@ -74,16 +74,30 @@ int vtkMomentsOfInertiaFilter::RequestData(vtkInformation*,
 		// we are at process 0 or running in serial
 		// first broadcast to other processes if 
 		// necessary
+		if(RunInParallel(this->Controller))
+			{
+			
+			}
 		// computing the moment of inertia tensor 3x3 matrix, and its
 		// eigenvalues and eigenvectors
 		ComputeInertiaTensor(input,centerOfMass,inertiaTensor);
 		// receive values from other processes if necessary
+		if(RunInParallel(this->Controller))
+			{
+			
+			}
 		// finally perform final computation
 		vtkMath::Diagonalize3x3(inertiaTensor,eigenvalues,eigenvectors);
 		// displaying eigenvectors
 		DisplayVectorsAsLines(input,output,eigenvectors,centerOfMass);
 		// memory management
 		delete [] centerOfMass;
+		}
+	else
+		{
+		// TODO: implement
+		// we are running in parallel
+
 		}
   return 1;
 }
