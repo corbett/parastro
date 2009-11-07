@@ -109,16 +109,6 @@ void vtkMomentsOfInertiaFilter::DisplayVectorsAsLines(vtkPointSet* input,
 {
 	vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
 	vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
-	// printing to check serial vs. parallel computation
-	// TODO: remove
-	for(int i = 0; i < 3; ++i)
-		{
-		for(int j = 0; j < 3; ++j)
-			{
-			cout << "moment i=" << i << " j=" << j 
-				<< ", =" <<  vectors[i][j] << "\n";
-			}
-		}
 	//setup the colors array
   vtkSmartPointer<vtkUnsignedCharArray> momentNumber = \
  		vtkSmartPointer<vtkUnsignedCharArray>::New();
