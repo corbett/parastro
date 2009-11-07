@@ -63,41 +63,35 @@ int vtkMomentsOfInertiaFilter::RequestData(vtkInformation*,
 	vtkSmartPointer<vtkCenterOfMassFilter> centerOfMassFilter = \
 		vtkSmartPointer<vtkCenterOfMassFilter>::New();
 	centerOfMassFilter->SetController(this->Controller);
-	double* centerOfMass = \
-	 	centerOfMassFilter->ComputeCenterOfMass(input,"mass");
+	// will be != null only for root process or serial
+	double* centerOfMass = new double[3];
+	centerOfMass=centerOfMassFilter->ComputeCenterOfMass(input,"mass"); 
+	if(RunInParallel(this->Controller))
+		{
+		// syncs the value of centerofmass among all processes
+		this->Controller->Broadcast(centerOfMass,3,0);
+		cout << "COM on proc " << this->Controller->GetLocalProcessId() 
+			<< " is synced to be " << centerOfMass[0] << ","
+			<< centerOfMass[1] << "," << centerOfMass[2] << "\n";
+		}
 	double inertiaTensor[3][3];
 	double eigenvalues[3];
 	double eigenvectors[3][3];
 	if(centerOfMass!=NULL)
 		{
-		// TODO: implement
-		// we are at process 0 or running in serial
-		// first broadcast to other processes if 
-		// necessary
-		if(RunInParallel(this->Controller))
-			{
-			
-			}
+		// TODO: finish implementation
 		// computing the moment of inertia tensor 3x3 matrix, and its
 		// eigenvalues and eigenvectors
 		ComputeInertiaTensor(input,centerOfMass,inertiaTensor);
-		// receive values from other processes if necessary
-		if(RunInParallel(this->Controller))
-			{
-			
-			}
+		// if we are not at proc 0 send results
+		// if we are on proc 0 & running in parallel receive results 
+		// from other processes
 		// finally perform final computation
 		vtkMath::Diagonalize3x3(inertiaTensor,eigenvalues,eigenvectors);
 		// displaying eigenvectors
 		DisplayVectorsAsLines(input,output,eigenvectors,centerOfMass);
 		// memory management
 		delete [] centerOfMass;
-		}
-	else
-		{
-		// TODO: implement
-		// we are running in parallel
-
 		}
   return 1;
 }
