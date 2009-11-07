@@ -123,8 +123,7 @@ double* vtkCenterOfMassFilter::ComputeCenterOfMass(vtkPointSet* input,
 		{
 		totalWeightedMass[i]=0;
 		}
-	if (this->Controller != NULL && 
-		this->Controller->GetNumberOfProcesses() > 1)
+	if(RunInParallel(this->Controller))
 		{
 		int procId=this->Controller->GetLocalProcessId();
 		int numProc=this->Controller->GetNumberOfProcesses();
@@ -147,8 +146,8 @@ double* vtkCenterOfMassFilter::ComputeCenterOfMass(vtkPointSet* input,
 			// Now gather results from each process other than this one
 			for(int proc = 1; proc < numProc; ++proc)
 				{
-				double* recTotalMass = new double[1];
-				double* recTotalWeightedMass = new double[3];
+				double recTotalMass[1];
+				double recTotalWeightedMass[3];
 				// Receiving
 				this->Controller->Receive(recTotalMass,
 					1,proc,TOTAL_MASS);
@@ -160,8 +159,10 @@ double* vtkCenterOfMassFilter::ComputeCenterOfMass(vtkPointSet* input,
 					{
 					totalWeightedMass[i]+=recTotalWeightedMass[i];
 					}
+				/*
 				delete [] recTotalMass;
 				delete [] recTotalWeightedMass;
+				*/
 				}
 			double* centerOfMassFinal = \
 			this->ComputeCenterOfMassFinal(input,totalMass[0],
@@ -177,7 +178,7 @@ double* vtkCenterOfMassFilter::ComputeCenterOfMass(vtkPointSet* input,
 		// we aren't using MPI or have only one process
 		this->UpdateCenterOfMassVariables(input,totalMass[0],totalWeightedMass);
 		double* centerOfMassFinal = \
-		this->ComputeCenterOfMassFinal(input,totalMass[0],totalWeightedMass);
+			this->ComputeCenterOfMassFinal(input,totalMass[0],totalWeightedMass);
 		// Memory management
 		delete [] totalMass;
 		delete [] totalWeightedMass;
