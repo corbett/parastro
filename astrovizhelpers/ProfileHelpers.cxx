@@ -5,10 +5,6 @@
 #include "vtkIntArray.h"
 #include "vtkSmartPointer.h"
 #include "DataSetHelpers.h"
-#include "vtkCellData.h"
-#include "vtkPoints.h"
-#include "vtkLine.h"
-#include "vtkUnsignedCharArray.h"
 #include <assert.h>
 #include <cmath>
 #include "vtkMath.h"
@@ -437,78 +433,6 @@ void VecMultConstant(double vector[],double constant)
 
 
 //----------------------------------------------------------------------------
-void ComputeInertiaTensor(vtkPointSet* input, double* centerPoint,\
-	double inertiaTensor[3][3])
-{
-	for(int nextPointId = 0;\
-	 		nextPointId < input->GetPoints()->GetNumberOfPoints();\
-	 		++nextPointId)
-		{
-		double* nextPoint=GetPoint(input,nextPointId);
-		// extracting the mass
-		// has to be double as this version of VTK doesn't have 
-		// GetTuple function which operates with float
-		double* mass=GetDataValue(input,"mass",nextPointId);
-		// get distance from nextPoint to center point
-		double* radius = PointVectorDifference(nextPoint,centerPoint);
-		// update the components of the inertia tensor
-		inertiaTensor[0][0]+=mass[0]*(pow(nextPoint[1],2)+pow(nextPoint[2],2));
-		inertiaTensor[1][1]+=mass[0]*(pow(nextPoint[0],2)+pow(nextPoint[2],2));
-		inertiaTensor[2][2]+=mass[0]*(pow(nextPoint[0],2)+pow(nextPoint[1],2));
-		inertiaTensor[0][1]+=mass[0]*nextPoint[0]*nextPoint[1];		
-		inertiaTensor[0][2]+=mass[0]*nextPoint[0]*nextPoint[2];		
-		inertiaTensor[1][2]+=mass[0]*nextPoint[1]*nextPoint[2];		
-		// Finally, some memory management
-		delete [] radius;
-		delete [] mass;
-		delete [] nextPoint;
-		}
-	// Update the signs of off diagonal elements
-	inertiaTensor[0][1]*=-1;		
-	inertiaTensor[0][2]*=-1;		
-	inertiaTensor[1][2]*=-1;
-	// We didn't compute these components as we know the tensor is symmetric
-	// so symmetrizing based on the components we computed
-	inertiaTensor[1][0]=inertiaTensor[0][1];
-	inertiaTensor[2][0]=inertiaTensor[0][2];		
-	inertiaTensor[2][1]=inertiaTensor[1][2];
-}
-
-//----------------------------------------------------------------------------
-void DisplayVectorsAsLines(vtkPointSet* input, vtkPolyData* output,
-	double vectors[3][3], double* centerPoint)
-{
-	vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
-	vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
-	//setup the colors array
-  vtkSmartPointer<vtkUnsignedCharArray> momentNumber = \
- 		vtkSmartPointer<vtkUnsignedCharArray>::New();
-		momentNumber->SetNumberOfComponents(1);
-		momentNumber->SetNumberOfValues(3);
-		momentNumber->SetName("moment number");
-	// setting origin
-	points->InsertNextPoint(centerPoint);
-	double scale=ComputeMaxR(input,centerPoint);
-	for(int i = 0; i < 3; ++i)
-		{
-		VecMultConstant(vectors[i],scale);
-		points->InsertNextPoint(vectors[i]);
-		// creating the lines
-		vtkSmartPointer<vtkLine> nextLine = vtkSmartPointer<vtkLine>::New();
-			// setting the first point of the line to be the origin
-			nextLine->GetPointIds()->SetId(0,0); 
-			// setting the second point of the line to be the scaled vector
-			nextLine->GetPointIds()->SetId(1,i+1); // i+1 as origin is 0
-		// adding the line to the cell array
-		lines->InsertNextCell(nextLine);
-		// saving the moment number so the lines can be colored by this
-		momentNumber->SetValue(i,i+1); // i+1 as want to index array by 1
-		}
-	// ready to update the output
-	output->SetPoints(points);
-	output->SetLines(lines);
-	output->GetCellData()->AddArray(momentNumber);
-}
 	
 	
 	
