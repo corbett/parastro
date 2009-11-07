@@ -116,13 +116,8 @@ double* vtkCenterOfMassFilter::ComputeCenterOfMass(vtkPointSet* input,
 {
 	// TODO: use the massArrayName
 	// Allocating data arrays and setting to zero
-	double* totalMass =new double[1];
-	totalMass[0]=0;
-	double* totalWeightedMass = new double[3];
-	for(int i = 0; i < 3; ++i)
-		{
-		totalWeightedMass[i]=0;
-		}
+	double totalMass[1];
+	double totalWeightedMass[3];
 	if(RunInParallel(this->Controller))
 		{
 		int procId=this->Controller->GetLocalProcessId();
@@ -135,8 +130,6 @@ double* vtkCenterOfMassFilter::ComputeCenterOfMass(vtkPointSet* input,
 			// Sending to root
 			this->Controller->Send(totalMass,1,0,TOTAL_MASS);
 			this->Controller->Send(totalWeightedMass,3,0,TOTAL_WEIGHTED_MASS);
-			delete [] totalMass;
-			delete [] totalWeightedMass;
 			return NULL;
 			}
 		else
@@ -159,17 +152,11 @@ double* vtkCenterOfMassFilter::ComputeCenterOfMass(vtkPointSet* input,
 					{
 					totalWeightedMass[i]+=recTotalWeightedMass[i];
 					}
-				/*
-				delete [] recTotalMass;
-				delete [] recTotalWeightedMass;
-				*/
 				}
 			double* centerOfMassFinal = \
 			this->ComputeCenterOfMassFinal(input,totalMass[0],
 				totalWeightedMass);
 			// Memory management
-			delete [] totalMass;
-			delete [] totalWeightedMass;
 			return centerOfMassFinal;
 			}
 		}
@@ -179,9 +166,6 @@ double* vtkCenterOfMassFilter::ComputeCenterOfMass(vtkPointSet* input,
 		this->UpdateCenterOfMassVariables(input,totalMass[0],totalWeightedMass);
 		double* centerOfMassFinal = \
 			this->ComputeCenterOfMassFinal(input,totalMass[0],totalWeightedMass);
-		// Memory management
-		delete [] totalMass;
-		delete [] totalWeightedMass;
 		return centerOfMassFinal;
 		}
 }
