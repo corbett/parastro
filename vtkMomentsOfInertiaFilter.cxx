@@ -10,6 +10,8 @@
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include "vtkStringArray.h"
 #include "vtkSphereSource.h"
+#include "vtkMultiProcessController.h"
+#include "vtkCenterOfMassFilter.h"
 #include "astrovizhelpers/DataSetHelpers.h"
 #include "astrovizhelpers/ProfileHelpers.h"
 #include "vtkMath.h"
@@ -17,15 +19,19 @@
 
 vtkCxxRevisionMacro(vtkMomentsOfInertiaFilter, "$Revision: 1.72 $");
 vtkStandardNewMacro(vtkMomentsOfInertiaFilter);
+vtkCxxSetObjectMacro(vtkMomentsOfInertiaFilter,Controller, vtkMultiProcessController);
 
 //----------------------------------------------------------------------------
 vtkMomentsOfInertiaFilter::vtkMomentsOfInertiaFilter()
 {
+	this->Controller = NULL;
+  this->SetController(vtkMultiProcessController::GetGlobalController());
 }
 
 //----------------------------------------------------------------------------
 vtkMomentsOfInertiaFilter::~vtkMomentsOfInertiaFilter()
 {
+ 	this->SetController(0);
 }
 
 //----------------------------------------------------------------------------
@@ -53,17 +59,31 @@ int vtkMomentsOfInertiaFilter::RequestData(vtkInformation*,
   // get input and output data
   vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
   vtkPolyData* output = vtkPolyData::GetData(outputVector);
-	// computing the center of mass
-	double* centerOfMass = ComputeCOM(input);
-	// computing the moment of inertia tensor 3x3 matrix, and its
-	// eigenvalues and eigenvectors
+	// computing the center of mass, works in parallel if necessary
+	vtkSmartPointer<vtkCenterOfMassFilter> centerOfMassFilter = \
+		vtkSmartPointer<vtkCenterOfMassFilter>::New();
+	centerOfMassFilter->SetController(this->Controller);
+	double* centerOfMass =\
+	 	centerOfMassFilter->ComputeCenterOfMass(input,"mass");
 	double inertiaTensor[3][3];
 	double eigenvalues[3];
 	double eigenvectors[3][3];
-	ComputeInertiaTensor(input,centerOfMass,inertiaTensor);
-	vtkMath::Diagonalize3x3(inertiaTensor,eigenvalues,eigenvectors);
-	// displaying eigenvectors
-	DisplayVectorsAsLines(input,output,eigenvectors,centerOfMass);
-	delete [] centerOfMass;
+	if(centerOfMass!=NULL)
+		{
+		// TODO: implement
+		// we are at process 0 or running in serial
+		// first broadcast to other processes if 
+		// necessary
+		// computing the moment of inertia tensor 3x3 matrix, and its
+		// eigenvalues and eigenvectors
+		ComputeInertiaTensor(input,centerOfMass,inertiaTensor);
+		// receive values from other processes if necessary
+		// finally perform final computation
+		vtkMath::Diagonalize3x3(inertiaTensor,eigenvalues,eigenvectors);
+		// displaying eigenvectors
+		DisplayVectorsAsLines(input,output,eigenvectors,centerOfMass);
+		// memory management
+		delete [] centerOfMass;
+		}
   return 1;
 }

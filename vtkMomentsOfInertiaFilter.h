@@ -23,12 +23,24 @@
 
 #include "vtkPointSetAlgorithm.h"
 
+enum MomentsMPIData 
+{
+	INERTIA_TENSOR_0,
+	INERTIA_TENSOR_1,
+	INERTIA_TENSOR_2
+};
+
+class vtkMultiProcessController;
 class VTK_GRAPHICS_EXPORT vtkMomentsOfInertiaFilter : public vtkPointSetAlgorithm
 {
 public:
   static vtkMomentsOfInertiaFilter *New();
   vtkTypeRevisionMacro(vtkMomentsOfInertiaFilter,vtkPointSetAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent);
+  // Description:
+  // By defualt this filter uses the global controller,
+  // but this method can be used to set another instead.
+  virtual void SetController(vtkMultiProcessController*);
 protected:
   vtkMomentsOfInertiaFilter();
   ~vtkMomentsOfInertiaFilter();
@@ -40,6 +52,7 @@ protected:
   virtual int RequestData(vtkInformation*,
                           vtkInformationVector**,
                           vtkInformationVector*);
+  vtkMultiProcessController *Controller;
 private:
   vtkMomentsOfInertiaFilter(const vtkMomentsOfInertiaFilter&);  // Not implemented.
   void operator=(const vtkMomentsOfInertiaFilter&);  // Not implemented.

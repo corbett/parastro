@@ -194,31 +194,6 @@ double* ComputeCircularVelocity(vtkVariant cumulativeMass,
 double* ComputeDensity(vtkVariant cumulativeMass, 
 	vtkVariant binRadius);
 	
-
-// Description
-// helper function called by each process to increment totalMass and
-// totalWeighted mass based on the dataset of that process
-// compute COM is called with these variables as input
-// at the very last stage
-void UpdateCOMVars(vtkPointSet* input,double& totalMass, 
-	double totalWeightedMass[]);
-
-// Description:
-// helper function to compute center of mass of point set, must be called
-// at last stage, once update COM vars has been called on each process
-double* ComputeCOM(vtkPointSet* input,double& totalMass, 
-	double totalWeightedMass[]);
-
-// Description
-// For those applications which don't care about parallel funcitonality
-// they can call this function, which uses the UpdateCOMVars and ComputeCOM
-// functions in succession
-double* ComputeCOM(vtkPointSet* input);
-
-// Description:
-// ComputeCOM helper function to calculate [m*x,m*y,m*z]
-double* ComputeWeightedMass(double& mass,double* point);
-
 // Description:
 // Helper function to compute the midpoint between two points
 double* ComputeMidpoint(double pointOne[], double pointTwo[]);
