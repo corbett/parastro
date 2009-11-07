@@ -12,10 +12,13 @@
 #include "vtkSphereSource.h"
 #include "vtkMultiProcessController.h"
 #include "vtkCenterOfMassFilter.h"
+#include "vtkCellData.h"
+#include "vtkPoints.h"
+#include "vtkLine.h"
+#include "vtkUnsignedCharArray.h"
 #include "astrovizhelpers/DataSetHelpers.h"
 #include "astrovizhelpers/ProfileHelpers.h"
 #include "vtkMath.h"
-
 
 vtkCxxRevisionMacro(vtkMomentsOfInertiaFilter, "$Revision: 1.72 $");
 vtkStandardNewMacro(vtkMomentsOfInertiaFilter);
@@ -50,6 +53,91 @@ int vtkMomentsOfInertiaFilter::FillInputPortInformation(int,
   return 1;
 }
 
+//----------------------------------------------------------------------------
+void vtkMomentsOfInertiaFilter::ComputeInertiaTensor(vtkPointSet* input,
+ 	double* centerPoint, double inertiaTensor[3][3])
+{
+	this->UpdateInertiaTensor(input,centerPoint,inertiaTensor);
+	this->UpdateInertiaTensorFinal(input,centerPoint,inertiaTensor);
+}
+
+//----------------------------------------------------------------------------
+void vtkMomentsOfInertiaFilter::UpdateInertiaTensor(vtkPointSet* input, 
+	double* centerPoint, double inertiaTensor[3][3])
+{
+	for(int nextPointId = 0;\
+	 		nextPointId < input->GetPoints()->GetNumberOfPoints();\
+	 		++nextPointId)
+		{
+		double* nextPoint=GetPoint(input,nextPointId);
+		// extracting the mass
+		// has to be double as this version of VTK doesn't have 
+		// GetTuple function which operates with float
+		double* mass=GetDataValue(input,"mass",nextPointId);
+		// get distance from nextPoint to center point
+		double* radius = PointVectorDifference(nextPoint,centerPoint);
+		// update the components of the inertia tensor
+		inertiaTensor[0][0]+=mass[0]*(pow(nextPoint[1],2)+pow(nextPoint[2],2));
+		inertiaTensor[1][1]+=mass[0]*(pow(nextPoint[0],2)+pow(nextPoint[2],2));
+		inertiaTensor[2][2]+=mass[0]*(pow(nextPoint[0],2)+pow(nextPoint[1],2));
+		inertiaTensor[0][1]+=mass[0]*nextPoint[0]*nextPoint[1];		
+		inertiaTensor[0][2]+=mass[0]*nextPoint[0]*nextPoint[2];		
+		inertiaTensor[1][2]+=mass[0]*nextPoint[1]*nextPoint[2];		
+		// Finally, some memory management
+		delete [] radius;
+		delete [] mass;
+		delete [] nextPoint;
+		}
+}
+//----------------------------------------------------------------------------
+void vtkMomentsOfInertiaFilter::UpdateInertiaTensorFinal(vtkPointSet* input, 
+	double* centerPoint, double inertiaTensor[3][3])
+{
+	// Update the signs of off diagonal elements
+	inertiaTensor[0][1]*=-1;		
+	inertiaTensor[0][2]*=-1;		
+	inertiaTensor[1][2]*=-1;
+	// We didn't compute these components as we know the tensor is symmetric
+	// so symmetrizing based on the components we computed
+	inertiaTensor[1][0]=inertiaTensor[0][1];
+	inertiaTensor[2][0]=inertiaTensor[0][2];		
+	inertiaTensor[2][1]=inertiaTensor[1][2];
+}
+//----------------------------------------------------------------------------
+void vtkMomentsOfInertiaFilter::DisplayVectorsAsLines(vtkPointSet* input,
+ 	vtkPolyData* output, double vectors[3][3], double* centerPoint)
+{
+	vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
+	vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
+	//setup the colors array
+  vtkSmartPointer<vtkUnsignedCharArray> momentNumber = \
+ 		vtkSmartPointer<vtkUnsignedCharArray>::New();
+		momentNumber->SetNumberOfComponents(1);
+		momentNumber->SetNumberOfValues(3);
+		momentNumber->SetName("moment number");
+	// setting origin
+	points->InsertNextPoint(centerPoint);
+	double scale=ComputeMaxR(input,centerPoint);
+	for(int i = 0; i < 3; ++i)
+		{
+		VecMultConstant(vectors[i],scale);
+		points->InsertNextPoint(vectors[i]);
+		// creating the lines
+		vtkSmartPointer<vtkLine> nextLine = vtkSmartPointer<vtkLine>::New();
+			// setting the first point of the line to be the origin
+			nextLine->GetPointIds()->SetId(0,0); 
+			// setting the second point of the line to be the scaled vector
+			nextLine->GetPointIds()->SetId(1,i+1); // i+1 as origin is 0
+		// adding the line to the cell array
+		lines->InsertNextCell(nextLine);
+		// saving the moment number so the lines can be colored by this
+		momentNumber->SetValue(i,i+1); // i+1 as want to index array by 1
+		}
+	// ready to update the output
+	output->SetPoints(points);
+	output->SetLines(lines);
+	output->GetCellData()->AddArray(momentNumber);
+}
 
 //----------------------------------------------------------------------------
 int vtkMomentsOfInertiaFilter::RequestData(vtkInformation*,
@@ -66,39 +154,79 @@ int vtkMomentsOfInertiaFilter::RequestData(vtkInformation*,
 	// will be != null only for root process or serial
 	double* calcCenterOfMass = \
 		centerOfMassFilter->ComputeCenterOfMass(input,"mass"); 
-	double centerOfMass[3];
-	if(calcCenterOfMass!=NULL)
+	// finally calculation
+	double inertiaTensor[3][3];
+	double eigenvalues[3];
+	double eigenvectors[3][3];
+	if(!RunInParallel(this->Controller))
 		{
-			for(int i = 0; i < 3; ++i)
-				{
-				centerOfMass[i]=calcCenterOfMass[i];
-				}
-		}
-	if(RunInParallel(this->Controller))
-		{
-		// syncs the value of centerofmass among all processes
-		this->Controller->Broadcast(centerOfMass,3,0);
-		cout << "COM on proc " << this->Controller->GetLocalProcessId() 
-			<< " is synced to be " << centerOfMass[0] << ","
-			<< centerOfMass[1] << "," << centerOfMass[2] << "\n";
-		}
-	if(calcCenterOfMass!=NULL)
-		{
-		double inertiaTensor[3][3];
-		double eigenvalues[3];
-		double eigenvectors[3][3];
-		// TODO: finish implementation
+		assert(calcCenterOfMass!=NULL);
 		// computing the moment of inertia tensor 3x3 matrix, and its
 		// eigenvalues and eigenvectors
-		ComputeInertiaTensor(input,centerOfMass,inertiaTensor);
-		// if we are not at proc 0 send results
-		// if we are on proc 0 & running in parallel receive results 
-		// from other processes
+		this->ComputeInertiaTensor(input,calcCenterOfMass,inertiaTensor);
 		// finally perform final computation
 		vtkMath::Diagonalize3x3(inertiaTensor,eigenvalues,eigenvectors);
 		// displaying eigenvectors
-		DisplayVectorsAsLines(input,output,eigenvectors,centerOfMass);
+		this->DisplayVectorsAsLines(input,output,eigenvectors,calcCenterOfMass);
 		delete [] calcCenterOfMass;
+		return 1;
 		}
-  return 1;
+	else
+		{
+		int procId=this->Controller->GetLocalProcessId();
+		int numProc=this->Controller->GetNumberOfProcesses();
+		double syncedCenterOfMass[3];
+		if(calcCenterOfMass!=NULL)
+			{
+				for(int i = 0; i < 3; ++i)
+					{
+					syncedCenterOfMass[i]=calcCenterOfMass[i];
+					}
+				delete [] calcCenterOfMass;
+			}
+		// syncs the value of centerOfMass from root to rest of all processes
+		this->Controller->Broadcast(syncedCenterOfMass,3,0);
+		// computing the moment of inertia tensor 3x3 matrix
+		this->UpdateInertiaTensor(input,syncedCenterOfMass,inertiaTensor);
+		// TODO: see if there's an easier way to send a 2d array
+		if(procId!=0)
+			{
+			// send result to root
+			this->Controller->Send(inertiaTensor[0],3,0,INERTIA_TENSOR_COLUMN_ZERO);
+			this->Controller->Send(inertiaTensor[1],3,0,INERTIA_TENSOR_COLUMN_ONE);
+			this->Controller->Send(inertiaTensor[2],3,0,INERTIA_TENSOR_COLUMN_TWO);
+			return 1;	
+			}
+		else
+			{
+			// we are at proc 0, the last proc, we recieve data from all procs > 0
+			for(int proc = 1; proc < numProc; ++proc)
+				{
+				double recInertiaTensorColumnZero[3];
+				double recInertiaTensorColumnOne[3];
+				double recInertiaTensorColumnTwo[3];
+				// Receiving
+				this->Controller->Receive(recInertiaTensorColumnZero,
+					3,proc,INERTIA_TENSOR_COLUMN_ZERO);
+				this->Controller->Receive(recInertiaTensorColumnOne,
+					3,proc,INERTIA_TENSOR_COLUMN_ONE);
+				this->Controller->Receive(recInertiaTensorColumnTwo,
+					3,proc,INERTIA_TENSOR_COLUMN_TWO);
+				// Updating inertia tensor
+				for(int i = 0; i < 3; ++i)
+					{
+					inertiaTensor[0][i]+=recInertiaTensorColumnZero[i];
+					inertiaTensor[1][i]+=recInertiaTensorColumnOne[i];
+					inertiaTensor[2][i]+=recInertiaTensorColumnTwo[i];
+					}
+				}
+			// finally perform final computation
+			this->UpdateInertiaTensorFinal(input,syncedCenterOfMass,inertiaTensor);
+			vtkMath::Diagonalize3x3(inertiaTensor,eigenvalues,eigenvectors);
+			// displaying eigenvectors
+			this->DisplayVectorsAsLines(input,output,
+				eigenvectors,syncedCenterOfMass);
+			return 1;
+			}
+		}
 }
