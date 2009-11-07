@@ -11,18 +11,24 @@
         short_help="physical profile">
      </Documentation>
 	<!--Sets the input dataset-->
-     <InputProperty name="Input" command="SetInputConnection">
-          <ProxyGroupDomain name="groups">
-            <Group name="sources"/>
-            <Group name="filters"/>
-          </ProxyGroupDomain>
-          <DataTypeDomain name="input_type">
-            <DataType value="vtkPointSet"/>
-          </DataTypeDomain>
-          <Documentation>
-            This property specifies the input to the Profile filter.
-          </Documentation>
-     </InputProperty>
+    <InputProperty name="Input" command="SetInputConnection">
+         <ProxyGroupDomain name="groups">
+           <Group name="sources"/>
+           <Group name="filters"/>
+         </ProxyGroupDomain>
+         <DataTypeDomain name="input_type">
+           <DataType value="vtkPointSet"/>
+         </DataTypeDomain>
+         <InputArrayDomain name="input_array">
+            <RequiredProperties>
+               <Property name="SelectInputArray" 
+                         function="FieldDataSelection"/>
+            </RequiredProperties>
+         </InputArrayDomain>
+         <Documentation>
+           This property specifies the input to the Profile filter.
+         </Documentation>
+    </InputProperty>
      <InputProperty
         name="Source"
         command="SetSourceConnection"
