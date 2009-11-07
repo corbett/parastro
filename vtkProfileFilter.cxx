@@ -115,9 +115,7 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 	vtkTable* const output = vtkTable::GetData(outputVector,0);
 	output->Initialize();
 	this->CalculateAndSetBounds(dataSet,pointInfo);
-	//TODO: add back in
-	
-//	this->GenerateProfile(dataSet,output);
+	this->GenerateProfile(dataSet,output);
 	return 1;
 }
 
@@ -162,7 +160,8 @@ int vtkProfileFilter::GetBinNumber(double x[])
 void vtkProfileFilter::GenerateProfile(vtkPolyData* input,vtkTable* output)
 {	
 	this->InitializeBins(input,output);
-	this->ComputeStatistics(input,output);
+	//TODO: add back in, for debugging
+//	this->ComputeStatistics(input,output);
 }
 
 //----------------------------------------------------------------------------
