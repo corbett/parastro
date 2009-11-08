@@ -115,25 +115,28 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 {
 	// Now we can get the input with which we want to work
  	vtkPolyData* input = vtkPolyData::GetData(inputVector[0]);
-	// Setting the center based upon the selection in the GUI
-	vtkDataSet* centerInfo = vtkDataSet::GetData(inputVector[1]);
 	vtkTable* const output = vtkTable::GetData(outputVector,0);
 	output->Initialize();
+
+	// Setting the center based upon the selection in the GUI
+	vtkDataSet* centerInfo = vtkDataSet::GetData(inputVector[1]);
 	this->CalculateAndSetBounds(input,centerInfo); // works in parallel
 	if(RunInParallel(this->Controller))
 		{
 		int procId=this->Controller->GetLocalProcessId();
 		int numProc=this->Controller->GetNumberOfProcesses();
+		vtkSmartPointer<vtkTable> localTable = vtkSmartPointer<vtkTable>::New();
+		localTable->Initialize();
 		if(procId==0)
 			{
 			// only take the time to initialize on process 0
-			this->InitializeBins(input,output);
+			this->InitializeBins(input,localTable);
+			output->DeepCopy(localTable);
 			}
 		// syncing output
-		this->Controller->Broadcast(output,0);
+		this->Controller->Broadcast(localTable,0);
 		// TODO: add back in
 		//this->ComputeStatistics(input,output);
-		
 		}	
 	else
 		{
