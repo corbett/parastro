@@ -230,6 +230,15 @@ protected:
 		vtkAbstractArray* oldData, vtkTable* output);
 
 	// Description:
+	// If this bin contains an array, update with this method. size(updateData)
+	// should be equal to size(oldData). Identical to other UpdateArrayBin
+	// method except takes in two vtkAbstractArrays		
+	void UpdateArrayBin(int binNum, BinUpdateType updateType,
+	 	vtkstd::string baseName, ColumnType columnType,
+	 	vtkAbstractArray* updateData, vtkAbstractArray* oldData, 
+		vtkTable* output);
+		
+	// Description:
 	// If this bin contains a double, update with this method. 	
 	void UpdateDoubleBin(int binNum, BinUpdateType updateType,
 		vtkstd::string baseName, ColumnType columnType, double updateData,
@@ -273,15 +282,19 @@ protected:
 	// Description:
 	// merges tableToMerge into originalTable by adding each row,column in
 	// tableToMerge to the corresponding row,column in originalTable
-	void MergeTables(vtkTable* originalTable,
+	void MergeTables(vtkPolyData* input, vtkTable* originalTable,
 		vtkTable* tableToMerge);
-
+	// Description:
+	// helper function for MergeTables, to merge two bins by addition, making
+	// the original table contain the updated result
+	void MergeBins(int binNum, BinUpdateType updateType,
+	 	vtkstd::string baseName, ColumnType columnType, vtkTable* originalTable,
+		vtkTable* tableToMerge);
 	// Description:
 	// given a base name, a variable index and a column type
 	// (TOTAL,AVERAGE,or CUMULATIVE) returns a string representing
 	// this data column's name
-	vtkstd::string GetColumnName(vtkstd::string baseName, 
-		ColumnType columnType);
+	vtkstd::string GetColumnName(vtkstd::string baseName,ColumnType columnType);
 	// Description:
 	// helper function to calculate the center based upon the source.
 	// either the point, or the midpoint of a line

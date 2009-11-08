@@ -146,7 +146,7 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 				this->Controller->Receive(recLocalTable,proc,DATA_TABLE);
 				//TODO: implement merge tables, for now does nothing ,
 				// meaning that result is only the localTable of process 
-				this->MergeTables(localTable,recLocalTable);
+				this->MergeTables(input,localTable,recLocalTable);
 				}
 			// Perform final computations
 			// Updating averages and doing relevant postprocessing
@@ -157,9 +157,9 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 			}
 		else
 			{
-			// syncing initialized table
+			// Syncing initialized, empty table
 			this->Controller->Broadcast(localTable,0);
-			// Problem with the syncing, currently segfaults
+			// Updating table with the data on this processor
 			this->UpdateStatistics(input,localTable);
 			// sending result to root
 			this->Controller->Send(localTable,0,DATA_TABLE);
@@ -179,10 +179,40 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 }
 
 //----------------------------------------------------------------------------
-void vtkProfileFilter::MergeTables(vtkTable* originalTable,
- 	vtkTable* tableToMerge)
+void vtkProfileFilter::MergeTables(vtkPolyData* input,
+	vtkTable* originalTable, vtkTable* tableToMerge)
 {
-	// TODO: implement
+	assert(originalTable->GetNumberOfRows()==tableToMerge->GetNumberOfRows());
+	for(int binNum = 0; binNum < originalTable->GetNumberOfRows(); ++binNum)
+		{
+		this->MergeBins(binNum,ADD,"number in bin",TOTAL,
+			originalTable,tableToMerge);	
+		this->MergeBins(binNum,ADD,"number in bin",CUMULATIVE,
+			originalTable,tableToMerge);
+		assert(0<=binNum<=this->BinNumber);
+		// Updating quanties for the input data arrays
+		for(int i = 0; i < input->GetPointData()->GetNumberOfArrays(); ++i)
+			{
+			vtkSmartPointer<vtkDataArray> nextArray = \
+			 	input->GetPointData()->GetArray(i);
+			// Merging the bins
+			string baseName = nextArray->GetName();
+			this->MergeBins(binNum,ADD,baseName,TOTAL,originalTable,tableToMerge);
+			this->MergeBins(binNum,ADD,baseName,AVERAGE,originalTable,tableToMerge);	
+			this->MergeBins(binNum,ADD,baseName,CUMULATIVE,
+				originalTable,tableToMerge);
+			}
+		for(int i = 0; i < this->AdditionalProfileQuantities.size(); ++i)
+			{
+			ProfileElement nextElement=this->AdditionalProfileQuantities[i];
+			if(!nextElement.Postprocess)
+				{
+				this->MergeBins(binNum,ADD,nextElement.BaseName,
+					nextElement.ProfileColumnType, 
+					originalTable,tableToMerge);
+				}
+			}
+		}
 }
 
 //----------------------------------------------------------------------------
@@ -490,6 +520,29 @@ void vtkProfileFilter::UpdateBin(int binNum, BinUpdateType updateType,
 }
 
 //----------------------------------------------------------------------------
+void vtkProfileFilter::MergeBins(int binNum, BinUpdateType updateType,
+ 	string baseName, ColumnType columnType, vtkTable* originalTable,
+	vtkTable* tableToMerge)
+{
+	vtkVariant originalData = this->GetData(binNum,baseName,columnType,
+		originalTable);
+	vtkVariant mergeData = this->GetData(binNum,baseName,columnType,
+		tableToMerge);
+	if(originalData.IsArray())
+		{
+		assert(mergeData.IsArray());
+		this->UpdateArrayBin(binNum,updateType,baseName,columnType,
+			mergeData.ToArray(),originalData.ToArray(),originalTable);
+		}
+	else
+		{
+		assert(mergeData.IsDouble());
+		this->UpdateDoubleBin(binNum,updateType,baseName,columnType,
+			mergeData.ToDouble(),originalData.ToDouble(),originalTable);
+		}
+}
+
+//----------------------------------------------------------------------------
 void vtkProfileFilter::UpdateBin(int binNum, BinUpdateType updateType,
  	string baseName, ColumnType columnType, double updateData,
  	vtkTable* output)
@@ -534,6 +587,36 @@ void vtkProfileFilter::UpdateDoubleBin(int binNum, BinUpdateType updateType,
 		output->SetValueByName(binNum,
 			GetColumnName(baseName,columnType).c_str(),updateData);
 }
+
+//----------------------------------------------------------------------------
+void vtkProfileFilter::UpdateArrayBin(int binNum, BinUpdateType updateType,
+ 	string baseName, ColumnType columnType, vtkAbstractArray* updateData,
+ 	vtkAbstractArray* oldData, vtkTable* output)
+{
+	for(int comp = 0; comp < oldData->GetNumberOfComponents(); ++comp)
+		{
+		switch(updateType)
+			{
+			case ADD:
+				oldData->InsertVariantValue(comp,
+					updateData->GetVariantValue(comp).ToDouble()+\
+					oldData->GetVariantValue(comp).ToDouble());
+				break;
+			case MULTIPLY:
+				oldData->InsertVariantValue(comp,
+					updateData->GetVariantValue(comp).ToDouble()*\
+					oldData->GetVariantValue(comp).ToDouble());
+				break;
+			case SET:
+				oldData->InsertVariantValue(comp,
+					updateData->GetVariantValue(comp).ToDouble());
+				break;
+			}
+		}
+	output->SetValueByName(binNum,GetColumnName(baseName,columnType).c_str(),
+		oldData);
+}
+
 
 //----------------------------------------------------------------------------
 void vtkProfileFilter::UpdateArrayBin(int binNum, BinUpdateType updateType,
