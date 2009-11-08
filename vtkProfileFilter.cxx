@@ -119,7 +119,9 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 	output->Initialize();
 	// Setting the center based upon the selection in the GUI
 	vtkDataSet* centerInfo = vtkDataSet::GetData(inputVector[1]);
-	this->CalculateAndSetBounds(input,centerInfo); // works in parallel
+	// runs in parallel, syncing class member data, if necessary, if not
+	// functions in serial
+	this->SetBoundsAndBinExtents(input,centerInfo); 
 	if(RunInParallel(this->Controller))
 		{
 		int procId=this->Controller->GetLocalProcessId();
@@ -184,7 +186,7 @@ double* vtkProfileFilter::CalculateCenter(vtkDataSet* source)
 }
 
 //----------------------------------------------------------------------------
-void vtkProfileFilter::CalculateAndSetBounds(vtkPolyData* input, 
+void vtkProfileFilter::SetBoundsAndBinExtents(vtkPolyData* input, 
 	vtkDataSet* source)
 {
 	if(RunInParallel(this->Controller))
@@ -212,6 +214,7 @@ void vtkProfileFilter::CalculateAndSetBounds(vtkPolyData* input,
 			this->MaxR=maxR;
 			// Syncronizing global maxR results
 			this->Controller->Broadcast(&this->MaxR,1,0);
+			// Calculating the bin spacing
 			}
 		else
 			{
@@ -237,6 +240,10 @@ void vtkProfileFilter::CalculateAndSetBounds(vtkPolyData* input,
 		//calculating the the max R
 		this->MaxR=ComputeMaxR(input,this->Center);			
 		}
+	// this->MaxR, this->BinNumber are already set/synced
+	// whether we are in parallel or serial, and each process can perform
+	// computation on its own
+	this->BinSpacing=this->CalculateBinSpacing(this->MaxR,this->BinNumber);
 }
 
 //----------------------------------------------------------------------------
@@ -252,7 +259,16 @@ int vtkProfileFilter::GetBinNumber(double x[])
 void vtkProfileFilter::InitializeBins(vtkPolyData* input,
 	vtkTable* output)
 {
-	this->CalculateAndSetBinExtents(output);
+	// the first column will be the bin radius
+	string binRadiusColumnName=this->GetColumnName("bin radius",
+		TOTAL);
+	AllocateDataArray(output,binRadiusColumnName.c_str(),1,this->BinNumber);
+	// setting the bin radii in the output
+	for(int binNum = 0; binNum < this->BinNumber; ++binNum)
+		{
+		this->UpdateBin(binNum,SET,
+			"bin radius",TOTAL,(binNum+1)*this->BinSpacing,output);
+		}
 	// always need this for averages
 	AllocateDataArray(output,GetColumnName("number in bin",TOTAL).c_str(),
 		1,this->BinNumber);
@@ -287,19 +303,9 @@ void vtkProfileFilter::InitializeBins(vtkPolyData* input,
 }
 
 //----------------------------------------------------------------------------
-void vtkProfileFilter::CalculateAndSetBinExtents(vtkTable* output)
+double vtkProfileFilter::CalculateBinSpacing(double maxR,int binNumber)
 {
-	this->BinSpacing=this->MaxR/this->BinNumber;
-	// the first column will be the bin radius
-	string binRadiusColumnName=this->GetColumnName("bin radius",
-		TOTAL);
-	AllocateDataArray(output,binRadiusColumnName.c_str(),1,this->BinNumber);
-	// setting the bin radii in the output
-	for(int binNum = 0; binNum < this->BinNumber; ++binNum)
-	{
-	this->UpdateBin(binNum,SET,
-		"bin radius",TOTAL,(binNum+1)*this->BinSpacing,output);
-	}
+	return maxR/binNumber;
 }
 
 //----------------------------------------------------------------------------

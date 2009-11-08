@@ -142,6 +142,7 @@ protected:
 	double Center[3];
   // Description:
 	// Number of bins to use
+	// user intput, with default
 	int BinNumber;
   // Description:
 	// Spacing between bins, automatically calculated based upon other
@@ -157,13 +158,16 @@ protected:
   
 	// Description:
   // Calculates the center and the maximum distance from the center
-	// based upon the user's input and the boundaries of the dataset.
-	void CalculateAndSetBounds(vtkPolyData* input, vtkDataSet* source);
+	// based upon the user's input and the boundaries of the dataset. Also
+	// calculates the bin spacing based on the center, maxR and the user's 
+	// desired number of bins
+	void SetBoundsAndBinExtents(vtkPolyData* input, vtkDataSet* source);
 
 	// Description:
-	// Calculates the bin spacing and number of bins if necessary from
-	// the user input.
-	//
+	// SetBoundsAndBinExtents must have been called first.
+	// 
+	// Initializes a row for each bin, with the max radius of that bin
+	// 
 	// For each dataarray in the input, define a total and an
 	// average column in the binned output table.
 	//
@@ -176,9 +180,8 @@ protected:
 	void InitializeBins(vtkPolyData* input, vtkTable* output);
 
 	// Description:
-	// Calculates the bin spacing and number of bins if necessary from
-	// the user input.
-	void CalculateAndSetBinExtents(vtkTable* output);
+	// Calculates the bin spacing 
+	double CalculateBinSpacing(double maxR,int binNumber);
 
 	// Description:
 	// For each point in the input, update the relevant bins and bin columns
