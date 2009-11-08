@@ -72,9 +72,9 @@ int vtkVirialRadiusFilter::RequestData(vtkInformation *request,
 	vtkPointSet* output = vtkPointSet::GetData(outputVector);
 	// TODO: add back in
 // copies the point positions
-  output->CopyStructure(dataSet);
+  output->CopyStructure(pointInfo);
 	// copies the point attributes
-  output->CopyAttributes(dataSet);
+  output->CopyAttributes(pointInfo);
 //TODO: add back in
 /*	
 	this->CalculateAndSetBounds(dataSet,pointInfo);
