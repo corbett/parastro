@@ -169,8 +169,7 @@ void vtkProfileFilter::CalculateAndSetBounds(vtkPolyData* input,
 			double maxR=ComputeMaxR(input,this->Center);
 			}
 			// Syncronizing the centers
-			//TODO: add back in
-//			this->Controller->Broadcast(this->Center,3,0);
+			this->Controller->Broadcast(this->Center,3,0);
 		}
 	else
 		{
@@ -183,7 +182,11 @@ void vtkProfileFilter::CalculateAndSetBounds(vtkPolyData* input,
 		//calculating the the max R
 		this->MaxR=ComputeMaxR(input,this->Center);			
 		}
-
+	// TODO: remove
+	for(int i = 0; i < 3; ++i)
+		{
+		cout << "center " << i << " is " << this->Center[i] << "\n";
+		}
 }
 
 //----------------------------------------------------------------------------
