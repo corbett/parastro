@@ -73,7 +73,6 @@ vtkProfileFilter::vtkProfileFilter()
 	// Defaults for quantities which will be computed based on user's
 	// later input
 	this->MaxR=1.0;
-	this->Delta=0.0;
 	this->BinNumber=30;
 }
 
@@ -87,8 +86,7 @@ vtkProfileFilter::~vtkProfileFilter()
 //----------------------------------------------------------------------------
 void vtkProfileFilter::PrintSelf(ostream& os, vtkIndent indent)
 {
-  os << indent << "overdensity: " << this->Delta << "\n"
-		 << indent << "bin number: " << this->BinNumber << "\n";
+  os << indent << "bin number: " << this->BinNumber << "\n";
 }
 
 //----------------------------------------------------------------------------

@@ -48,16 +48,6 @@
 	        	<Property name="NumberOfPoints" show="0"/> 
 	    	</Hints>
       </InputProperty>
-	<!--Adds a checkbox for the option Bin By Radius-->
-	  <DoubleVectorProperty
-			name="Delta"
-			command="SetDelta"
-			number_of_elements="1"
-			default_values="1">
-			<Documentation>
-			Set the density parameter
-			</Documentation>
-	  </DoubleVectorProperty>
      <IntVectorProperty name="BinNumber" 
         command="SetBinNumber" 
         number_of_elements="1" 

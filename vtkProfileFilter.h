@@ -45,10 +45,6 @@ public:
   vtkTypeRevisionMacro(vtkProfileFilter, vtkTableAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent);
   // Description:
-  // Get/Set the density parameter
-  vtkSetMacro(Delta, double);
-  vtkGetMacro(Delta, double);
-  // Description:
   // Get/Set the center
   vtkSetVector3Macro(Center,double);
   vtkGetVectorMacro(Center,double,3);
@@ -125,10 +121,6 @@ protected:
 			vtkstd::string argTwoBaseName, ColumnType argTwoColumnType);
 		~ProfileElement();
  	};
-  // Description:
-	// Set in GUI, with defaults
-	// Overdensity
-	double Delta; 
   // Description:
 	// Center around which to compute radial bins
 	double Center[3];
