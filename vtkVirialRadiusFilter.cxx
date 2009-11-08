@@ -66,10 +66,10 @@ int vtkVirialRadiusFilter::RequestData(vtkInformation *request,
 																	vtkInformationVector *outputVector)
 {
 	// Now we can get the input with which we want to work
- 	vtkPolyData* dataSet = vtkPolyData::GetData(inputVector[0]);
+ 	vtkPolyData* const dataSet = vtkPolyData::GetData(inputVector[0]);
 	// Setting the center based upon the selection in the GUI
 	vtkDataSet* pointInfo = vtkDataSet::GetData(inputVector[1]);
-	vtkPolyData* output = vtkPolyData::GetData(outputVector,0);
+	vtkPolyData* output = vtkPolyData::GetData(outputVector);
 	this->CalculateAndSetBounds(dataSet,pointInfo);
 	VirialRadiusInfo virialRadiusInfo = \
 		 	ComputeVirialRadius(dataSet,this->Softening,
@@ -90,7 +90,7 @@ int vtkVirialRadiusFilter::RequestData(vtkInformation *request,
 		{
 		vtkErrorMacro("Unable to find virial radius: considering changing your delta or selecting a different point around which to search. For now simply copying input");
 		// TODO: add back in
-//		output->ShallowCopy(dataSet);
+		output->ShallowCopy(dataSet);
 		}
 	return 1;
 }
