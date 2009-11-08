@@ -92,7 +92,7 @@ double ComputeMaxR(vtkPointSet* input,double point[])
 				{
 				double testCorner[3] = {bounds[x],bounds[y],bounds[z]};
 				// TODO: remove
-				cout << " corner " << i << "," << j << "," << k << " is "
+				cout << " corner " << x << "," << y << "," << z << " is "
 					<< bounds[x] << "," << bounds[y] << "," << bounds[z] << "\n";
 				testR = sqrt(vtkMath::Distance2BetweenPoints(testCorner,point));
 				// only if our test R is greater than the current max do we update
