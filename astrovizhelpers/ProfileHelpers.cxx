@@ -91,12 +91,17 @@ double ComputeMaxR(vtkPointSet* input,double point[])
 			for(int z = 4; z < 6; ++z)
 				{
 				double testCorner[3] = {bounds[x],bounds[y],bounds[z]};
+				// TODO: remove
+				cout << " corner " << i << "," << j << "," << k << " is "
+					<< bounds[x] << "," << bounds[y] << "," << bounds[z] << "\n";
 				testR = sqrt(vtkMath::Distance2BetweenPoints(testCorner,point));
 				// only if our test R is greater than the current max do we update
-				maxR=std::max(maxR,testR);
+				maxR=vtkstd::max(maxR,testR);
 				}
 			}
 		}
+	// TODO: remove
+	cout << "max R is " << maxR << "\n";
 	return maxR;
 }
 
