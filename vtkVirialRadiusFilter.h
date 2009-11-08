@@ -1,7 +1,7 @@
 /*=========================================================================
 
   Program:   AstroViz plugin for ParaView
-  Module:    $RCSfile: vtkProfileFilter.h,v $
+  Module:    $RCSfile: vtkVirialRadiusFilter.h,v $
 
   Copyright (c) Christine Corbett Moran
   All rights reserved.
@@ -10,13 +10,13 @@
      PURPOSE.  See the above copyright notice for more information.
 
 =========================================================================*/
-// .NAME vtkProfileFilter - shrink cells composing an arbitrary data set
+// .NAME vtkVirialRadiusFilter - shrink cells composing an arbitrary data set
 // .SECTION Description
 // Plots the mass function N(>M) as a scatter plot
 // .SECTION See Also
 
-#ifndef __vtkProfileFilter_h
-#define __vtkProfileFilter_h
+#ifndef __vtkVirialRadiusFilter_h
+#define __vtkVirialRadiusFilter_h
 #include "vtkTableAlgorithm.h" // super class
 #include "vtkStringArray.h" // some class variables are vtkStringArrays
 
@@ -38,11 +38,11 @@ enum ColumnType
 
 
 //----------------------------------------------------------------------------
-class VTK_EXPORT vtkProfileFilter : public vtkTableAlgorithm
+class VTK_EXPORT vtkVirialRadiusFilter : public vtkTableAlgorithm
 {
 public:
-  static vtkProfileFilter* New();
-  vtkTypeRevisionMacro(vtkProfileFilter, vtkTableAlgorithm);
+  static vtkVirialRadiusFilter* New();
+  vtkTypeRevisionMacro(vtkVirialRadiusFilter, vtkTableAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent);
   // Description:
   // Get/Set the softening parameter
@@ -72,8 +72,8 @@ public:
 
 //BTX
 protected:
-  vtkProfileFilter();
-  ~vtkProfileFilter();
+  vtkVirialRadiusFilter();
+  ~vtkVirialRadiusFilter();
   // Description:
   // This is called within ProcessRequest when a request asks the algorithm
   // to do its work. This is the method you should override to do whatever the
@@ -295,8 +295,8 @@ protected:
 
   virtual int FillInputPortInformation (int port, vtkInformation *info);
 private:
-  vtkProfileFilter(const vtkProfileFilter&); // Not implemented
-  void operator=(const vtkProfileFilter&); // Not implemented
+  vtkVirialRadiusFilter(const vtkVirialRadiusFilter&); // Not implemented
+  void operator=(const vtkVirialRadiusFilter&); // Not implemented
 //ETX
 };
 

@@ -1,9 +1,9 @@
 /*=========================================================================
 
   Program:   Visualization Toolkit
-  Module:    $RCSfile: vtkProfileFilter.cxx,v $
+  Module:    $RCSfile: vtkVirialRadiusFilter.cxx,v $
 =========================================================================*/
-#include "vtkProfileFilter.h"
+#include "vtkVirialRadiusFilter.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
 #include "vtkObjectFactory.h"
@@ -21,11 +21,11 @@
 #include <cmath>
 using vtkstd::string;
 
-vtkCxxRevisionMacro(vtkProfileFilter, "$Revision: 1.72 $");
-vtkStandardNewMacro(vtkProfileFilter);
+vtkCxxRevisionMacro(vtkVirialRadiusFilter, "$Revision: 1.72 $");
+vtkStandardNewMacro(vtkVirialRadiusFilter);
 
 //----------------------------------------------------------------------------
-vtkProfileFilter::vtkProfileFilter()
+vtkVirialRadiusFilter::vtkVirialRadiusFilter()
 {
   this->SetNumberOfInputPorts(2);
 	this->AdditionalProfileQuantities.push_back(
@@ -79,14 +79,14 @@ vtkProfileFilter::vtkProfileFilter()
 }
 
 //----------------------------------------------------------------------------
-vtkProfileFilter::~vtkProfileFilter()
+vtkVirialRadiusFilter::~vtkVirialRadiusFilter()
 {
 	// TODO: here I want to destroy the elements in the
 	// AdditionalProfileQuantities array
 }
 
 //----------------------------------------------------------------------------
-void vtkProfileFilter::PrintSelf(ostream& os, vtkIndent indent)
+void vtkVirialRadiusFilter::PrintSelf(ostream& os, vtkIndent indent)
 {
   os << indent << "overdensity: " << this->Delta << "\n"
 		 << indent << "bin number: " << this->BinNumber 
@@ -94,12 +94,12 @@ void vtkProfileFilter::PrintSelf(ostream& os, vtkIndent indent)
 }
 
 //----------------------------------------------------------------------------
-void vtkProfileFilter::SetSourceConnection(vtkAlgorithmOutput* algOutput)
+void vtkVirialRadiusFilter::SetSourceConnection(vtkAlgorithmOutput* algOutput)
 {
   this->SetInputConnection(1, algOutput);
 }
 
-int vtkProfileFilter::FillInputPortInformation (int port, 
+int vtkVirialRadiusFilter::FillInputPortInformation (int port, 
                                                    vtkInformation *info)
 {
   this->Superclass::FillInputPortInformation(port, info);
@@ -108,7 +108,7 @@ int vtkProfileFilter::FillInputPortInformation (int port,
 }
 
 //----------------------------------------------------------------------------
-int vtkProfileFilter::RequestData(vtkInformation *request,
+int vtkVirialRadiusFilter::RequestData(vtkInformation *request,
 																	vtkInformationVector **inputVector,
 																	vtkInformationVector *outputVector)
 {
@@ -154,7 +154,7 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 }
 
 //----------------------------------------------------------------------------
-void vtkProfileFilter::CalculateAndSetBounds(vtkPolyData* input, 
+void vtkVirialRadiusFilter::CalculateAndSetBounds(vtkPolyData* input, 
 	vtkDataSet* source)
 {
 	//TODO: this can later be done as in the XML documentation for this filter; 	  
@@ -183,7 +183,7 @@ void vtkProfileFilter::CalculateAndSetBounds(vtkPolyData* input,
 }
 
 //----------------------------------------------------------------------------
-int vtkProfileFilter::GetBinNumber(double x[])
+int vtkVirialRadiusFilter::GetBinNumber(double x[])
 {
 	double distanceToCenter = \
 		sqrt(vtkMath::Distance2BetweenPoints(this->Center,x));
@@ -191,14 +191,14 @@ int vtkProfileFilter::GetBinNumber(double x[])
 }
 
 //----------------------------------------------------------------------------
-void vtkProfileFilter::GenerateProfile(vtkPolyData* input,vtkTable* output)
+void vtkVirialRadiusFilter::GenerateProfile(vtkPolyData* input,vtkTable* output)
 {	
 	this->InitializeBins(input,output);
 	this->ComputeStatistics(input,output);
 }
 
 //----------------------------------------------------------------------------
-void vtkProfileFilter::InitializeBins(vtkPolyData* input,
+void vtkVirialRadiusFilter::InitializeBins(vtkPolyData* input,
 	vtkTable* output)
 {
 	this->CalculateAndSetBinExtents(input,output);
@@ -236,7 +236,7 @@ void vtkProfileFilter::InitializeBins(vtkPolyData* input,
 }
 
 //----------------------------------------------------------------------------
-void vtkProfileFilter::CalculateAndSetBinExtents(vtkPolyData* input,
+void vtkVirialRadiusFilter::CalculateAndSetBinExtents(vtkPolyData* input,
 	vtkTable* output)
 {
 	this->BinSpacing=this->MaxR/this->BinNumber;
@@ -253,7 +253,7 @@ void vtkProfileFilter::CalculateAndSetBinExtents(vtkPolyData* input,
 }
 
 //----------------------------------------------------------------------------
-void vtkProfileFilter::ComputeStatistics(vtkPolyData* input,vtkTable* output)
+void vtkVirialRadiusFilter::ComputeStatistics(vtkPolyData* input,vtkTable* output)
 {
 	for(int nextPointId = 0;
 	 		nextPointId < input->GetPoints()->GetNumberOfPoints();
@@ -266,7 +266,7 @@ void vtkProfileFilter::ComputeStatistics(vtkPolyData* input,vtkTable* output)
 }
 
 //----------------------------------------------------------------------------
-void vtkProfileFilter::UpdateBinStatistics(vtkPolyData* input,
+void vtkVirialRadiusFilter::UpdateBinStatistics(vtkPolyData* input,
  	vtkIdType pointGlobalId,vtkTable* output)
 {
 	double* x = GetPoint(input,pointGlobalId);
@@ -316,7 +316,7 @@ void vtkProfileFilter::UpdateBinStatistics(vtkPolyData* input,
 }
 
 //----------------------------------------------------------------------------
-void 	vtkProfileFilter::BinAveragesAndPostprocessing(
+void 	vtkVirialRadiusFilter::BinAveragesAndPostprocessing(
 	vtkPolyData* input,vtkTable* output)
 {
 	for(int binNum = 0; binNum < this->BinNumber; ++binNum)
@@ -381,7 +381,7 @@ void 	vtkProfileFilter::BinAveragesAndPostprocessing(
 }
 
 //----------------------------------------------------------------------------
-string vtkProfileFilter::GetColumnName(string baseName, 
+string vtkVirialRadiusFilter::GetColumnName(string baseName, 
 	ColumnType columnType)
 {
 	switch(columnType)
@@ -399,7 +399,7 @@ string vtkProfileFilter::GetColumnName(string baseName,
 }
 
 //----------------------------------------------------------------------------
-void vtkProfileFilter::UpdateBin(int binNum, BinUpdateType updateType,
+void vtkVirialRadiusFilter::UpdateBin(int binNum, BinUpdateType updateType,
  	string baseName, ColumnType columnType, double* updateData,
  	vtkTable* output)
 {
@@ -417,7 +417,7 @@ void vtkProfileFilter::UpdateBin(int binNum, BinUpdateType updateType,
 }
 
 //----------------------------------------------------------------------------
-void vtkProfileFilter::UpdateBin(int binNum, BinUpdateType updateType,
+void vtkVirialRadiusFilter::UpdateBin(int binNum, BinUpdateType updateType,
  	string baseName, ColumnType columnType, double updateData,
  	vtkTable* output)
 {
@@ -443,7 +443,7 @@ void vtkProfileFilter::UpdateBin(int binNum, BinUpdateType updateType,
 }
 
 //----------------------------------------------------------------------------
-void vtkProfileFilter::UpdateDoubleBin(int binNum, BinUpdateType updateType,
+void vtkVirialRadiusFilter::UpdateDoubleBin(int binNum, BinUpdateType updateType,
  	string baseName, ColumnType columnType, double updateData, double oldData,
  	vtkTable* output)
 {
@@ -463,7 +463,7 @@ void vtkProfileFilter::UpdateDoubleBin(int binNum, BinUpdateType updateType,
 }
 
 //----------------------------------------------------------------------------
-void vtkProfileFilter::UpdateArrayBin(int binNum, BinUpdateType updateType,
+void vtkVirialRadiusFilter::UpdateArrayBin(int binNum, BinUpdateType updateType,
  	string baseName, ColumnType columnType, double* updateData,
  	vtkAbstractArray* oldData, vtkTable* output)
 {
@@ -490,7 +490,7 @@ void vtkProfileFilter::UpdateArrayBin(int binNum, BinUpdateType updateType,
 }
 
 //----------------------------------------------------------------------------
-void vtkProfileFilter::UpdateCumulativeBins(int binNum, BinUpdateType 		
+void vtkVirialRadiusFilter::UpdateCumulativeBins(int binNum, BinUpdateType 		
 	updateType, string baseName, ColumnType columnType, double* dataToAdd,
 	vtkTable* output)
 {
@@ -501,7 +501,7 @@ void vtkProfileFilter::UpdateCumulativeBins(int binNum, BinUpdateType
 }
 
 //----------------------------------------------------------------------------
-void vtkProfileFilter::UpdateCumulativeBins(int binNum, BinUpdateType 		
+void vtkVirialRadiusFilter::UpdateCumulativeBins(int binNum, BinUpdateType 		
 	updateType, string baseName, ColumnType columnType, double dataToAdd,
 	vtkTable* output)
 {
@@ -511,7 +511,7 @@ void vtkProfileFilter::UpdateCumulativeBins(int binNum, BinUpdateType
 		}
 }
 //----------------------------------------------------------------------------
-vtkVariant vtkProfileFilter::GetData(int binNum, string baseName,
+vtkVariant vtkVirialRadiusFilter::GetData(int binNum, string baseName,
 	ColumnType columnType, vtkTable* output)
 {
 	return output->GetValueByName(binNum,
@@ -519,7 +519,7 @@ vtkVariant vtkProfileFilter::GetData(int binNum, string baseName,
 }
 
 //----------------------------------------------------------------------------
-vtkProfileFilter::ProfileElement::ProfileElement(string baseName, 
+vtkVirialRadiusFilter::ProfileElement::ProfileElement(string baseName, 
 	int numberComponents, double* (*funcPtr)(double [], double []),
 	ColumnType columnType)
 {
@@ -530,7 +530,7 @@ vtkProfileFilter::ProfileElement::ProfileElement(string baseName,
 	this->Postprocess = 0;	
 }
 
-vtkProfileFilter::ProfileElement::ProfileElement(string baseName, 
+vtkVirialRadiusFilter::ProfileElement::ProfileElement(string baseName, 
 	int numberComponents, double* (*funcPtr)(vtkVariant, vtkVariant),
 	string argOneBaseName, ColumnType argOneColumnType, 
 	string argTwoBaseName, ColumnType argTwoColumnType)
@@ -547,7 +547,7 @@ vtkProfileFilter::ProfileElement::ProfileElement(string baseName,
 }
 
 //----------------------------------------------------------------------------
-vtkProfileFilter::ProfileElement::~ProfileElement()
+vtkVirialRadiusFilter::ProfileElement::~ProfileElement()
 {
 	
 }
