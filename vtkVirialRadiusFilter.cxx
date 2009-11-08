@@ -66,16 +66,13 @@ int vtkVirialRadiusFilter::RequestData(vtkInformation *request,
 																	vtkInformationVector *outputVector)
 {
 	// Now we can get the input with which we want to work
- 	vtkPointSet* dataSet = vtkPointSet::GetData(inputVector[0]);
+ 	vtkPolyData* dataSet = vtkPolyData::GetData(inputVector[0]);
 	// Setting the center based upon the selection in the GUI
 	vtkDataSet* pointInfo = vtkDataSet::GetData(inputVector[1]);
-	vtkPointSet* output = vtkPointSet::GetData(outputVector);
-	// TODO: add back in
-// copies the point positions
-  output->CopyStructure(pointInfo);
-	// copies the point attributes
-  output->CopyAttributes(pointInfo);
-//TODO: add back in
+	vtkPolyData* output = vtkPolyData::GetData(outputVector);
+	cout " prenit \n";
+	output->Initialize();
+	cout << " init \n";
 /*	
 	this->CalculateAndSetBounds(dataSet,pointInfo);
 	VirialRadiusInfo virialRadiusInfo = \
