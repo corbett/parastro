@@ -132,7 +132,7 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 			this->InitializeBins(input,localTable);
 			// Syncronizing the intialized table with the other processes
 			this->Controller->Broadcast(localTable,0);
-			this->ComputeStatistics(input,localTable);
+//			this->ComputeStatistics(input,localTable);
 			// Receive computations from each process and merge the table into
 			// the localTable of process 0
 			
@@ -144,7 +144,7 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 			{
 			// syncing initialized table
 			this->Controller->Broadcast(localTable,0);
-			this->ComputeStatistics(input,localTable);
+//			this->ComputeStatistics(input,localTable);
 			// sending result to root
 			// this->Controller->Send(localTable,0);
 			}
