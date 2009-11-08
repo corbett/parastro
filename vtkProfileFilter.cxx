@@ -125,6 +125,27 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 	return 1;
 }
 
+
+//----------------------------------------------------------------------------
+double* vtkProfileFilter::CalculateCenter(vtkDataSet* source)
+{
+	double* center;
+	if(source->GetNumberOfPoints()==1)
+		{
+		// we are dealing with a point
+		center = source->GetPoint(0);
+		}
+	else
+		{
+		// we are dealing with a line
+		double* pointOne=source->GetPoint(0);
+		double* pointTwo=source->GetPoint(source->GetNumberOfPoints()-1);
+		// TODO: fix this is currently == pointTwo (for some reason p1=p2?)
+		center=ComputeMidpoint(pointOne,pointTwo);
+		}
+	return center;
+}
+
 //----------------------------------------------------------------------------
 void vtkProfileFilter::CalculateAndSetBounds(vtkPolyData* input, 
 	vtkDataSet* source)
@@ -139,48 +160,25 @@ void vtkProfileFilter::CalculateAndSetBounds(vtkPolyData* input,
 			}
 		else
 			{
-			double* center;
-			if(source->GetNumberOfPoints()==1)
-				{
-				// we are dealing with a point
-				center = source->GetPoint(0);
-				}
-			else
-				{
-				// we are dealing with a line
-				double* pointOne=source->GetPoint(0);
-				double* pointTwo=source->GetPoint(source->GetNumberOfPoints()-1);
-				// TODO: fix this is currently == pointTwo (for some reason p1=p2?)
-				center=ComputeMidpoint(pointOne,pointTwo);
-				}
+			double* sourceCenter=this->CalculateCenter(source);
 			for(int i = 0; i < 3; ++i)
 				{
-				this->Center[i]=center[i];
+				this->Center[i]=sourceCenter[i];
 				}
 			//calculating the the max R
-			this->MaxR=ComputeMaxR(input,this->Center);
+			double maxR=ComputeMaxR(input,this->Center);
 			}
+			// Syncronizing the centers
+			//TODO: add back in
+//			this->Controller->Broadcast(this->Center,3,0);
 		}
 	else
 		{
 		// we aren't using MPI or have only one process
-		double* center;
-		if(source->GetNumberOfPoints()==1)
-			{
-			// we are dealing with a point
-			center = source->GetPoint(0);
-			}
-		else
-			{
-			// we are dealing with a line
-			double* pointOne=source->GetPoint(0);
-			double* pointTwo=source->GetPoint(source->GetNumberOfPoints()-1);
-			// TODO: fix this is currently == pointTwo (for some reason p1=p2?)
-			center=ComputeMidpoint(pointOne,pointTwo);
-			}
+		double* sourceCenter=this->CalculateCenter(source);
 		for(int i = 0; i < 3; ++i)
 			{
-			this->Center[i]=center[i];
+			this->Center[i]=sourceCenter[i];
 			}
 		//calculating the the max R
 		this->MaxR=ComputeMaxR(input,this->Center);			

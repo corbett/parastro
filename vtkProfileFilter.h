@@ -277,8 +277,10 @@ protected:
 	// this data column's name
 	vtkstd::string GetColumnName(vtkstd::string baseName, 
 		ColumnType columnType);
-
-
+	// Description:
+	// helper function to calculate the center based upon the source.
+	// either the point, or the midpoint of a line
+	double* CalculateCenter(vtkDataSet* source);
 	// Description:
 	// Gets a column's data
 	vtkVariant GetData(int binNum, vtkstd::string baseName,
