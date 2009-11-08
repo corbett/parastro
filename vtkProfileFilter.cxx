@@ -124,7 +124,7 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 		{
 		int procId=this->Controller->GetLocalProcessId();
 		int numProc=this->Controller->GetNumberOfProcesses();
-		vtkSmartPointer<vtkTable> localTable = vtkSmartPointer<vtkTable>::New();
+		vtkTable* localTable = vtkTable::New();
 		localTable->Initialize();
 		if(procId==0)
 			{
@@ -149,6 +149,8 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 			// sending result to root
 			// this->Controller->Send(localTable,0);
 			}
+		//done with local table
+		localTable->Delete();
 		}	
 	else
 		{
