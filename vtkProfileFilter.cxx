@@ -73,6 +73,7 @@ vtkProfileFilter::vtkProfileFilter()
 	// Defaults for quantities which will be computed based on user's
 	// later input
 	this->MaxR=1.0;
+	this->Delta=1; // TODO: remove
 	this->BinNumber=30;
 }
 
