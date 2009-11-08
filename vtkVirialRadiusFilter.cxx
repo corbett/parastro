@@ -82,14 +82,17 @@ int vtkVirialRadiusFilter::RequestData(vtkInformation *request,
 		//setting the dataSet to this newInput
 		vtkPolyData* newDataSet = \
 			GetDatasetWithinVirialRadius(virialRadiusInfo);
-		output->DeepCopy(newDataSet);
-		newDataSet->Delete();
+		// TODO: add back in
+		//output->DeepCopy(newDataSet);
+		//newDataSet->Delete();
 		}
 	else	
 		{
 		vtkErrorMacro("Unable to find virial radius: considering changing your delta or selecting a different point around which to search. For now simply copying input");
-		output->DeepCopy(dataSet);
+		// TODO: add back in
+//		output->ShallowCopy(dataSet);
 		}
+	return 1;
 }
 
 //----------------------------------------------------------------------------
