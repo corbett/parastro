@@ -536,6 +536,7 @@ void vtkProfileFilter::MergeBins(int binNum, BinUpdateType updateType,
 		}
 	else
 		{
+		assert(originalData.IsDouble());
 		assert(mergeData.IsDouble());
 		this->UpdateDoubleBin(binNum,updateType,baseName,columnType,
 			mergeData.ToDouble(),originalData.ToDouble(),originalTable);
