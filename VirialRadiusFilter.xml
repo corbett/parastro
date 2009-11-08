@@ -48,9 +48,6 @@
 	        	<Property name="NumberOfPoints" show="0"/> 
 	    	</Hints>
       </InputProperty>
-	<!--Adds a checkbox for the option Bin By Radius-->
-	<!--Adds a checkbox for the option Cut Off At Virial Radius-->
-     </IntVectorProperty>
 	<!--Allows the user to type into a text field the softening of their
 	simulation -->
 	  <DoubleVectorProperty
