@@ -26,8 +26,8 @@ class vtkMultiProcessController;
 
 enum ProfileMPIData 
 {
-	CENTER,
-	MAX_R
+	MAX_R,
+	DATA_TABLE
 };
 
 enum BinUpdateType
@@ -187,7 +187,7 @@ protected:
 	// For each point in the input, update the relevant bins and bin columns
 	// to reflect this point's data. Finally compute the averages, relevant
 	// dispersions, and global statistics.
-	void ComputeStatistics(vtkPolyData* input,vtkTable* output);
+	void UpdateStatistics(vtkPolyData* input,vtkTable* output);
 
 	// Description:
 	// For each quantity initialized in InitializeBins updates the statistics
@@ -269,6 +269,12 @@ protected:
 	// must be called to do the proper averaging and/or postprocessing on 
 	// the accumlated columns.
 	void BinAveragesAndPostprocessing(vtkPolyData* input, vtkTable* output);
+
+	// Description:
+	// merges tableToMerge into originalTable by adding each row,column in
+	// tableToMerge to the corresponding row,column in originalTable
+	void MergeTables(vtkTable* originalTable,
+		vtkTable* tableToMerge);
 
 	// Description:
 	// given a base name, a variable index and a column type

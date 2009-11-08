@@ -135,23 +135,34 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 			this->InitializeBins(input,localTable);
 			// Syncronizing the intialized table with the other processes
 			this->Controller->Broadcast(localTable,0);
-			this->ComputeStatistics(input,localTable);
+			this->UpdateStatistics(input,localTable);
 			// Receive computations from each process and merge the table into
 			// the localTable of process 0
-			
+			for(int proc = 1; proc < numProc; ++proc)
+				{
+				vtkSmartPointer<vtkTable> recLocalTable = \
+						vtkSmartPointer<vtkTable>::New();
+				recLocalTable->Initialize();
+				this->Controller->Receive(recLocalTable,proc,DATA_TABLE);
+				//TODO: implement merge tables, for now does nothing ,
+				// meaning that result is only the localTable of process 
+				this->MergeTables(localTable,recLocalTable);
+				}
 			// Perform final computations
-			// Copy process zero's local table to output
+			// Updating averages and doing relevant postprocessing
+			this->BinAveragesAndPostprocessing(input,localTable);
+			// Copy process 0's local table to output, which should have collected
+			// answer
 			output->DeepCopy(localTable);
 			}
 		else
 			{
-			// TODO: finish this implementation
 			// syncing initialized table
 			this->Controller->Broadcast(localTable,0);
 			// Problem with the syncing, currently segfaults
-			this->ComputeStatistics(input,localTable);
+			this->UpdateStatistics(input,localTable);
 			// sending result to root
-			// this->Controller->Send(localTable,0);
+			this->Controller->Send(localTable,0,DATA_TABLE);
 			}
 		//done with local table
 		cout << "number of columns " << localTable->GetNumberOfColumns() 
@@ -160,11 +171,19 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 	else
 		{
 		this->InitializeBins(input,output);
-		this->ComputeStatistics(input,output);
+		this->UpdateStatistics(input,output);
+		// Updating averages and doing relevant postprocessing
+		this->BinAveragesAndPostprocessing(input,output);
 		}
 	return 1;
 }
 
+//----------------------------------------------------------------------------
+void vtkProfileFilter::MergeTables(vtkTable* originalTable,
+ 	vtkTable* tableToMerge)
+{
+	// TODO: implement
+}
 
 //----------------------------------------------------------------------------
 double* vtkProfileFilter::CalculateCenter(vtkDataSet* source)
@@ -215,7 +234,6 @@ void vtkProfileFilter::SetBoundsAndBinExtents(vtkPolyData* input,
 			this->MaxR=maxR;
 			// Syncronizing global maxR results
 			this->Controller->Broadcast(&this->MaxR,1,0);
-			// Calculating the bin spacing
 			}
 		else
 			{
@@ -310,7 +328,7 @@ double vtkProfileFilter::CalculateBinSpacing(double maxR,int binNumber)
 }
 
 //----------------------------------------------------------------------------
-void vtkProfileFilter::ComputeStatistics(vtkPolyData* input,vtkTable* output)
+void vtkProfileFilter::UpdateStatistics(vtkPolyData* input,vtkTable* output)
 {
 	for(int nextPointId = 0;
 	 		nextPointId < input->GetPoints()->GetNumberOfPoints();
@@ -318,8 +336,6 @@ void vtkProfileFilter::ComputeStatistics(vtkPolyData* input,vtkTable* output)
 		{
 			this->UpdateBinStatistics(input,nextPointId,output);
 		}
-	// Updating averages and doing relevant postprocessing
-	this->BinAveragesAndPostprocessing(input,output);
 }
 
 //----------------------------------------------------------------------------
