@@ -18,12 +18,13 @@
 #include "vtkMath.h"
 #include "vtkInformationDataObjectKey.h"
 #include "vtkPolyData.h" // helper functions take this as argument
+#include "vtkMultiProcessController.h"
 #include <cmath>
 using vtkstd::string;
 
 vtkCxxRevisionMacro(vtkProfileFilter, "$Revision: 1.72 $");
 vtkStandardNewMacro(vtkProfileFilter);
-
+vtkCxxSetObjectMacro(vtkProfileFilter, Controller, vtkMultiProcessController);
 //----------------------------------------------------------------------------
 vtkProfileFilter::vtkProfileFilter()
 {
@@ -75,11 +76,14 @@ vtkProfileFilter::vtkProfileFilter()
 	this->MaxR=1.0;
 	this->Delta=1; // TODO: remove
 	this->BinNumber=30;
+	this->Controller = NULL;
+  this->SetController(vtkMultiProcessController::GetGlobalController());
 }
 
 //----------------------------------------------------------------------------
 vtkProfileFilter::~vtkProfileFilter()
 {
+ 	this->SetController(0);
 	// TODO: here I want to destroy the elements in the
 	// AdditionalProfileQuantities array
 }
@@ -125,36 +129,63 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 void vtkProfileFilter::CalculateAndSetBounds(vtkPolyData* input, 
 	vtkDataSet* source)
 {
-	//TODO: this can later be done as in the XML documentation for this filter; 	  
-	// for now, only getting the first point. this is the point selected in the
- // GUI, or the midpoint of the line selected in the GUI
-	// TODO: add back in
-	/*
-
-	double* center;
-	if(source->GetNumberOfPoints()==1)
+	if(RunInParallel(this->Controller))
 		{
-		// we are dealing with a point
-		center = source->GetPoint(0);
+		int procId=this->Controller->GetLocalProcessId();
+		int numProc=this->Controller->GetNumberOfProcesses();
+		if(procId!=0)
+			{
+			cout << "ignoring, not process zero\n";
+			}
+		else
+			{
+			double* center;
+			if(source->GetNumberOfPoints()==1)
+				{
+				// we are dealing with a point
+				center = source->GetPoint(0);
+				}
+			else
+				{
+				// we are dealing with a line
+				double* pointOne=source->GetPoint(0);
+				double* pointTwo=source->GetPoint(source->GetNumberOfPoints()-1);
+				// TODO: fix this is currently == pointTwo (for some reason p1=p2?)
+				center=ComputeMidpoint(pointOne,pointTwo);
+				}
+			for(int i = 0; i < 3; ++i)
+				{
+				this->Center[i]=center[i];
+				}
+			//calculating the the max R
+			this->MaxR=ComputeMaxR(input,this->Center);
+			}
 		}
 	else
 		{
-		// we are dealing with a line
-		double* pointOne=source->GetPoint(0);
-		double* pointTwo=source->GetPoint(source->GetNumberOfPoints()-1);
-		// TODO: fix this is currently == pointTwo (for some reason p1=p2?)
-		center=ComputeMidpoint(pointOne,pointTwo);
+		// we aren't using MPI or have only one process
+		double* center;
+		if(source->GetNumberOfPoints()==1)
+			{
+			// we are dealing with a point
+			center = source->GetPoint(0);
+			}
+		else
+			{
+			// we are dealing with a line
+			double* pointOne=source->GetPoint(0);
+			double* pointTwo=source->GetPoint(source->GetNumberOfPoints()-1);
+			// TODO: fix this is currently == pointTwo (for some reason p1=p2?)
+			center=ComputeMidpoint(pointOne,pointTwo);
+			}
+		for(int i = 0; i < 3; ++i)
+			{
+			this->Center[i]=center[i];
+			}
+		//calculating the the max R
+		this->MaxR=ComputeMaxR(input,this->Center);			
 		}
-	for(int i = 0; i < 3; ++i)
-		{
-		this->Center[i]=center[i];
-		}
- 	// calculating the the max R
-	this->MaxR=ComputeMaxR(input,this->Center);
-	*/
-	//TODO: remove
-	double center[3] = {0,0,0};
-	ComputeMaxR(input,center);
+
 }
 
 //----------------------------------------------------------------------------
