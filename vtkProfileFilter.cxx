@@ -116,7 +116,8 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 	vtkTable* const output = vtkTable::GetData(outputVector,0);
 	output->Initialize();
 	this->CalculateAndSetBounds(dataSet,pointInfo);
-	this->GenerateProfile(dataSet,output);
+	//TODO: add back in
+//	this->GenerateProfile(dataSet,output);
 	return 1;
 }
 
@@ -127,6 +128,7 @@ void vtkProfileFilter::CalculateAndSetBounds(vtkPolyData* input,
 	//TODO: this can later be done as in the XML documentation for this filter; 	  
 	// for now, only getting the first point. this is the point selected in the
  // GUI, or the midpoint of the line selected in the GUI
+	
 	double* center;
 	if(source->GetNumberOfPoints()==1)
 		{
@@ -141,12 +143,17 @@ void vtkProfileFilter::CalculateAndSetBounds(vtkPolyData* input,
 		// TODO: fix this is currently == pointTwo (for some reason p1=p2?)
 		center=ComputeMidpoint(pointOne,pointTwo);
 		}
+	// TODO: add back in
+	/*
 	for(int i = 0; i < 3; ++i)
 		{
 		this->Center[i]=center[i];
 		}
+	*/
  	// calculating the the max R
-	this->MaxR=ComputeMaxR(input,this->Center);
+//TODO: add back in
+//	this->MaxR=ComputeMaxR(input,this->Center);
+	ComputeMaxR(input,center);
 }
 
 //----------------------------------------------------------------------------
