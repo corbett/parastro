@@ -164,9 +164,6 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 			// sending result to root
 			this->Controller->Send(localTable,0,DATA_TABLE);
 			}
-		//done with local table
-		cout << "number of columns " << localTable->GetNumberOfColumns() 
-			<< "on proc " << procId << "\n";
 		}	
 	else
 		{
@@ -528,16 +525,14 @@ void vtkProfileFilter::MergeBins(int binNum, BinUpdateType updateType,
 		originalTable);
 	vtkVariant mergeData = this->GetData(binNum,baseName,columnType,
 		tableToMerge);
-	if(originalData.IsArray())
+	if(originalData.IsArray() && mergeData.IsArray())
 		{
-		assert(mergeData.IsArray());
 		this->UpdateArrayBin(binNum,updateType,baseName,columnType,
 			mergeData.ToArray(),originalData.ToArray(),originalTable);
 		}
 	else
 		{
-		cout << " merge data " << mergeData.ToDouble() 
-			<< " original data " << originalData.ToDouble() << "\n";
+		assert(originalData.IsNumeric() && mergeData.IsNumeric());
 		this->UpdateDoubleBin(binNum,updateType,baseName,columnType,
 			mergeData.ToDouble(),originalData.ToDouble(),originalTable);
 		}
