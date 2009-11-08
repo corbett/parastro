@@ -117,7 +117,6 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
  	vtkPolyData* input = vtkPolyData::GetData(inputVector[0]);
 	vtkTable* const output = vtkTable::GetData(outputVector,0);
 	output->Initialize();
-
 	// Setting the center based upon the selection in the GUI
 	vtkDataSet* centerInfo = vtkDataSet::GetData(inputVector[1]);
 	this->CalculateAndSetBounds(input,centerInfo); // works in parallel
@@ -130,14 +129,16 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 		if(procId==0)
 			{
 			// only take the time to initialize on process 0
-			this->InitializeBins(input,output);
+			this->InitializeBins(input,localTable);
 			// Syncronizing the intialized table with the other processes
-			this->Controller->Broadcast(output,0);
-			this->ComputeStatistics(input,output);
+			this->Controller->Broadcast(localTable,0);
+			this->ComputeStatistics(input,localTable);
 			// Receive computations from each process and merge the table into
-			// the output
+			// the localTable of process 0
 			
 			// Perform final computations
+			// Copy process zero's local table to output
+			output->DeepCopy(localTable);
 			}
 		else
 			{
