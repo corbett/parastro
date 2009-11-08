@@ -17,10 +17,11 @@
 
 #ifndef __vtkVirialRadiusFilter_h
 #define __vtkVirialRadiusFilter_h
-#include "vtkTableAlgorithm.h" // super class
+#include "vtkPointSetAlgorithm.h"
 #include "vtkStringArray.h" // some class variables are vtkStringArrays
 
 class vtkPolyData;
+class vtkDataSet;
 //----------------------------------------------------------------------------
 enum BinUpdateType
 {
@@ -38,11 +39,11 @@ enum ColumnType
 
 
 //----------------------------------------------------------------------------
-class VTK_EXPORT vtkVirialRadiusFilter : public vtkTableAlgorithm
+class VTK_EXPORT vtkVirialRadiusFilter : public vtkPointSetAlgorithm
 {
 public:
   static vtkVirialRadiusFilter* New();
-  vtkTypeRevisionMacro(vtkVirialRadiusFilter, vtkTableAlgorithm);
+  vtkTypeRevisionMacro(vtkVirialRadiusFilter, vtkPointSetAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent);
   // Description:
   // Get/Set the softening parameter
