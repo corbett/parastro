@@ -154,22 +154,40 @@ void vtkProfileFilter::CalculateAndSetBounds(vtkPolyData* input,
 		{
 		int procId=this->Controller->GetLocalProcessId();
 		int numProc=this->Controller->GetNumberOfProcesses();
-		if(procId!=0)
-			{
-			cout << "ignoring, not process zero\n";
-			}
-		else
+		if(procId==0)
 			{
 			double* sourceCenter=this->CalculateCenter(source);
 			for(int i = 0; i < 3; ++i)
 				{
 				this->Center[i]=sourceCenter[i];
 				}
-			//calculating the the max R
-			double maxR=ComputeMaxR(input,this->Center);
-			}
 			// Syncronizing the centers
 			this->Controller->Broadcast(this->Center,3,0);
+			//calculating the the max R
+			double maxR=ComputeMaxR(input,this->Center);
+			// collecting and updating maxR from other processors			
+			for(int proc= 1; proc < numProc; ++proc)
+				{
+				double recMaxR;
+				this->Controller->Receive(&recMaxR,1,proc,MAX_R);
+				maxR=vtkstd::max(maxR,recMaxR);
+				}
+			this->MaxR=maxR;
+			// Syncronizing global maxR results
+			this->Controller->Broadcast(&this->MaxR,1,0);
+			}
+		else
+			{
+			// Syncronizing the centers
+			this->Controller->Broadcast(this->Center,3,0);
+			// calculating the the max R
+			double maxR=ComputeMaxR(input,this->Center);
+			// sending to process 0, which will compare all results and compute
+			// global maximum
+			this->Controller->Send(&maxR,1,0,MAX_R);
+			// syncronizing global maxR results
+			this->Controller->Broadcast(&this->MaxR,1,0);
+			}
 		}
 	else
 		{
@@ -183,6 +201,7 @@ void vtkProfileFilter::CalculateAndSetBounds(vtkPolyData* input,
 		this->MaxR=ComputeMaxR(input,this->Center);			
 		}
 	// TODO: remove
+	cout << " max R is " << this->MaxR << "\n";
 	for(int i = 0; i < 3; ++i)
 		{
 		cout << "center " << i << " is " << this->Center[i] << "\n";
