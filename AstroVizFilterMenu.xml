@@ -7,5 +7,6 @@
 	 <Filter name="Profile Filter" />
 	 <Filter name="PlotAttributes" />
 	 <Filter name="Principle Moments of Inertia" />
+	 <Filter name="Virial Radius Filter" />
    </Category>
  </ParaViewFilters>
