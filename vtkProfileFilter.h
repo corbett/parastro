@@ -154,10 +154,6 @@ protected:
 	// Description:
 	// Quantities to add to the input
 	vtkstd::vector<ProfileElement> AdditionalProfileQuantities;
-	// Description:
-	// Generates the desired profile quantities and places them
-	// in the output table by bin.
-	void GenerateProfile(vtkPolyData* input,vtkTable* output);
   
 	// Description:
   // Calculates the center and the maximum distance from the center
@@ -182,7 +178,7 @@ protected:
 	// Description:
 	// Calculates the bin spacing and number of bins if necessary from
 	// the user input.
-	void CalculateAndSetBinExtents(vtkPolyData* input, vtkTable* output);
+	void CalculateAndSetBinExtents(vtkTable* output);
 
 	// Description:
 	// For each point in the input, update the relevant bins and bin columns

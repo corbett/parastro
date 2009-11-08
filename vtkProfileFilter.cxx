@@ -114,14 +114,32 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 																	vtkInformationVector *outputVector)
 {
 	// Now we can get the input with which we want to work
- 	vtkPolyData* dataSet = vtkPolyData::GetData(inputVector[0]);
+ 	vtkPolyData* input = vtkPolyData::GetData(inputVector[0]);
 	// Setting the center based upon the selection in the GUI
-	vtkDataSet* pointInfo = vtkDataSet::GetData(inputVector[1]);
+	vtkDataSet* centerInfo = vtkDataSet::GetData(inputVector[1]);
 	vtkTable* const output = vtkTable::GetData(outputVector,0);
 	output->Initialize();
-	this->CalculateAndSetBounds(dataSet,pointInfo);
-	//TODO: add back in
-//	this->GenerateProfile(dataSet,output);
+	this->CalculateAndSetBounds(input,centerInfo); // works in parallel
+	if(RunInParallel(this->Controller))
+		{
+		int procId=this->Controller->GetLocalProcessId();
+		int numProc=this->Controller->GetNumberOfProcesses();
+		if(procId==0)
+			{
+			// only take the time to initialize on process 0
+			this->InitializeBins(input,output);
+			}
+		// syncing output
+		this->Controller->Broadcast(output,0);
+		// TODO: add back in
+		//this->ComputeStatistics(input,output);
+		
+		}	
+	else
+		{
+		this->InitializeBins(input,output);
+		this->ComputeStatistics(input,output);
+		}
 	return 1;
 }
 
@@ -200,12 +218,6 @@ void vtkProfileFilter::CalculateAndSetBounds(vtkPolyData* input,
 		//calculating the the max R
 		this->MaxR=ComputeMaxR(input,this->Center);			
 		}
-	// TODO: remove
-	cout << " max R is " << this->MaxR << "\n";
-	for(int i = 0; i < 3; ++i)
-		{
-		cout << "center " << i << " is " << this->Center[i] << "\n";
-		}
 }
 
 //----------------------------------------------------------------------------
@@ -216,18 +228,12 @@ int vtkProfileFilter::GetBinNumber(double x[])
 	return floor(distanceToCenter/this->BinSpacing);
 }
 
-//----------------------------------------------------------------------------
-void vtkProfileFilter::GenerateProfile(vtkPolyData* input,vtkTable* output)
-{	
-	this->InitializeBins(input,output);
-	this->ComputeStatistics(input,output);
-}
 
 //----------------------------------------------------------------------------
 void vtkProfileFilter::InitializeBins(vtkPolyData* input,
 	vtkTable* output)
 {
-	this->CalculateAndSetBinExtents(input,output);
+	this->CalculateAndSetBinExtents(output);
 	// always need this for averages
 	AllocateDataArray(output,GetColumnName("number in bin",TOTAL).c_str(),
 		1,this->BinNumber);
@@ -262,8 +268,7 @@ void vtkProfileFilter::InitializeBins(vtkPolyData* input,
 }
 
 //----------------------------------------------------------------------------
-void vtkProfileFilter::CalculateAndSetBinExtents(vtkPolyData* input,
-	vtkTable* output)
+void vtkProfileFilter::CalculateAndSetBinExtents(vtkTable* output)
 {
 	this->BinSpacing=this->MaxR/this->BinNumber;
 	// the first column will be the bin radius
