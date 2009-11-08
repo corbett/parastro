@@ -21,7 +21,15 @@
 #include "vtkStringArray.h" // some class variables are vtkStringArrays
 
 class vtkPolyData;
+class vtkMultiProcessController;
 //----------------------------------------------------------------------------
+
+enum ProfileMPIData 
+{
+	CENTER,
+	MAX_R
+};
+
 enum BinUpdateType
 {
 	ADD, 
@@ -56,6 +64,10 @@ public:
   // Specify the point locations used to probe input. Any geometry
   // can be used. New style. Equivalent to SetInputConnection(1, algOutput).
   void SetSourceConnection(vtkAlgorithmOutput* algOutput);
+  // Description:
+  // By defualt this filter uses the global controller,
+  // but this method can be used to set another instead.
+  virtual void SetController(vtkMultiProcessController*);
 
 //BTX
 protected:
@@ -69,6 +81,8 @@ protected:
   virtual int RequestData(vtkInformation*, 
                           vtkInformationVector**, 
                           vtkInformationVector*);
+  vtkMultiProcessController *Controller;
+
 	// Description:
 	// the ProfileElement protected nested class holds all the information
 	// necessary to initialize and at runtime compute the value
