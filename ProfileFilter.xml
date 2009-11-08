@@ -50,16 +50,6 @@
       </InputProperty>
 	<!--Adds a checkbox for the option Bin By Radius-->
 	<!--Adds a checkbox for the option Cut Off At Virial Radius-->
-     <IntVectorProperty 
-        name="CutOffAtVirialRadius" 
-        command="SetCutOffAtVirialRadius" 
-        number_of_elements="1"
-        default_values="1" > 
-       <BooleanDomain name="bool"/>
-       <Documentation>
-         If the value of this property is 1, then the bins are only from the center up to the virial radius.
-       </Documentation>
-     </IntVectorProperty>
 	<!--Allows the user to type into a text field the softening of their
 	simulation -->
 	  <DoubleVectorProperty

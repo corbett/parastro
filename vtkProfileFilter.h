@@ -61,11 +61,6 @@ public:
   vtkSetMacro(BinNumber,int);
   vtkGetMacro(BinNumber,int);
   // Description:
-  // Get/Set whether the bins should be only from the center to the virial 
-	// radius
-	vtkSetMacro(CutOffAtVirialRadius,int);
-	vtkGetMacro(CutOffAtVirialRadius,int);
-  // Description:
   // Specify the point locations used to probe input. Any geometry
   // can be used. New style. Equivalent to SetInputConnection(1, algOutput).
   void SetSourceConnection(vtkAlgorithmOutput* algOutput);
@@ -146,9 +141,6 @@ protected:
   // Description:
 	// Center around which to compute radial bins
 	double Center[3];
-  // Description:
-	// Whether to only compute the profile up to the virial radius
-	int CutOffAtVirialRadius;
   // Description:
 	// Number of bins to use
 	int BinNumber;
