@@ -49,19 +49,6 @@
 	    	</Hints>
       </InputProperty>
 	<!--Adds a checkbox for the option Bin By Radius-->
-	<!--Adds a checkbox for the option Cut Off At Virial Radius-->
-	<!--Allows the user to type into a text field the softening of their
-	simulation -->
-	  <DoubleVectorProperty
-			name="Softening"
-			command="SetSoftening"
-			number_of_elements="1"
-			default_values="1e-6">
-			<Documentation>
-			Set the softening. This parameter influences the search for
-			the viral radius.
-			</Documentation>
-	  </DoubleVectorProperty>
 	  <DoubleVectorProperty
 			name="Delta"
 			command="SetDelta"

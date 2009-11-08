@@ -75,7 +75,6 @@ vtkProfileFilter::vtkProfileFilter()
 	this->MaxR=1.0;
 	this->Delta=0.0;
 	this->BinNumber=30;
-	this->Softening=1e-6f;
 }
 
 //----------------------------------------------------------------------------
@@ -89,8 +88,7 @@ vtkProfileFilter::~vtkProfileFilter()
 void vtkProfileFilter::PrintSelf(ostream& os, vtkIndent indent)
 {
   os << indent << "overdensity: " << this->Delta << "\n"
-		 << indent << "bin number: " << this->BinNumber 
-		<< "softening :" << this->Softening << "\n";
+		 << indent << "bin number: " << this->BinNumber << "\n";
 }
 
 //----------------------------------------------------------------------------
