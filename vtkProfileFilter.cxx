@@ -110,8 +110,8 @@ int vtkProfileFilter::FillInputPortInformation (int port,
 
 //----------------------------------------------------------------------------
 int vtkProfileFilter::RequestData(vtkInformation *request,
-																	vtkInformationVector **inputVector,
-																	vtkInformationVector *outputVector)
+	vtkInformationVector **inputVector,
+	vtkInformationVector *outputVector)
 {
 	// Now we can get the input with which we want to work
  	vtkPolyData* input = vtkPolyData::GetData(inputVector[0]);
@@ -130,13 +130,23 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 		if(procId==0)
 			{
 			// only take the time to initialize on process 0
-			this->InitializeBins(input,localTable);
-			output->DeepCopy(localTable);
+			this->InitializeBins(input,output);
+			// Syncronizing the intialized table with the other processes
+			this->Controller->Broadcast(output,0);
+			this->ComputeStatistics(input,output);
+			// Receive computations from each process and merge the table into
+			// the output
+			
+			// Perform final computations
 			}
-		// syncing output
-		this->Controller->Broadcast(localTable,0);
-		// TODO: add back in
-		//this->ComputeStatistics(input,output);
+		else
+			{
+			// syncing initialized table
+			this->Controller->Broadcast(localTable,0);
+			this->ComputeStatistics(input,localTable);
+			// sending result to root
+			// this->Controller->Send(localTable,0);
+			}
 		}	
 	else
 		{
