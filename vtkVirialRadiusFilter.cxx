@@ -72,8 +72,8 @@ int vtkVirialRadiusFilter::RequestData(vtkInformation *request,
 	vtkPolyData* output = vtkPolyData::GetData(outputVector);
 	this->CalculateAndSetBounds(dataSet,pointInfo);
 	VirialRadiusInfo virialRadiusInfo = \
-		 	ComputeVirialRadius(dataSet,this->Softening,
-			this->Delta,this->MaxR,this->Center);
+	 	ComputeVirialRadius(dataSet,this->Softening,
+		this->Delta,this->MaxR,this->Center);
 		// note that if there was an error finding the virialRadius the 
 		// radius returned is < 0
 	if(virialRadiusInfo.virialRadius>0)
@@ -90,7 +90,10 @@ int vtkVirialRadiusFilter::RequestData(vtkInformation *request,
 		{
 		vtkErrorMacro("Unable to find virial radius: considering changing your delta or selecting a different point around which to search. For now simply copying input");
 		// TODO: add back in
-		output->ShallowCopy(dataSet);
+	// copies the point positions
+	  output->CopyStructure(dataSet);
+		// copies the point attributes
+	  output->CopyAttributes(dataSet);
 		}
 	return 1;
 }
