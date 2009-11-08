@@ -145,10 +145,11 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 			}
 		else
 			{
+			// TODO: finish this implementation
 			// syncing initialized table
 			this->Controller->Broadcast(localTable,0);
 			// Problem with the syncing, currently segfaults
-//			this->ComputeStatistics(input,localTable);
+			this->ComputeStatistics(input,localTable);
 			// sending result to root
 			// this->Controller->Send(localTable,0);
 			}
