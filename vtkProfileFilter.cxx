@@ -124,7 +124,8 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 		{
 		int procId=this->Controller->GetLocalProcessId();
 		int numProc=this->Controller->GetNumberOfProcesses();
-		vtkTable* localTable = vtkTable::New();
+		vtkSmartPointer<vtkTable> localTable = \
+			vtkSmartPointer<vtkTable>::New();
 		localTable->Initialize();
 		if(procId==0)
 			{
@@ -152,8 +153,6 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 		//done with local table
 		cout << "number of columns " << localTable->GetNumberOfColumns() 
 			<< "on proc " << procId << "\n";
-		
-		localTable->Delete();
 		}	
 	else
 		{
