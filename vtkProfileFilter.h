@@ -121,6 +121,8 @@ protected:
 			vtkstd::string argTwoBaseName, ColumnType argTwoColumnType);
 		~ProfileElement();
  	};
+	// TODO: remove
+	double Delta;
   // Description:
 	// Center around which to compute radial bins
 	double Center[3];
