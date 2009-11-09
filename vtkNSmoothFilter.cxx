@@ -16,21 +16,29 @@
 #include "vtkGenericPointIterator.h"
 #include "vtkDataArray.h"
 #include "vtkMath.h"
+#include "vtkMultiProcessController.h"
 #include "astrovizhelpers/DataSetHelpers.h"
+
 using vtkstd::string;
 
 vtkCxxRevisionMacro(vtkNSmoothFilter, "$Revision: 1.72 $");
 vtkStandardNewMacro(vtkNSmoothFilter);
+vtkCxxSetObjectMacro(vtkNSmoothFilter,Controller, vtkMultiProcessController);
+
 
 //----------------------------------------------------------------------------
 vtkNSmoothFilter::vtkNSmoothFilter()
 {
   this->NeighborNumber = 50; //default
+  this->Controller = NULL;
+  this->SetController(vtkMultiProcessController::GetGlobalController());
 }
 
 //----------------------------------------------------------------------------
 vtkNSmoothFilter::~vtkNSmoothFilter()
 {
+	this->SetController(0);
+ 	
 }
 
 //----------------------------------------------------------------------------

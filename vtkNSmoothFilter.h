@@ -28,7 +28,7 @@
 #define __vtkNSmoothFilter_h
 
 #include "vtkPointSetAlgorithm.h"
-
+class vtkMultiProcessController;
 class VTK_GRAPHICS_EXPORT vtkNSmoothFilter : public vtkPointSetAlgorithm
 {
 public:
@@ -40,6 +40,10 @@ public:
   // Get/Set the number of neighbors to search
   vtkSetMacro(NeighborNumber, int);
   vtkGetMacro(NeighborNumber, int);
+  // Description:
+  // By defualt this filter uses the global controller,
+  // but this method can be used to set another instead.
+  virtual void SetController(vtkMultiProcessController*);
 
 //BTX
 protected:
@@ -51,9 +55,10 @@ protected:
 
   // Main implementation.
   virtual int RequestData(vtkInformation*,
-                          vtkInformationVector**,
-                          vtkInformationVector*);
+   	vtkInformationVector**,
+    vtkInformationVector*);
   int NeighborNumber;
+  vtkMultiProcessController *Controller;
 
 private:
   vtkNSmoothFilter(const vtkNSmoothFilter&);  // Not implemented.
