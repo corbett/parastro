@@ -132,6 +132,10 @@ void vtkTipsyReader::ReadAllParticles(TipsyHeader& tipsyHeader,
 		<< " pieceSize=" << pieceSize << " beginIndex=" << beginIndex 
 		<< " endIndex=" << endIndex << " numInPiece=" << endIndex-beginIndex 
 		<< "\n";
+	cout << "tipsy nbodies="<< tipsyHeader.h_nBodies
+		<< ", ndark=" << tipsyHeader.h_nDark 
+		<< ", nsph=" << tipsyHeader.h_nSph 
+		<< ", nstar=" << tipsyHeader.h_nStar << "\n";
 	// Allocates vtk scalars and vector arrays to hold particle data, 
 	this->AllocateAllTipsyVariableArrays(endIndex-beginIndex,output);
 	for(int i=beginIndex; i<endIndex; i++)  // we could have many bodies
@@ -166,6 +170,8 @@ void vtkTipsyReader::ReadMarkedParticles(
 tipsypos vtkTipsyReader::SeekToIndex(int index,TipsyHeader& tipsyHeader,
 	ifTipsy& tipsyInfile)
 {
+	// TODO: remove
+	cout << "index="<<index << ",";
 	if(index < tipsyHeader.h_nSph)
 		{
 		// we are seeking a gas particle
