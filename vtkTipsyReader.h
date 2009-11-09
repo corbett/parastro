@@ -49,10 +49,15 @@ protected:
 	char* MarkFileName;
 	char* FileName;
 	int ReadPositionsOnly;
+	int vtkTipsyReader::RequestInformation(
+		vtkInformation*,
+		vtkInformationVector**,
+		vtkInformationVector*);
 
   int RequestData(vtkInformation*,
-                  vtkInformationVector**,
-                  vtkInformationVector*);
+		vtkInformationVector**,
+    vtkInformationVector*);
+
 private:
   vtkTipsyReader(const vtkTipsyReader&);  // Not implemented.
   void operator=(const vtkTipsyReader&);  // Not implemented.
@@ -61,13 +66,14 @@ private:
 	// Reads the tipsy header. 
 	TipsyHeader ReadTipsyHeader(ifTipsy& tipsyInfile);
 	// Description:
-	// Reads all particles from the tipsy file
+	// Reads all particles of this piece from the tipsy file
 	void ReadAllParticles(TipsyHeader& tipsyHeader,
-		ifTipsy& tipsyInfile,vtkPolyData* output);
+		ifTipsy& tipsyInfile,int piece,int numPieces,vtkPolyData* output);
 	// Description:
 	// reads in a particle (either gas, dark or star as appropriate) 
 	//from the tipsy in file of this class
-	vtkIdType ReadParticle(ifTipsy& tipsyInFile,vtkPolyData* output);
+	vtkIdType ReadParticle(int index, TipsyHeader& tipsyHeader,
+		ifTipsy& tipsyInfile, vtkPolyData* output);
 	// Description:
 	// reads variables common to all particles
 	vtkIdType ReadBaseParticle(vtkPolyData* output, TipsyBaseParticle& b);
@@ -85,6 +91,10 @@ private:
 	// Must be called after function ReadMarkedParticleIndices.
 	void ReadMarkedParticles(vtkstd::vector<int>& markedParticleIndices,
 		TipsyHeader& tipsyHeader,ifTipsy& tipsyInfile,vtkPolyData* output);
+	// Description:
+	// Helper function to read seek to a given index before reading
+	tipsypos SeekToIndex(int index,TipsyHeader& tipsyHeader,
+		ifTipsy& tipsyInfile);
 	// Description:
 	// reads in an array of the indices of marked particles from a file, 
 	// returns a queue of marked particles
