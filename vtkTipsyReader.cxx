@@ -130,7 +130,7 @@ void vtkTipsyReader::ReadAllParticles(TipsyHeader& tipsyHeader,
 	// TODO: remove
 	cout <<  "piece=" << piece << " numPieces=" << numPieces 
 		<< " pieceSize=" << pieceSize << " beginIndex=" << beginIndex 
-		<< " endIndex=" << endIndex - 1 << " numInPiece=" << endIndex-beginIndex 
+		<< " endIndex=" << endIndex -1 << " numInPiece=" << endIndex-beginIndex 
 		<< "\n";
 	cout << "tipsy nbodies="<< tipsyHeader.h_nBodies
 		<< ", ndark=" << tipsyHeader.h_nDark 
@@ -167,8 +167,8 @@ void vtkTipsyReader::ReadMarkedParticles(
 }
 
 //----------------------------------------------------------------------------
-tipsypos vtkTipsyReader::SeekToIndex(int index,TipsyHeader& tipsyHeader,
-	ifTipsy& tipsyInfile)
+tipsypos::section_type vtkTipsyReader::SeekToIndex(int index,
+	TipsyHeader& tipsyHeader, ifTipsy& tipsyInfile)
 {
 	if(index < tipsyHeader.h_nSph)
 		{
@@ -288,9 +288,9 @@ vtkIdType vtkTipsyReader::ReadParticle(int index, TipsyHeader& tipsyHeader,
   TipsyGasParticle  g;
   TipsyDarkParticle d;
   TipsyStarParticle s;
-	tipsypos particleType=this->SeekToIndex(index,
+	tipsypos::section_type particleSection=this->SeekToIndex(index,
 		tipsyHeader,tipsyInfile);
-  switch(particleType) 
+	switch(particleSection)
 		{
    case tipsypos::gas:
      tipsyInfile >> g;
