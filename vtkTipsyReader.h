@@ -93,7 +93,7 @@ private:
 		TipsyHeader& tipsyHeader,ifTipsy& tipsyInfile,vtkPolyData* output);
 	// Description:
 	// Helper function to read seek to a given index before reading
-	tipsypos SeekToIndex(int index,TipsyHeader& tipsyHeader,
+	tipsypos::section_type SeekToIndex(int index,TipsyHeader& tipsyHeader,
 		ifTipsy& tipsyInfile);
 	// Description:
 	// reads in an array of the indices of marked particles from a file, 
