@@ -435,8 +435,8 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 		// TODO: make mark file read in parallel
 		// assert to make sure we are not trying to do this in paralle
 		assert(piece==0);
-		vtkDebugMacro("Reading marked point indices from file:" \
-									<< this->MarkFileName);
+		vtkDebugMacro("Reading marked point indices from file:" 
+			<< this->MarkFileName);
 		markedParticleIndices=this->ReadMarkedParticleIndices(tipsyHeader,
 			tipsyInfile);
 		}

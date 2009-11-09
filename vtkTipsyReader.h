@@ -49,7 +49,7 @@ protected:
 	char* MarkFileName;
 	char* FileName;
 	int ReadPositionsOnly;
-	int vtkTipsyReader::RequestInformation(
+	int RequestInformation(
 		vtkInformation*,
 		vtkInformationVector**,
 		vtkInformationVector*);
