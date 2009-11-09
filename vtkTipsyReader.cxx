@@ -121,24 +121,13 @@ vtkstd::vector<int> vtkTipsyReader::ReadMarkedParticleIndices(\
 void vtkTipsyReader::ReadAllParticles(TipsyHeader& tipsyHeader,
 	ifTipsy& tipsyInfile,int piece,int numPieces,vtkPolyData* output)
 {
-	// TODO: implement based on piece, numPieces
 	int pieceSize = floor(tipsyHeader.h_nBodies*1./numPieces);
 	int beginIndex = piece*pieceSize;
 	int endIndex = (piece == numPieces - 1) ? tipsyHeader.h_nBodies : \
 		(piece+1)*pieceSize;
-	// Printing for now
-	// TODO: remove
-	cout <<  "piece=" << piece << " numPieces=" << numPieces 
-		<< " pieceSize=" << pieceSize << " beginIndex=" << beginIndex 
-		<< " endIndex=" << endIndex -1 << " numInPiece=" << endIndex-beginIndex 
-		<< "\n";
-	cout << "tipsy nbodies="<< tipsyHeader.h_nBodies
-		<< ", ndark=" << tipsyHeader.h_nDark 
-		<< ", nsph=" << tipsyHeader.h_nSph 
-		<< ", nstar=" << tipsyHeader.h_nStar << "\n";
 	// Allocates vtk scalars and vector arrays to hold particle data, 
 	this->AllocateAllTipsyVariableArrays(endIndex-beginIndex,output);
-	for(int i=beginIndex; i<endIndex; i++)  // we could have many bodies
+	for(int i=beginIndex; i < endIndex; i++)  
   	{ 
 		this->ReadParticle(i,tipsyHeader,tipsyInfile,output);
   	}
@@ -176,10 +165,8 @@ tipsypos::section_type vtkTipsyReader::SeekToIndex(int index,
 		tipsyInfile.seekg(tipsypos(tipsypos::gas,index));	
 		return tipsypos::gas;
 		}
-	else if(index < tipsyHeader.h_nDark+tipsyHeader.h_nSph	)
+	else if(index < tipsyHeader.h_nDark+tipsyHeader.h_nSph)
 		{
-		// TODO: remove
-		cout << "dark index="<<index << "\n";
 		// we are seeking a dark particle
 		tipsyInfile.seekg(tipsypos(tipsypos::dark,index));
 		return tipsypos::dark;
@@ -451,7 +438,7 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 		{
 		//reading only marked particles
 		// TODO: make mark file read in parallel
-		// assert to make sure we are not trying to do this in paralle
+		// assert to make sure we are not trying to do this in parallel, for now
 		assert(numPieces==1);
 		vtkDebugMacro("Reading marked point indices from file:" 
 			<< this->MarkFileName);
@@ -471,7 +458,7 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 		{
 		//reading only marked particles
 		// TODO: make mark file read in parallel
-		// assert to make sure we are not trying to do this in paralle
+		// assert to make sure we are not trying to do this in parallel, for now
 		assert(numPieces==1);
 		vtkDebugMacro("Reading only the marked points in file: " \
 				<< this->MarkFileName << " from file " << this->FileName);
