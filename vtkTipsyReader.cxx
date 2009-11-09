@@ -170,8 +170,6 @@ void vtkTipsyReader::ReadMarkedParticles(
 tipsypos vtkTipsyReader::SeekToIndex(int index,TipsyHeader& tipsyHeader,
 	ifTipsy& tipsyInfile)
 {
-	// TODO: remove
-	cout << "index="<<index << ",";
 	if(index < tipsyHeader.h_nSph)
 		{
 		// we are seeking a gas particle
@@ -186,6 +184,8 @@ tipsypos vtkTipsyReader::SeekToIndex(int index,TipsyHeader& tipsyHeader,
 		}
 	else if(index < tipsyHeader.h_nBodies)
 		{
+		// TODO: remove
+		cout << "star index="<<index << ",";
 		// we are seeking a star particle
 		tipsyInfile.seekg(tipsypos(tipsypos::star,index));	
 		return tipsypos::star;
