@@ -290,7 +290,7 @@ vtkIdType vtkTipsyReader::ReadParticle(int index, TipsyHeader& tipsyHeader,
   TipsyStarParticle s;
 	tipsypos particleType=this->SeekToIndex(index,
 		tipsyHeader,tipsyInfile);
-  switch(tipsyInfile.tellg().section()) 
+  switch(particleType) 
 		{
    case tipsypos::gas:
      tipsyInfile >> g;
