@@ -4,7 +4,7 @@
        a filter already in ParaView (in Servers/ServerManager/Resources/*.xml)
        that matches your filter and then model your xml on it -->
   <ProxyGroup name="filters">
-   <SourceProxy name="Profile Filter" class="vtkVirialRadiusFilter" label="Profile Filter">
+   <SourceProxy name="Profile Filter" class="vtkVirialRadiusFilter" label="Virial Radius Filter">
      <Documentation
         long_help="Calculates various physical profiles as a func-
 		       tion of radius"
