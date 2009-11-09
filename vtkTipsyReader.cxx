@@ -385,6 +385,7 @@ int vtkTipsyReader::RequestInformation(
 	// means that the data set can be divided into an arbitrary number of pieces
 	outInfo->Set(vtkStreamingDemandDrivenPipeline::MAXIMUM_NUMBER_OF_PIECES(),
 		-1);
+	return 1;
 }
 /*
 * Reads a file, optionally only the marked particles from the file, 
@@ -424,6 +425,8 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 		vtkStreamingDemandDrivenPipeline::UPDATE_PIECE_NUMBER());
 	int numPieces =outInfo->Get(
 		vtkStreamingDemandDrivenPipeline::UPDATE_NUMBER_OF_PIECES());
+	// TODO: remove
+	cout << "piece=" << piece << "numPieces=" << numPieces << "\n";
   // Read the header from the input
 	TipsyHeader tipsyHeader=this->ReadTipsyHeader(tipsyInfile);
 	// Next considering whether to read in a mark file, 
