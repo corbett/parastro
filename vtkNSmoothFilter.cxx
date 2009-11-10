@@ -126,7 +126,7 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 	if (this->PKdTree == NULL)
     {
 		this->PKdTree = this->D3->GetKdtree();
-		cout << "now PkdTree\n";
+		cout << "now Pkdtree\n";
     }
   else
 		{
@@ -134,10 +134,10 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 		}
 	// Building the Kd tree, should already be built
 	// TODO: remove
-//	vtkSmartPointer<vtkPKdTree> pointTree = vtkSmartPointer<vtkPKdTree>::New();
+//	vtkSmartPointer<vtkPkdtree> pointTree = vtkSmartPointer<vtkPkdtree>::New();
 	cout << "building locator/n";
 	this->PKdTree->BuildLocator();
-	this->PkdTree->Update();
+	this->PKdTree->Update();
 	// Allocating arrays to store our smoothed values
 	// smoothed density
  	AllocateDoubleDataArray(output,"smoothed density", 
