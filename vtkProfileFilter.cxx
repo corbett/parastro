@@ -17,7 +17,7 @@
 #include "vtkSortDataArray.h"
 #include "vtkMath.h"
 #include "vtkInformationDataObjectKey.h"
-#include "vtkPolyData.h" // helper functions take this as argument
+#include "vtkPointSet.h" // helper functions take this as argument
 #include "vtkMultiProcessController.h"
 #include <cmath>
 using vtkstd::string;
@@ -104,7 +104,7 @@ int vtkProfileFilter::FillInputPortInformation (int port,
                                                    vtkInformation *info)
 {
   this->Superclass::FillInputPortInformation(port, info);
-  info->Set(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), "vtkPolyData");
+  info->Set(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), "vtkPointSet");
   return 1;
 }
 
@@ -114,7 +114,7 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 	vtkInformationVector *outputVector)
 {
 	// Now we can get the input with which we want to work
- 	vtkPolyData* input = vtkPolyData::GetData(inputVector[0]);
+ 	vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
 	vtkTable* const output = vtkTable::GetData(outputVector,0);
 	output->Initialize();
 	// Setting the center based upon the selection in the GUI
@@ -176,7 +176,7 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 }
 
 //----------------------------------------------------------------------------
-void vtkProfileFilter::MergeTables(vtkPolyData* input,
+void vtkProfileFilter::MergeTables(vtkPointSet* input,
 	vtkTable* originalTable, vtkTable* tableToMerge)
 {
 	assert(originalTable->GetNumberOfRows()==tableToMerge->GetNumberOfRows());
@@ -233,7 +233,7 @@ double* vtkProfileFilter::CalculateCenter(vtkDataSet* source)
 }
 
 //----------------------------------------------------------------------------
-void vtkProfileFilter::SetBoundsAndBinExtents(vtkPolyData* input, 
+void vtkProfileFilter::SetBoundsAndBinExtents(vtkPointSet* input, 
 	vtkDataSet* source)
 {
 	if(RunInParallel(this->Controller))
@@ -302,7 +302,7 @@ int vtkProfileFilter::GetBinNumber(double x[])
 
 
 //----------------------------------------------------------------------------
-void vtkProfileFilter::InitializeBins(vtkPolyData* input,
+void vtkProfileFilter::InitializeBins(vtkPointSet* input,
 	vtkTable* output)
 {
 	// the first column will be the bin radius
@@ -355,7 +355,7 @@ double vtkProfileFilter::CalculateBinSpacing(double maxR,int binNumber)
 }
 
 //----------------------------------------------------------------------------
-void vtkProfileFilter::UpdateStatistics(vtkPolyData* input,vtkTable* output)
+void vtkProfileFilter::UpdateStatistics(vtkPointSet* input,vtkTable* output)
 {
 	for(int nextPointId = 0;
 	 		nextPointId < input->GetPoints()->GetNumberOfPoints();
@@ -366,7 +366,7 @@ void vtkProfileFilter::UpdateStatistics(vtkPolyData* input,vtkTable* output)
 }
 
 //----------------------------------------------------------------------------
-void vtkProfileFilter::UpdateBinStatistics(vtkPolyData* input,
+void vtkProfileFilter::UpdateBinStatistics(vtkPointSet* input,
  	vtkIdType pointGlobalId,vtkTable* output)
 {
 	double* x = GetPoint(input,pointGlobalId);
@@ -417,7 +417,7 @@ void vtkProfileFilter::UpdateBinStatistics(vtkPolyData* input,
 
 //----------------------------------------------------------------------------
 void 	vtkProfileFilter::BinAveragesAndPostprocessing(
-	vtkPolyData* input,vtkTable* output)
+	vtkPointSet* input,vtkTable* output)
 {
 	for(int binNum = 0; binNum < this->BinNumber; ++binNum)
 		{

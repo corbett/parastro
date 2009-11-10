@@ -20,7 +20,7 @@
 #include "vtkTableAlgorithm.h" // super class
 #include "vtkStringArray.h" // some class variables are vtkStringArrays
 
-class vtkPolyData;
+class vtkPointSet;
 class vtkMultiProcessController;
 //----------------------------------------------------------------------------
 
@@ -161,7 +161,7 @@ protected:
 	// based upon the user's input and the boundaries of the dataset. Also
 	// calculates the bin spacing based on the center, maxR and the user's 
 	// desired number of bins
-	void SetBoundsAndBinExtents(vtkPolyData* input, vtkDataSet* source);
+	void SetBoundsAndBinExtents(vtkPointSet* input, vtkDataSet* source);
 
 	// Description:
 	// SetBoundsAndBinExtents must have been called first.
@@ -177,7 +177,7 @@ protected:
 	//
 	// For each cumulative array as specified by the CumulativeQuantitiesArray
 	//
-	void InitializeBins(vtkPolyData* input, vtkTable* output);
+	void InitializeBins(vtkPointSet* input, vtkTable* output);
 
 	// Description:
 	// Calculates the bin spacing 
@@ -187,7 +187,7 @@ protected:
 	// For each point in the input, update the relevant bins and bin columns
 	// to reflect this point's data. Finally compute the averages, relevant
 	// dispersions, and global statistics.
-	void UpdateStatistics(vtkPolyData* input,vtkTable* output);
+	void UpdateStatistics(vtkPointSet* input,vtkTable* output);
 
 	// Description:
 	// For each quantity initialized in InitializeBins updates the statistics
@@ -197,7 +197,7 @@ protected:
 	// why after all points have updated the bin statistics,
 	// BinAveragesAndPostprocessing must be called to do the proper averaging
 	// and/or postprocessing on  the accumlated columns.
-	void UpdateBinStatistics(vtkPolyData* input, 
+	void UpdateBinStatistics(vtkPointSet* input, 
 		vtkIdType pointGlobalId,vtkTable* output);
 	
 	// Description:
@@ -277,12 +277,12 @@ protected:
    // After all points have updated the bin statistics, UpdateBinAverages
 	// must be called to do the proper averaging and/or postprocessing on 
 	// the accumlated columns.
-	void BinAveragesAndPostprocessing(vtkPolyData* input, vtkTable* output);
+	void BinAveragesAndPostprocessing(vtkPointSet* input, vtkTable* output);
 
 	// Description:
 	// merges tableToMerge into originalTable by adding each row,column in
 	// tableToMerge to the corresponding row,column in originalTable
-	void MergeTables(vtkPolyData* input, vtkTable* originalTable,
+	void MergeTables(vtkPointSet* input, vtkTable* originalTable,
 		vtkTable* tableToMerge);
 	// Description:
 	// helper function for MergeTables, to merge two bins by addition, making
