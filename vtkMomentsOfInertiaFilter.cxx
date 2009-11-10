@@ -156,6 +156,7 @@ int vtkMomentsOfInertiaFilter::RequestData(vtkInformation*,
   // get input and output data
   vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
   vtkPolyData* output = vtkPolyData::GetData(outputVector);
+	output->Initialize();
 	// computing the center of mass, works in parallel if necessary
 	vtkSmartPointer<vtkCenterOfMassFilter> centerOfMassFilter = \
 		vtkSmartPointer<vtkCenterOfMassFilter>::New();
