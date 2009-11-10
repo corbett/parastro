@@ -123,6 +123,7 @@ double* vtkCenterOfMassFilter::ComputeCenterOfMass(vtkPointSet* input,
 	centerOfMassTest[0]=0;
 	centerOfMassTest[1]=0;
 	centerOfMassTest[2]=0;
+	return centerOfMassTest;
 	// testing to make sure we can get to work with D3
 	if(RunInParallel(this->Controller))
 		{
@@ -136,6 +137,7 @@ double* vtkCenterOfMassFilter::ComputeCenterOfMass(vtkPointSet* input,
 			// Sending to root
 			this->Controller->Send(totalMass,1,0,TOTAL_MASS);
 			this->Controller->Send(totalWeightedMass,3,0,TOTAL_WEIGHTED_MASS);
+			// TODO: swtich back return statements
 			return centerOfMassTest;
 //			return NULL;
 			}
