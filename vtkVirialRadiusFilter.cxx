@@ -17,7 +17,8 @@
 #include "vtkDataSet.h"
 #include "vtkMath.h"
 #include "vtkInformationDataObjectKey.h"
-#include "vtkPolyData.h" // helper functions take this as argument
+#include "vtkPolyData.h" 
+#include "vtkPointSet.h" 
 #include <cmath>
 using vtkstd::string;
 
@@ -95,7 +96,7 @@ int vtkVirialRadiusFilter::RequestData(vtkInformation *request,
 }
 
 //----------------------------------------------------------------------------
-void vtkVirialRadiusFilter::CalculateAndSetBounds(vtkPolyData* input, 
+void vtkVirialRadiusFilter::CalculateAndSetBounds(vtkPointSet* input, 
 	vtkDataSet* source)
 {
 	//TODO: this can later be done as in the XML documentation for this filter; 	  

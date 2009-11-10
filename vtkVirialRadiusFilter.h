@@ -21,6 +21,7 @@
 #include "vtkStringArray.h" // some class variables are vtkStringArrays
 
 class vtkPolyData;
+class vtkPointSet;
 class vtkDataSet;
 //----------------------------------------------------------------------------
 enum BinUpdateType
@@ -93,7 +94,7 @@ protected:
 	// Description:
   // Calculates the center and the maximum distance from the center
 	// based upon the user's input and the boundaries of the dataset.
-	void CalculateAndSetBounds(vtkPolyData* input, vtkDataSet* source);
+	void CalculateAndSetBounds(vtkPointSet* input, vtkDataSet* source);
   virtual int FillInputPortInformation (int port, vtkInformation *info);
 private:
   vtkVirialRadiusFilter(const vtkVirialRadiusFilter&); // Not implemented
