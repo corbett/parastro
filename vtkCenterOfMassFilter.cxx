@@ -136,9 +136,7 @@ double* vtkCenterOfMassFilter::ComputeCenterOfMass(vtkPointSet* input,
 			// Sending to root
 			this->Controller->Send(totalMass,1,0,TOTAL_MASS);
 			this->Controller->Send(totalWeightedMass,3,0,TOTAL_WEIGHTED_MASS);
-			return centerOfMassTest;
-			//TODO: remove
-//			return NULL;
+			return NULL;
 			}
 		else
 			{
@@ -165,7 +163,7 @@ double* vtkCenterOfMassFilter::ComputeCenterOfMass(vtkPointSet* input,
 					}
 				*/
 				}
-			// TODO: add back in
+			// TODO: add back in other stuff, remove this
 			return centerOfMassTest;
 			/*
 			double* centerOfMassFinal = \
