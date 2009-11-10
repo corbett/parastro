@@ -123,6 +123,8 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
   this->D3->SetController(this->Controller);
   this->D3->Modified();
   this->D3->Update();
+	this->D3->Execute();
+
 	if (this->PKdTree == NULL)
     {
 		this->PKdTree = this->D3->GetKdtree();
