@@ -198,7 +198,7 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 		// we are in serial or at process 0
 		float* centerOfMass = DoublePointToFloat(dbCenterOfMass);
 		// Placing the point's data in the output
-		SetPointValue(output,centerOfMass); 
+		//SetPointValue(output,centerOfMass); 
 		// finally, some memory management
 		delete [] dbCenterOfMass;
 		delete [] centerOfMass;
