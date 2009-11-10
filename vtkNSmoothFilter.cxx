@@ -110,19 +110,19 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 	// TODO: remove-just seeing if I understand how this filter accepts input
 	if (this->D3 == NULL)
     {
-		cout << "D3!!\n";
+		cout << "NO D3!!\n";
     }
   else
 		{
-			cout<<"NO D3\n";
+			cout<<"D3!!\n";
 		}
 	if (this->PKdTree == NULL)
     {
-		cout << "PkdTree!!\n";
+		cout << "no PkdTree\n";
     }
   else
 		{
-			cout<<"no pkdtree\n";
+			cout<<"Pkdtree!!\n";
 		}
 	// Building the Kd tree
 	vtkSmartPointer<vtkPKdTree> pointTree = vtkSmartPointer<vtkPKdTree>::New();
