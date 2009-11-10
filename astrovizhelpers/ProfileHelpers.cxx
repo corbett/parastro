@@ -231,7 +231,7 @@ template <class T> void shiftLeftUpdate(T* array,int size, T updateValue)
 	array[size-1]=updateValue;
 }
 //----------------------------------------------------------------------------
-vtkPolyData* CopyPolyPointsAndData(vtkPolyData* dataSet, vtkIdList*
+vtkPointSet* CopyPointsAndData(vtkPointSet* dataSet, vtkIdList*
  	pointsInRadius)
 {
 	// TODO: I was using CopyCells method of vtkPolyData
@@ -239,10 +239,9 @@ vtkPolyData* CopyPolyPointsAndData(vtkPolyData* dataSet, vtkIdList*
 	// go back to finding the way using the VTK api to do this
 	int numNewPoints=pointsInRadius->GetNumberOfIds();
 	// Initilizing
-	vtkPolyData* newDataSet = vtkPolyData::New(); // this memory must be managed
+	vtkPointSet* newDataSet = vtkPolyData::New(); // this memory must be managed
 		// Initializing points and verts
 	  newDataSet->SetPoints(vtkSmartPointer<vtkPoints>::New());
-		newDataSet->SetVerts(vtkSmartPointer<vtkCellArray>::New());
 	  // Initializing data
 	vtkSmartPointer<vtkDataArray> nextArray;
 	for(int i = 0; i < dataSet->GetPointData()->GetNumberOfArrays(); ++i)
@@ -282,7 +281,7 @@ vtkPolyData* CopyPolyPointsAndData(vtkPolyData* dataSet, vtkIdList*
 
 
 //----------------------------------------------------------------------------
-vtkPolyData* GetDatasetWithinVirialRadius(VirialRadiusInfo virialRadiusInfo)
+vtkPointSet* GetDatasetWithinVirialRadius(VirialRadiusInfo virialRadiusInfo)
 {
 
 	vtkSmartPointer<vtkIdList> pointsInRadius = \
@@ -295,8 +294,8 @@ vtkPolyData* GetDatasetWithinVirialRadius(VirialRadiusInfo virialRadiusInfo)
 		vtkPolyData::SafeDownCast(virialRadiusInfo.locator->GetDataSet());	
 	// Creating a new dataset
 	// first allocating
-	vtkPolyData* newDataSet = \
-		CopyPolyPointsAndData(dataSet,pointsInRadius);
+	vtkPointSet* newDataSet = \
+		CopyPointsAndData(dataSet,pointsInRadius);
 	return newDataSet;
 }
 

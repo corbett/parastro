@@ -82,7 +82,7 @@ int vtkVirialRadiusFilter::RequestData(vtkInformation *request,
 		{
 		vtkWarningMacro("virial radius is " << virialRadiusInfo.virialRadius);
 		//setting the dataSet to this newInput
-		vtkPolyData* newDataSet = \
+		vtkPointSet* newDataSet = \
 			GetDatasetWithinVirialRadius(virialRadiusInfo);
 		output->DeepCopy(newDataSet);
 		newDataSet->Delete();
