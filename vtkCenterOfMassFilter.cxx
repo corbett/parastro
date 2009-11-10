@@ -116,7 +116,7 @@ double* vtkCenterOfMassFilter::ComputeCenterOfMass(vtkPointSet* input,
 {
 	// TODO: remove this
 	return NULL;
-	cout <<< "how?\n";
+	cout << "how?\n";
 	// TODO: use the massArrayName
 	// Allocating data arrays and setting to zero
 	double totalMass[1];
