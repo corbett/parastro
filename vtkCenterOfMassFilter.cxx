@@ -192,7 +192,7 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 	double* dbCenterOfMass=this->ComputeCenterOfMass(input,"mass");
 	if(dbCenterOfMass!=NULL)
 		{
-		cout << "not null COM is " << dbCenterOfMass[0] ","
+		cout << "not null COM is " << dbCenterOfMass[0] << ","
 		 	<< dbCenterOfMass[1] << ","
 			<< dbCenterOfMass[2] << "\n";
 		// we are in serial or at process 0
