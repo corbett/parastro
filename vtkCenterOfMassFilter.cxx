@@ -122,8 +122,9 @@ double* vtkCenterOfMassFilter::ComputeCenterOfMass(vtkPointSet* input,
 	// testing to make sure we can get to work with D3
 	double centerOfMassFinal=new double[3];
 	centerOfMassFinal[0]=0;
-	centerOfMassFinal[1]=1;
-	centerOfMassFinal[2]=2;
+	centerOfMassFinal[1]=0;
+	centerOfMassFinal[2]=0;
+	cout << "COM inc FINAL ret\n";
 	return centerOfMassFinal;
 	/*
 	if(RunInParallel(this->Controller))
