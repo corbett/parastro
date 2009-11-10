@@ -119,14 +119,11 @@ double* vtkCenterOfMassFilter::ComputeCenterOfMass(vtkPointSet* input,
 	double totalMass[1];
 	double totalWeightedMass[3];
 	// TODO: add back in, rest, remove this
+	double* centerOfMassTest=new double[3];
+	centerOfMassTest[0]=0;
+	centerOfMassTest[1]=0;
+	centerOfMassTest[2]=0;
 	// testing to make sure we can get to work with D3
-	double* centerOfMassFinal=new double[3];
-	centerOfMassFinal[0]=0;
-	centerOfMassFinal[1]=0;
-	centerOfMassFinal[2]=0;
-	cout << "COM inc FINAL ret\n";
-	return centerOfMassFinal;
-	/*
 	if(RunInParallel(this->Controller))
 		{
 		int procId=this->Controller->GetLocalProcessId();
@@ -139,7 +136,9 @@ double* vtkCenterOfMassFilter::ComputeCenterOfMass(vtkPointSet* input,
 			// Sending to root
 			this->Controller->Send(totalMass,1,0,TOTAL_MASS);
 			this->Controller->Send(totalWeightedMass,3,0,TOTAL_WEIGHTED_MASS);
-			return NULL;
+			return centerOfMassTest;
+			//TODO: remove
+//			return NULL;
 			}
 		else
 			{
@@ -156,17 +155,25 @@ double* vtkCenterOfMassFilter::ComputeCenterOfMass(vtkPointSet* input,
 				this->Controller->Receive(recTotalWeightedMass,
 					3,proc,TOTAL_WEIGHTED_MASS);
 				// Updating
+				// TODO: add back in
+				/*
 				totalMass[0]+=recTotalMass[0];
 				for(int i = 0; i < 3; ++i)
 					{
 					totalWeightedMass[i]+=recTotalWeightedMass[i];
+					
 					}
+				*/
 				}
+			// TODO: add back in
+			return centerOfMassTest;
+			/*
 			double* centerOfMassFinal = \
 			this->ComputeCenterOfMassFinal(input,totalMass[0],
 				totalWeightedMass);
 			// Memory management
 			return centerOfMassFinal;
+			*/
 			}
 		}
 	else
@@ -177,7 +184,6 @@ double* vtkCenterOfMassFilter::ComputeCenterOfMass(vtkPointSet* input,
 			this->ComputeCenterOfMassFinal(input,totalMass[0],totalWeightedMass);
 		return centerOfMassFinal;
 		}
-		*/
 }
 
 //----------------------------------------------------------------------------
