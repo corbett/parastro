@@ -26,9 +26,11 @@
 
 #ifndef __vtkNSmoothFilter_h
 #define __vtkNSmoothFilter_h
-
 #include "vtkPointSetAlgorithm.h"
+
 class vtkMultiProcessController;
+class vtkPKdTree;
+class vtkDistributedDataFilter;
 class VTK_GRAPHICS_EXPORT vtkNSmoothFilter : public vtkPointSetAlgorithm
 {
 public:
@@ -44,6 +46,15 @@ public:
   // By defualt this filter uses the global controller,
   // but this method can be used to set another instead.
   virtual void SetController(vtkMultiProcessController*);
+  vtkGetObjectMacro(Controller, vtkMultiProcessController);
+  // Description:
+  // Set the vtkPKdTree to distribute with.
+  virtual void SetPKdTree(vtkPKdTree*);
+  vtkGetObjectMacro(PKdTree, vtkPKdTree);
+  // Description:
+  // Set/get some internal filters.
+  vtkGetObjectMacro(D3, vtkDistributedDataFilter);
+  virtual void SetD3(vtkDistributedDataFilter*);
 
 //BTX
 protected:
@@ -59,6 +70,8 @@ protected:
     vtkInformationVector*);
   int NeighborNumber;
   vtkMultiProcessController *Controller;
+  vtkDistributedDataFilter *D3;
+  vtkPKdTree *PKdTree;
 
 private:
   vtkNSmoothFilter(const vtkNSmoothFilter&);  // Not implemented.

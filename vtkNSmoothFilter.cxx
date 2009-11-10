@@ -17,13 +17,18 @@
 #include "vtkDataArray.h"
 #include "vtkMath.h"
 #include "vtkMultiProcessController.h"
+#include "vtkPKdTree.h";
+#include "vtkDistributedDataFilter.h";
 #include "astrovizhelpers/DataSetHelpers.h"
 
 using vtkstd::string;
 
 vtkCxxRevisionMacro(vtkNSmoothFilter, "$Revision: 1.72 $");
 vtkStandardNewMacro(vtkNSmoothFilter);
-vtkCxxSetObjectMacro(vtkNSmoothFilter,Controller, vtkMultiProcessController);
+vtkCxxSetObjectMacro(vtkNSmoothFilter,Controller,vtkMultiProcessController);
+vtkCxxSetObjectMacro(vtkNSmoothFilter,PKdTree,vtkPKdTree);
+vtkCxxSetObjectMacro(vtkNSmoothFilter,D3,vtkDistributedDataFilter);
+
 
 
 //----------------------------------------------------------------------------
@@ -31,14 +36,18 @@ vtkNSmoothFilter::vtkNSmoothFilter()
 {
   this->NeighborNumber = 50; //default
   this->Controller = NULL;
+  this->PKdTree = NULL;
+  this->D3 = NULL;
+
   this->SetController(vtkMultiProcessController::GetGlobalController());
 }
 
 //----------------------------------------------------------------------------
 vtkNSmoothFilter::~vtkNSmoothFilter()
 {
-	this->SetController(0);
- 	
+  this->SetPKdTree(NULL);
+  this->SetController(NULL);
+  this->SetD3(NULL);
 }
 
 //----------------------------------------------------------------------------
@@ -98,6 +107,23 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
   output->CopyStructure(input);
 	// copies the point attributes
   output->CopyAttributes(input);
+	// TODO: remove-just seeing if I understand how this filter accepts input
+	if (this->D3 == NULL)
+    {
+		cout << "D3!!\n";
+    }
+  else
+		{
+			cout<<"NO D3\n";
+		}
+	if (this->PKdTree == NULL)
+    {
+		cout << "PkdTree!!\n";
+    }
+  else
+		{
+			cout<<"no pkdtree\n";
+		}
 	// Building the Kd tree
 	vtkSmartPointer<vtkPKdTree> pointTree = vtkSmartPointer<vtkPKdTree>::New();
 	pointTree->BuildLocatorFromPoints(input);
