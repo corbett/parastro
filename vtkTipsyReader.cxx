@@ -167,13 +167,17 @@ tipsypos::section_type vtkTipsyReader::SeekToIndex(int index,
 		}
 	else if(index < tipsyHeader.h_nDark+tipsyHeader.h_nSph)
 		{
-		// we are seeking a dark particle
+		// we are seeking a dark particle, which begin at index 0 after
+		// gas particles
+		index-=tipsyHeader.h_nSph;
 		tipsyInfile.seekg(tipsypos(tipsypos::dark,index));
 		return tipsypos::dark;
 		}
 	else if(index < tipsyHeader.h_nBodies)
 		{
-		// we are seeking a star particle
+		// we are seeking a star particle, which begin at index zero after gas
+		// and dark particles
+		index-=(tipsyHeader.h_nSph+tipsyHeader.h_nDark);
 		tipsyInfile.seekg(tipsypos(tipsypos::star,index));	
 		return tipsypos::star;
 		}
