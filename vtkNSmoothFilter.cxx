@@ -127,6 +127,7 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 	if (this->PKdTree == NULL)
     {
 		this->PKdTree = this->D3->GetKdtree();
+		this->PKdTree->SetController(this->Controller);
 		cout << "now Pkdtree\n";
     }
   else
