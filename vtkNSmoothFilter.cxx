@@ -138,7 +138,7 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 	cout << "building locator/n";
 	this->PKdTree->BuildLocator();
 	// TODO: remove this
-	return; 
+	return 1; 
 	// Allocating arrays to store our smoothed values
 	// smoothed density
  	AllocateDoubleDataArray(output,"smoothed density", 
