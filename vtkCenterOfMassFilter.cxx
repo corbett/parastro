@@ -118,6 +118,14 @@ double* vtkCenterOfMassFilter::ComputeCenterOfMass(vtkPointSet* input,
 	// Allocating data arrays and setting to zero
 	double totalMass[1];
 	double totalWeightedMass[3];
+	// TODO: add back in, rest, remove this
+	// testing to make sure we can get to work with D3
+	double centerOfMassFinal=new double[3];
+	centerOfMassFinal[0]=0;
+	centerOfMassFinal[1]=1;
+	centerOfMassFinal[2]=2;
+	return centerOfMassFinal;
+	/*
 	if(RunInParallel(this->Controller))
 		{
 		int procId=this->Controller->GetLocalProcessId();
@@ -168,6 +176,7 @@ double* vtkCenterOfMassFilter::ComputeCenterOfMass(vtkPointSet* input,
 			this->ComputeCenterOfMassFinal(input,totalMass[0],totalWeightedMass);
 		return centerOfMassFinal;
 		}
+		*/
 }
 
 //----------------------------------------------------------------------------
@@ -188,9 +197,7 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 		// we are in serial or at process 0
 		float* centerOfMass = DoublePointToFloat(dbCenterOfMass);
 		// Placing the point's data in the output
-		// TODO: add back in, seeing if this is simply th eproblem in parallel 
-		// with D3
-//		SetPointValue(output,centerOfMass); 
+		SetPointValue(output,centerOfMass); 
 		// finally, some memory management
 		delete [] dbCenterOfMass;
 		delete [] centerOfMass;
