@@ -120,7 +120,7 @@ double* vtkCenterOfMassFilter::ComputeCenterOfMass(vtkPointSet* input,
 	double totalWeightedMass[3];
 	// TODO: add back in, rest, remove this
 	// testing to make sure we can get to work with D3
-	double centerOfMassFinal=new double[3];
+	double* centerOfMassFinal=new double[3];
 	centerOfMassFinal[0]=0;
 	centerOfMassFinal[1]=0;
 	centerOfMassFinal[2]=0;
