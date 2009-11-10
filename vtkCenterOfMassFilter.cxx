@@ -48,6 +48,15 @@ int vtkCenterOfMassFilter::FillInputPortInformation(int, vtkInformation* info)
   return 1;
 }
 //----------------------------------------------------------------------------
+int vtkCenterOfMassFilter::FillOutputPortInformation(
+  int vtkNotUsed(port), vtkInformation* info)
+{
+  // now add our info
+  info->Set(vtkDataObject::DATA_TYPE_NAME(), "vtkPolyData");
+  return 1;
+}
+
+//----------------------------------------------------------------------------
 double* vtkCenterOfMassFilter::ComputeCenterOfMassFinal(
 	vtkPointSet* input,double& totalMass,double totalWeightedMass[])
 {
@@ -181,15 +190,15 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
   vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
 	// Place result in output
 	// need to output point set, otherwise D3 is VERY unhappy
-	vtkPointSet* output = vtkPointSet::GetData(outputVector);
+//	vtkPointSet* output = vtkPointSet::GetData(outputVector);
+	vtkPolyData* output = vtkPolyData::GetData(outputVector);
+	// need to output point set, otherwise D3 is VERY unhappy
 	output->SetPoints(vtkSmartPointer<vtkPoints>::New());
+	output->SetVerts(vtkSmartPointer<vtkCellArray>::New());
 	// TODO: actually use array name
 	double* dbCenterOfMass=this->ComputeCenterOfMass(input,"mass");
 	if(dbCenterOfMass!=NULL)
 		{
-		cout << "not null COM is " << dbCenterOfMass[0] << ","
-		 	<< dbCenterOfMass[1] << ","
-			<< dbCenterOfMass[2] << "\n";
 		// we are in serial or at process 0
 		float* centerOfMass = DoublePointToFloat(dbCenterOfMass);
 		// Placing the point's data in the output
