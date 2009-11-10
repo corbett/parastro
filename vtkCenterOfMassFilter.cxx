@@ -116,7 +116,6 @@ double* vtkCenterOfMassFilter::ComputeCenterOfMass(vtkPointSet* input,
 {
 	// TODO: remove this
 	return NULL;
-	cout << "how?\n";
 	// TODO: use the massArrayName
 	// Allocating data arrays and setting to zero
 	double totalMass[1];
@@ -182,9 +181,13 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
   // Get input and output data.
   vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
 	// Place result in output
+	/*
   vtkPolyData* output = vtkPolyData::GetData(outputVector);
 	output->SetPoints(vtkSmartPointer<vtkPoints>::New());
 	output->SetVerts(vtkSmartPointer<vtkCellArray>::New());
+	*/
+	vtkPointSet* output = vtkPointSet:GetData(outputVector);
+	output->Initialize();
 	// TODO: actually use array name
 	double* dbCenterOfMass=this->ComputeCenterOfMass(input,"mass");
 	if(dbCenterOfMass!=NULL)
