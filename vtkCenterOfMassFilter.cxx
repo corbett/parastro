@@ -114,8 +114,7 @@ double* vtkCenterOfMassFilter::ComputeWeightedMass(double& mass,double* point)
 double* vtkCenterOfMassFilter::ComputeCenterOfMass(vtkPointSet* input,
 	vtkstd::string massArrayName)
 {
-	// TODO: remove this
-	return NULL;
+
 	// TODO: use the massArrayName
 	// Allocating data arrays and setting to zero
 	double totalMass[1];
@@ -192,7 +191,7 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 	double* dbCenterOfMass=this->ComputeCenterOfMass(input,"mass");
 	if(dbCenterOfMass!=NULL)
 		{
-		cout << "NOT NULL\n";
+		cout << "not null \n";
 		// we are in serial or at process 0
 		float* centerOfMass = DoublePointToFloat(dbCenterOfMass);
 		// Placing the point's data in the output
@@ -202,6 +201,5 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 		delete [] dbCenterOfMass;
 		delete [] centerOfMass;
 		}
-	cout << "BEFORE RETURN\n";
   return 1;
 }
