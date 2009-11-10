@@ -17,8 +17,8 @@
 #include "vtkDataArray.h"
 #include "vtkMath.h"
 #include "vtkMultiProcessController.h"
-#include "vtkPKdTree.h";
-#include "vtkDistributedDataFilter.h";
+#include "vtkPKdTree.h"
+#include "vtkDistributedDataFilter.h"
 #include "vtkCallbackCommand.h"
 #include "astrovizhelpers/DataSetHelpers.h"
 
