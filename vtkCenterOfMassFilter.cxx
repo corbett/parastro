@@ -185,18 +185,20 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 	output->SetPoints(vtkSmartPointer<vtkPoints>::New());
 	output->SetVerts(vtkSmartPointer<vtkCellArray>::New());
 	*/
+	// need to output point set, otherwise D3 is VERY unhappy
 	vtkPointSet* output = vtkPointSet::GetData(outputVector);
 	output->Initialize();
 	// TODO: actually use array name
 	double* dbCenterOfMass=this->ComputeCenterOfMass(input,"mass");
 	if(dbCenterOfMass!=NULL)
 		{
-		cout << "not null \n";
+		cout << "not null COM is " << dbCenterOfMass[0] ","
+		 	<< dbCenterOfMass[1] << ","
+			<< dbCenterOfMass[2] << "\n";
 		// we are in serial or at process 0
 		float* centerOfMass = DoublePointToFloat(dbCenterOfMass);
 		// Placing the point's data in the output
-		//TODO: add back in
-//		SetPointValue(output,centerOfMass); 
+		SetPointValue(output,centerOfMass); 
 		// finally, some memory management
 		delete [] dbCenterOfMass;
 		delete [] centerOfMass;

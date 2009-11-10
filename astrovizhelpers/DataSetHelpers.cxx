@@ -82,6 +82,12 @@ void CreateSphere(vtkPolyData* output,double radius,double center[])
 * Work with VtkPointSet
 *
 *---------------------------------------------------------------------------*/
+//----------------------------------------------------------------------------
+vtkIdType SetPointValue(vtkPointSet* output,float pos[])
+{
+	vtkIdType id=output->GetPoints()->InsertNextPoint(pos);
+	return id;
+}
 
 //----------------------------------------------------------------------------
 void AllocateDataArray(vtkPointSet* output, const char* arrayName,\
