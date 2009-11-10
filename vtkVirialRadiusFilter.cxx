@@ -17,7 +17,6 @@
 #include "vtkDataSet.h"
 #include "vtkMath.h"
 #include "vtkInformationDataObjectKey.h"
-#include "vtkPolyData.h" 
 #include "vtkPointSet.h" 
 #include <cmath>
 using vtkstd::string;
@@ -53,21 +52,13 @@ void vtkVirialRadiusFilter::SetSourceConnection(vtkAlgorithmOutput* algOutput)
   this->SetInputConnection(1, algOutput);
 }
 
-int vtkVirialRadiusFilter::FillInputPortInformation (int port, 
-	vtkInformation *info)
-{
-  this->Superclass::FillInputPortInformation(port, info);
-  info->Set(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), "vtkPolyData");
-  return 1;
-}
-
 //----------------------------------------------------------------------------
 int vtkVirialRadiusFilter::RequestData(vtkInformation *request,
 																	vtkInformationVector **inputVector,
 																	vtkInformationVector *outputVector)
 {
 	// Now we can get the input with which we want to work
- 	vtkPolyData* dataSet = vtkPolyData::GetData(inputVector[0]);
+ 	vtkPointSet* dataSet = vtkPointSet::GetData(inputVector[0]);
 	// Setting the center based upon the selection in the GUI
 	vtkDataSet* pointInfo = vtkDataSet::GetData(inputVector[1]);
 	vtkPointSet* output = vtkPointSet::GetData(outputVector,0);

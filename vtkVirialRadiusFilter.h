@@ -20,7 +20,6 @@
 #include "vtkPointSetAlgorithm.h"
 #include "vtkStringArray.h" // some class variables are vtkStringArrays
 
-class vtkPolyData;
 class vtkPointSet;
 class vtkDataSet;
 //----------------------------------------------------------------------------
@@ -95,7 +94,7 @@ protected:
   // Calculates the center and the maximum distance from the center
 	// based upon the user's input and the boundaries of the dataset.
 	void CalculateAndSetBounds(vtkPointSet* input, vtkDataSet* source);
-  virtual int FillInputPortInformation (int port, vtkInformation *info);
+
 private:
   vtkVirialRadiusFilter(const vtkVirialRadiusFilter&); // Not implemented
   void operator=(const vtkVirialRadiusFilter&); // Not implemented
