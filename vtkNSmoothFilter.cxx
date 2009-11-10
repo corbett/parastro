@@ -123,7 +123,6 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
   this->D3->SetController(this->Controller);
   this->D3->Modified();
   this->D3->Update();
-	this->D3->Execute();
 
 	if (this->PKdTree == NULL)
     {
@@ -137,10 +136,8 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 	// Building the Kd tree, should already be built
 	// TODO: remove
 //	vtkSmartPointer<vtkPkdtree> pointTree = vtkSmartPointer<vtkPkdtree>::New();
-	cout << "building locator\n";
-	this->PKdTree->BuildLocator();
-	this->PKdTree->Modified();
-	this->PKdTree->Update();
+	cout << "building locator from input \n";
+	this->PKdTree->BuildLocatorFromPoints(input);
 	cout << " done with locator \n";
 	return 1;
 	// Allocating arrays to store our smoothed values
