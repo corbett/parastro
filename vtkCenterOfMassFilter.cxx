@@ -188,7 +188,9 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 		// we are in serial or at process 0
 		float* centerOfMass = DoublePointToFloat(dbCenterOfMass);
 		// Placing the point's data in the output
-		SetPointValue(output,centerOfMass); 
+		// TODO: add back in, seeing if this is simply th eproblem in parallel 
+		// with D3
+//		SetPointValue(output,centerOfMass); 
 		// finally, some memory management
 		delete [] dbCenterOfMass;
 		delete [] centerOfMass;
