@@ -186,7 +186,7 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 	output->SetPoints(vtkSmartPointer<vtkPoints>::New());
 	output->SetVerts(vtkSmartPointer<vtkCellArray>::New());
 	*/
-	vtkPointSet* output = vtkPointSet:GetData(outputVector);
+	vtkPointSet* output = vtkPointSet::GetData(outputVector);
 	output->Initialize();
 	// TODO: actually use array name
 	double* dbCenterOfMass=this->ComputeCenterOfMass(input,"mass");
