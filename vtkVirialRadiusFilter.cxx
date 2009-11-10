@@ -53,6 +53,15 @@ void vtkVirialRadiusFilter::SetSourceConnection(vtkAlgorithmOutput* algOutput)
 }
 
 //----------------------------------------------------------------------------
+int vtkVirialRadiusFilter::FillInputPortInformation (int port, 
+	vtkInformation *info)
+{
+  this->Superclass::FillInputPortInformation(port, info);
+  info->Set(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), "vtkPointSet");
+  return 1;
+}
+
+//----------------------------------------------------------------------------
 int vtkVirialRadiusFilter::RequestData(vtkInformation *request,
 																	vtkInformationVector **inputVector,
 																	vtkInformationVector *outputVector)
