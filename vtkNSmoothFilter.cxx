@@ -19,6 +19,7 @@
 #include "vtkMultiProcessController.h"
 #include "vtkPKdTree.h";
 #include "vtkDistributedDataFilter.h";
+#include "vtkCallbackCommand.h"
 #include "astrovizhelpers/DataSetHelpers.h"
 
 using vtkstd::string;
@@ -111,22 +112,32 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 	if (this->D3 == NULL)
     {
 		cout << "NO D3!!\n";
+	  this->D3 = vtkDistributedDataFilter::New();
     }
   else
 		{
 			cout<<"D3!!\n";
 		}
+  this->D3->SetBoundaryModeToSplitBoundaryCells();
+  this->D3->SetInput(input);
+  this->D3->SetController(this->Controller);
+  this->D3->Modified();
+  this->D3->Update();
 	if (this->PKdTree == NULL)
     {
-		cout << "no PkdTree\n";
+		this->PKdTree = this->D3->GetKdtree();
+		cout << "now PkdTree\n";
     }
   else
 		{
-			cout<<"Pkdtree!!\n";
+			cout<<"alread Pkdtree!!\n";
 		}
-	// Building the Kd tree
-	vtkSmartPointer<vtkPKdTree> pointTree = vtkSmartPointer<vtkPKdTree>::New();
-	pointTree->BuildLocatorFromPoints(input);
+	// Building the Kd tree, should already be built
+	// TODO: remove
+//	vtkSmartPointer<vtkPKdTree> pointTree = vtkSmartPointer<vtkPKdTree>::New();
+	cout << "building locator/n";
+	this->PKdTree->BuildLocator();
+
 	// Allocating arrays to store our smoothed values
 	// smoothed density
  	AllocateDoubleDataArray(output,"smoothed density", 
@@ -156,7 +167,7 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 		// plus one as the first point returned by locator is always one's self, 
 		// and the user expects specifying 1 neighbor will actually find
 		// one neighbor 
-		pointTree->FindClosestNPoints(this->NeighborNumber+1,
+		this->PKdTree->FindClosestNPoints(this->NeighborNumber+1,
 																	nextPoint,closestNPoints);
 		// looping over the closestNPoints, 
 		// only if we have more neighbors than ourselves
