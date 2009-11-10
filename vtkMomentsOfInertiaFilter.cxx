@@ -54,6 +54,15 @@ int vtkMomentsOfInertiaFilter::FillInputPortInformation(int,
 }
 
 //----------------------------------------------------------------------------
+int vtkMomentsOfInertiaFilter::FillOutputPortInformation(
+  int vtkNotUsed(port), vtkInformation* info)
+{
+  // now add our info
+  info->Set(vtkDataObject::DATA_TYPE_NAME(), "vtkPolyData");
+  return 1;
+}
+
+//----------------------------------------------------------------------------
 void vtkMomentsOfInertiaFilter::ComputeInertiaTensor(vtkPointSet* input,
  	double* centerPoint, double inertiaTensor[3][3])
 {
