@@ -20,15 +20,15 @@
 
 #ifndef __vtkAddAdditionalAttribute_h
 #define __vtkAddAdditionalAttribute_h
-#include "vtkDataReader.h"
+#include "vtkPointSetAlgorithm.h"
 #include <vtkstd/vector>
 
 class vtkMultiProcessController;
-class VTK_GRAPHICS_EXPORT vtkAddAdditionalAttribute : public vtkDataReader
+class VTK_GRAPHICS_EXPORT vtkAddAdditionalAttribute : public vtkPointSetAlgorithm
 {
 public:
   static vtkAddAdditionalAttribute *New();
-  vtkTypeRevisionMacro(vtkAddAdditionalAttribute,vtkDataReader);
+  vtkTypeRevisionMacro(vtkAddAdditionalAttribute,vtkPointSetAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent);
   // Description:
   // By defualt this filter uses the global controller,
@@ -50,9 +50,6 @@ protected:
 
   // Override to specify support for any vtkDataSet input type.
   virtual int FillInputPortInformation(int port, vtkInformation* info);
-	// Override to specify different type of output
-	virtual int FillOutputPortInformation(int vtkNotUsed(port), 
-		vtkInformation* info);
 
   // Main implementation.
   virtual int RequestData(vtkInformation*,

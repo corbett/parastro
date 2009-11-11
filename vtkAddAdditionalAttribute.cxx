@@ -31,8 +31,6 @@ vtkAddAdditionalAttribute::vtkAddAdditionalAttribute()
 	this->AttributeName = 0; 
 	this->Controller = NULL;
   this->SetController(vtkMultiProcessController::GetGlobalController());
-  this->SetNumberOfInputPorts(1); 
-
 }
 
 //----------------------------------------------------------------------------
@@ -62,14 +60,7 @@ int vtkAddAdditionalAttribute::FillInputPortInformation(int,
   return 1;
 }
 
-int vtkAddAdditionalAttribute::FillOutputPortInformation(
-  int vtkNotUsed(port), vtkInformation* info)
-{
-  // now add our info
-  info->Set(vtkDataObject::DATA_TYPE_NAME(), "vtkPointSet");
-  return 1;
-}
-
+//----------------------------------------------------------------------------
 int vtkAddAdditionalAttribute::ReadAdditionalAttributeFile(
 	vtkstd::vector<int>& markedParticleIndices, vtkPointSet* output)
 {
