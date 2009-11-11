@@ -39,7 +39,6 @@ vtkAddAdditionalAttribute::~vtkAddAdditionalAttribute()
  	this->SetController(0);
   this->SetAttributeFile(0);
   this->SetAttributeName(0);
-
 }
 
 //----------------------------------------------------------------------------
@@ -60,6 +59,15 @@ int vtkAddAdditionalAttribute::FillInputPortInformation(int,
   info->Set(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), "vtkPointSet");
   return 1;
 }
+
+int vtkAddAdditionalAttribute::FillOutputPortInformation(
+  int vtkNotUsed(port), vtkInformation* info)
+{
+  // now add our info
+  info->Set(vtkDataObject::DATA_TYPE_NAME(), "vtkPointSet");
+  return 1;
+}
+
 int vtkAddAdditionalAttribute::ReadAdditionalAttributeFile(
 	vtkstd::vector<int>& markedParticleIndices, vtkPointSet* output)
 {
