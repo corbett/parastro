@@ -29,9 +29,19 @@
 		<Documentation>
 	    Additional attribute files set are merged into existing input.
 		</Documentation>
+	  </StringVectorProperty>
+	  <StringVectorProperty
+		name="AttributeName"
+		command="SetAttributeName"
+		number_of_elements="1"
+		default_values="Additional Attribute">
+		<Documentation>
+		Default name is 'additional attribute', but can also specify a custom attribute name here.	
+		</Documentation>
 	  </StringVectorProperty>  
       <Hints>
 		<Property name="AdditionalAttributeFile" show="1"/>
+		<Property name="AttributeName" show="1"/>		
       </Hints>
    </SourceProxy>
  </ProxyGroup>
