@@ -73,6 +73,11 @@ int vtkAddAdditionalAttribute::ReadAdditionalAttributeFile(
  		}
 	else
 		{
+	if(strcmp(this->AttributeName,"")==0)	
+		{
+		// if default has been pummeled by user, we restore it
+		this->AttributeName="additional attribute";
+		}
 		int numBodies;
 		attributeInFile >> numBodies;
 		if(numBodies==output->GetPoints()->GetNumberOfPoints())
@@ -83,12 +88,12 @@ int vtkAddAdditionalAttribute::ReadAdditionalAttributeFile(
 			if(markedParticleIndices.empty())
 				{
 				// read additional attribute for all particles
-				AllocateDataArray(output,"additional attribute",1,
+				AllocateDataArray(output,this->AttributeName,1,
 					output->GetPoints()->GetNumberOfPoints());
 				while(attributeInFile >> attributeData)
 					{
 					// place attribute data in output
-					SetDataValue(output,"additional attribute",dataIndex,
+					SetDataValue(output,this->AttributeName,dataIndex,
 						&attributeData);
 					dataIndex++;
 					}
@@ -96,7 +101,7 @@ int vtkAddAdditionalAttribute::ReadAdditionalAttributeFile(
 			else
 				{
 				// read additional attribute only for marked particles
-				AllocateDataArray(output,"additional attribute",1,
+				AllocateDataArray(output,this->AttributeName,1,
 					markedParticleIndices.size());
 				int nextMarkedParticleIndex=0;
 				for(vtkstd::vector<int>::iterator it = markedParticleIndices.begin();
@@ -108,7 +113,7 @@ int vtkAddAdditionalAttribute::ReadAdditionalAttributeFile(
 						if(nextMarkedParticleIndex == dataIndex)
 							{
 							// nextMarkedParticleIndex == current particle so store
-							SetDataValue(output,"additional attribute",
+							SetDataValue(output,this->AttributeName,
 								dataIndex,&attributeData);
 							dataIndex++;
 							// break as we are done reading current marked particle's 
