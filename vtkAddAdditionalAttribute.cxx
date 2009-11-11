@@ -31,6 +31,8 @@ vtkAddAdditionalAttribute::vtkAddAdditionalAttribute()
 	this->AttributeName = 0; 
 	this->Controller = NULL;
   this->SetController(vtkMultiProcessController::GetGlobalController());
+  this->SetNumberOfInputPorts(1); 
+
 }
 
 //----------------------------------------------------------------------------
