@@ -36,7 +36,7 @@ vtkCxxSetObjectMacro(vtkNSmoothFilter,D3,vtkDistributedDataFilter);
 vtkNSmoothFilter::vtkNSmoothFilter()
 {
   this->NeighborNumber = 50; //default
-	this->PKdTree  = vtkSmartPointer<vtkPKdtree>::New();
+	this->PKdTree  = vtkSmartPointer<vtkPKdTree>::New();
 	this->Controller = NULL;
 	this->D3 = NULL;
   this->SetController(vtkMultiProcessController::GetGlobalController());
