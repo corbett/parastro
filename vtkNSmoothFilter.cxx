@@ -36,7 +36,7 @@ vtkCxxSetObjectMacro(vtkNSmoothFilter,D3,vtkDistributedDataFilter);
 vtkNSmoothFilter::vtkNSmoothFilter()
 {
   this->NeighborNumber = 50; //default
-	this->PKdTree  = vtkPKdTree::New();
+	this->PKdTree  = NULL;
 	this->Controller = NULL;
 	this->D3 = NULL;
   this->SetController(vtkMultiProcessController::GetGlobalController());
@@ -108,7 +108,8 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 	// copies the point attributes
   output->CopyAttributes(input);
 	// Building the Kd tree, should already be built
-	this->PKdTree->BuildLocatorFromPoints(input);
+	vtkSmartPointer<vtkPKdTree> pointTree = vtkSmartPointer<vtkPKdTree>::New();
+	pointTree->BuildLocatorFromPoints(input);
 	// Allocating arrays to store our smoothed values
 	// smoothed density
  	AllocateDoubleDataArray(output,"smoothed density", 
@@ -138,7 +139,7 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 		// plus one as the first point returned by locator is always one's self, 
 		// and the user expects specifying 1 neighbor will actually find
 		// one neighbor 
-		this->PKdTree->FindClosestNPoints(this->NeighborNumber+1,
+		pointTree->FindClosestNPoints(this->NeighborNumber+1,
 																	nextPoint,closestNPoints);
 		// looping over the closestNPoints, 
 		// only if we have more neighbors than ourselves
