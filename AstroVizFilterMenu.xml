@@ -1,6 +1,7 @@
 <ParaViewFilters>
    <Category name="AstroViz" menu_label="&amp;AstroViz Analysis">
      <!-- adds a new category and then adds our addition filters to it -->
+	 <Filter name="Add Additional Attribute" />
      <Filter name="Neighbor Smooth" />
      <Filter name="ExtractHistogram" />
      <Filter name="Center Of Mass" />
@@ -8,6 +9,5 @@
 	 <Filter name="PlotAttributes" />
 	 <Filter name="Principle Moments of Inertia" />
 	 <Filter name="Virial Radius Filter" />
-	 <Filter name="Add Additional Attribute" />
    </Category>
  </ParaViewFilters>
