@@ -27,7 +27,8 @@ vtkCxxSetObjectMacro(vtkAddAdditionalAttribute,Controller, vtkMultiProcessContro
 //----------------------------------------------------------------------------
 vtkAddAdditionalAttribute::vtkAddAdditionalAttribute()
 {
-	this->AttributeFile = 0; 
+	this->AttributeFile = 0;
+	this->AttributeName = 0; 
 	this->Controller = NULL;
   this->SetController(vtkMultiProcessController::GetGlobalController());
 }
@@ -37,6 +38,8 @@ vtkAddAdditionalAttribute::~vtkAddAdditionalAttribute()
 {
  	this->SetController(0);
   this->SetAttributeFile(0);
+  this->SetAttributeName(0);
+
 }
 
 //----------------------------------------------------------------------------

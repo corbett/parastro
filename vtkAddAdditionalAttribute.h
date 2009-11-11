@@ -38,6 +38,11 @@ public:
   // Set/Get the name of the file from which to get additional attributes
   vtkSetStringMacro(AttributeFile);
   vtkGetStringMacro(AttributeFile);
+  // Description:
+  // Set/Get the name of the additional attribute
+  vtkSetStringMacro(AttributeName);
+  vtkGetStringMacro(AttributeName);
+
 //BTX
 protected:
   vtkAddAdditionalAttribute();
@@ -51,6 +56,7 @@ protected:
                           vtkInformationVector*);
   vtkMultiProcessController *Controller;
 	char* AttributeFile;
+	char* AttributeName;
 
 private:
   vtkAddAdditionalAttribute(const vtkAddAdditionalAttribute&);  // Not implemented.

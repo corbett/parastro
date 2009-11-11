@@ -35,7 +35,6 @@
 	     </IntVectorProperty>
 		<Hints>
 			<Property name="MarkFileName" show="1"/>
-			<Property name="AdditionalAttributeFile" show="1"/>
 		</Hints>  
 		</SourceProxy>
 	</ProxyGroup>
