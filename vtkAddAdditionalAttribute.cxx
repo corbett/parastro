@@ -18,6 +18,7 @@
 #include "vtkUnsignedCharArray.h"
 #include "astrovizhelpers/DataSetHelpers.h"
 #include "astrovizhelpers/ProfileHelpers.h"
+#include <vtkstd/string>
 #include "vtkMath.h"
 
 vtkCxxRevisionMacro(vtkAddAdditionalAttribute, "$Revision: 1.72 $");
@@ -77,7 +78,8 @@ int vtkAddAdditionalAttribute::ReadAdditionalAttributeFile(
 	if(strcmp(this->AttributeName,"")==0)	
 		{
 		// if default has been pummeled by user, we restore it
-		this->AttributeName="additional attribute";
+		vtkstd::string attributeName="additional attribute";
+		this->AttributeName=attributeName.c_str();
 		}
 		int numBodies;
 		attributeInFile >> numBodies;
