@@ -57,7 +57,7 @@ protected:
                           vtkInformationVector*);
   vtkMultiProcessController *Controller;
 	char* AttributeFile;
-	char* AttributeName;
+	const char* AttributeName;
 
 private:
   vtkAddAdditionalAttribute(const vtkAddAdditionalAttribute&);  // Not implemented.

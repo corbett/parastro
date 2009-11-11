@@ -78,8 +78,8 @@ int vtkAddAdditionalAttribute::ReadAdditionalAttributeFile(
 	if(strcmp(this->AttributeName,"")==0)	
 		{
 		// if default has been pummeled by user, we restore it
-		vtkstd::string attributeName="additional attribute";
-		this->AttributeName=attributeName.c_str();
+//		vtkstd::string attributeName="additional attribute";
+		this->AttributeName="additional attribute";
 		}
 		int numBodies;
 		attributeInFile >> numBodies;
