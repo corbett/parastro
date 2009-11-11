@@ -67,7 +67,7 @@ int vtkAddAdditionalAttribute::ReadAdditionalAttributeFile(
 {
 	// open file
 	ifstream attributeInFile(this->AttributeFile);
-	if(!attributeInFile)
+	if(strcmp(this->AttributeFile,"")==0||!attributeInFile)
  		{
  		vtkErrorMacro("Error opening attribute file: " << this->AttributeFile);
 		return 0;
