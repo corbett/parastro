@@ -3,7 +3,7 @@
        a new filter. As a rule of thumb, try to locate the configuration for
        a filter already in ParaView (in Servers/ServerManager/Resources/*.xml)
        that matches your filter and then model your xml on it -->
-  <ProxyGroup name="filters">
+  <ProxyGroup name="sources">
    <SourceProxy name="Add Additional Attribute" class="vtkAddAdditionalAttribute" label="Add Additional Attribute">
      <Documentation
         long_help="Additional attribute files set are merged into existing input."
