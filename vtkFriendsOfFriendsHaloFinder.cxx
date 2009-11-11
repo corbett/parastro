@@ -20,9 +20,9 @@
 #include "vtkPKdTree.h"
 #include "vtkDistributedDataFilter.h"
 #include "vtkCallbackCommand.h"
+#include <vtkstd/vector>
 #include "astrovizhelpers/DataSetHelpers.h"
 
-using vtkstd::string;
 
 vtkCxxRevisionMacro(vtkFriendsOfFriendsHaloFinder, "$Revision: 1.72 $");
 vtkStandardNewMacro(vtkFriendsOfFriendsHaloFinder);
@@ -75,7 +75,8 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPointSet* input,
 	// Allocating array to store the number of the halo each point belongs to
  	AllocateIntDataArray(output,"halo number", 
 		1,output->GetPoints()->GetNumberOfPoints());
-	// calculating the halo number for each point in input
+	// calculating the initial haloes
+	vtkstd::vector<vtkIdList> initialHaloes;
 	for(int nextPointId = 0;
 		nextPointId < input->GetPoints()->GetNumberOfPoints();
 	 	++nextPointId)
@@ -88,9 +89,24 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPointSet* input,
 			this->LinkingLength,
 			nextPoint,
 			pointsInLinkingLength);
+		initialHaloes.push_back(pointsInLinkingLength);
 		// Finally, some memory management
 		delete [] nextPoint;
 		}
+	// merging the haloes
+	vtkstd::vector<vtkIdList> finalHaloes;
+	// hmm this has duplicates and is nsquared. better way.
+	for(int i = 0; i < initialHalos.size(); ++i)
+		{
+			for(int j = 0; j < haloes.size(); ++j)
+				{
+				if(i!=j)
+					{
+					haloes[i]->IntersectWith(haloes[j]);
+					}
+				}
+		}
+	// recording the results
 }
 
 //----------------------------------------------------------------------------
