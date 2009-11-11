@@ -77,10 +77,17 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPointSet* input,
 		1,output->GetPoints()->GetNumberOfPoints());
 	// calculating the initial haloes
 	vtkstd::vector<vtkIdList> initialHaloes;
+	vtkstd::vector<int> done;
+	haloId=1;
 	for(int nextPointId = 0;
 		nextPointId < input->GetPoints()->GetNumberOfPoints();
 	 	++nextPointId)
 		{
+		if(done[nextPoint]>0)
+			{
+			// this means this point is already in a unique halo
+			continue;
+			}
 		double* nextPoint=GetPoint(input,nextPointId);
 		// finding the points within a linking length of this point
 		vtkSmartPointer<vtkIdList> pointsInLinkingLength = \
@@ -89,23 +96,19 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPointSet* input,
 			this->LinkingLength,
 			nextPoint,
 			pointsInLinkingLength);
-		initialHaloes.push_back(pointsInLinkingLength);
+		// find bounding box 
+		
+		// for each point in bounding box (8), find points within radius tau
+			// merge with this id list,
+			// compute new bounding box
+			// continue until bounding box converges			
+		// when done, mark all these particles as halo and as done in the 
+		// vector by assigning them unique ID
+		
 		// Finally, some memory management
 		delete [] nextPoint;
 		}
 	// merging the haloes
-	vtkstd::vector<vtkIdList> finalHaloes;
-	// hmm this has duplicates and is nsquared. better way.
-	for(int i = 0; i < initialHalos.size(); ++i)
-		{
-			for(int j = 0; j < haloes.size(); ++j)
-				{
-				if(i!=j)
-					{
-					haloes[i]->IntersectWith(haloes[j]);
-					}
-				}
-		}
 	// recording the results
 }
 
