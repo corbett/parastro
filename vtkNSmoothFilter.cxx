@@ -40,8 +40,6 @@ vtkNSmoothFilter::vtkNSmoothFilter()
 	this->Controller = NULL;
 	this->D3 = NULL;
   this->SetController(vtkMultiProcessController::GetGlobalController());
-	this->PKdTree->SetController(
-		vtkMultiProcessController::GetGlobalController());
 }
 
 //----------------------------------------------------------------------------
