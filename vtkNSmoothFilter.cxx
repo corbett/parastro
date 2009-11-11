@@ -36,11 +36,11 @@ vtkCxxSetObjectMacro(vtkNSmoothFilter,D3,vtkDistributedDataFilter);
 vtkNSmoothFilter::vtkNSmoothFilter()
 {
   this->NeighborNumber = 50; //default
-  this->Controller = NULL;
-  this->PKdTree = NULL;
-  this->D3 = NULL;
-
+	this->PKdTree  = vtkSmartPointer<vtkPkdtree>::New();
+	this->Controller = NULL;
+	this->D3 = NULL;
   this->SetController(vtkMultiProcessController::GetGlobalController());
+	this->PKdTree->SetController(this->Controller);
 }
 
 //----------------------------------------------------------------------------
@@ -108,38 +108,8 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
   output->CopyStructure(input);
 	// copies the point attributes
   output->CopyAttributes(input);
-	// TODO: remove-just seeing if I understand how this filter accepts input
-	if (this->D3 == NULL)
-    {
-		cout << "NO D3!!\n";
-	  this->D3 = vtkDistributedDataFilter::New();
-    }
-  else
-		{
-			cout<<"D3!!\n";
-		}
-  this->D3->SetBoundaryModeToSplitBoundaryCells();
-  this->D3->SetInput(input);
-  this->D3->SetController(this->Controller);
-  this->D3->Modified();
-  this->D3->Update();
-
-	if (this->PKdTree == NULL)
-    {
-		this->PKdTree = this->D3->GetKdtree();
-		this->PKdTree->SetController(this->Controller);
-		cout << "now Pkdtree\n";
-    }
-  else
-		{
-			cout<<"alread Pkdtree!!\n";
-		}
 	// Building the Kd tree, should already be built
-	// TODO: remove
-//	vtkSmartPointer<vtkPkdtree> pointTree = vtkSmartPointer<vtkPkdtree>::New();
-	cout << "building locator from input \n";
 	this->PKdTree->BuildLocatorFromPoints(input);
-	cout << " done with locator \n";
 	// Allocating arrays to store our smoothed values
 	// smoothed density
  	AllocateDoubleDataArray(output,"smoothed density", 
