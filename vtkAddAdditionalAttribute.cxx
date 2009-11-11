@@ -69,83 +69,70 @@ int vtkAddAdditionalAttribute::ReadAdditionalAttributeFile(
 	ifstream attributeInFile(this->AttributeFile);
 	if(!attributeInFile)
  		{
- 		vtkErrorMacro("Error opening marked particle file: " 
-			<< this->AttributeFile 
-			<< " reading only attributes defined in binary.");
+ 		vtkErrorMacro("Error opening attribute file: " << this->AttributeFile);
+		return 0;
  		}
-	else
-		{
 	if(strcmp(this->AttributeName,"")==0)	
 		{
-		// if default has been pummeled by user, we restore it
-		vtkstd::string attributeName="additional attribute";
-		this->AttributeName=attributeName.c_str();
+		vtkErrorMacro("Please specify an attribute name.");
+		return 0;
 		}
-		int numBodies;
-		attributeInFile >> numBodies;
-		if(numBodies==output->GetPoints()->GetNumberOfPoints())
+
+	int numBodies;
+	attributeInFile >> numBodies;
+	if(numBodies==output->GetPoints()->GetNumberOfPoints())
+		{
+		// ready to read in
+		int dataIndex=0;
+		double attributeData;
+		if(markedParticleIndices.empty())
 			{
-			// ready to read in
-			int dataIndex=0;
-			double attributeData;
-			if(markedParticleIndices.empty())
+			// read additional attribute for all particles
+			AllocateDataArray(output,this->AttributeName,1,
+				output->GetPoints()->GetNumberOfPoints());
+			while(attributeInFile >> attributeData)
 				{
-				// read additional attribute for all particles
-				AllocateDataArray(output,this->AttributeName,1,
-					output->GetPoints()->GetNumberOfPoints());
-				while(attributeInFile >> attributeData)
-					{
-					// place attribute data in output
-					SetDataValue(output,this->AttributeName,dataIndex,
-						&attributeData);
-					dataIndex++;
-					}
+				// place attribute data in output
+				SetDataValue(output,this->AttributeName,dataIndex,
+					&attributeData);
+				dataIndex++;
 				}
-			else
-				{
-				// read additional attribute only for marked particles
-				AllocateDataArray(output,this->AttributeName,1,
-					markedParticleIndices.size());
-				int nextMarkedParticleIndex=0;
-				for(vtkstd::vector<int>::iterator it = markedParticleIndices.begin();
-					it != markedParticleIndices.end(); ++it)		
-					{
-			 		nextMarkedParticleIndex=*it;
-					while(attributeInFile >> attributeData)
-						{
-						if(nextMarkedParticleIndex == dataIndex)
-							{
-							// nextMarkedParticleIndex == current particle so store
-							SetDataValue(output,this->AttributeName,
-								dataIndex,&attributeData);
-							dataIndex++;
-							// break as we are done reading current marked particle's 
-							// data and want to get the index of the next marked particle,
-							// if there are more marked particles
-							break;
-							}
-						else
-							{
-							// skipping, not marked
-							dataIndex++;
-							}
-						}
-					}
-				}
-			// closing file
-			attributeInFile.close();
-			// successful
-			return 1;
 			}
 		else
 			{
-			vtkErrorMacro("Error opening marked particle file: " 
-				<< this->AttributeFile 
-				<< " reading only attributes defined in binary.");
+			// read additional attribute only for marked particles
+			AllocateDataArray(output,this->AttributeName,1,
+				markedParticleIndices.size());
+			int nextMarkedParticleIndex=0;
+			for(vtkstd::vector<int>::iterator it = markedParticleIndices.begin();
+				it != markedParticleIndices.end(); ++it)		
+				{
+		 		nextMarkedParticleIndex=*it;
+				while(attributeInFile >> attributeData)
+					{
+					if(nextMarkedParticleIndex == dataIndex)
+						{
+						// nextMarkedParticleIndex == current particle so store
+						SetDataValue(output,this->AttributeName,
+							dataIndex,&attributeData);
+						dataIndex++;
+						// break as we are done reading current marked particle's 
+						// data and want to get the index of the next marked particle,
+						// if there are more marked particles
+						break;
+						}
+					else
+						{
+						// skipping, not marked
+						dataIndex++;
+						}
+					}
+				}
 			}
+		// closing file
+		attributeInFile.close();
 		}
-	// unsuccessful
-	return 0;
+	return 1;
 }
 
 //----------------------------------------------------------------------------
