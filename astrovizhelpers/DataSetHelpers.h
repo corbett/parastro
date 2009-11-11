@@ -71,6 +71,13 @@ void AllocateDoubleDataArray(vtkPointSet* output, const char* arrayName,
 	int numComponents, int numTuples);
 
 // Description:
+// create a vtkDataArray with the  name arrayName, number of components 
+// numComponents and number of tuples numTuples of type T
+// e.g. AllocateDoubleDataArray("density",1,100) creates a array of 100 
+// scalar double densities
+void AllocateIntDataArray(vtkPointSet* output, const char* arrayName,
+	int numComponents, int numTuples);
+// Description:
 // Given a VTK array, sets it to have arrayName, numComponents and numTuples
 // unlike the above methods, does not create the array, nor add it to the 
 // output	

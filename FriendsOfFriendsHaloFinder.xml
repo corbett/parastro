@@ -1,0 +1,36 @@
+<ServerManagerConfiguration>
+  <!-- This is the server manager configuration XML. It defines the interface to
+       a new filter. As a rule of thumb, try to locate the configuration for
+       a filter already in ParaView (in Servers/ServerManager/Resources/*.xml)
+       that matches your filter and then model your xml on it -->
+  <ProxyGroup name="filters">
+   <SourceProxy name="Friends-Of-Friends Halo Finder" class="vtkFriendsOfFriendsHaloFinder" label="Friends-Of-Friends Halo Finder">
+     <Documentation
+        long_help="Finds groups of particles, defined to be haloes each within a specified linking length of each other"
+        short_help="Finds haloes via the friends-of-friends algorithm.">
+		More documentation can be listed here
+     </Documentation>
+     <InputProperty
+        name="Input"
+        command="SetInputConnection">
+           <ProxyGroupDomain name="groups">
+             <Group name="sources"/>
+             <Group name="filters"/>
+           </ProxyGroupDomain>
+           <DataTypeDomain name="input_type">
+             <DataType value="vtkDataSet"/>
+           </DataTypeDomain>
+      </InputProperty>
+	  <DoubleVectorProperty
+			name="LinkingLength"
+			command="SetLinkingLength"
+			number_of_elements="1"
+			default_values="1e-6">
+			<Documentation>
+			Sets the linking length this halo finder will use.
+			</Documentation>
+	  </DoubleVectorProperty>
+   </SourceProxy>
+ </ProxyGroup>
+</ServerManagerConfiguration>
+
