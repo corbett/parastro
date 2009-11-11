@@ -20,10 +20,6 @@ public:
   vtkTypeRevisionMacro(vtkTipsyReader,vtkPolyDataReader);
   void PrintSelf(ostream& os, vtkIndent indent);
   // Description:
-  // Set/Get the name of the file from which to get additional attributes
-  vtkSetStringMacro(AttributeFile);
-  vtkGetStringMacro(AttributeFile);
-  // Description:
   // Set/Get the name of the file from which to read the marked points.
   vtkSetStringMacro(MarkFileName);
   vtkGetStringMacro(MarkFileName);
@@ -45,7 +41,6 @@ public:
 protected:
   vtkTipsyReader();
   ~vtkTipsyReader();
-	char* AttributeFile;
 	char* MarkFileName;
 	char* FileName;
 	int ReadPositionsOnly;
@@ -101,14 +96,6 @@ private:
 	// which is empty if reading was unsucessful.
 	vtkstd::vector<int> ReadMarkedParticleIndices(TipsyHeader& tipsyHeader,
 		ifTipsy& tipsyInfile);
-	// Description:
-	// If an additional attribute file is specified, reads this file in as 
-	// an additional attribute array. The points in the tipsy file must have
-	// already been read in, and an additional attribute file must have
-	// been input by the user. If a marked file was specified, it reads in 
-	// only the particles at indices which were marked
-	int ReadAdditionalAttributeFile(vtkstd::vector<int>& markedParticleIndices,
-		TipsyHeader& tipsyHeader, vtkPolyData* output);
 	/* Helper functions for storing data in output vector*/
 	// Description:
 	// allocates all vtk arrays for Tipsy variables and places them 

@@ -1,0 +1,44 @@
+<ServerManagerConfiguration>
+  <!-- This is the server manager configuration XML. It defines the interface to
+       a new filter. As a rule of thumb, try to locate the configuration for
+       a filter already in ParaView (in Servers/ServerManager/Resources/*.xml)
+       that matches your filter and then model your xml on it -->
+  <ProxyGroup name="filters">
+   <SourceProxy name="Add Additional Attribute" class="vtkAddAdditionalAttribute" label="Add Additional Attribute">
+     <Documentation
+        long_help="Additional attribute files set are merged into existing input."
+        short_help="Additional attribute files set are merged into existing input.">
+		More documentation can be listed here
+     </Documentation>
+     <InputProperty
+        name="Input"
+        command="SetInputConnection">
+           <ProxyGroupDomain name="groups">
+             <Group name="sources"/>
+             <Group name="filters"/>
+           </ProxyGroupDomain>
+           <DataTypeDomain name="input_type">
+             <DataType value="vtkPointSet"/>
+           </DataTypeDomain>
+      </InputProperty>
+	  <StringVectorProperty
+		name="AdditionalAttributeFile"
+		command="SetAttributeFile"
+		number_of_elements="1">
+		<FileListDomain name="files"/>
+		<Documentation>
+	    Additional attribute files set are merged into existing input.
+		</Documentation>
+	  </StringVectorProperty>  
+      <Hints>
+        <!-- Visibility Element can be used to suggest the GUI about
+             visibility of this filter (or its input) on creation.
+             replace_input="0" implies that the input visibility is not
+             changed on creation of this filter (defaults to "1")
+             -->
+        <Visibility replace_input="0" />
+      </Hints>
+   </SourceProxy>
+ </ProxyGroup>
+</ServerManagerConfiguration>
+

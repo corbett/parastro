@@ -28,7 +28,6 @@ vtkStandardNewMacro(vtkTipsyReader);
 vtkTipsyReader::vtkTipsyReader()
 {
   this->MarkFileName = 0; // this file is optional
-	this->AttributeFile = 0; // this file is also optional
   this->FileName = 0;
 	this->ReadPositionsOnly = 0;
   this->SetNumberOfInputPorts(0); 
@@ -38,7 +37,6 @@ vtkTipsyReader::vtkTipsyReader()
 vtkTipsyReader::~vtkTipsyReader()
 {
   this->SetFileName(0);
-  this->SetAttributeFile(0);
   this->SetMarkFileName(0);
 	this->SetReadPositionsOnly(0);
 }
@@ -50,9 +48,7 @@ void vtkTipsyReader::PrintSelf(ostream& os, vtkIndent indent)
   os << indent << "FileName: "
      << (this->FileName ? this->FileName : "(none)") << "\n"
 		 << indent << "MarkFileName: "
-     << (this->MarkFileName ? this->MarkFileName : "(none)") << "\n"
-		 << indent << "AttributeFile: "
-		 << (this->AttributeFile ? this->AttributeFile : "(none)") << "\n";
+		 << (this->MarkFileName ? this->MarkFileName : "(none)") << "\n";
 }
 
 //----------------------------------------------------------------------------
@@ -188,86 +184,6 @@ tipsypos::section_type vtkTipsyReader::SeekToIndex(int index,
 		}
 }
 //----------------------------------------------------------------------------
-int vtkTipsyReader::ReadAdditionalAttributeFile(
-	vtkstd::vector<int>& markedParticleIndices, TipsyHeader& tipsyHeader, 
-	vtkPolyData* output)
-{
-	// open file
-	ifstream attributeInFile(this->AttributeFile);
-	if(!attributeInFile)
- 		{
- 		vtkErrorMacro("Error opening marked particle file: " 
-			<< this->AttributeFile 
-			<< " reading only attributes defined in binary.");
- 		}
-	else
-		{
-		int numBodies;
-		attributeInFile >> numBodies;
-		if(numBodies==tipsyHeader.h_nBodies)
-			{
-			// ready to read in
-			int dataIndex=0;
-			double attributeData;
-			if(markedParticleIndices.empty())
-				{
-				// read additional attribute for all particles
-				AllocateDataArray(output,"additional attribute",1,
-					tipsyHeader.h_nBodies);
-				while(attributeInFile >> attributeData)
-					{
-					// place attribute data in output
-					SetDataValue(output,"additional attribute",dataIndex,
-						&attributeData);
-					dataIndex++;
-					}
-				}
-			else
-				{
-				// read additional attribute only for marked particles
-				AllocateDataArray(output,"additional attribute",1,
-					markedParticleIndices.size());
-				int nextMarkedParticleIndex=0;
-				for(vtkstd::vector<int>::iterator it = markedParticleIndices.begin();
-					it != markedParticleIndices.end(); ++it)		
-					{
-			 		nextMarkedParticleIndex=*it;
-					while(attributeInFile >> attributeData)
-						{
-						if(nextMarkedParticleIndex == dataIndex)
-							{
-							// nextMarkedParticleIndex == current particle so store
-							SetDataValue(output,"additional attribute",
-								dataIndex,&attributeData);
-							dataIndex++;
-							// break as we are done reading current marked particle's 
-							// data and want to get the index of the next marked particle,
-							// if there are more marked particles
-							break;
-							}
-						else
-							{
-							// skipping, not marked
-							dataIndex++;
-							}
-						}
-					}
-				}
-			// closing file
-			attributeInFile.close();
-			// successful
-			return 1;
-			}
-		else
-			{
-			vtkErrorMacro("Error opening marked particle file: " 
-				<< this->AttributeFile 
-				<< " reading only attributes defined in binary.");
-			}
-		}
-	// unsuccessful
-	return 0;
-}
 
 //----------------------------------------------------------------------------
 //i,tipsyHeader,tipsyInfile,output)
@@ -471,14 +387,6 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 		}
   // Close the tipsy in file.
 	tipsyInfile.close();
-	if(strcmp(this->AttributeFile,"")!=0)
-		{
-		//reading only marked particles
-		// TODO: make additional attribute file read in parallel
-		// assert to make sure we are not trying to do this in parallel
-		assert(piece==0);
-		ReadAdditionalAttributeFile(markedParticleIndices,tipsyHeader,output);
-		}
 	// Read Successfully
 	vtkDebugMacro("Read " << output->GetPoints()->GetNumberOfPoints() \
 		<< " points.");
