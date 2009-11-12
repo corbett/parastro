@@ -37,7 +37,7 @@ vtkCxxSetObjectMacro(vtkFriendsOfFriendsHaloFinder,D3,
 vtkFriendsOfFriendsHaloFinder::vtkFriendsOfFriendsHaloFinder()
 {
   this->LinkingLength = 1e-6; //default
-	this->MinimumNumberOfParticles = 50;
+	this->MinimumNumberOfParticles = 50; // default
 	this->PKdTree  = NULL;
 	this->Controller = NULL;
 	this->D3 = NULL;
@@ -92,6 +92,8 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPointSet* input,
 	// first building map of id to count of that id, O(N)
 	vtkstd::map<vtkIdType,int> haloCount;
 	int uniqueId=1;
+	// use negatives to figure differentiate between unique id assignment 
+	// (positive) and count (negative) in the same map
 	for(int nextHaloId = 0;
 		nextHaloId < haloIdArray->GetNumberOfTuples();
 	 	++nextHaloId)
@@ -122,7 +124,7 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPointSet* input,
 		vtkIdType haloId = haloIdArray->GetValue(nextHaloId);
 		if(haloCount[haloId]<1)
 			{
-			// we only saw it once
+			// we only saw it less than requisite number of times
 			haloIdArray->SetValue(nextHaloId,0);
 			}
 		else
