@@ -89,7 +89,7 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPointSet* input,
 	 	++nextHaloId)
 		{
 		haloIdArray->GetTuples(nextHaloId,nextHaloId,halo);
-		if(halo->GetNumberOfTuples()<1)
+		if(halo->GetNumberOfTuples()<2)
 			{
 			// this means this point does not belong to a halo, as it has no pair
 			// setting its value to zero
