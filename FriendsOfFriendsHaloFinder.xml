@@ -30,6 +30,16 @@
 			Sets the linking length this halo finder will use.
 			</Documentation>
 	  </DoubleVectorProperty>
+	  <IntVectorProperty
+			name="MinimumNumberOfParticles"
+			command="SetMinimumNumberOfParticles"
+			number_of_elements="1"
+			default_values="50">
+			<Documentation>
+			Set the minimum number of particles to consider a halo. Default
+			is 50.
+			</Documentation>
+	  </IntVectorProperty>
    </SourceProxy>
  </ProxyGroup>
 </ServerManagerConfiguration>

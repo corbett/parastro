@@ -37,6 +37,7 @@ vtkCxxSetObjectMacro(vtkFriendsOfFriendsHaloFinder,D3,
 vtkFriendsOfFriendsHaloFinder::vtkFriendsOfFriendsHaloFinder()
 {
   this->LinkingLength = 1e-6; //default
+	this->MinimumNumberOfParticles = 50;
 	this->PKdTree  = NULL;
 	this->Controller = NULL;
 	this->D3 = NULL;
@@ -55,7 +56,9 @@ vtkFriendsOfFriendsHaloFinder::~vtkFriendsOfFriendsHaloFinder()
 void vtkFriendsOfFriendsHaloFinder::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os,indent);
-  os << indent << "Linking Length: " << this->LinkingLength << "\n";
+  os << indent << "Linking Length: " << this->LinkingLength 
+		<<	indent << "Minimum Number Of Particles: " 
+		<<  this->MinimumNumberOfParticles << "\n";
 }
 
 //----------------------------------------------------------------------------

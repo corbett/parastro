@@ -42,18 +42,27 @@ public:
   void PrintSelf(ostream& os, vtkIndent indent);
 
   // Description:
-  // Get/Set the number of neighbors to search
+  // Get/Set the linking length, for which any particle within this radius
+	// of another particle is linked into a halo
   vtkSetMacro(LinkingLength, double);
   vtkGetMacro(LinkingLength, double);
+
+  // Description:
+  // Get/Set the minimum number of particles to consider a halo
+  vtkSetMacro(MinimumNumberOfParticles, int);
+  vtkGetMacro(MinimumNumberOfParticles, int);
+
   // Description:
   // By defualt this filter uses the global controller,
   // but this method can be used to set another instead.
   virtual void SetController(vtkMultiProcessController*);
   vtkGetObjectMacro(Controller, vtkMultiProcessController);
+
   // Description:
   // Set the vtkPKdTree to distribute with.
   virtual void SetPKdTree(vtkPKdTree*);
   vtkGetObjectMacro(PKdTree, vtkPKdTree);
+
   // Description:
   // Set/get some internal filters.
   vtkGetObjectMacro(D3, vtkDistributedDataFilter);
@@ -74,6 +83,7 @@ protected:
    	vtkInformationVector**,
     vtkInformationVector*);
   double LinkingLength;
+	int MinimumNumberOfParticles;
   vtkMultiProcessController *Controller;
   vtkDistributedDataFilter *D3;
   vtkPKdTree *PKdTree;
