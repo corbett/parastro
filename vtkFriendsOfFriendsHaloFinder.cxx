@@ -75,6 +75,8 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPointSet* input,
 	// calculating the initial haloes
 	vtkSmartPointer<vtkIdTypeArray> haloIdArray = \
 		pointTree->BuildMapForDuplicatePoints(this->LinkingLength);
+	haloIdArray->SetNumberOfComponents(1);
+	haloIdArray->SetNumberOfTuples(input->GetPoints()->GetNumberOfPoints);
 	haloIdArray->SetName("halo ID");
 	/*
 	int haloId=0;
