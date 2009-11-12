@@ -21,6 +21,7 @@
 #include "vtkDistributedDataFilter.h"
 #include "vtkCallbackCommand.h"
 #include <vtkstd/vector>
+#include <vtkstd/map>
 #include "astrovizhelpers/DataSetHelpers.h"
 
 
@@ -69,7 +70,7 @@ int vtkFriendsOfFriendsHaloFinder::FillInputPortInformation(int, vtkInformation*
 int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPointSet* input,
 	vtkPointSet* output)
 {
-	// Building the Kd tree, should already be built
+	// Building the Kd tree
 	vtkSmartPointer<vtkPKdTree> pointTree = vtkSmartPointer<vtkPKdTree>::New();
 		pointTree->BuildLocatorFromPoints(input);
 	// calculating the initial haloes
@@ -80,19 +81,23 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPointSet* input,
 	haloIdArray->SetName("halo ID");
 	// Now assign halos, if this point has at least one other pair,
 	// it is a halo, if not it is not (set to 0)
-	vtkSmartPointer<vtkIdTypeArray> halo = \
-		vtkSmartPointer<vtkIdTypeArray>::New();
-	halo->SetNumberOfComponents(1);
-	halo->SetNumberOfTuples(input->GetPoints()->GetNumberOfPoints());
+	// first building map of id to count of that id, O(N)
+	vtkstd::map<vtkIdType,int> haloCount;
 	for(int nextHaloId = 0;
 		nextHaloId < haloIdArray->GetNumberOfTuples();
 	 	++nextHaloId)
 		{
-		haloIdArray->GetTuples(nextHaloId,nextHaloId,halo);
-		if(halo->GetNumberOfTuples()<2)
+		vtkIdType haloId = haloIdArray->GetValue(nextHaloId);
+		haloCount[haloId]+=1;
+		}
+	// finally setting to zero points which have count < 2, O(N)
+	for(int nextHaloId = 0;
+		nextHaloId < haloIdArray->GetNumberOfTuples();
+	 	++nextHaloId)
+		{
+		vtkIdType haloId = haloIdArray->GetValue(nextHaloId);
+		if(haloCount[haloId]<2)
 			{
-			// this means this point does not belong to a halo, as it has no pair
-			// setting its value to zero
 			haloIdArray->SetValue(nextHaloId,0);
 			}
 		}
