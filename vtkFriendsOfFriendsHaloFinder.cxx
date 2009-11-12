@@ -100,8 +100,9 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPointSet* input,
 		if(haloCount[haloId]<1)
 			{
 			// this counts each time we see the id, until we reach 
-			// this->MinimumNumberOfParticles
 			haloCount[haloId]-=1;
+			cout << " have seen " << haloId << " " << haloCount[haloId] 
+			<< " times\n";
 			}
 		else if(haloCount[haloId]==-1*this->MinimumNumberOfParticles)
 			{
