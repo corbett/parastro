@@ -72,18 +72,17 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPointSet* input,
 	// Building the Kd tree, should already be built
 	vtkSmartPointer<vtkPKdTree> pointTree = vtkSmartPointer<vtkPKdTree>::New();
 		pointTree->BuildLocatorFromPoints(input);
-	// Allocating array to store the number of the halo each point belongs to
- 	AllocateIntDataArray(output,"halo number", 
-		1,output->GetPoints()->GetNumberOfPoints());
 	// calculating the initial haloes
-	vtkstd::vector<vtkIdList> initialHaloes;
-	vtkstd::vector<int> done;
-	haloId=1;
+	vtkSmartPointer<vtkIntArray> haloIdArray= \
+	 	vtkSmartPointer<vtkIntArray>::New();
+	InitializeDataArray(haloIdArray, "halo ID",1,
+		output->GetPoints()->GetNumberOfPoints());
+	int haloId=1;
 	for(int nextPointId = 0;
 		nextPointId < input->GetPoints()->GetNumberOfPoints();
 	 	++nextPointId)
 		{
-		if(done[nextPoint]>0)
+		if(haloIdArray->GetValue(nextPointId)>0)
 			{
 			// this means this point is already in a unique halo
 			continue;
@@ -96,8 +95,7 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPointSet* input,
 			this->LinkingLength,
 			nextPoint,
 			pointsInLinkingLength);
-		// find bounding box 
-		
+		// find bounding box 		
 		// for each point in bounding box (8), find points within radius tau
 			// merge with this id list,
 			// compute new bounding box
@@ -110,6 +108,7 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPointSet* input,
 		}
 	// merging the haloes
 	// recording the results
+	output->GetPointData()->AddArray(haloIdArray);
 }
 
 //----------------------------------------------------------------------------
