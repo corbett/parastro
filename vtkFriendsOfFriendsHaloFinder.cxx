@@ -119,8 +119,8 @@ int vtkFriendsOfFriendsHaloFinder::RequestData(vtkInformation*,
   // Get input and output data.
   vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
   vtkPointSet* output = vtkPointSet::GetData(outputVector);
-	this->FindHaloes(input,output);
   output->ShallowCopy(input);
+	this->FindHaloes(input,output);
 	// Finally, some memory management
   output->Squeeze();
   return 1;
