@@ -13,8 +13,8 @@
 * Work with vtkDataArray
 *
 *---------------------------------------------------------------------------*/
-void InitializeDataArray(vtkDataArray* dataArray, const char* arrayName,\
- 			int numComponents, int numTuples)
+void InitializeDataArray(vtkDataArray* dataArray, const char* arrayName,
+	int numComponents, int numTuples)
 {
 	dataArray->SetNumberOfComponents(numComponents);
 	dataArray->SetNumberOfTuples(numTuples);

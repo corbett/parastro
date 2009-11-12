@@ -77,7 +77,7 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPointSet* input,
 	 	vtkSmartPointer<vtkIntArray>::New();
 	InitializeDataArray(haloIdArray, "halo ID",1,
 		output->GetPoints()->GetNumberOfPoints());
-	int haloId=1;
+	int haloId=0;
 	for(int nextPointId = 0;
 		nextPointId < input->GetPoints()->GetNumberOfPoints();
 	 	++nextPointId)
@@ -95,6 +95,17 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPointSet* input,
 			this->LinkingLength,
 			nextPoint,
 			pointsInLinkingLength);
+		// TODO: change, just the prototype
+		// increment halo id if necessary
+		haloId+=(pointsInLinkingLength->GetNumberOfIds()>0) ? 1 : 0;
+		for(int neighborPointLocalId = 0;
+	 		neighborPointLocalId < pointsInLinkingLength->GetNumberOfIds();
+			++neighborPointLocalId)
+			{
+			vtkIdType neighborPointGlobalId  = \
+				pointsInLinkingLength->GetId(neighborPointLocalId);
+			haloIdArray->SetValue(neighborPointLocalId,haloId);
+			}
 		// find bounding box 		
 		// for each point in bounding box (8), find points within radius tau
 			// merge with this id list,
