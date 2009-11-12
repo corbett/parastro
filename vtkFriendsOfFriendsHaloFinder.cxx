@@ -83,22 +83,40 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPointSet* input,
 	// it is a halo, if not it is not (set to 0)
 	// first building map of id to count of that id, O(N)
 	vtkstd::map<vtkIdType,int> haloCount;
+	int uniqueId=1;
 	for(int nextHaloId = 0;
 		nextHaloId < haloIdArray->GetNumberOfTuples();
 	 	++nextHaloId)
 		{
 		vtkIdType haloId = haloIdArray->GetValue(nextHaloId);
-		haloCount[haloId]+=1;
-		}
-	// finally setting to zero points which have count < 2, O(N)
-	for(int nextHaloId = 0;
-		nextHaloId < haloIdArray->GetNumberOfTuples();
-	 	++nextHaloId)
-		{
-		vtkIdType haloId = haloIdArray->GetValue(nextHaloId);
-		if(haloCount[haloId]<2)
+		if(haloCount[haloId]==0)
 			{
+			// this signals we have see an id once
+			haloCount[haloId]=-1;
+			}
+		else if(haloCount[haloId]==-1)
+			{
+			// the second time we have seen the id, so we assign it a unique id
+			haloCount[haloId]=uniqueId;
+			uniqueId+=1;
+			}
+		}
+	// finally setting to zero points which have count < 2, O(N), and
+	// assigning those we have seen more than once to their unique id
+	for(int nextHaloId = 0;
+		nextHaloId < haloIdArray->GetNumberOfTuples();
+	 	++nextHaloId)
+		{
+		vtkIdType haloId = haloIdArray->GetValue(nextHaloId);
+		if(haloCount[haloId]<1)
+			{
+			// we only saw it once
 			haloIdArray->SetValue(nextHaloId,0);
+			}
+		else
+			{
+			// we saw it more than once, assign it to its unique id
+			haloIdArray->SetValue(nextHaloId,haloCount[haloId]);
 			}
 		}
 	output->GetPointData()->AddArray(haloIdArray);
