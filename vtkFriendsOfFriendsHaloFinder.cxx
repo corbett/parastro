@@ -73,6 +73,11 @@ int vtkFriendsOfFriendsHaloFinder::FillInputPortInformation(int, vtkInformation*
 int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPointSet* input,
 	vtkPointSet* output)
 {
+	if(this->MinimumNumberOfParticles < 2)
+		{
+		vtkWarningMacro("setting minimum number of particles to 2, a minimum number of particles below this makes no sense.");
+		this->MinimumNumberOfParticles=2;
+		}
 	// Building the Kd tree
 	vtkSmartPointer<vtkPKdTree> pointTree = vtkSmartPointer<vtkPKdTree>::New();
 		pointTree->BuildLocatorFromPoints(input);
@@ -92,20 +97,24 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPointSet* input,
 	 	++nextHaloId)
 		{
 		vtkIdType haloId = haloIdArray->GetValue(nextHaloId);
-		if(haloCount[haloId]==0)
+		if(haloCount[haloId]<1)
 			{
-			// this signals we have see an id once
-			haloCount[haloId]=-1;
+			// this counts each time we see the id, until we reach 
+			// this->MinimumNumberOfParticles
+			haloCount[haloId]-=1;
 			}
-		else if(haloCount[haloId]==-1)
+		else if(haloCount[haloId]==-1*this->MinimumNumberOfParticles)
 			{
-			// the second time we have seen the id, so we assign it a unique id
+			// we have seen the id minimum number of particles times,
+			// so we assign it a unique halo id, considering it a halo
 			haloCount[haloId]=uniqueId;
 			uniqueId+=1;
 			}
 		}
-	// finally setting to zero points which have count < 2, O(N), and
-	// assigning those we have seen more than once to their unique id
+	// finally setting to zero points which have 
+	// count < this->MinimumNumberOfParticles, O(N), and
+	// assigning those we have seen more the requisite number
+	// of times to their unique id
 	for(int nextHaloId = 0;
 		nextHaloId < haloIdArray->GetNumberOfTuples();
 	 	++nextHaloId)
