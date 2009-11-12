@@ -78,50 +78,24 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPointSet* input,
 	haloIdArray->SetNumberOfComponents(1);
 	haloIdArray->SetNumberOfTuples(input->GetPoints()->GetNumberOfPoints());
 	haloIdArray->SetName("halo ID");
-	/*
-	int haloId=0;
-	for(int nextPointId = 0;
-		nextPointId < input->GetPoints()->GetNumberOfPoints();
-	 	++nextPointId)
+	// Now assign halos, if this point has at least one other pair,
+	// it is a halo, if not it is not (set to 0)
+	vtkSmartPointer<vtkIdTypeArray> halo = \
+		vtkSmartPointer<vtkIdTypeArray>::New();
+	halo->SetNumberOfComponents(1);
+	halo->SetNumberOfTuples(input->GetPoints()->GetNumberOfPoints());
+	for(int nextHaloId = 0;
+		nextHaloId < haloIdArray->GetNumberOfTuples();
+	 	++nextHaloId)
 		{
-		if(haloIdArray->GetValue(nextPointId)>0)
+		haloIdArray->GetTuples(nextHaloId,nextHaloId,halo);
+		if(halo->GetNumberOfTuples()<1)
 			{
-			// this means this point is already in a unique halo
-			continue;
+			// this means this point does not belong to a halo, as it has no pair
+			// setting its value to zero
+			haloIdArray->SetValue(nextHaloId,0);
 			}
-		double* nextPoint=GetPoint(input,nextPointId);
-		// finding the points within a linking length of this point
-		vtkSmartPointer<vtkIdList> pointsInLinkingLength = \
-			vtkSmartPointer<vtkIdList>::New();
-		pointTree->FindPointsWithinRadius(
-			this->LinkingLength,
-			nextPoint,
-			pointsInLinkingLength);
-		// TODO: change, just the prototype
-		// increment halo id if necessary
-		haloId+=(pointsInLinkingLength->GetNumberOfIds()>0) ? 1 : 0;
-		for(int neighborPointLocalId = 0;
-	 		neighborPointLocalId < pointsInLinkingLength->GetNumberOfIds();
-			++neighborPointLocalId)
-			{
-			vtkIdType neighborPointGlobalId  = \
-				pointsInLinkingLength->GetId(neighborPointLocalId);
-			haloIdArray->SetValue(neighborPointLocalId,haloId);
-			}
-		// find bounding box 		
-		// for each point in bounding box (8), find points within radius tau
-			// merge with this id list,
-			// compute new bounding box
-			// continue until bounding box converges			
-		// when done, mark all these particles as halo and as done in the 
-		// vector by assigning them unique ID
-		
-		// Finally, some memory management
-		delete [] nextPoint;
 		}
-	// merging the haloes
-	// recording the results
-	*/
 	output->GetPointData()->AddArray(haloIdArray);
 }
 
