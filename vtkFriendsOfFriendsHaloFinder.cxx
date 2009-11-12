@@ -81,7 +81,8 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPointSet* input,
 	// Building the Kd tree
 	vtkSmartPointer<vtkPKdTree> pointTree = vtkSmartPointer<vtkPKdTree>::New();
 		pointTree->BuildLocatorFromPoints(input);
-	// calculating the initial haloes
+	// calculating the initial haloes- yes it really is done in just this 
+	// one line.
 	vtkSmartPointer<vtkIdTypeArray> haloIdArray = \
 		pointTree->BuildMapForDuplicatePoints(this->LinkingLength);
 	haloIdArray->SetNumberOfComponents(1);
