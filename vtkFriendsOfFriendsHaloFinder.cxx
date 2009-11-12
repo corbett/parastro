@@ -97,19 +97,18 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPointSet* input,
 	 	++nextHaloId)
 		{
 		vtkIdType haloId = haloIdArray->GetValue(nextHaloId);
-		if(haloCount[haloId]<1)
-			{
-			// this counts each time we see the id, until we reach 
-			haloCount[haloId]-=1;
-			cout << " have seen " << haloId << " " << haloCount[haloId] 
-			<< " times\n";
-			}
-		else if(haloCount[haloId]==-1*this->MinimumNumberOfParticles)
+		if(haloCount[haloId]==-1*this->MinimumNumberOfParticles)
 			{
 			// we have seen the id minimum number of particles times,
 			// so we assign it a unique halo id, considering it a halo
 			haloCount[haloId]=uniqueId;
 			uniqueId+=1;
+			}
+		else if(haloCount[haloId]<1)
+			{
+			// this counts each time we see the id, until we reach the
+			// minimum number of particles to count as a halo
+			haloCount[haloId]-=1;
 			}
 		}
 	// finally setting to zero points which have 
