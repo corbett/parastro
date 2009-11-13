@@ -28,6 +28,12 @@ vtkStandardNewMacro(vtkVirialRadiusFilter);
 vtkVirialRadiusFilter::vtkVirialRadiusFilter()
 {
   this->SetNumberOfInputPorts(2);
+	this->SetInputArrayToProcess(
+    0,
+    0,
+    0,
+    vtkDataObject::FIELD_ASSOCIATION_POINTS_THEN_CELLS,
+    vtkDataSetAttributes::SCALARS);
 	// Defaults for quantities which will be computed based on user's
 	// later input
 	this->MaxR=1.0;
@@ -71,10 +77,16 @@ int vtkVirialRadiusFilter::RequestData(vtkInformation *request,
 	// Setting the center based upon the selection in the GUI
 	vtkDataSet* pointInfo = vtkDataSet::GetData(inputVector[1]);
 	vtkPointSet* output = vtkPointSet::GetData(outputVector,0);
-
+	// Get name of data array containing mass
+	vtkDataArray* massArray = this->GetInputArrayToProcess(0, inputVector);
+  if (!massArray)
+    {
+    vtkErrorMacro("Failed to locate mass array");
+    return 0;
+    }
 	this->CalculateAndSetBounds(dataSet,pointInfo);
 	VirialRadiusInfo virialRadiusInfo = \
-	 	ComputeVirialRadius(dataSet,this->Softening,
+	 	ComputeVirialRadius(dataSet,massArray->GetName(),this->Softening,
 		this->Delta,this->MaxR,this->Center);
 		// note that if there was an error finding the virialRadius the 
 		// radius returned is < 0

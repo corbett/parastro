@@ -12,6 +12,7 @@
 #include "vtkFloatArray.h"
 #include "vtkTable.h"
 #include "vtkPointSet.h"
+#include <vtkstd/string>
 // Description:
 // Uses the Illinois root finding method to find the root of the function
 // func. The root must lie between r and s. Root is returned when it is found 
@@ -85,13 +86,16 @@ struct VirialRadiusInfo
 	double criticalValue;
 	double virialRadius;
 	double softening;
+	vtkstd::string massArrayName;
 };
 
 
 // Description:
 // Computes the virial radius >=0 base upon the user defined 
 // overdensity and center. Returns -1 if there is a problem. 
-VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,double softening,double overdensity,double maxR,double center[]);
+VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,
+	vtkstd::string massArrayName, double softening,double overdensity,
+	double maxR,double center[]);
 
 // Description:
 // shifts every item in array one to left (the first element is thrown away)

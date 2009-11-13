@@ -104,9 +104,9 @@ double ComputeMaxR(vtkPointSet* input,double point[])
 double OverDensityInSphere(double r,void* inputVirialRadiusInfo)
 {
 	VirialRadiusInfo* virialRadiusInfo = \
-	 											static_cast<VirialRadiusInfo*>(inputVirialRadiusInfo);
+		static_cast<VirialRadiusInfo*>(inputVirialRadiusInfo);
 	vtkSmartPointer<vtkIdList> pointsInRadius = \
-																vtkSmartPointer<vtkIdList>::New();
+		vtkSmartPointer<vtkIdList>::New();
 	virialRadiusInfo->locator->FindPointsWithinRadius(r,
 		virialRadiusInfo->center,
 		pointsInRadius);
@@ -124,7 +124,8 @@ double OverDensityInSphere(double r,void* inputVirialRadiusInfo)
 		double* nextPoint=GetPoint(dataSet,pointGlobalId);
 		// extracting the mass
 		// has to be double as this version of VTK doesn't have float method
-		double* mass=GetDataValue(dataSet,"mass",pointGlobalId);
+		double* mass=GetDataValue(dataSet,virialRadiusInfo->massArrayName.c_str(),
+			pointGlobalId);
 		totalMass+=mass[0];
 		// Finally, some memory management
 		delete [] mass;
@@ -155,7 +156,8 @@ double OverNumberInSphere(double r,void* inputVirialRadiusInfo)
 
 //----------------------------------------------------------------------------
 VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,
-	double softening,double overdensity,double maxR,double center[])
+	vtkstd::string massArrayName, double softening,double overdensity,
+	double maxR,double center[])
 {
 		// Building the point locator and the struct to use as an 
 		// input to the rootfinder.
@@ -174,6 +176,7 @@ VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,
 		}
 		virialRadiusInfo.softening=softening;
 		virialRadiusInfo.virialRadius = -1; // if stays -1 means not found
+		virialRadiusInfo.massArrayName = massArrayName;
 		// but IllinoisRootFinder takes in a void pointer
 		void* pntrVirialRadiusInfo = &virialRadiusInfo;
 		// 3. Define necessary variables to find virial radius, then search for 
