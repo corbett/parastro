@@ -27,6 +27,12 @@ vtkCxxSetObjectMacro(vtkMomentsOfInertiaFilter,Controller, vtkMultiProcessContro
 //----------------------------------------------------------------------------
 vtkMomentsOfInertiaFilter::vtkMomentsOfInertiaFilter()
 {
+	this->SetInputArrayToProcess(
+    0,
+    0,
+    0,
+    vtkDataObject::FIELD_ASSOCIATION_POINTS_THEN_CELLS,
+    vtkDataSetAttributes::SCALARS);
 	this->Controller = NULL;
   this->SetController(vtkMultiProcessController::GetGlobalController());
 }
@@ -64,15 +70,17 @@ int vtkMomentsOfInertiaFilter::FillOutputPortInformation(
 
 //----------------------------------------------------------------------------
 void vtkMomentsOfInertiaFilter::ComputeInertiaTensor(vtkPointSet* input,
- 	double* centerPoint, double inertiaTensor[3][3])
+	vtkstd::string massArrayName, double* centerPoint, 
+	double inertiaTensor[3][3])
 {
-	this->UpdateInertiaTensor(input,centerPoint,inertiaTensor);
+	this->UpdateInertiaTensor(input,massArrayName,centerPoint,inertiaTensor);
 	this->UpdateInertiaTensorFinal(input,centerPoint,inertiaTensor);
 }
 
 //----------------------------------------------------------------------------
 void vtkMomentsOfInertiaFilter::UpdateInertiaTensor(vtkPointSet* input, 
-	double* centerPoint, double inertiaTensor[3][3])
+	vtkstd::string massArrayName, double* centerPoint, 
+	double inertiaTensor[3][3])
 {
 	for(int nextPointId = 0;\
 	 		nextPointId < input->GetPoints()->GetNumberOfPoints();\
@@ -82,7 +90,7 @@ void vtkMomentsOfInertiaFilter::UpdateInertiaTensor(vtkPointSet* input,
 		// extracting the mass
 		// has to be double as this version of VTK doesn't have 
 		// GetTuple function which operates with float
-		double* mass=GetDataValue(input,"mass",nextPointId);
+		double* mass=GetDataValue(input,massArrayName.c_str(),nextPointId);
 		// get distance from nextPoint to center point
 		double* radius = PointVectorDifference(nextPoint,centerPoint);
 		// update the components of the inertia tensor
@@ -155,6 +163,13 @@ int vtkMomentsOfInertiaFilter::RequestData(vtkInformation*,
 {
   // get input and output data
   vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
+	// Get name of data array containing mass
+	vtkDataArray* massArray = this->GetInputArrayToProcess(0, inputVector);
+  if (!massArray)
+    {
+    vtkErrorMacro("Failed to locate mass array");
+    return 0;
+    }
   vtkPolyData* output = vtkPolyData::GetData(outputVector);
 	output->Initialize();
 	// computing the center of mass, works in parallel if necessary
@@ -163,7 +178,7 @@ int vtkMomentsOfInertiaFilter::RequestData(vtkInformation*,
 	centerOfMassFilter->SetController(this->Controller);
 	// will be != null only for root process or serial
 	double* calcCenterOfMass = \
-		centerOfMassFilter->ComputeCenterOfMass(input,"mass"); 
+		centerOfMassFilter->ComputeCenterOfMass(input,massArray->GetName()); 
 	// finally calculation
 	double inertiaTensor[3][3];
 	double eigenvalues[3];
@@ -173,7 +188,8 @@ int vtkMomentsOfInertiaFilter::RequestData(vtkInformation*,
 		assert(calcCenterOfMass!=NULL);
 		// computing the moment of inertia tensor 3x3 matrix, and its
 		// eigenvalues and eigenvectors
-		this->ComputeInertiaTensor(input,calcCenterOfMass,inertiaTensor);
+		this->ComputeInertiaTensor(input,massArray->GetName(),
+			calcCenterOfMass,inertiaTensor);
 		// finally perform final computation
 		vtkMath::Diagonalize3x3(inertiaTensor,eigenvalues,eigenvectors);
 		// displaying eigenvectors
@@ -197,7 +213,8 @@ int vtkMomentsOfInertiaFilter::RequestData(vtkInformation*,
 		// syncs the value of centerOfMass from root to rest of all processes
 		this->Controller->Broadcast(syncedCenterOfMass,3,0);
 		// computing the moment of inertia tensor 3x3 matrix
-		this->UpdateInertiaTensor(input,syncedCenterOfMass,inertiaTensor);
+		this->UpdateInertiaTensor(input,massArray->GetName(), 
+			syncedCenterOfMass,inertiaTensor);
 		// TODO: see if there's an easier way to send a 2d array
 		if(procId!=0)
 			{

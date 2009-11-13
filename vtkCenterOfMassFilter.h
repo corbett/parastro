@@ -45,7 +45,8 @@ public:
 	// if a controller is set. Returns NULL if in parallel and process id != 0
 	// (result isn't ready until process 0). So check for this.
 	//BTX
-	double* ComputeCenterOfMass(vtkPointSet* input, vtkstd::string massArrayName);
+	double* ComputeCenterOfMass(vtkPointSet* input,
+	 vtkstd::string massArrayName);
 protected:
   vtkCenterOfMassFilter();
   ~vtkCenterOfMassFilter();

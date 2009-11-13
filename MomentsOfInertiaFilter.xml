@@ -20,7 +20,35 @@
            <DataTypeDomain name="input_type">
              <DataType value="vtkPointSet"/>
            </DataTypeDomain>
+          <InputArrayDomain name="input_array">
+             <RequiredProperties>
+                <Property name="SelectInputArray" 
+                          function="FieldDataSelection"/>
+             </RequiredProperties>
+          </InputArrayDomain>
       </InputProperty>
+     <StringVectorProperty
+         name="SelectInputArray" 
+         command="SetInputArrayToProcess" 
+         number_of_elements="5" 
+         element_types="0 0 0 0 2" 
+         animateable="0"> 
+          <ArrayListDomain name="array_list" 
+                           attribute_type="Scalars">
+            <RequiredProperties>
+               <Property name="Input" function="Input"/>
+            </RequiredProperties>
+          </ArrayListDomain>
+          <FieldDataDomain name="field_list">
+            <RequiredProperties>
+               <Property name="Input" function="Input"/>
+            </RequiredProperties>
+          </FieldDataDomain>
+          <Documentation>
+			This property indicates which scalar array contains the mass of the particles.
+          </Documentation>
+     </StringVectorProperty>
+
       <Hints>
         <!-- Visibility Element can be used to suggest the GUI about
              visibility of this filter (or its input) on creation.

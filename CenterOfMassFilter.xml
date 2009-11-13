@@ -48,7 +48,6 @@
 			This property indicates which scalar array contains the mass of the particles.
           </Documentation>
      </StringVectorProperty>
-
       <Hints>
         <!-- Visibility Element can be used to suggest the GUI about
              visibility of this filter (or its input) on creation.

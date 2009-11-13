@@ -22,6 +22,7 @@
 #define __vtkMomentsOfInertiaFilter_h
 
 #include "vtkPointSetAlgorithm.h"
+#include <vtkstd/string> // some functions use as argument
 
 enum MomentsMPIData 
 {
@@ -41,6 +42,7 @@ public:
   // By defualt this filter uses the global controller,
   // but this method can be used to set another instead.
   virtual void SetController(vtkMultiProcessController*);
+//BTX
 protected:
   vtkMomentsOfInertiaFilter();
   ~vtkMomentsOfInertiaFilter();
@@ -64,7 +66,7 @@ private:
 	// Description:
 	// Helper function, for serial applications calls UpdateInertiaTensor
 	// then UpdateInertiaTensorFinal
-	void ComputeInertiaTensor(vtkPointSet* input, 
+	void ComputeInertiaTensor(vtkPointSet* input, vtkstd::string massArrayName,
 		double* centerPoint,double inertiaTensor[3][3]);
 
 	// Description:
@@ -77,7 +79,8 @@ private:
 	// I01=sum i=1 to n: m_i*x_i*y_i
 	// I02=sum i=1 to n: m_i*x_i*y_i
 	// I12=sum i=1 to n: m_i*x_i*y_i
-	void UpdateInertiaTensor(vtkPointSet* input, double* centerPoint,
+	void UpdateInertiaTensor(vtkPointSet* input,
+	 	vtkstd::string massArrayName, double* centerPoint,
 		double inertiaTensor[3][3]);
 
 	// Description
@@ -97,7 +100,6 @@ private:
 	// until the bounds of the data set
 	void DisplayVectorsAsLines(vtkPointSet* input, vtkPolyData* output,
 		double vectors[3][3], double* centerPoint);
-
+//ETX
 };
-
 #endif
