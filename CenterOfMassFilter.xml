@@ -45,7 +45,7 @@
             </RequiredProperties>
           </FieldDataDomain>
           <Documentation>
-            This property indicates the name of the array from which to compute the histogram.
+			This property indicates which scalar array contains the mass of the particles.
           </Documentation>
      </StringVectorProperty>
 

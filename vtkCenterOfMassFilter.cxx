@@ -89,7 +89,8 @@ double* vtkCenterOfMassFilter::ComputeCenterOfMassFinal(
 
 //----------------------------------------------------------------------------
 void vtkCenterOfMassFilter::UpdateCenterOfMassVariables(
-	vtkPointSet* input,double& totalMass,double totalWeightedMass[])
+	vtkPointSet* input,vtkstd::string massArrayName,
+	double& totalMass,double totalWeightedMass[])
 {
 	for(int nextPointId = 0;
 	 		nextPointId < input->GetPoints()->GetNumberOfPoints();
@@ -99,7 +100,7 @@ void vtkCenterOfMassFilter::UpdateCenterOfMassVariables(
 		// extracting the mass
 		// has to be double as this version of VTK doesn't have 
 		// GetTuple function which operates with float
-		double* mass=GetDataValue(input,"mass",nextPointId);
+		double* mass=GetDataValue(input,massArrayName.c_str(),nextPointId);
 		//calculating the weighted mass
 		double* weightedMass=this->ComputeWeightedMass(mass[0],nextPoint);
 		// updating the mass and the weighted mass
@@ -143,7 +144,8 @@ double* vtkCenterOfMassFilter::ComputeCenterOfMass(vtkPointSet* input,
 			{
 			// We are at non-root process so simply update and move on
 			// Private variables to aid computation of COM
-			this->UpdateCenterOfMassVariables(input,totalMass[0],totalWeightedMass);
+			this->UpdateCenterOfMassVariables(input,massArrayName,
+				totalMass[0],totalWeightedMass);
 			// Sending to root
 			this->Controller->Send(totalMass,1,0,TOTAL_MASS);
 			this->Controller->Send(totalWeightedMass,3,0,TOTAL_WEIGHTED_MASS);
@@ -152,7 +154,8 @@ double* vtkCenterOfMassFilter::ComputeCenterOfMass(vtkPointSet* input,
 		else
 			{
 			// We are at root process so update results from root process 
-			this->UpdateCenterOfMassVariables(input,totalMass[0],totalWeightedMass);
+			this->UpdateCenterOfMassVariables(input,massArrayName,
+				totalMass[0],totalWeightedMass);
 			// Now gather results from each process other than this one
 			for(int proc = 1; proc < numProc; ++proc)
 				{
@@ -180,7 +183,8 @@ double* vtkCenterOfMassFilter::ComputeCenterOfMass(vtkPointSet* input,
 	else
 		{
 		// we aren't using MPI or have only one process
-		this->UpdateCenterOfMassVariables(input,totalMass[0],totalWeightedMass);
+		this->UpdateCenterOfMassVariables(input,
+			massArrayName,totalMass[0],totalWeightedMass);
 		double* centerOfMassFinal = \
 			this->ComputeCenterOfMassFinal(input,totalMass[0],totalWeightedMass);
 		return centerOfMassFinal;
@@ -194,15 +198,22 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 {
   // Get input and output data.
   vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
+	// Get name of data array containing mass
+	vtkDataArray* massArray = this->GetInputArrayToProcess(0, inputVector);
+  if (!massArray)
+    {
+    vtkErrorMacro("Failed to locate mass array");
+    return 0;
+    }
 	// Place result in output
 	// need to output point set, otherwise D3 is VERY unhappy
-//	vtkPointSet* output = vtkPointSet::GetData(outputVector);
 	vtkPolyData* output = vtkPolyData::GetData(outputVector);
 	// need to output point set, otherwise D3 is VERY unhappy
 	output->SetPoints(vtkSmartPointer<vtkPoints>::New());
 	output->SetVerts(vtkSmartPointer<vtkCellArray>::New());
 	// TODO: actually use array name
-	double* dbCenterOfMass=this->ComputeCenterOfMass(input,"mass");
+	double* dbCenterOfMass=this->ComputeCenterOfMass(input,
+		massArray->GetName());
 	if(dbCenterOfMass!=NULL)
 		{
 		// we are in serial or at process 0

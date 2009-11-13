@@ -70,7 +70,9 @@ private:
 	// totalWeighted mass based on the dataset of that process
 	// compute COM is called with these variables as input
 	// at the very last stage
-	void UpdateCenterOfMassVariables(vtkPointSet* input,double& totalMass, 
+	void UpdateCenterOfMassVariables(vtkPointSet* input,
+		vtkstd::string massArrayName,
+		double& totalMass, 
 		double totalWeightedMass[]);
 
 	// Description:
