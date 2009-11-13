@@ -32,7 +32,6 @@
 #include "vtkPointSetAlgorithm.h"
 
 class vtkMultiProcessController;
-
 class VTK_GRAPHICS_EXPORT vtkFriendsOfFriendsHaloFinder : public vtkPointSetAlgorithm
 {
 public:

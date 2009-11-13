@@ -17,8 +17,6 @@
 #include "vtkDataArray.h"
 #include "vtkMath.h"
 #include "vtkMultiProcessController.h"
-#include "vtkPKdTree.h"
-#include "vtkDistributedDataFilter.h"
 #include "vtkCallbackCommand.h"
 #include <vtkstd/vector>
 #include <vtkstd/map>
@@ -74,18 +72,8 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPointSet* input,
 		}
 	// Building the Kd tree
 	vtkSmartPointer<vtkPKdTree> pointTree; 
-	if(this->Controller!=NULL)
-		{
-		// Run D3
-		
-		// get PKdTree from D3's output
-			
-		}
-	else
-		{
-		pointTree	= vtkSmartPointer<vtkPKdTree>::New();
-				pointTree->BuildLocatorFromPoints(input);
-		}
+	pointTree	= vtkSmartPointer<vtkPKdTree>::New();
+		pointTree->BuildLocatorFromPoints(input);
 	// calculating the initial haloes- yes it really is done in just this 
 	// one line.
 	vtkSmartPointer<vtkIdTypeArray> haloIdArray = \
