@@ -92,7 +92,6 @@ int vtkVirialRadiusFilter::RequestData(vtkInformation *request,
 		// radius returned is < 0
 	if(virialRadiusInfo.virialRadius>0)
 		{
-		vtkWarningMacro("virial radius is " << virialRadiusInfo.virialRadius);
 		//setting the dataSet to this newInput
 		vtkPointSet* newDataSet = \
 			GetDatasetWithinVirialRadius(virialRadiusInfo);
