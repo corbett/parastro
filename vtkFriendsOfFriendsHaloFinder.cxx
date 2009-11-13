@@ -29,27 +29,20 @@ vtkCxxRevisionMacro(vtkFriendsOfFriendsHaloFinder, "$Revision: 1.72 $");
 vtkStandardNewMacro(vtkFriendsOfFriendsHaloFinder);
 vtkCxxSetObjectMacro(vtkFriendsOfFriendsHaloFinder,Controller,
 	vtkMultiProcessController);
-vtkCxxSetObjectMacro(vtkFriendsOfFriendsHaloFinder,PKdTree,vtkPKdTree);
-vtkCxxSetObjectMacro(vtkFriendsOfFriendsHaloFinder,D3,
-	vtkDistributedDataFilter);
 
 //----------------------------------------------------------------------------
 vtkFriendsOfFriendsHaloFinder::vtkFriendsOfFriendsHaloFinder()
 {
   this->LinkingLength = 1e-6; //default
 	this->MinimumNumberOfParticles = 50; // default
-	this->PKdTree  = NULL;
 	this->Controller = NULL;
-	this->D3 = NULL;
   this->SetController(vtkMultiProcessController::GetGlobalController());
 }
 
 //----------------------------------------------------------------------------
 vtkFriendsOfFriendsHaloFinder::~vtkFriendsOfFriendsHaloFinder()
 {
-  this->SetPKdTree(NULL);
   this->SetController(NULL);
-  this->SetD3(NULL);
 }
 
 //----------------------------------------------------------------------------
@@ -70,6 +63,7 @@ int vtkFriendsOfFriendsHaloFinder::FillInputPortInformation(int, vtkInformation*
   return 1;
 }
 
+//----------------------------------------------------------------------------
 int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPointSet* input,
 	vtkPointSet* output)
 {
@@ -79,8 +73,19 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPointSet* input,
 		this->MinimumNumberOfParticles=2;
 		}
 	// Building the Kd tree
-	vtkSmartPointer<vtkPKdTree> pointTree = vtkSmartPointer<vtkPKdTree>::New();
-		pointTree->BuildLocatorFromPoints(input);
+	vtkSmartPointer<vtkPKdTree> pointTree; 
+	if(this->Controller!=NULL)
+		{
+		// Run D3
+		
+		// get PKdTree from D3's output
+			
+		}
+	else
+		{
+		pointTree	= vtkSmartPointer<vtkPKdTree>::New();
+				pointTree->BuildLocatorFromPoints(input);
+		}
 	// calculating the initial haloes- yes it really is done in just this 
 	// one line.
 	vtkSmartPointer<vtkIdTypeArray> haloIdArray = \

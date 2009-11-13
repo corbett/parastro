@@ -32,8 +32,7 @@
 #include "vtkPointSetAlgorithm.h"
 
 class vtkMultiProcessController;
-class vtkPKdTree;
-class vtkDistributedDataFilter;
+
 class VTK_GRAPHICS_EXPORT vtkFriendsOfFriendsHaloFinder : public vtkPointSetAlgorithm
 {
 public:
@@ -59,15 +58,9 @@ public:
   vtkGetObjectMacro(Controller, vtkMultiProcessController);
 
   // Description:
-  // Set the vtkPKdTree to distribute with.
-  virtual void SetPKdTree(vtkPKdTree*);
-  vtkGetObjectMacro(PKdTree, vtkPKdTree);
-
-  // Description:
-  // Set/get some internal filters.
-  vtkGetObjectMacro(D3, vtkDistributedDataFilter);
-  virtual void SetD3(vtkDistributedDataFilter*);
-
+	// Groups all particles within a certain linking length of eachother into
+	// a single halo. Considers particles to comprise a halo only if its group
+	// has more than the requisite number of particles, as input by user
 	int FindHaloes(vtkPointSet* input, vtkPointSet* output);
 
 //BTX
@@ -85,8 +78,6 @@ protected:
   double LinkingLength;
 	int MinimumNumberOfParticles;
   vtkMultiProcessController *Controller;
-  vtkDistributedDataFilter *D3;
-  vtkPKdTree *PKdTree;
 
 private:
   vtkFriendsOfFriendsHaloFinder(const vtkFriendsOfFriendsHaloFinder&);  // Not implemented.
