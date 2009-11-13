@@ -93,6 +93,12 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 {
   // Get input and output data.
   vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
+	vtkDataArray* massArray = this->GetInputArrayToProcess(0, inputVector);
+  if (!massArray)
+    {
+    vtkErrorMacro("Failed to locate mass array");
+    return 0;
+    }
   vtkPointSet* output = vtkPointSet::GetData(outputVector);
   // Outline of this filter:
 	// 1. Build Kd tree
@@ -205,7 +211,8 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 			double* lastNeighborPoint=GetPoint(output,lastNeighborPointGlobalId);		
 			// there MUST be an array named mass in the input.
 			double* smoothedMass = \
-				GetDataValue(output,GetSmoothedArrayName("mass",0).c_str(),
+				GetDataValue(output,GetSmoothedArrayName(massArray->GetName(),
+				0).c_str(),
 				nextPointId);
 			double* smoothedDensity=new double[1];
 			smoothedDensity[0]=\
