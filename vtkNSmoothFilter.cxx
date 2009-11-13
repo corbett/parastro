@@ -207,7 +207,7 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 			// last neighbor point, as this is farthest from the original point
 			// we use this to calculate the volume over which to smooth
 			vtkIdType lastNeighborPointGlobalId = \
-									closestNPoints->GetId(closestNPoints->GetNumberOfIds()-1);
+				closestNPoints->GetId(closestNPoints->GetNumberOfIds()-1);
 			double* lastNeighborPoint=GetPoint(output,lastNeighborPointGlobalId);		
 			// there MUST be an array named mass in the input.
 			double* smoothedMass = \

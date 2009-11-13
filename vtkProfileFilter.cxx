@@ -29,48 +29,12 @@ vtkCxxSetObjectMacro(vtkProfileFilter, Controller, vtkMultiProcessController);
 vtkProfileFilter::vtkProfileFilter()
 {
   this->SetNumberOfInputPorts(2);
-	this->AdditionalProfileQuantities.push_back(
-		ProfileElement("angular momentum",3,&ComputeAngularMomentum,AVERAGE));
-	this->AdditionalProfileQuantities.push_back(
-		ProfileElement("radial velocity",3,&ComputeRadialVelocity,AVERAGE));
-	this->AdditionalProfileQuantities.push_back(
-		ProfileElement("tangential velocity",3,&ComputeTangentialVelocity,
-		AVERAGE));
-	this->AdditionalProfileQuantities.push_back(
-		ProfileElement("velocity squared",1,&ComputeVelocitySquared,AVERAGE));
-	this->AdditionalProfileQuantities.push_back(
-		ProfileElement("radial velocity squared",1,&ComputeRadialVelocitySquared,
-		AVERAGE));
-	this->AdditionalProfileQuantities.push_back(
-		ProfileElement("tangential velocity squared",1,
-		&ComputeTangentialVelocitySquared,AVERAGE));
-	// These use a different constructor as they are elements to be
-	// postprocessed. 
-	this->AdditionalProfileQuantities.push_back(
-		ProfileElement("circular velocity",1,
-		&ComputeCircularVelocity,
-		"mass",CUMULATIVE,
-		"bin radius",TOTAL));
-	this->AdditionalProfileQuantities.push_back(
-		ProfileElement("density",1,
-		&ComputeDensity,
-		"mass",CUMULATIVE,
-		"bin radius",TOTAL));
-	this->AdditionalProfileQuantities.push_back(
-		ProfileElement("velocity dispersion",3,
-		&ComputeVelocityDispersion,
-		"velocity squared",AVERAGE,
-		"velocity",AVERAGE));
-	this->AdditionalProfileQuantities.push_back(
-		ProfileElement("tangential velocity dispersion",3,
-		&ComputeVelocityDispersion,
-		"tangential velocity squared",AVERAGE,
-		"tangential velocity",AVERAGE));
-	this->AdditionalProfileQuantities.push_back(
-		ProfileElement("radial velocity dispersion",3,
-		&ComputeVelocityDispersion,
-		"radial velocity squared",AVERAGE,
-		"radial velocity",AVERAGE));
+	this->SetInputArrayToProcess(
+    0,
+    0,
+    0,
+    vtkDataObject::FIELD_ASSOCIATION_POINTS_THEN_CELLS,
+    vtkDataSetAttributes::SCALARS);
 	// Defaults for quantities which will be computed based on user's
 	// later input
 	this->MaxR=1.0;
@@ -115,10 +79,62 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 {
 	// Now we can get the input with which we want to work
  	vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
+	// Will set the center based upon the selection in the GUI
+	vtkDataSet* centerInfo = vtkDataSet::GetData(inputVector[1]);
+	// Get name of data array containing mass
+	vtkDataArray* massArray = this->GetInputArrayToProcess(0, inputVector);
+  if (!massArray)
+    {
+    vtkErrorMacro("Failed to locate mass array");
+    return 0;
+  	}
 	vtkTable* const output = vtkTable::GetData(outputVector,0);
 	output->Initialize();
-	// Setting the center based upon the selection in the GUI
-	vtkDataSet* centerInfo = vtkDataSet::GetData(inputVector[1]);
+
+	// Choosing which quantities to profile. Right now choosing all,
+	// could later by modified to use user's input to select
+	this->AdditionalProfileQuantities.push_back(
+		ProfileElement("angular momentum",3,&ComputeAngularMomentum,AVERAGE));
+	this->AdditionalProfileQuantities.push_back(
+		ProfileElement("radial velocity",3,&ComputeRadialVelocity,AVERAGE));
+	this->AdditionalProfileQuantities.push_back(
+		ProfileElement("tangential velocity",3,&ComputeTangentialVelocity,
+		AVERAGE));
+	this->AdditionalProfileQuantities.push_back(
+		ProfileElement("velocity squared",1,&ComputeVelocitySquared,AVERAGE));
+	this->AdditionalProfileQuantities.push_back(
+		ProfileElement("radial velocity squared",1,&ComputeRadialVelocitySquared,
+		AVERAGE));
+	this->AdditionalProfileQuantities.push_back(
+		ProfileElement("tangential velocity squared",1,
+		&ComputeTangentialVelocitySquared,AVERAGE));
+	// These use a different constructor as they are elements to be
+	// postprocessed. 
+	this->AdditionalProfileQuantities.push_back(
+		ProfileElement("velocity dispersion",3,
+		&ComputeVelocityDispersion,
+		"velocity squared",AVERAGE,
+		"velocity",AVERAGE));
+	this->AdditionalProfileQuantities.push_back(
+		ProfileElement("tangential velocity dispersion",3,
+		&ComputeVelocityDispersion,
+		"tangential velocity squared",AVERAGE,
+		"tangential velocity",AVERAGE));
+	this->AdditionalProfileQuantities.push_back(
+		ProfileElement("radial velocity dispersion",3,
+		&ComputeVelocityDispersion,
+		"radial velocity squared",AVERAGE,
+		"radial velocity",AVERAGE));
+	this->AdditionalProfileQuantities.push_back(
+		ProfileElement("circular velocity",1,
+		&ComputeCircularVelocity,
+		massArray->GetName(),CUMULATIVE,
+		"bin radius",TOTAL));
+	this->AdditionalProfileQuantities.push_back(
+		ProfileElement("density",1,
+		&ComputeDensity,
+		massArray->GetName(),CUMULATIVE,
+		"bin radius",TOTAL));
 	// runs in parallel, syncing class member data, if necessary, if not
 	// functions in serial
 	this->SetBoundsAndBinExtents(input,centerInfo); 

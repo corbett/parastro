@@ -48,6 +48,27 @@
 	        	<Property name="NumberOfPoints" show="0"/> 
 	    	</Hints>
       </InputProperty>
+     <StringVectorProperty
+         name="SelectInputArray" 
+         command="SetInputArrayToProcess" 
+         number_of_elements="5" 
+         element_types="0 0 0 0 2" 
+         animateable="0"> 
+          <ArrayListDomain name="array_list" 
+                           attribute_type="Scalars">
+            <RequiredProperties>
+               <Property name="Input" function="Input"/>
+            </RequiredProperties>
+          </ArrayListDomain>
+          <FieldDataDomain name="field_list">
+            <RequiredProperties>
+               <Property name="Input" function="Input"/>
+            </RequiredProperties>
+          </FieldDataDomain>
+          <Documentation>
+			This property indicates which scalar array contains the mass of the particles.
+          </Documentation>
+     </StringVectorProperty>
      <IntVectorProperty name="BinNumber" 
         command="SetBinNumber" 
         number_of_elements="1" 
