@@ -99,7 +99,6 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
     return 0;
     }
 	vtkPointSet* output = vtkPointSet::GetData(outputVector);;
-	output->Initialize();
 	// copies the point positions
 	output->CopyStructure(input);
 	// copies the point attributes
@@ -117,6 +116,8 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 	// identical to the input, with some additional properties
 	// Building the Kd tree, should already be built
 	pointTree->BuildLocatorFromPoints(output);
+	// TODO: for debugging remove
+	return 1;
 	// Allocating arrays to store our smoothed values
 	// smoothed density
  	AllocateDoubleDataArray(output,"smoothed density", 
