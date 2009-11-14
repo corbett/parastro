@@ -92,9 +92,8 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
 			{
 			this->GetController()->Send(haloIdArray,0,HALO_ID_ARRAY_INITIAL);
 			// waiting to recieve the final result, as computed by root
-			// TODO: ADD BACK IN
-//			this->GetController()->Receive(haloIdArray,0,
-//				HALO_ID_ARRAY_FINAL);			
+			this->GetController()->Receive(haloIdArray,0,
+				HALO_ID_ARRAY_FINAL);			
 			// setting output
 			output->GetPointData()->AddArray(haloIdArray);
 			// returning	
@@ -155,12 +154,7 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
 				haloCount[haloId]-=1;
 				}
 			}
-		}
-	// TODO: remove testing
-	output->GetPointData()->AddArray(haloIdArray);
-	// TODO: remove returning
-	return 1;
-	
+		}	
 	// finally setting to zero points which have 
 	// count < this->MinimumNumberOfParticles, O(N), and
 	// assigning those we have seen more the requisite number
@@ -170,7 +164,7 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
 		procHaloIdArrayIndex < allHaloIdArrays.size(); 
 		++procHaloIdArrayIndex)
 		{
-		vtkSmartPointer<vtkIdTypeArray> nextHaloIdArray = \
+		vtkIdTypeArray* nextHaloIdArray = \
 			allHaloIdArrays[procHaloIdArrayIndex];
 		// use negatives to figure differentiate between unique id assignment 
 		// (positive) and count (negative) in the same map
@@ -195,11 +189,12 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
 			// if running in parallel and if we are not dealing with our own 
 			// halo array on process 0
 			// dispatch it to its process processes
-			this->GetController()->Send(haloIdArray,
+			this->GetController()->Send(nextHaloIdArray,
 				procHaloIdArrayIndex,HALO_ID_ARRAY_FINAL);
 			}
 		}
 	output->GetPointData()->AddArray(haloIdArray);
+	return 1;
 }
 
 //----------------------------------------------------------------------------
