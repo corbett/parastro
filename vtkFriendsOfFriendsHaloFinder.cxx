@@ -62,8 +62,7 @@ int vtkFriendsOfFriendsHaloFinder::FillInputPortInformation(int, vtkInformation*
 }
 
 //----------------------------------------------------------------------------
-int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPointSet* input,
-	vtkPointSet* output)
+int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPointSet* output)
 {
 	if(this->MinimumNumberOfParticles < 2)
 		{
@@ -73,13 +72,13 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPointSet* input,
 	// Building the Kd tree
 	vtkSmartPointer<vtkPKdTree> pointTree; 
 	pointTree	= vtkSmartPointer<vtkPKdTree>::New();
-		pointTree->BuildLocatorFromPoints(input);
+		pointTree->BuildLocatorFromPoints(output);
 	// calculating the initial haloes- yes it really is done in just this 
 	// one line.
 	vtkSmartPointer<vtkIdTypeArray> haloIdArray = \
 		pointTree->BuildMapForDuplicatePoints(this->LinkingLength);
 	haloIdArray->SetNumberOfComponents(1);
-	haloIdArray->SetNumberOfTuples(input->GetPoints()->GetNumberOfPoints());
+	haloIdArray->SetNumberOfTuples(output->GetPoints()->GetNumberOfPoints());
 	haloIdArray->SetName("halo ID");
 	// Now assign halos, if this point has at least one other pair,
 	// it is a halo, if not it is not (set to 0)
@@ -137,9 +136,19 @@ int vtkFriendsOfFriendsHaloFinder::RequestData(vtkInformation*,
 {
   // Get input and output data.
   vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
-  vtkPointSet* output = vtkPointSet::GetData(outputVector);
-  output->ShallowCopy(input);
-	this->FindHaloes(input,output);
+	vtkPointSet* output;
+	if(this->Controller!=NULL)
+		{
+		// call D3, setting retain PKTree to 1
+		vtkErrorMacro("this filter is not currently supported in parallel");
+		return 0;
+		}
+	else
+		{
+		output = vtkPointSet::GetData(outputVector);
+  	output->ShallowCopy(input);
+		}
+	this->FindHaloes(output);
 	// Finally, some memory management
   output->Squeeze();
   return 1;

@@ -59,8 +59,10 @@ public:
   // Description:
 	// Groups all particles within a certain linking length of eachother into
 	// a single halo. Considers particles to comprise a halo only if its group
-	// has more than the requisite number of particles, as input by user
-	int FindHaloes(vtkPointSet* input, vtkPointSet* output);
+	// has more than the requisite number of particles, as input by user. 
+	// Output should contain the data set in which halos should be searched
+	// before calling.
+	int FindHaloes(vtkPointSet* output);
 
 //BTX
 protected:
