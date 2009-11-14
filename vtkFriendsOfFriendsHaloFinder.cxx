@@ -186,8 +186,8 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
 				// we saw it more than once, assign it to its unique id
 				nextHaloIdArray->SetValue(nextHaloId,haloCount[haloId]);
 				}
-			}
 			*/
+			}
 		if(RunInParallel(this->GetController()) && procHaloIdArrayIndex > 0)
 			{
 			// if running in parallel and if we are not dealing with our own 
