@@ -93,6 +93,8 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
 			// waiting to recieve the final result, as computed by root
 			this->GetController()->Receive(haloIdArray,0,
 				HALO_ID_ARRAY_FINAL);
+			// TODO: remove
+			cout << " id array has " << haloIdArray->GetNumberOfTuples() << "\n";
 			// setting output
 			output->GetPointData()->AddArray(haloIdArray);
 			// returning	
@@ -211,7 +213,7 @@ int vtkFriendsOfFriendsHaloFinder::RequestData(vtkInformation* request,
 		// methods
 		this->RetainKdtreeOn();
 		// requesting ghost cells
-      this->AssignBoundaryCellsToAllIntersectingRegionsOn();
+    this->AssignBoundaryCellsToAllIntersectingRegionsOn();
 		// Just calling the superclass' method to distribute data and build
 		// PKdTree
 	  this->Superclass::RequestData(request,inputVector,outputVector);
