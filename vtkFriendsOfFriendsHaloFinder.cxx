@@ -53,7 +53,8 @@ void vtkFriendsOfFriendsHaloFinder::PrintSelf(ostream& os, vtkIndent indent)
 }
 
 //----------------------------------------------------------------------------
-int vtkFriendsOfFriendsHaloFinder::FillInputPortInformation(int, vtkInformation* info)
+int vtkFriendsOfFriendsHaloFinder::FillInputPortInformation(int, 
+  vtkInformation* info)
 {
   // This filter uses the vtkDataSet cell traversal methods so it
   // suppors any data set type as input.

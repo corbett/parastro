@@ -19,7 +19,7 @@
 #define __vtkProfileFilter_h
 #include "vtkTableAlgorithm.h" // super class
 #include "vtkStringArray.h" // some class variables are vtkStringArrays
-
+#include <vtkstd/vector>
 class vtkPointSet;
 class vtkMultiProcessController;
 //----------------------------------------------------------------------------
