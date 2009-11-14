@@ -93,7 +93,6 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
 			// waiting to recieve the final result, as computed by root
 			this->GetController()->Receive(haloIdArray,0,
 				HALO_ID_ARRAY_FINAL);
-			cout << " just receiving results in " << procId << "\n";
 			// setting output
 			output->GetPointData()->AddArray(haloIdArray);
 			// returning	
@@ -189,7 +188,6 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
 			// if running in parallel and if we are not dealing with our own 
 			// halo array on process 0
 			// dispatch it to its process processes
-			cout << "sending next to proc " << procHaloIdArrayIndex << "\n";
 			this->GetController()->Send(nextHaloIdArray,
 				procHaloIdArrayIndex,HALO_ID_ARRAY_FINAL);
 			}
@@ -213,7 +211,7 @@ int vtkFriendsOfFriendsHaloFinder::RequestData(vtkInformation* request,
 		// methods
 		this->RetainKdtreeOn();
 		// requesting ghost cells
-		this->SetBoundaryModeToAssignToAllIntersectingRegions();
+      this->AssignBoundaryCellsToAllIntersectingRegionsOn();
 		// Just calling the superclass' method to distribute data and build
 		// PKdTree
 	  this->Superclass::RequestData(request,inputVector,outputVector);
