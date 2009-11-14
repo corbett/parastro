@@ -101,7 +101,6 @@ int vtkNSmoothFilter::RequestData(vtkInformation *request,
 	int numberOriginalArrays = input->GetPointData()->GetNumberOfArrays();
 	if(RunInParallel(this->GetController()))
 		{
-		cout << "in parallel`\n" ;
 		// call D3, setting retain PKTree to 1; this can be accessed by later
 		// methods
 		this->RetainKdtreeOn();
@@ -116,7 +115,6 @@ int vtkNSmoothFilter::RequestData(vtkInformation *request,
 		}
 	else
 		{		
-		cout << " not in parallel`\n" ;
 		output = vtkPointSet::GetData(outputVector);
   	output->ShallowCopy(input);
 		// Building the Kd tree, should already be built

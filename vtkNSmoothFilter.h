@@ -35,8 +35,6 @@
 #define __vtkNSmoothFilter_h
 #include "vtkDistributedDataFilter.h"
 
-class vtkMultiProcessController;
-class vtkPKdTree;
 class VTK_GRAPHICS_EXPORT vtkNSmoothFilter : public vtkDistributedDataFilter
 {
 public:
@@ -56,6 +54,7 @@ protected:
 
   // Override to specify support for any vtkDataSet input type.
   virtual int FillInputPortInformation(int port, vtkInformation* info);
+
 	// Override to specify different type of output
 	virtual int FillOutputPortInformation(int vtkNotUsed(port), 
 		vtkInformation* info);
@@ -64,10 +63,8 @@ protected:
   virtual int RequestData(vtkInformation*,
    	vtkInformationVector**,
     vtkInformationVector*);
+
   int NeighborNumber;
-  vtkMultiProcessController *Controller;
-  vtkDistributedDataFilter *D3;
-  vtkPKdTree *PKdTree;
 
 private:
   vtkNSmoothFilter(const vtkNSmoothFilter&);  // Not implemented.

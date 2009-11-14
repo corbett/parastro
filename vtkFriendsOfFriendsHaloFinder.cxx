@@ -25,22 +25,17 @@
 
 vtkCxxRevisionMacro(vtkFriendsOfFriendsHaloFinder, "$Revision: 1.72 $");
 vtkStandardNewMacro(vtkFriendsOfFriendsHaloFinder);
-vtkCxxSetObjectMacro(vtkFriendsOfFriendsHaloFinder,Controller,
-	vtkMultiProcessController);
 
 //----------------------------------------------------------------------------
-vtkFriendsOfFriendsHaloFinder::vtkFriendsOfFriendsHaloFinder()
+vtkFriendsOfFriendsHaloFinder::vtkFriendsOfFriendsHaloFinder():vtkDistributedDataFilter()
 {
   this->LinkingLength = 1e-6; //default
 	this->MinimumNumberOfParticles = 50; // default
-	this->Controller = NULL;
-  this->SetController(vtkMultiProcessController::GetGlobalController());
 }
 
 //----------------------------------------------------------------------------
 vtkFriendsOfFriendsHaloFinder::~vtkFriendsOfFriendsHaloFinder()
 {
-  this->SetController(NULL);
 }
 
 //----------------------------------------------------------------------------
@@ -56,24 +51,29 @@ void vtkFriendsOfFriendsHaloFinder::PrintSelf(ostream& os, vtkIndent indent)
 int vtkFriendsOfFriendsHaloFinder::FillInputPortInformation(int, 
   vtkInformation* info)
 {
-  // This filter uses the vtkDataSet cell traversal methods so it
-  // suppors any data set type as input.
   info->Set(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), "vtkPointSet");
   return 1;
 }
 
 //----------------------------------------------------------------------------
-int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPointSet* output)
+int vtkFriendsOfFriendsHaloFinder::FillOutputPortInformation(
+  int vtkNotUsed(port), vtkInformation* info)
+{
+  info->Set(vtkDataObject::DATA_TYPE_NAME(), "vtkPointSet");
+  return 1;
+}
+
+//----------------------------------------------------------------------------
+int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
+	vtkPointSet* output)
 {
 	if(this->MinimumNumberOfParticles < 2)
 		{
 		vtkWarningMacro("setting minimum number of particles to 2, a minimum number of particles below this makes no sense.");
 		this->MinimumNumberOfParticles=2;
 		}
-	// Building the Kd tree
-	vtkSmartPointer<vtkPKdTree> pointTree; 
-	pointTree	= vtkSmartPointer<vtkPKdTree>::New();
-		pointTree->BuildLocatorFromPoints(output);
+	// building a locator
+	pointTree->BuildLocatorFromPoints(output);
 	// calculating the initial haloes- yes it really is done in just this 
 	// one line.
 	vtkSmartPointer<vtkIdTypeArray> haloIdArray = \
@@ -131,28 +131,33 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPointSet* output)
 }
 
 //----------------------------------------------------------------------------
-int vtkFriendsOfFriendsHaloFinder::RequestData(vtkInformation*,
-                                 vtkInformationVector** inputVector,
-                                 vtkInformationVector* outputVector)
+int vtkFriendsOfFriendsHaloFinder::RequestData(vtkInformation* request,
+	vtkInformationVector** inputVector,
+  vtkInformationVector* outputVector)
 {
   // Get input and output data.
   vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
 	vtkPointSet* output;
-	if(RunInParallel(this->Controller))
+	vtkSmartPointer<vtkPKdTree> pointTree;
+	if(RunInParallel(this->GetController()))
 		{
-		// TODO: implement
 		// call D3, setting retain PKTree to 1; this can be accessed by later
 		// methods
-		vtkErrorMacro("this filter is not currently supported in parallel");
-		return 0;
+		this->RetainKdtreeOn();
+		// Just calling the superclass' method to distribute data and build
+		// PKdTree
+	  this->Superclass::RequestData(request,inputVector,outputVector);
+		output = vtkPointSet::GetData(outputVector);
+		// setting the KdTree to the output from D3
+		pointTree=this->GetKdtree();
 		}
 	else
-		{
+		{		
 		output = vtkPointSet::GetData(outputVector);
   	output->ShallowCopy(input);
+		// Building the Kd tree, should already be built
+		pointTree = vtkSmartPointer<vtkPKdTree>::New();
 		}
-	this->FindHaloes(output);
-	// Finally, some memory management
-  output->Squeeze();
+	this->FindHaloes(pointTree,output);
   return 1;
 }

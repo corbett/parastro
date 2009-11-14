@@ -25,18 +25,19 @@
 //    apart. if so, merge haloes. Continue until every halo's bounds
 //    have been checked against every other halo's
 // .SECTION See Also
-// vtkKdTree
+// vtkKdTree, vtkPKdTree, vtkDistributedDataFilter.h
 
 #ifndef __vtkFriendsOfFriendsHaloFinder_h
 #define __vtkFriendsOfFriendsHaloFinder_h
-#include "vtkPointSetAlgorithm.h"
+#include "vtkDistributedDataFilter.h"
 
-class vtkMultiProcessController;
-class VTK_GRAPHICS_EXPORT vtkFriendsOfFriendsHaloFinder : public vtkPointSetAlgorithm
+class vtkPointSet;
+class VTK_GRAPHICS_EXPORT vtkFriendsOfFriendsHaloFinder : public vtkDistributedDataFilter
 {
 public:
   static vtkFriendsOfFriendsHaloFinder *New();
-  vtkTypeRevisionMacro(vtkFriendsOfFriendsHaloFinder,vtkPointSetAlgorithm);
+  vtkTypeRevisionMacro(vtkFriendsOfFriendsHaloFinder,
+		vtkDistributedDataFilter);
   void PrintSelf(ostream& os, vtkIndent indent);
 
   // Description:
@@ -51,27 +52,22 @@ public:
   vtkGetMacro(MinimumNumberOfParticles, int);
 
   // Description:
-  // By defualt this filter uses the global controller,
-  // but this method can be used to set another instead.
-  virtual void SetController(vtkMultiProcessController*);
-  vtkGetObjectMacro(Controller, vtkMultiProcessController);
-
-  // Description:
 	// Groups all particles within a certain linking length of eachother into
 	// a single halo. Considers particles to comprise a halo only if its group
 	// has more than the requisite number of particles, as input by user. 
 	// Output should contain the data set in which halos should be searched
 	// before calling.
-	int FindHaloes(vtkPointSet* output);
+	int FindHaloes(vtkPKdTree* pointTree, vtkPointSet* output);
 
 //BTX
 protected:
   vtkFriendsOfFriendsHaloFinder();
   ~vtkFriendsOfFriendsHaloFinder();
-
   // Override to specify support for any vtkDataSet input type.
   virtual int FillInputPortInformation(int port, vtkInformation* info);
-
+	// Override to specify different type of output
+	virtual int FillOutputPortInformation(int vtkNotUsed(port), 
+		vtkInformation* info);
   // Main implementation.
   virtual int RequestData(vtkInformation*,
    	vtkInformationVector**,
