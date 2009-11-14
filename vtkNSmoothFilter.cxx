@@ -110,9 +110,7 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
   // First copying the input to the output, as the output will be 
 	// identical to the input, with some additional properties
 	// copies the point positions
-  output->CopyStructure(input);
-	// copies the point attributes
-  output->CopyAttributes(input);
+  output->ShallowCopy(input);
 	// Building the Kd tree, should already be built
 	vtkSmartPointer<vtkPKdTree> pointTree = vtkSmartPointer<vtkPKdTree>::New();
 	pointTree->BuildLocatorFromPoints(input);
