@@ -124,7 +124,6 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
 	// Now assign halos, if this point has at least one other pair,
 	// it is a halo, if not it is not (set to 0)
 	// first building map of id to count of that id, O(N)
-
 	vtkstd::map<vtkIdType,int> haloCount;
 	int uniqueId=1;
 	for(int procHaloIdArrayIndex = 0; 
@@ -140,6 +139,9 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
 		 	++nextHaloId)
 			{
 			vtkIdType haloId = nextHaloIdArray->GetValue(nextHaloId);
+			// TODO: REMOVE
+			cout << "halo ID " << haloId << "\n";
+			
 			if(haloCount[haloId]==-1*this->MinimumNumberOfParticles)
 				{
 				// we have seen the id minimum number of particles times,
@@ -172,11 +174,7 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
 			nextHaloId < nextHaloIdArray->GetNumberOfTuples();
 		 	++nextHaloId)
 			{
-			vtkIdType haloId = nextHaloIdArray->GetValue(nextHaloId);
-			// TODO: REMOVE
-			cout << "halo ID " << haloId << "\n";
-			cout << "halo count " << haloCount[haloId] << "\n";
-			
+			vtkIdType haloId = nextHaloIdArray->GetValue(nextHaloId);			
 			if(haloCount[haloId]<1)
 				{
 				// we only saw it less than requisite number of times
