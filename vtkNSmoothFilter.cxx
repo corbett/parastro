@@ -119,10 +119,11 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
  	AllocateDoubleDataArray(output,"smoothed density", 
 		1,output->GetPoints()->GetNumberOfPoints());
 	// smoothing each quantity in the input
-	for(int i = 0; i < input->GetPointData()->GetNumberOfArrays(); ++i)
+	int numberOriginalArrays = output->GetPointData()->GetNumberOfArrays();
+	for(int i = 0; i < numberOriginalArrays; ++i)
 		{
 		vtkSmartPointer<vtkDataArray> nextArray = \
-		 	input->GetPointData()->GetArray(i);
+		 	output->GetPointData()->GetArray(i);
 		string baseName = nextArray->GetName();
 		for(int comp = 0; comp < nextArray->GetNumberOfComponents(); ++comp)
 			{
