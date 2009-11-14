@@ -81,50 +81,113 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
 	haloIdArray->SetNumberOfComponents(1);
 	haloIdArray->SetNumberOfTuples(output->GetPoints()->GetNumberOfPoints());
 	haloIdArray->SetName("halo ID");
+
+	vtkstd::vector<vtkIdTypeArray*> allHaloIdArrays;
+	if(RunInParallel(this->GetController()))
+		{
+		int procId=this->Controller->GetLocalProcessId();
+		int numProc=this->Controller->GetNumberOfProcesses();
+		if(procId!=0)
+			{
+			this->GetController()->Send(haloIdArray,0,HALO_ID_ARRAY_INITIAL);
+			// waiting to recieve the final result, as computed by root
+			this->GetController()->Receive(haloIdArray,0,
+				HALO_ID_ARRAY_FINAL);
+			// setting output
+			output->GetPointData()->AddArray(haloIdArray);
+			// returning
+			return 1;
+			}
+		else
+			{
+			// Syncing all hashtables if process 0
+			// Filling it first with process zero's info
+			allHaloIdArrays.push_back(haloIdArray);
+			vtkSmartPointer<vtkIdTypeArray> recHaloIdArray = \
+				vtkSmartPointer<vtkIdTypeArray>::New();
+			for(int proc = 1; proc < numProc; ++proc)
+				{
+				this->GetController()->Receive(recHaloIdArray,proc,
+					HALO_ID_ARRAY_INITIAL);
+				allHaloIdArrays.push_back(recHaloIdArray);
+				}
+			// don't return, proc 0 should execute code after if statement
+			}
+		}
+	else
+		{
+		// running in serial
+		allHaloIdArrays.push_back(haloIdArray);
+		}
 	// Now assign halos, if this point has at least one other pair,
 	// it is a halo, if not it is not (set to 0)
 	// first building map of id to count of that id, O(N)
 	vtkstd::map<vtkIdType,int> haloCount;
 	int uniqueId=1;
-	// use negatives to figure differentiate between unique id assignment 
-	// (positive) and count (negative) in the same map
-	for(int nextHaloId = 0;
-		nextHaloId < haloIdArray->GetNumberOfTuples();
-	 	++nextHaloId)
+	for(int procHaloIdArrayIndex = 0; 
+		procHaloIdArrayIndex < allHaloIdArrays.size(); 
+		++procHaloIdArrayIndex)
 		{
-		vtkIdType haloId = haloIdArray->GetValue(nextHaloId);
-		if(haloCount[haloId]==-1*this->MinimumNumberOfParticles)
+		vtkSmartPointer<vtkIdTypeArray> nextHaloIdArray = \
+			allHaloIdArrays[procHaloIdArrayIndex];
+		// use negatives to figure differentiate between unique id assignment 
+		// (positive) and count (negative) in the same map
+		for(int nextHaloId = 0;
+			nextHaloId < nextHaloIdArray->GetNumberOfTuples();
+		 	++nextHaloId)
 			{
-			// we have seen the id minimum number of particles times,
-			// so we assign it a unique halo id, considering it a halo
-			haloCount[haloId]=uniqueId;
-			uniqueId+=1;
-			}
-		else if(haloCount[haloId]<1)
-			{
-			// this counts each time we see the id, until we reach the
-			// minimum number of particles to count as a halo
-			haloCount[haloId]-=1;
+			vtkIdType haloId = nextHaloIdArray->GetValue(nextHaloId);
+			if(haloCount[haloId]==-1*this->MinimumNumberOfParticles)
+				{
+				// we have seen the id minimum number of particles times,
+				// so we assign it a unique halo id, considering it a halo
+				haloCount[haloId]=uniqueId;
+				uniqueId+=1;
+				}
+			else if(haloCount[haloId]<1)
+				{
+				// this counts each time we see the id, until we reach the
+				// minimum number of particles to count as a halo
+				haloCount[haloId]-=1;
+				}
 			}
 		}
 	// finally setting to zero points which have 
 	// count < this->MinimumNumberOfParticles, O(N), and
 	// assigning those we have seen more the requisite number
 	// of times to their unique id
-	for(int nextHaloId = 0;
-		nextHaloId < haloIdArray->GetNumberOfTuples();
-	 	++nextHaloId)
+	// process 0 or running in serial
+	for(int procHaloIdArrayIndex = 0; 
+		procHaloIdArrayIndex < allHaloIdArrays.size(); 
+		++procHaloIdArrayIndex)
 		{
-		vtkIdType haloId = haloIdArray->GetValue(nextHaloId);
-		if(haloCount[haloId]<1)
+		vtkSmartPointer<vtkIdTypeArray> nextHaloIdArray = \
+			allHaloIdArrays[procHaloIdArrayIndex];
+		// use negatives to figure differentiate between unique id assignment 
+		// (positive) and count (negative) in the same map
+		for(int nextHaloId = 0;
+			nextHaloId < nextHaloIdArray->GetNumberOfTuples();
+		 	++nextHaloId)
 			{
-			// we only saw it less than requisite number of times
-			haloIdArray->SetValue(nextHaloId,0);
+			vtkIdType haloId = nextHaloIdArray->GetValue(nextHaloId);
+			if(haloCount[haloId]<1)
+				{
+				// we only saw it less than requisite number of times
+				nextHaloIdArray->SetValue(nextHaloId,0);
+				}
+			else
+				{
+				// we saw it more than once, assign it to its unique id
+				nextHaloIdArray->SetValue(nextHaloId,haloCount[haloId]);
+				}
 			}
-		else
+		if(RunInParallel(this->GetController()) && procHaloIdArrayIndex > 0)
 			{
-			// we saw it more than once, assign it to its unique id
-			haloIdArray->SetValue(nextHaloId,haloCount[haloId]);
+			// if running in parallel and if we are not dealing with our own 
+			// halo array on process 0
+			// dispatch it to its process processes
+			this->GetController()->Send(haloIdArray,
+				procHaloIdArrayIndex,HALO_ID_ARRAY_FINAL);
 			}
 		}
 	output->GetPointData()->AddArray(haloIdArray);

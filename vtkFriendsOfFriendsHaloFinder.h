@@ -32,6 +32,11 @@
 #include "vtkDistributedDataFilter.h"
 
 class vtkPointSet;
+enum FriendsOfFriendsMPIData 
+{
+	HALO_ID_ARRAY_INITIAL,
+	HALO_ID_ARRAY_FINAL
+};
 class VTK_GRAPHICS_EXPORT vtkFriendsOfFriendsHaloFinder : public vtkDistributedDataFilter
 {
 public:
