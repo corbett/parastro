@@ -124,6 +124,11 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
 	// Now assign halos, if this point has at least one other pair,
 	// it is a halo, if not it is not (set to 0)
 	// first building map of id to count of that id, O(N)
+	// TODO: remove testing
+	output->GetPointData()->AddArray(haloIdArray);
+	// TODO: remove returning
+	return 1;
+
 	vtkstd::map<vtkIdType,int> haloCount;
 	int uniqueId=1;
 	for(int procHaloIdArrayIndex = 0; 
@@ -154,10 +159,6 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
 				}
 			}
 		}
-	// TODO: remove testing
-	output->GetPointData()->AddArray(haloIdArray);
-	// TODO: remove returning
-	return 1;
 	
 	// finally setting to zero points which have 
 	// count < this->MinimumNumberOfParticles, O(N), and
