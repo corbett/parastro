@@ -110,16 +110,16 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
   // First copying the input to the output, as the output will be 
 	// identical to the input, with some additional properties
 	// copies the point positions
+	// smoothing each quantity in the output
+	int numberOriginalArrays = input->GetPointData()->GetNumberOfArrays();
   output->ShallowCopy(input);
 	// Building the Kd tree, should already be built
 	vtkSmartPointer<vtkPKdTree> pointTree = vtkSmartPointer<vtkPKdTree>::New();
-	pointTree->BuildLocatorFromPoints(input);
+	pointTree->BuildLocatorFromPoints(output);
 	// Allocating arrays to store our smoothed values
 	// smoothed density
  	AllocateDoubleDataArray(output,"smoothed density", 
 		1,output->GetPoints()->GetNumberOfPoints());
-	// smoothing each quantity in the input
-	int numberOriginalArrays = output->GetPointData()->GetNumberOfArrays();
 	for(int i = 0; i < numberOriginalArrays; ++i)
 		{
 		vtkSmartPointer<vtkDataArray> nextArray = \
@@ -134,10 +134,10 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 			}
 		}
 	for(int nextPointId = 0;
-		nextPointId < input->GetPoints()->GetNumberOfPoints();
+		nextPointId < output->GetPoints()->GetNumberOfPoints();
 	 	++nextPointId)
 		{
-		double* nextPoint=GetPoint(input,nextPointId);
+		double* nextPoint=GetPoint(output,nextPointId);
 		// finding the closest N points
 		vtkSmartPointer<vtkIdList> closestNPoints = \
 			vtkSmartPointer<vtkIdList>::New();
@@ -156,15 +156,15 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 				{
 				vtkIdType neighborPointGlobalId = \
 										closestNPoints->GetId(neighborPointLocalId);
-				double* neighborPoint=GetPoint(input,neighborPointGlobalId);
+				double* neighborPoint=GetPoint(output,neighborPointGlobalId);
 			// keeps track of the totals for each quantity inside
 			// the output, only dividing by N at the end
-				for(int i = 0; i < input->GetPointData()->GetNumberOfArrays(); ++i)
+				for(int i = 0; i < numberOriginalArrays; ++i)
 					{
 					vtkSmartPointer<vtkDataArray> nextArray = \
-						input->GetPointData()->GetArray(i);
+						output->GetPointData()->GetArray(i);
 					string baseName = nextArray->GetName();
-					double* data=GetDataValue(input,baseName.c_str(),
+					double* data=GetDataValue(output,baseName.c_str(),
 						neighborPointGlobalId);
 					for(int comp = 0; comp < nextArray->GetNumberOfComponents(); ++comp)
 						{
@@ -185,10 +185,10 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 				}
 			// dividing by N at the end
 			double numberPoints = closestNPoints->GetNumberOfIds();
-			for(int i = 0; i < input->GetPointData()->GetNumberOfArrays(); ++i)
+			for(int i = 0; i < numberOriginalArrays; ++i)
 				{
 				vtkSmartPointer<vtkDataArray> nextArray = \
-					input->GetPointData()->GetArray(i);
+					output->GetPointData()->GetArray(i);
 				string baseName = nextArray->GetName();
 				for(int comp = 0; comp < nextArray->GetNumberOfComponents(); ++comp)
 					{
@@ -208,7 +208,6 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 			vtkIdType lastNeighborPointGlobalId = \
 				closestNPoints->GetId(closestNPoints->GetNumberOfIds()-1);
 			double* lastNeighborPoint=GetPoint(output,lastNeighborPointGlobalId);		
-			// there MUST be an array named mass in the input.
 			double* smoothedMass = \
 				GetDataValue(output,GetSmoothedArrayName(massArray->GetName(),
 				0).c_str(),
