@@ -99,7 +99,8 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
     vtkErrorMacro("Failed to locate mass array");
     return 0;
     }
-  vtkPointSet* output = vtkPointSet::GetData(outputVector);
+  vtkPointSet* output;
+	vtkSmartPointer<vtkPKdTree> pointTree;
   // Outline of this filter:
 	// 1. Build Kd tree
 	// 2. Go through each point in output
@@ -112,10 +113,22 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 	// copies the point positions
 	// smoothing each quantity in the output
 	int numberOriginalArrays = input->GetPointData()->GetNumberOfArrays();
-  output->ShallowCopy(input);
-	// Building the Kd tree, should already be built
-	vtkSmartPointer<vtkPKdTree> pointTree = vtkSmartPointer<vtkPKdTree>::New();
-	pointTree->BuildLocatorFromPoints(output);
+	if(RunInParallel(this->Controller))
+		{
+		// TODO: implement
+		// call D3, setting retain PKTree to 1; this can be accessed by later
+		// methods
+		vtkErrorMacro("this filter is not currently supported in parallel");
+		return 0;
+		}
+	else
+		{
+		output = vtkPointSet::GetData(outputVector);
+  	output->ShallowCopy(input);
+		// Building the Kd tree, should already be built
+		pointTree = vtkSmartPointer<vtkPKdTree>::New();
+		pointTree->BuildLocatorFromPoints(output);
+		}
 	// Allocating arrays to store our smoothed values
 	// smoothed density
  	AllocateDoubleDataArray(output,"smoothed density", 

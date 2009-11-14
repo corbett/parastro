@@ -141,7 +141,8 @@ int vtkFriendsOfFriendsHaloFinder::RequestData(vtkInformation*,
 	if(RunInParallel(this->Controller))
 		{
 		// TODO: implement
-		// call D3, setting retain PKTree to 1
+		// call D3, setting retain PKTree to 1; this can be accessed by later
+		// methods
 		vtkErrorMacro("this filter is not currently supported in parallel");
 		return 0;
 		}
