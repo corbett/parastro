@@ -116,12 +116,13 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 	// identical to the input, with some additional properties
 	// Building the Kd tree, should already be built
 	pointTree->BuildLocatorFromPoints(output);
-	// TODO: for debugging remove
-	return 1;
 	// Allocating arrays to store our smoothed values
 	// smoothed density
  	AllocateDoubleDataArray(output,"smoothed density", 
 		1,output->GetPoints()->GetNumberOfPoints());
+	// TODO: for debugging remove
+	return 1;
+	
 	// smoothing each quantity in the output
 	for(int i = 0; i < output->GetPointData()->GetNumberOfArrays(); ++i)
 		{
