@@ -136,8 +136,6 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
 				allHaloIdArrays[procHaloIdArrayIndex];
 		// use negatives to figure differentiate between unique id assignment 
 		// (positive) and count (negative) in the same map
-		//TODO: add back in
-		/*
 		for(int nextHaloId = 0;
 			nextHaloId < nextHaloIdArray->GetNumberOfTuples();
 		 	++nextHaloId)
@@ -157,7 +155,6 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
 				haloCount[haloId]-=1;
 				}
 			}
-		*/
 		}
 	// TODO: remove testing
 	output->GetPointData()->AddArray(haloIdArray);
