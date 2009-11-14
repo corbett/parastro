@@ -76,7 +76,8 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
 	pointTree->BuildLocatorFromPoints(output);
 	// calculating the initial haloes- yes it really is done in just this 
 	// one line.
-	vtkSmartPointer<vtkIdTypeArray> haloIdArray = \
+	// TODO: manage memory
+	vtkIdTypeArray* haloIdArray = \
 		pointTree->BuildMapForDuplicatePoints(this->LinkingLength);
 	haloIdArray->SetNumberOfComponents(1);
 	haloIdArray->SetNumberOfTuples(output->GetPoints()->GetNumberOfPoints());
@@ -104,8 +105,8 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
 			// Syncing all hashtables if process 0
 			// Filling it first with process zero's info
 			allHaloIdArrays.push_back(haloIdArray);
-			vtkSmartPointer<vtkIdTypeArray> recHaloIdArray = \
-				vtkSmartPointer<vtkIdTypeArray>::New();
+			// TODO: manage memory
+			vtkIdTypeArray* recHaloIdArray = vtkIdTypeArray::New();
 			recHaloIdArray->Initialize();
 			for(int proc = 1; proc < numProc; ++proc)
 				{
@@ -131,8 +132,8 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
 		procHaloIdArrayIndex < allHaloIdArrays.size(); 
 		++procHaloIdArrayIndex)
 		{
-		vtkSmartPointer<vtkIdTypeArray> nextHaloIdArray = \
-			allHaloIdArrays[procHaloIdArrayIndex];
+		vtkIdTypeArray* nextHaloIdArray = \
+				allHaloIdArrays[procHaloIdArrayIndex];
 		// use negatives to figure differentiate between unique id assignment 
 		// (positive) and count (negative) in the same map
 		//TODO: add back in
