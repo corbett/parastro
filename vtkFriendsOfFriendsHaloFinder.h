@@ -79,7 +79,6 @@ protected:
     vtkInformationVector*);
   double LinkingLength;
 	int MinimumNumberOfParticles;
-  vtkMultiProcessController *Controller;
 
 private:
   vtkFriendsOfFriendsHaloFinder(const vtkFriendsOfFriendsHaloFinder&);  // Not implemented.

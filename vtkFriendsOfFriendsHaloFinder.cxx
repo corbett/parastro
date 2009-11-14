@@ -85,22 +85,18 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
 	vtkstd::vector<vtkIdTypeArray*> allHaloIdArrays;
 	if(RunInParallel(this->GetController()))
 		{
-		int procId=this->Controller->GetLocalProcessId();
-		int numProc=this->Controller->GetNumberOfProcesses();
+		int procId=this->GetController()->GetLocalProcessId();
+		int numProc=this->GetController()->GetNumberOfProcesses();
 		if(procId!=0)
 			{
-			// TODO: remove, putting this in, to indicate where algorithm is segfaulting
-			return 1;
-			
 			this->GetController()->Send(haloIdArray,0,HALO_ID_ARRAY_INITIAL);
 			// waiting to recieve the final result, as computed by root
 			this->GetController()->Receive(haloIdArray,0,
 				HALO_ID_ARRAY_FINAL);			
 			// setting output
 			output->GetPointData()->AddArray(haloIdArray);
-			// returning
-				
-			//return 1;
+			// returning	
+			return 1;
 			}
 		else
 			{
@@ -109,11 +105,7 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
 			allHaloIdArrays.push_back(haloIdArray);
 			vtkSmartPointer<vtkIdTypeArray> recHaloIdArray = \
 				vtkSmartPointer<vtkIdTypeArray>::New();
-			// TODO: remove, putting this in, to indicate where algorithm is segfaulting
-			return 1;
-			
 			recHaloIdArray->Initialize();
-			
 			for(int proc = 1; proc < numProc; ++proc)
 				{
 				this->GetController()->Receive(recHaloIdArray,proc,
