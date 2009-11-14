@@ -138,10 +138,7 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
 			nextHaloId < nextHaloIdArray->GetNumberOfTuples();
 		 	++nextHaloId)
 			{
-			vtkIdType haloId = nextHaloIdArray->GetValue(nextHaloId);
-			// TODO: REMOVE
-			cout << "halo ID " << haloId << "\n";
-			
+			vtkIdType haloId = nextHaloIdArray->GetValue(nextHaloId);			
 			if(haloCount[haloId]==-1*this->MinimumNumberOfParticles)
 				{
 				// we have seen the id minimum number of particles times,
@@ -175,6 +172,10 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
 		 	++nextHaloId)
 			{
 			vtkIdType haloId = nextHaloIdArray->GetValue(nextHaloId);			
+			// TODO: remove following line
+			nextHaloIdArray->SetValue(nextHaloId,haloId);
+			// TODO: add back in
+			/*
 			if(haloCount[haloId]<1)
 				{
 				// we only saw it less than requisite number of times
@@ -186,6 +187,7 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
 				nextHaloIdArray->SetValue(nextHaloId,haloCount[haloId]);
 				}
 			}
+			*/
 		if(RunInParallel(this->GetController()) && procHaloIdArrayIndex > 0)
 			{
 			// if running in parallel and if we are not dealing with our own 
