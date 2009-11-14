@@ -137,7 +137,7 @@ int vtkFriendsOfFriendsHaloFinder::RequestData(vtkInformation*,
   // Get input and output data.
   vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
 	vtkPointSet* output;
-	if(this->Controller!=NULL)
+	if(RunInParallel(this->Controller))
 		{
 		// call D3, setting retain PKTree to 1
 		vtkErrorMacro("this filter is not currently supported in parallel");
