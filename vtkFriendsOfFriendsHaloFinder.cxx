@@ -109,6 +109,9 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
 			vtkSmartPointer<vtkIdTypeArray> recHaloIdArray = \
 				vtkSmartPointer<vtkIdTypeArray>::New();
 			recHaloIdArray->Initialize();
+			// TODO: remove, putting this in, to indicate where algorithm is segfaulting
+			return 1;
+			
 			for(int proc = 1; proc < numProc; ++proc)
 				{
 				this->GetController()->Receive(recHaloIdArray,proc,
@@ -116,8 +119,6 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
 				allHaloIdArrays.push_back(recHaloIdArray);
 				}
 			// don't return, proc 0 should execute code after if statement
-			// TODO: remove, putting this in, to indicate where algorithm is segfaulting
-			return 1;
 			}
 		}
 	else
