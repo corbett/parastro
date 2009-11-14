@@ -110,10 +110,9 @@ int vtkNSmoothFilter::RequestData(vtkInformation *request,
 	  this->Superclass::RequestData(request,inputVector,outputVector);
 		output = vtkPointSet::GetData(outputVector);
 		// calling build locator
-		this->GetKdtree()->BuildLocator();
 		// setting the KdTree
 		pointTree=this->GetKdtree();
-		
+		pointTree->BuildLocatorFromPoints(output);
 		}
 	else
 		{		
