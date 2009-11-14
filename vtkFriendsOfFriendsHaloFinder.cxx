@@ -172,9 +172,10 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
 			nextHaloId < nextHaloIdArray->GetNumberOfTuples();
 		 	++nextHaloId)
 			{
+			vtkIdType haloId = nextHaloIdArray->GetValue(nextHaloId);
 			// TODO: REMOVE
 			cout << "halo ID " << haloId << "\n";
-			vtkIdType haloId = nextHaloIdArray->GetValue(nextHaloId);
+			
 			if(haloCount[haloId]<1)
 				{
 				// we only saw it less than requisite number of times
