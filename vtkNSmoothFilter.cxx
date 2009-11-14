@@ -101,7 +101,9 @@ int vtkNSmoothFilter::RequestData(vtkInformation *request,
 	int numberOriginalArrays = input->GetPointData()->GetNumberOfArrays();
 	if(RunInParallel(this->Controller))
 		{
-		// TODO: implement
+		// TODO: remove, just seeing if this part works in ||
+		return 1;
+		
 		// call D3, setting retain PKTree to 1; this can be accessed by later
 		// methods
 		this->RetainKdtreeOn();
@@ -111,10 +113,11 @@ int vtkNSmoothFilter::RequestData(vtkInformation *request,
 		}
 	else
 		{
-		output = vtkPointSet::GetData(outputVector);
-  	output->ShallowCopy(input);
 		// TODO: remove, just seeing if this part works in ||
 		return 1;
+		
+		output = vtkPointSet::GetData(outputVector);
+  	output->ShallowCopy(input);
 
 		// Building the Kd tree, should already be built
 		pointTree = vtkSmartPointer<vtkPKdTree>::New();
