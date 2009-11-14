@@ -95,9 +95,6 @@ int vtkNSmoothFilter::RequestData(vtkInformation *request,
     vtkErrorMacro("Failed to locate mass array");
     return 0;
     }
-	// TODO: remove, just seeing if this part works in ||
-	return 1;
-
   vtkPointSet* output;
 	vtkSmartPointer<vtkPKdTree> pointTree;
 	// smoothing each quantity in the output
@@ -116,6 +113,9 @@ int vtkNSmoothFilter::RequestData(vtkInformation *request,
 		{
 		output = vtkPointSet::GetData(outputVector);
   	output->ShallowCopy(input);
+		// TODO: remove, just seeing if this part works in ||
+		return 1;
+
 		// Building the Kd tree, should already be built
 		pointTree = vtkSmartPointer<vtkPKdTree>::New();
 		pointTree->BuildLocatorFromPoints(output);
