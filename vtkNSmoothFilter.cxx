@@ -100,8 +100,9 @@ int vtkNSmoothFilter::RequestData(vtkInformation *request,
 	// smoothing each quantity in the output
 	int numberOriginalArrays = input->GetPointData()->GetNumberOfArrays();
 	// TODO: remove, just seeing if this part works in ||
+	cout << "retain kd tree =" << this->GetRetainKdtree();
 	return 1;
-	if(RunInParallel(this->Controller))
+	if(RunInParallel(this->GetController()))
 		{
 		
 		// call D3, setting retain PKTree to 1; this can be accessed by later
