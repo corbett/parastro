@@ -99,7 +99,7 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
     return 0;
     }
 	vtkPointSet* output = vtkPointSet::GetData(outputVector);;
-	output.Initialize();
+	output->Initialize();
 	// copies the point positions
 	output->CopyStructure(input);
 	// copies the point attributes
