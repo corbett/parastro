@@ -82,7 +82,6 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
 	haloIdArray->SetNumberOfComponents(1);
 	haloIdArray->SetNumberOfTuples(output->GetPoints()->GetNumberOfPoints());
 	haloIdArray->SetName("halo ID");
-
 	vtkstd::vector<vtkIdTypeArray*> allHaloIdArrays;
 	if(RunInParallel(this->GetController()))
 		{
@@ -172,10 +171,6 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
 		 	++nextHaloId)
 			{
 			vtkIdType haloId = nextHaloIdArray->GetValue(nextHaloId);			
-			// TODO: remove following line
-			nextHaloIdArray->SetValue(nextHaloId,haloId);
-			// TODO: add back in
-			/*
 			if(haloCount[haloId]<1)
 				{
 				// we only saw it less than requisite number of times
@@ -186,7 +181,6 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
 				// we saw it more than once, assign it to its unique id
 				nextHaloIdArray->SetValue(nextHaloId,haloCount[haloId]);
 				}
-			*/
 			}
 		if(RunInParallel(this->GetController()) && procHaloIdArrayIndex > 0)
 			{
@@ -215,6 +209,8 @@ int vtkFriendsOfFriendsHaloFinder::RequestData(vtkInformation* request,
 		// call D3, setting retain PKTree to 1; this can be accessed by later
 		// methods
 		this->RetainKdtreeOn();
+		// requesting ghost cells
+		this->SetBoundaryModeToAssignToAllIntersectingRegions();
 		// Just calling the superclass' method to distribute data and build
 		// PKdTree
 	  this->Superclass::RequestData(request,inputVector,outputVector);
