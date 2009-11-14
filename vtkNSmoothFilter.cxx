@@ -98,21 +98,12 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
     vtkErrorMacro("Failed to locate mass array");
     return 0;
     }
-	vtkPointSet* output;
+	vtkPointSet* output = vtkPointSet::GetData(outputVector);;
+	output.Initialize();
+	// copies the point positions
+	output->ShallowCopy(input);
 	vtkSmartPointer<vtkPKdTree> pointTree = vtkSmartPointer<vtkPKdTree>::New();	
-	if(RunInParallel(this->Controller))
-		{
-		// TODO: implements
-		// call D3, setting retain PKTree to 1
-		vtkErrorMacro("this filter is not currently supported in parallel");
-		return 0;
-		}
-	else
-		{
-		output = vtkPointSet::GetData(outputVector);
-		// copies the point positions
-		output->ShallowCopy(input);
-		}
+
   // Outline of this filter:
 	// 1. Build Kd tree
 	// 2. Go through each point in output
