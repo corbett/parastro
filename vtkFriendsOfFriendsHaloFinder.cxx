@@ -89,9 +89,10 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
 		int numProc=this->Controller->GetNumberOfProcesses();
 		if(procId!=0)
 			{
-			this->GetController()->Send(haloIdArray,0,HALO_ID_ARRAY_INITIAL);
 			// TODO: remove, putting this in, to indicate where algorithm is segfaulting
 			return 1;
+			
+			this->GetController()->Send(haloIdArray,0,HALO_ID_ARRAY_INITIAL);
 			// waiting to recieve the final result, as computed by root
 			this->GetController()->Receive(haloIdArray,0,
 				HALO_ID_ARRAY_FINAL);			
