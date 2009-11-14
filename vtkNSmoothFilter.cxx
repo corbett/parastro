@@ -120,9 +120,6 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 	// smoothed density
  	AllocateDoubleDataArray(output,"smoothed density", 
 		1,output->GetPoints()->GetNumberOfPoints());
-	// TODO: for debugging remove
-	return 1;
-	
 	// smoothing each quantity in the output
 	for(int i = 0; i < output->GetPointData()->GetNumberOfArrays(); ++i)
 		{
@@ -137,6 +134,9 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 				1,output->GetPoints()->GetNumberOfPoints());
 			}
 		}
+	// TODO: for debugging remove
+	return 1;
+
 	for(int nextPointId = 0;
 		nextPointId < output->GetPoints()->GetNumberOfPoints();
 	 	++nextPointId)
