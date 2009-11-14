@@ -112,9 +112,11 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
 				this->GetController()->Receive(recHaloIdArray,proc,
 					HALO_ID_ARRAY_INITIAL);
 				allHaloIdArrays.push_back(recHaloIdArray);
+				cout << "all halo id array component " << proc << " has " 
+				<< recHaloIdArray->GetNumberOfTuples() << " ids \n";	
 				}
-			output->GetPointData()->AddArray(haloIdArray);
 			// TODO: REMOVE
+			output->GetPointData()->AddArray(haloIdArray);
 			return 1;
 			// don't return, proc 0 should execute code after if statement
 			}
