@@ -26,28 +26,16 @@ using vtkstd::string;
 
 vtkCxxRevisionMacro(vtkNSmoothFilter, "$Revision: 1.72 $");
 vtkStandardNewMacro(vtkNSmoothFilter);
-vtkCxxSetObjectMacro(vtkNSmoothFilter,Controller,vtkMultiProcessController);
-vtkCxxSetObjectMacro(vtkNSmoothFilter,PKdTree,vtkPKdTree);
-vtkCxxSetObjectMacro(vtkNSmoothFilter,D3,vtkDistributedDataFilter);
-
-
 
 //----------------------------------------------------------------------------
-vtkNSmoothFilter::vtkNSmoothFilter()
+vtkNSmoothFilter::vtkNSmoothFilter():vtkDistributedDataFilter()
 {
   this->NeighborNumber = 50; //default
-	this->PKdTree  = NULL;
-	this->Controller = NULL;
-	this->D3 = NULL;
-  this->SetController(vtkMultiProcessController::GetGlobalController());
 }
 
 //----------------------------------------------------------------------------
 vtkNSmoothFilter::~vtkNSmoothFilter()
 {
-  this->SetPKdTree(NULL);
-  this->SetController(NULL);
-  this->SetD3(NULL);
 }
 
 //----------------------------------------------------------------------------
@@ -63,6 +51,15 @@ int vtkNSmoothFilter::FillInputPortInformation(int, vtkInformation* info)
   // This filter uses the vtkDataSet cell traversal methods so it
   // suppors any data set type as input.
   info->Set(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), "vtkPointSet");
+  return 1;
+}
+
+//----------------------------------------------------------------------------
+int vtkNSmoothFilter::FillOutputPortInformation(
+  int vtkNotUsed(port), vtkInformation* info)
+{
+  // now add our info
+  info->Set(vtkDataObject::DATA_TYPE_NAME(), "vtkPointSet");
   return 1;
 }
 
@@ -87,9 +84,8 @@ double vtkNSmoothFilter::CalculateDensity(double pointOne[],\
 }
 
 //----------------------------------------------------------------------------
-int vtkNSmoothFilter::RequestData(vtkInformation*,
-                                 vtkInformationVector** inputVector,
-                                 vtkInformationVector* outputVector)
+int vtkNSmoothFilter::RequestData(vtkInformation *request,
+	vtkInformationVector** inputVector, vtkInformationVector* outputVector)
 {
   // Get input and output data.
   vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
@@ -101,16 +97,6 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
     }
   vtkPointSet* output;
 	vtkSmartPointer<vtkPKdTree> pointTree;
-  // Outline of this filter:
-	// 1. Build Kd tree
-	// 2. Go through each point in output
-	// 		o calculate N nearest neighbors
-	//		o calculate smoothed quantities
-	// 		o add to their respective arrays.
-	// 3. Add the arrays of smoothed varaibles to the output
-  // First copying the input to the output, as the output will be 
-	// identical to the input, with some additional properties
-	// copies the point positions
 	// smoothing each quantity in the output
 	int numberOriginalArrays = input->GetPointData()->GetNumberOfArrays();
 	if(RunInParallel(this->Controller))
@@ -118,8 +104,12 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 		// TODO: implement
 		// call D3, setting retain PKTree to 1; this can be accessed by later
 		// methods
-		vtkErrorMacro("this filter is not currently supported in parallel");
-		return 0;
+		this->RetainKdtreeOn();
+		//Just calling the superclass' method to build
+	  this->Superclass::RequestData(request,inputVector,outputVector);
+		pointTree=this->GetKdtree();
+		// TODO: remove, just seeing if this part works in ||
+		return 1;
 		}
 	else
 		{

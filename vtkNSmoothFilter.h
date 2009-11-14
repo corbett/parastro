@@ -21,40 +21,33 @@
 // variables which need a volume to be computed
 // consider the volume as sphere around point with radius of the
 // outermost neighbor point.
+ // Outline of this filter:
+// 1. Build Kd tree, or if running in parallel run D3 filter and use its KDT
+// 2. Go through each point in output
+// 		o calculate N nearest neighbors
+//		o calculate smoothed quantities
+// 		o add to their respective arrays.
+// 3. Add the arrays of smoothed variables to the output
 // .SECTION See Also
-// vtkKdTree
+// vtkKdTree, vtkPKdTree
 
 #ifndef __vtkNSmoothFilter_h
 #define __vtkNSmoothFilter_h
-#include "vtkPointSetAlgorithm.h"
+#include "vtkDistributedDataFilter.h"
 
 class vtkMultiProcessController;
 class vtkPKdTree;
-class vtkDistributedDataFilter;
-class VTK_GRAPHICS_EXPORT vtkNSmoothFilter : public vtkPointSetAlgorithm
+class VTK_GRAPHICS_EXPORT vtkNSmoothFilter : public vtkDistributedDataFilter
 {
 public:
   static vtkNSmoothFilter *New();
-  vtkTypeRevisionMacro(vtkNSmoothFilter,vtkPointSetAlgorithm);
+  vtkTypeRevisionMacro(vtkNSmoothFilter,vtkDistributedDataFilter);
   void PrintSelf(ostream& os, vtkIndent indent);
 
   // Description:
   // Get/Set the number of neighbors to search
   vtkSetMacro(NeighborNumber, int);
   vtkGetMacro(NeighborNumber, int);
-  // Description:
-  // By defualt this filter uses the global controller,
-  // but this method can be used to set another instead.
-  virtual void SetController(vtkMultiProcessController*);
-  vtkGetObjectMacro(Controller, vtkMultiProcessController);
-  // Description:
-  // Set the vtkPKdTree to distribute with.
-  virtual void SetPKdTree(vtkPKdTree*);
-  vtkGetObjectMacro(PKdTree, vtkPKdTree);
-  // Description:
-  // Set/get some internal filters.
-  vtkGetObjectMacro(D3, vtkDistributedDataFilter);
-  virtual void SetD3(vtkDistributedDataFilter*);
 
 //BTX
 protected:
@@ -63,6 +56,9 @@ protected:
 
   // Override to specify support for any vtkDataSet input type.
   virtual int FillInputPortInformation(int port, vtkInformation* info);
+	// Override to specify different type of output
+	virtual int FillOutputPortInformation(int vtkNotUsed(port), 
+		vtkInformation* info);
 
   // Main implementation.
   virtual int RequestData(vtkInformation*,
