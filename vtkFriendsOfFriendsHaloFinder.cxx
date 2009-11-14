@@ -91,8 +91,9 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
 			{
 			this->GetController()->Send(haloIdArray,0,HALO_ID_ARRAY_INITIAL);
 			// waiting to recieve the final result, as computed by root
-			this->GetController()->Receive(haloIdArray,0,
-				HALO_ID_ARRAY_FINAL);			
+			// TODO: ADD BACK IN
+//			this->GetController()->Receive(haloIdArray,0,
+//				HALO_ID_ARRAY_FINAL);			
 			// setting output
 			output->GetPointData()->AddArray(haloIdArray);
 			// returning	
@@ -112,6 +113,9 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
 					HALO_ID_ARRAY_INITIAL);
 				allHaloIdArrays.push_back(recHaloIdArray);
 				}
+			output->GetPointData()->AddArray(haloIdArray);
+			// TODO: REMOVE
+			return 1;
 			// don't return, proc 0 should execute code after if statement
 			}
 		}
