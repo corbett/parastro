@@ -105,10 +105,15 @@ int vtkNSmoothFilter::RequestData(vtkInformation *request,
 		// call D3, setting retain PKTree to 1; this can be accessed by later
 		// methods
 		this->RetainKdtreeOn();
-		//Just calling the superclass' method to build
+		// Just calling the superclass' method to distribute data and build
+		// PkDTree
 	  this->Superclass::RequestData(request,inputVector,outputVector);
 		output = vtkPointSet::GetData(outputVector);
+		// calling build locator
+		this->GetKdtree()->BuildLocator();
+		// setting the KdTree
 		pointTree=this->GetKdtree();
+		
 		}
 	else
 		{		
