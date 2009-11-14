@@ -99,10 +99,10 @@ int vtkNSmoothFilter::RequestData(vtkInformation *request,
 	vtkSmartPointer<vtkPKdTree> pointTree;
 	// smoothing each quantity in the output
 	int numberOriginalArrays = input->GetPointData()->GetNumberOfArrays();
+	// TODO: remove, just seeing if this part works in ||
+	return 1;
 	if(RunInParallel(this->Controller))
 		{
-		// TODO: remove, just seeing if this part works in ||
-		return 1;
 		
 		// call D3, setting retain PKTree to 1; this can be accessed by later
 		// methods
@@ -112,10 +112,7 @@ int vtkNSmoothFilter::RequestData(vtkInformation *request,
 		pointTree=this->GetKdtree();
 		}
 	else
-		{
-		// TODO: remove, just seeing if this part works in ||
-		return 1;
-		
+		{		
 		output = vtkPointSet::GetData(outputVector);
   	output->ShallowCopy(input);
 
