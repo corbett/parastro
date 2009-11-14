@@ -101,7 +101,9 @@ int vtkNSmoothFilter::RequestData(vtkInformation *request,
 	int numberOriginalArrays = input->GetPointData()->GetNumberOfArrays();
 	if(RunInParallel(this->GetController()))
 		{
-		
+		// TODO: remove
+    vtkErrorMacro("cant yet run in parallel");
+		return 0;
 		// call D3, setting retain PKTree to 1; this can be accessed by later
 		// methods
 		this->RetainKdtreeOn();
