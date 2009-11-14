@@ -112,12 +112,7 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
 				this->GetController()->Receive(recHaloIdArray,proc,
 					HALO_ID_ARRAY_INITIAL);
 				allHaloIdArrays.push_back(recHaloIdArray);
-				cout << "all halo id array component " << proc << " has " 
-				<< recHaloIdArray->GetNumberOfTuples() << " ids \n";	
 				}
-			// TODO: REMOVE
-			output->GetPointData()->AddArray(haloIdArray);
-			return 1;
 			// don't return, proc 0 should execute code after if statement
 			}
 		}
@@ -159,6 +154,11 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
 				}
 			}
 		}
+	// TODO: remove testing
+	output->GetPointData()->AddArray(haloIdArray);
+	// TODO: remove returning
+	return 1;
+	
 	// finally setting to zero points which have 
 	// count < this->MinimumNumberOfParticles, O(N), and
 	// assigning those we have seen more the requisite number
