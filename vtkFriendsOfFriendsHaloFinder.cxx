@@ -105,6 +105,7 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
 			allHaloIdArrays.push_back(haloIdArray);
 			vtkSmartPointer<vtkIdTypeArray> recHaloIdArray = \
 				vtkSmartPointer<vtkIdTypeArray>::New();
+			recHaloIdArray->Initialize();
 			for(int proc = 1; proc < numProc; ++proc)
 				{
 				this->GetController()->Receive(recHaloIdArray,proc,
