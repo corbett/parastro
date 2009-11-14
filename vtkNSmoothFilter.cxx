@@ -100,11 +100,8 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
     }
 	vtkPointSet* output = vtkPointSet::GetData(outputVector);;
 	// copies the point positions
-	output->CopyStructure(input);
-	// copies the point attributes
-	output->CopyAttributes(input);
+	output->ShallowCopy(input);
 	vtkSmartPointer<vtkPKdTree> pointTree = vtkSmartPointer<vtkPKdTree>::New();	
-
   // Outline of this filter:
 	// 1. Build Kd tree
 	// 2. Go through each point in output
@@ -119,9 +116,10 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 	// Allocating arrays to store our smoothed values
 	// smoothed density
  	AllocateDoubleDataArray(output,"smoothed density", 
-		1,output->GetPoints()->GetNumberOfPoints());
+		1,input->GetPoints()->GetNumberOfPoints());
 	// smoothing each quantity in the output
-	for(int i = 0; i < output->GetPointData()->GetNumberOfArrays(); ++i)
+	int numOriginalArrays = output->GetPointData()->GetNumberOfArrays();
+	for(int i = 0; i < numOriginalArrays; ++i)
 		{
 		vtkSmartPointer<vtkDataArray> nextArray = \
 		 	output->GetPointData()->GetArray(i);
@@ -134,9 +132,8 @@ int vtkNSmoothFilter::RequestData(vtkInformation*,
 				1,output->GetPoints()->GetNumberOfPoints());
 			}
 		}
-	// TODO: for debugging remove
+	// TODO: for debugging, remove
 	return 1;
-
 	for(int nextPointId = 0;
 		nextPointId < output->GetPoints()->GetNumberOfPoints();
 	 	++nextPointId)
