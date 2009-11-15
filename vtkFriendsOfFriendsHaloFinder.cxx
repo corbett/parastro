@@ -213,7 +213,7 @@ int vtkFriendsOfFriendsHaloFinder::RequestData(vtkInformation* request,
 		this->RetainKdtreeOn();
 		// requesting ghost cells
 		cout << "boundary mode before set " << this->GetBoundaryMode() << "\n";
-		this->SetBoundaryModeToAssignToAllIntersectingRegions(); 
+		this->SetBoundaryModeToSplitBoundaryCells(); 
 		cout << "boundary mode after set " << this->GetBoundaryMode() << "\n";
 		// Just calling the superclass' method to distribute data and build
 		// PKdTree
