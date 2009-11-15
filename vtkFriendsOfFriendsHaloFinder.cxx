@@ -89,10 +89,14 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
 		int numProc=this->GetController()->GetNumberOfProcesses();
 		if(procId!=0)
 			{
+			cout << "halo id of point 5 on proc " << procId << " is  "  
+				<< haloIdArray->GetValue(5) << " before send\n";
 			this->GetController()->Send(haloIdArray,0,HALO_ID_ARRAY_INITIAL);
 			// waiting to recieve the final result, as computed by root
 			this->GetController()->Receive(haloIdArray,0,
 				HALO_ID_ARRAY_FINAL);
+			cout << "halo id of point 5 on proc " << procId << " is  "  
+				<< haloIdArray->GetValue(5) << " as computed by root\n";
 			// setting output
 			output->GetPointData()->AddArray(haloIdArray);
 			// returning	
