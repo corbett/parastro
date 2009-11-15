@@ -155,10 +155,16 @@ double OverNumberInSphere(double r,void* inputVirialRadiusInfo)
 }
 
 //----------------------------------------------------------------------------
-VirialRadiusInfo ComputeVirialRadius(vtkPointLocator* locator,
+VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,
 	vtkstd::string massArrayName, double softening,double overdensity,
 	double maxR,double center[])
 {
+		// Building the point locator and the struct to use as an 
+		// input to the rootfinder.
+		// 1. Building the point locator
+		vtkPointLocator* locator = vtkPointLocator::New();
+			locator->SetDataSet(input);
+			locator->BuildLocator();
 		// Building the struct to use as argument to root finder and density
 		// functions. Contains locator, center, softening info and stores virial
 		// radius info for output
