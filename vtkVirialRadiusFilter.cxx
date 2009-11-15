@@ -68,6 +68,15 @@ int vtkVirialRadiusFilter::FillInputPortInformation (int port,
 }
 
 //----------------------------------------------------------------------------
+int vtkVirialRadiusFilter::FillOutputPortInformation(
+  int vtkNotUsed(port), vtkInformation* info)
+{
+  // now add our info
+  info->Set(vtkDataObject::DATA_TYPE_NAME(), "vtkPointSet");
+  return 1;
+}
+
+//----------------------------------------------------------------------------
 int vtkVirialRadiusFilter::RequestData(vtkInformation *request,
 																	vtkInformationVector **inputVector,
 																	vtkInformationVector *outputVector)
