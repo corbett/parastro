@@ -12,7 +12,14 @@
 #include "vtkFloatArray.h"
 #include "vtkTable.h"
 #include "vtkPointSet.h"
+#include "vtkMultiProcessController.h"
 #include <vtkstd/string>
+enum PointsInRadiusMPIData
+{
+	TOTAL_MASS_IN_SPHERE,
+	TOTAL_NUMBER_IN_SPHERE,
+	MAX_R
+};
 // Description:
 // Uses the Illinois root finding method to find the root of the function
 // func. The root must lie between r and s. Root is returned when it is found 
@@ -54,6 +61,18 @@ double IllinoisRootFinder(double (*func)(double,void *),void *ctx,double r,doubl
 double ComputeMaxR(vtkPointSet* input,double point[]);
 
 // Description:
+// Runs ComputeMaxR on each process, then syncronizes results taking the
+// over all global maximum. This result will be slightly different that that
+// if run serially, as the bounding boxes may be tighter on subprocesses
+// than an overall bounding box. But if anything, the parallel version should
+// be an even better approximation to the maximum radius (as we use the
+// bounding box, not the individual points therein to compute) than the
+// serial version, and is always guarenteed to be greater than or equal
+// to the true maximum (if one used the points within the data set)
+double ComputeMaxRadiusInParallel(
+	vtkMultiProcessController* controller,vtkPointSet* input,double point[]);
+	
+// Description:
 // This assumes locatorStruct is a VirialRadiusInfo struct, which contains
 // a locator for a given vtkdataset, a center from which to calculate
 // the volume 
@@ -62,7 +81,6 @@ double ComputeMaxR(vtkPointSet* input,double point[]);
 // the user's choice.
 // 
 double OverDensityInSphere(double r, void* locatorStruct);
-
 
 // Description:
 // This assumes locatorStruct is a VirialRadiusInfo struct, which contains
@@ -73,6 +91,12 @@ double OverDensityInSphere(double r, void* locatorStruct);
 // the user's choice.
 double OverNumberInSphere(double r, void* locatorStruct);
 
+// Descriptions:
+// If this is called by each process in the domain of the controller, finds
+// all points within a given radius on this process
+vtkIdList* FindPointsWithinRadius(double r, double* center,
+	vtkPointLocator* locatorOfThisProcess);
+
 // Description:
 // The VirialRadiusInfo struct is an containing:
 // .locator which is a vtkPointLocator
@@ -82,6 +106,7 @@ double OverNumberInSphere(double r, void* locatorStruct);
 struct VirialRadiusInfo 
 {
 	vtkPointLocator* locator;
+	vtkMultiProcessController* controller;
 	double center[3];
 	double criticalValue;
 	double virialRadius;
@@ -93,7 +118,10 @@ struct VirialRadiusInfo
 // Description:
 // Computes the virial radius >=0 base upon the user defined 
 // overdensity and center. Returns -1 if there is a problem. 
-VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,
+// Works in parallel if a controller is specified not equal to null and if 
+// the number of processors is > 1
+VirialRadiusInfo ComputeVirialRadius(
+	vtkMultiProcessController* controller, vtkPointLocator* locator,
 	vtkstd::string massArrayName, double softening,double overdensity,
 	double maxR,double center[]);
 

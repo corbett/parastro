@@ -94,8 +94,16 @@ int vtkVirialRadiusFilter::RequestData(vtkInformation *request,
     return 0;
     }
 	this->CalculateAndSetBounds(dataSet,pointInfo);
+	// Building the point locator and the struct to use as an 
+	// input to the rootfinder.
+	// 1. Building the point locator
+	vtkPointLocator* locator = vtkPointLocator::New();
+		locator->SetDataSet(dataSet);
+		locator->BuildLocator();
+	// Will communicate with other processes if necessary
 	VirialRadiusInfo virialRadiusInfo = \
-	 	ComputeVirialRadius(dataSet,massArray->GetName(),this->Softening,
+	 	ComputeVirialRadius(this->GetController(),
+		locator,massArray->GetName(),this->Softening,
 		this->Delta,this->MaxR,this->Center);
 		// note that if there was an error finding the virialRadius the 
 		// radius returned is < 0
@@ -110,7 +118,7 @@ int vtkVirialRadiusFilter::RequestData(vtkInformation *request,
 	else	
 		{
 		vtkErrorMacro("Unable to find virial radius: considering changing your delta or selecting a different point around which to search. For now simply copying input");
-		output->DeepCopy(dataSet);
+		output->ShallowCopy(dataSet);
 		}
 	return 1;
 }
@@ -122,7 +130,9 @@ void vtkVirialRadiusFilter::CalculateAndSetBounds(vtkPointSet* input,
 	//TODO: this can later be done as in the XML documentation for this filter; 	  
 	// for now, only getting the first point. this is the point selected in the
  // GUI, or the midpoint of the line selected in the GUI
-	double* center;
+	// Each process recalculates this; may or may not be faster than having root
+	// calculate and simply syncronizing.
+	double* center = new double[3];
 	if(source->GetNumberOfPoints()==1)
 		{
 		// we are dealing with a point
@@ -139,8 +149,10 @@ void vtkVirialRadiusFilter::CalculateAndSetBounds(vtkPointSet* input,
 	for(int i = 0; i < 3; ++i)
 		{
 		this->Center[i]=center[i];
-		}
+		}	
+	delete [] center;
  	// calculating the the max R
-	this->MaxR=ComputeMaxR(input,this->Center);
+	this->MaxR=ComputeMaxRadiusInParallel(this->GetController(),
+		input,this->Center);
 }
 

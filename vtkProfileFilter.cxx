@@ -264,32 +264,16 @@ void vtkProfileFilter::SetBoundsAndBinExtents(vtkPointSet* input,
 				this->Center[i]=sourceCenter[i];
 				}
 			// Syncronizing the centers
-			this->Controller->Broadcast(this->Center,3,0);
-			//calculating the the max R
-			double maxR=ComputeMaxR(input,this->Center);
-			// collecting and updating maxR from other processors			
-			for(int proc= 1; proc < numProc; ++proc)
-				{
-				double recMaxR;
-				this->Controller->Receive(&recMaxR,1,proc,MAX_R);
-				maxR=vtkstd::max(maxR,recMaxR);
-				}
-			this->MaxR=maxR;
-			// Syncronizing global maxR results
-			this->Controller->Broadcast(&this->MaxR,1,0);
+			this->Controller->Broadcast(this->Center,3,0);			
 			}
 		else
 			{
 			// Syncronizing the centers
 			this->Controller->Broadcast(this->Center,3,0);
-			// calculating the the max R
-			double maxR=ComputeMaxR(input,this->Center);
-			// sending to process 0, which will compare all results and compute
-			// global maximum
-			this->Controller->Send(&maxR,1,0,MAX_R);
-			// syncronizing global maxR results
-			this->Controller->Broadcast(&this->MaxR,1,0);
 			}
+		// calculating the max R
+		this->MaxR=ComputeMaxRadiusInParallel(this->Controller,
+			input,this->Center);
 		}
 	else
 		{

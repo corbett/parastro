@@ -74,6 +74,47 @@ double IllinoisRootFinder(double (*func)(double,void *),void *ctx,\
 }
 
 //----------------------------------------------------------------------------
+double ComputeMaxRadiusInParallel(
+	vtkMultiProcessController* controller,vtkPointSet* input,double point[])
+{
+	double maxR = 0;
+	if(RunInParallel(controller))
+		{
+		int procId=controller->GetLocalProcessId();
+		int numProc=controller->GetNumberOfProcesses();
+		if(procId==0)
+			{
+			//calculating the the max R
+			// collecting and updating maxR from other processors			
+			for(int proc= 1; proc < numProc; ++proc)
+				{
+				double recMaxR;
+				controller->Receive(&recMaxR,1,proc,MAX_R);
+				maxR=vtkstd::max(maxR,recMaxR);
+				}
+			maxR=maxR;
+			// Syncronizing global maxR results
+			controller->Broadcast(&maxR,1,0);
+			}
+		else
+			{
+			// calculating the the max R
+			double maxR=ComputeMaxR(input,point);
+			// sending to process 0, which will compare all results and compute
+			// global maximum
+			controller->Send(&maxR,1,0,MAX_R);
+			// syncronizing global maxR results
+			controller->Broadcast(&maxR,1,0);
+			}
+		}
+	else
+		{
+		// running in serial
+		maxR=ComputeMaxR(input,point);
+		}
+	return maxR;
+}
+//----------------------------------------------------------------------------
 
 double ComputeMaxR(vtkPointSet* input,double point[])
 {
@@ -105,11 +146,9 @@ double OverDensityInSphere(double r,void* inputVirialRadiusInfo)
 {
 	VirialRadiusInfo* virialRadiusInfo = \
 		static_cast<VirialRadiusInfo*>(inputVirialRadiusInfo);
-	vtkSmartPointer<vtkIdList> pointsInRadius = \
-		vtkSmartPointer<vtkIdList>::New();
-	virialRadiusInfo->locator->FindPointsWithinRadius(r,
-		virialRadiusInfo->center,
-		pointsInRadius);
+	vtkIdList* pointsInRadius = \
+		FindPointsWithinRadius(r,virialRadiusInfo->center,
+		virialRadiusInfo->locator);
 	// calculating the average mass, dividing this by the volume of the sphere
 	// to get the density
 	double totalMass=0;
@@ -131,11 +170,40 @@ double OverDensityInSphere(double r,void* inputVirialRadiusInfo)
 		delete [] mass;
 		delete [] nextPoint;
 		}
+	// If we are running in parallel, update result based on that of other 
+	// processors
+	if(RunInParallel(virialRadiusInfo->controller))
+		{
+		int procId=virialRadiusInfo->controller->GetLocalProcessId();
+		int numProc=virialRadiusInfo->controller->GetNumberOfProcesses();
+		if(procId!=0)
+			{
+			// Sending to root
+			virialRadiusInfo->controller->Send(&totalMass,1,0,TOTAL_MASS_IN_SPHERE);
+			// Receiving back the final totalMass from root
+			virialRadiusInfo->controller->Broadcast(&totalMass,1,0);
+			}
+		else
+			{
+			// Now gather results from each process other than this one
+			for(int proc = 1; proc < numProc; ++proc)
+				{
+				double recTotalMass[1];
+				// Receiving
+				virialRadiusInfo->controller->Receive(recTotalMass,
+					1,proc,TOTAL_MASS_IN_SPHERE);
+				// Updating
+				totalMass+=recTotalMass[0];
+				}
+			virialRadiusInfo->controller->Broadcast(&totalMass,1,0);
+			}
+		}
 	// Returning the density minus the critical density. Density is defined
 	// as zero if the number points within the radius is zero
-	double density = (pointsInRadius->GetNumberOfIds() > 0) ? \
-		totalMass/(4./3*M_PI*pow(r,3)) : 0;
+	double density = totalMass/(4./3*M_PI*pow(r,3));
 	double overdensity = density - 	virialRadiusInfo->criticalValue;
+	// managing memory as instructed
+	pointsInRadius->Delete();
 	return overdensity;
 }
 
@@ -144,32 +212,74 @@ double OverNumberInSphere(double r,void* inputVirialRadiusInfo)
 {
 	VirialRadiusInfo* virialRadiusInfo = \
 		static_cast<VirialRadiusInfo*>(inputVirialRadiusInfo);
-	vtkSmartPointer<vtkIdList> pointsInRadius = \
-		vtkSmartPointer<vtkIdList>::New();
-	virialRadiusInfo->locator->FindPointsWithinRadius(r,
-		virialRadiusInfo->center,
-		pointsInRadius);
+	vtkIdList* pointsInRadius = \
+		FindPointsWithinRadius(r,virialRadiusInfo->center,
+		virialRadiusInfo->locator);
+	// If we are running in parallel, update result based on that of other 
+	// processors
+	int totalNumberInSphere = pointsInRadius->GetNumberOfIds();
+	if(RunInParallel(virialRadiusInfo->controller))
+		{
+		int procId=virialRadiusInfo->controller->GetLocalProcessId();
+		int numProc=virialRadiusInfo->controller->GetNumberOfProcesses();
+		if(procId!=0)
+			{
+			// Sending to root
+			virialRadiusInfo->controller->Send(&totalNumberInSphere,1,0,
+				TOTAL_NUMBER_IN_SPHERE);
+			// Making sure we are done, so that the function must finish
+			// on all processes before it is attempted to be called again
+			virialRadiusInfo->controller->Broadcast(&totalNumberInSphere,1,0);
+			}
+		else
+			{
+			// Now gather results from each process other than this one
+			for(int proc = 1; proc < numProc; ++proc)
+				{
+				int recTotalNumber[1];
+				// Receiving
+				virialRadiusInfo->controller->Receive(recTotalNumber,
+					1,proc,TOTAL_NUMBER_IN_SPHERE);
+				// Updating
+				totalNumberInSphere+=recTotalNumber[0];
+				}
+			virialRadiusInfo->controller->Broadcast(&totalNumberInSphere,1,0);
+			}
+		}
 	// Returning the number minus the critical number
-	return pointsInRadius->GetNumberOfIds() - \
+	double overNumberInSphere = totalNumberInSphere - \
 	 	virialRadiusInfo->criticalValue;
+	// Managing memory first, as instructed by FindPoints..
+	pointsInRadius->Delete();
+	return overNumberInSphere;
 }
 
 //----------------------------------------------------------------------------
-VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,
+vtkIdList* FindPointsWithinRadius(double r, 
+	double* center, vtkPointLocator* locatorOfThisProcess)
+{
+	// find points within r, all will need this
+	// THIS MEMORY MUST BE MANAGED BY ROOT/CALLER
+	vtkIdList* pointsInRadius = vtkIdList::New();
+	pointsInRadius->Initialize();
+	locatorOfThisProcess->FindPointsWithinRadius(r,
+		center,
+		pointsInRadius);
+	// serial, simply return result
+	return pointsInRadius;
+}
+//----------------------------------------------------------------------------
+VirialRadiusInfo ComputeVirialRadius(
+	vtkMultiProcessController* controller, vtkPointLocator* locator,
 	vtkstd::string massArrayName, double softening,double overdensity,
 	double maxR,double center[])
 {
-		// Building the point locator and the struct to use as an 
-		// input to the rootfinder.
-		// 1. Building the point locator
-		vtkPointLocator* locator = vtkPointLocator::New();
-			locator->SetDataSet(input);
-			locator->BuildLocator();
 		// Building the struct to use as argument to root finder and density
 		// functions. Contains locator, center, softening info and stores virial
 		// radius info for output
 		VirialRadiusInfo virialRadiusInfo;
 		virialRadiusInfo.locator=locator;
+		virialRadiusInfo.controller=controller;
 		for(int i = 0; i < 3; ++i)
 		{
 			virialRadiusInfo.center[i]=center[i];
@@ -287,18 +397,17 @@ vtkPointSet* CopyPointsAndData(vtkPointSet* dataSet, vtkIdList*
 vtkPointSet* GetDatasetWithinVirialRadius(VirialRadiusInfo virialRadiusInfo)
 {
 
-	vtkSmartPointer<vtkIdList> pointsInRadius = \
-		vtkSmartPointer<vtkIdList>::New();
-	virialRadiusInfo.locator->FindPointsWithinRadius(
-		virialRadiusInfo.virialRadius,
-		virialRadiusInfo.center,
-		pointsInRadius);
+	vtkIdList* pointsInRadius = \
+		FindPointsWithinRadius(virialRadiusInfo.virialRadius,
+		virialRadiusInfo.center, virialRadiusInfo.locator);
   vtkPolyData* dataSet = \
 		vtkPolyData::SafeDownCast(virialRadiusInfo.locator->GetDataSet());	
 	// Creating a new dataset
 	// first allocating
 	vtkPointSet* newDataSet = \
 		CopyPointsAndData(dataSet,pointsInRadius);
+	// Managing memory
+	pointsInRadius->Delete();
 	return newDataSet;
 }
 

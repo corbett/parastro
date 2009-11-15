@@ -99,6 +99,7 @@ protected:
 	// Description:
   // Calculates the center and the maximum distance from the center
 	// based upon the user's input and the boundaries of the dataset.
+	// Works in parallel if necessary
 	void CalculateAndSetBounds(vtkPointSet* input, vtkDataSet* source);
 
 private:

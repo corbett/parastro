@@ -26,7 +26,6 @@ class vtkMultiProcessController;
 
 enum ProfileMPIData 
 {
-	MAX_R,
 	DATA_TABLE
 };
 
