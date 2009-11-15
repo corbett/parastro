@@ -219,6 +219,8 @@ int vtkFriendsOfFriendsHaloFinder::RequestData(vtkInformation* request,
 		output = vtkPointSet::GetData(outputVector);
 		// setting the KdTree to the output from D3
 		pointTree=this->GetKdtree();
+		cout << "tree has " << pointTree->GetNumberOfRegions()
+			<< " number of regions\n";
 		}
 	else
 		{		
