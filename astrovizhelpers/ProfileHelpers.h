@@ -144,6 +144,11 @@ vtkPointSet* CopyPointsAndData(vtkPointSet* dataSet, vtkIdList*
 // This method only works if input was vtkPolyData...
 vtkPointSet* GetDatasetWithinVirialRadius(VirialRadiusInfo virialRadiusInfo);
 
+// Description:
+// helper function to calculate the center based upon the source.
+// either the point, or the midpoint of a line
+double* CalculateCenter(vtkDataSet* source);
+
 // Description
 // Given an input data set, the bin number, a list of points in the relevant
 // bin,  and the output table, computes the average radial velocity in the

@@ -82,10 +82,9 @@ int vtkVirialRadiusFilter::RequestData(vtkInformation *request,
 																	vtkInformationVector *outputVector)
 {
 	// Now we can get the input with which we want to work
- 	vtkPointSet* dataSet = vtkPointSet::GetData(inputVector[0]);
+ 	vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
 	// Setting the center based upon the selection in the GUI
 	vtkDataSet* pointInfo = vtkDataSet::GetData(inputVector[1]);
-	vtkPointSet* output = vtkPointSet::GetData(outputVector,0);
 	// Get name of data array containing mass
 	vtkDataArray* massArray = this->GetInputArrayToProcess(0, inputVector);
   if (!massArray)
@@ -93,66 +92,94 @@ int vtkVirialRadiusFilter::RequestData(vtkInformation *request,
     vtkErrorMacro("Failed to locate mass array");
     return 0;
     }
-	this->CalculateAndSetBounds(dataSet,pointInfo);
+	// Running D3 if necessary
+	vtkPointSet* output;
+	if(RunInParallel(this->GetController()))
+		{
+		// call D3, setting retain PKTree to 1; this can be accessed by later
+		// methods
+		this->RetainKdtreeOn();
+		// Just calling the superclass' method to distribute data and build
+		// PkDTree
+	  this->Superclass::RequestData(request,inputVector,outputVector);
+		output = vtkPointSet::GetData(outputVector);
+		}
+	else
+		{		
+		output = vtkPointSet::GetData(outputVector);
+  	output->ShallowCopy(input);
+		}
+	
+	this->CalculateAndSetBounds(output,pointInfo);
+	
 	// Building the point locator and the struct to use as an 
 	// input to the rootfinder.
 	// 1. Building the point locator
 	vtkPointLocator* locator = vtkPointLocator::New();
-		locator->SetDataSet(dataSet);
+		locator->SetDataSet(output);
 		locator->BuildLocator();
 	// Will communicate with other processes if necessary
 	VirialRadiusInfo virialRadiusInfo = \
 	 	ComputeVirialRadius(this->GetController(),
 		locator,massArray->GetName(),this->Softening,
-		this->Delta,this->MaxR,this->Center);
-		// note that if there was an error finding the virialRadius the 
-		// radius returned is < 0
+		this->Delta,this->MaxR,this->Center);	
+	// note that if there was an error finding the virialRadius the 
+	// radius returned is < 0
 	if(virialRadiusInfo.virialRadius>0)
 		{
+		// This is causing problems, segfault
 		//setting the dataSet to this newInput
 		vtkPointSet* newDataSet = \
-			GetDatasetWithinVirialRadius(virialRadiusInfo);
+			GetDatasetWithinVirialRadius(virialRadiusInfo);	
+		// resetting output, then copying into it the new data set
+		output->Initialize();
 		output->DeepCopy(newDataSet);
 		newDataSet->Delete();
 		}
 	else	
 		{
 		vtkErrorMacro("Unable to find virial radius: considering changing your delta or selecting a different point around which to search. For now simply copying input");
-		output->ShallowCopy(dataSet);
 		}
-	return 1;
+	return 1;	
 }
 
 //----------------------------------------------------------------------------
 void vtkVirialRadiusFilter::CalculateAndSetBounds(vtkPointSet* input, 
 	vtkDataSet* source)
 {
-	//TODO: this can later be done as in the XML documentation for this filter; 	  
-	// for now, only getting the first point. this is the point selected in the
- // GUI, or the midpoint of the line selected in the GUI
-	// Each process recalculates this; may or may not be faster than having root
-	// calculate and simply syncronizing.
-	double* center = new double[3];
-	if(source->GetNumberOfPoints()==1)
+	if(RunInParallel(this->GetController()))
 		{
-		// we are dealing with a point
-		center = source->GetPoint(0);
+		int procId=this->GetController()->GetLocalProcessId();
+		int numProc=this->GetController()->GetNumberOfProcesses();
+		if(procId==0)
+			{
+			double* sourceCenter=CalculateCenter(source);
+			for(int i = 0; i < 3; ++i)
+				{
+				this->Center[i]=sourceCenter[i];
+				}
+			// Syncronizing the centers
+			this->GetController()->Broadcast(this->Center,3,0);			
+			}
+		else
+			{
+			// Syncronizing the centers
+			this->GetController()->Broadcast(this->Center,3,0);
+			}
+		// calculating the max R
+		this->MaxR=ComputeMaxRadiusInParallel(this->GetController(),
+			input,this->Center);
 		}
 	else
 		{
-		// we are dealing with a line
-		double* pointOne=source->GetPoint(0);
-		double* pointTwo=source->GetPoint(source->GetNumberOfPoints()-1);
-		// TODO: fix this is currently == pointTwo (for some reason p1=p2?)
-		center=ComputeMidpoint(pointOne,pointTwo);
+		// we aren't using MPI or have only one process
+		double* sourceCenter=CalculateCenter(source);
+		for(int i = 0; i < 3; ++i)
+			{
+			this->Center[i]=sourceCenter[i];
+			}
+		//calculating the the max R
+		this->MaxR=ComputeMaxR(input,this->Center);			
 		}
-	for(int i = 0; i < 3; ++i)
-		{
-		this->Center[i]=center[i];
-		}	
-	delete [] center;
- 	// calculating the the max R
-	this->MaxR=ComputeMaxRadiusInParallel(this->GetController(),
-		input,this->Center);
 }
 

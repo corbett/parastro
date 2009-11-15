@@ -259,6 +259,27 @@ vtkIdList* FindPointsWithinRadius(double r,
 	// serial, simply return result
 	return pointsInRadius;
 }
+
+//----------------------------------------------------------------------------
+double* CalculateCenter(vtkDataSet* source)
+{
+	double* center;
+	if(source->GetNumberOfPoints()==1)
+		{
+		// we are dealing with a point
+		center = source->GetPoint(0);
+		}
+	else
+		{
+		// we are dealing with a line
+		double* pointOne=source->GetPoint(0);
+		double* pointTwo=source->GetPoint(source->GetNumberOfPoints()-1);
+		// TODO: fix this is currently == pointTwo (for some reason p1=p2?)
+		center=ComputeMidpoint(pointOne,pointTwo);
+		}
+	return center;
+}
+
 //----------------------------------------------------------------------------
 VirialRadiusInfo ComputeVirialRadius(
 	vtkMultiProcessController* controller, vtkPointLocator* locator,
@@ -278,6 +299,7 @@ VirialRadiusInfo ComputeVirialRadius(
 		virialRadiusInfo.softening=softening;
 		virialRadiusInfo.virialRadius = -1; // if stays -1 means not found
 		virialRadiusInfo.massArrayName = massArrayName;
+		virialRadiusInfo.criticalValue=maxR;
 		// but IllinoisRootFinder takes in a void pointer
 		void* pntrVirialRadiusInfo = &virialRadiusInfo;
 		// 3. Define necessary variables to find virial radius, then search for 
@@ -320,7 +342,7 @@ VirialRadiusInfo ComputeVirialRadius(
 			shiftLeftUpdate(denGuessR,3,OverDensityInSphere(nextR,
 				pntrVirialRadiusInfo));
 		}
-  	return virialRadiusInfo;
+		return virialRadiusInfo;
 }
 
 //----------------------------------------------------------------------------
@@ -391,8 +413,8 @@ vtkPointSet* GetDatasetWithinVirialRadius(VirialRadiusInfo virialRadiusInfo)
 	vtkIdList* pointsInRadius = \
 		FindPointsWithinRadius(virialRadiusInfo.virialRadius,
 		virialRadiusInfo.center, virialRadiusInfo.locator);
-  vtkPolyData* dataSet = \
-		vtkPolyData::SafeDownCast(virialRadiusInfo.locator->GetDataSet());	
+  vtkPointSet* dataSet = \
+		vtkPointSet::SafeDownCast(virialRadiusInfo.locator->GetDataSet());	
 	// Creating a new dataset
 	// first allocating
 	vtkPointSet* newDataSet = \

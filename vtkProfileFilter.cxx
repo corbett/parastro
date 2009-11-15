@@ -229,26 +229,6 @@ void vtkProfileFilter::MergeTables(vtkPointSet* input,
 }
 
 //----------------------------------------------------------------------------
-double* vtkProfileFilter::CalculateCenter(vtkDataSet* source)
-{
-	double* center;
-	if(source->GetNumberOfPoints()==1)
-		{
-		// we are dealing with a point
-		center = source->GetPoint(0);
-		}
-	else
-		{
-		// we are dealing with a line
-		double* pointOne=source->GetPoint(0);
-		double* pointTwo=source->GetPoint(source->GetNumberOfPoints()-1);
-		// TODO: fix this is currently == pointTwo (for some reason p1=p2?)
-		center=ComputeMidpoint(pointOne,pointTwo);
-		}
-	return center;
-}
-
-//----------------------------------------------------------------------------
 void vtkProfileFilter::SetBoundsAndBinExtents(vtkPointSet* input, 
 	vtkDataSet* source)
 {
@@ -258,7 +238,7 @@ void vtkProfileFilter::SetBoundsAndBinExtents(vtkPointSet* input,
 		int numProc=this->Controller->GetNumberOfProcesses();
 		if(procId==0)
 			{
-			double* sourceCenter=this->CalculateCenter(source);
+			double* sourceCenter=CalculateCenter(source);
 			for(int i = 0; i < 3; ++i)
 				{
 				this->Center[i]=sourceCenter[i];
@@ -278,7 +258,7 @@ void vtkProfileFilter::SetBoundsAndBinExtents(vtkPointSet* input,
 	else
 		{
 		// we aren't using MPI or have only one process
-		double* sourceCenter=this->CalculateCenter(source);
+		double* sourceCenter=CalculateCenter(source);
 		for(int i = 0; i < 3; ++i)
 			{
 			this->Center[i]=sourceCenter[i];
