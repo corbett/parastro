@@ -77,40 +77,31 @@ double IllinoisRootFinder(double (*func)(double,void *),void *ctx,\
 double ComputeMaxRadiusInParallel(
 	vtkMultiProcessController* controller,vtkPointSet* input,double point[])
 {
-	double maxR = 0;
+	double maxR=ComputeMaxR(input,point);
 	if(RunInParallel(controller))
 		{
 		int procId=controller->GetLocalProcessId();
 		int numProc=controller->GetNumberOfProcesses();
 		if(procId==0)
 			{
-			//calculating the the max R
 			// collecting and updating maxR from other processors			
 			for(int proc= 1; proc < numProc; ++proc)
 				{
-				double recMaxR;
+				double recMaxR=0;
 				controller->Receive(&recMaxR,1,proc,MAX_R);
 				maxR=vtkstd::max(maxR,recMaxR);
 				}
-			maxR=maxR;
 			// Syncronizing global maxR results
 			controller->Broadcast(&maxR,1,0);
 			}
 		else
 			{
-			// calculating the the max R
-			double maxR=ComputeMaxR(input,point);
 			// sending to process 0, which will compare all results and compute
 			// global maximum
 			controller->Send(&maxR,1,0,MAX_R);
 			// syncronizing global maxR results
 			controller->Broadcast(&maxR,1,0);
 			}
-		}
-	else
-		{
-		// running in serial
-		maxR=ComputeMaxR(input,point);
 		}
 	return maxR;
 }
