@@ -139,7 +139,6 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
 		 	++nextHaloId)
 			{
 			vtkIdType haloId = nextHaloIdArray->GetValue(nextHaloId);
-			TODO: add back in 
 			if(haloCount[haloId]==-1*this->MinimumNumberOfParticles)
 				{
 				// we have seen the id minimum number of particles times,
