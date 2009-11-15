@@ -94,8 +94,6 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
 			// waiting to recieve the final result, as computed by root
 			this->GetController()->Receive(haloIdArray,0,
 				HALO_ID_ARRAY_FINAL);
-			// TODO: remove
-			cout << " id array has " << haloIdArray->GetNumberOfTuples() << "\n";
 			// setting output
 			output->GetPointData()->AddArray(haloIdArray);
 			// returning	
@@ -195,7 +193,7 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
 				procHaloIdArrayIndex,HALO_ID_ARRAY_FINAL);
 			}
 		}
-	output->GetPointData()->AddArray(haloIdArray);
+	output->GetPointData()->AddArray(allHaloIdArrays[0]);
 	return 1;
 }
 

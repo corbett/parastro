@@ -93,7 +93,7 @@ struct VirialRadiusInfo
 // Description:
 // Computes the virial radius >=0 base upon the user defined 
 // overdensity and center. Returns -1 if there is a problem. 
-VirialRadiusInfo ComputeVirialRadius(vtkPointSet* input,
+VirialRadiusInfo ComputeVirialRadius(vtkPointLocator* locator,
 	vtkstd::string massArrayName, double softening,double overdensity,
 	double maxR,double center[]);
 
