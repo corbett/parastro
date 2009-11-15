@@ -41,7 +41,8 @@ vtkFriendsOfFriendsHaloFinder::~vtkFriendsOfFriendsHaloFinder()
 //----------------------------------------------------------------------------
 void vtkFriendsOfFriendsHaloFinder::PrintSelf(ostream& os, vtkIndent indent)
 {
-  this->Superclass::PrintSelf(os,indent);
+  this->
+class::PrintSelf(os,indent);
   os << indent << "Linking Length: " << this->LinkingLength 
 		<<	indent << "Minimum Number Of Particles: " 
 		<<  this->MinimumNumberOfParticles << "\n";
@@ -213,7 +214,7 @@ int vtkFriendsOfFriendsHaloFinder::RequestData(vtkInformation* request,
 		// methods
 		this->RetainKdtreeOn();
 		// requesting ghost cells
-    this->AssignBoundaryCellsToAllIntersectingRegionsOn();
+		this->SetBoundaryModeToAssignToAllIntersectingRegions(); 
 		// Just calling the superclass' method to distribute data and build
 		// PKdTree
 	  this->Superclass::RequestData(request,inputVector,outputVector);
