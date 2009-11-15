@@ -41,8 +41,7 @@ vtkFriendsOfFriendsHaloFinder::~vtkFriendsOfFriendsHaloFinder()
 //----------------------------------------------------------------------------
 void vtkFriendsOfFriendsHaloFinder::PrintSelf(ostream& os, vtkIndent indent)
 {
-  this->
-class::PrintSelf(os,indent);
+  this->Superclass::PrintSelf(os,indent);
   os << indent << "Linking Length: " << this->LinkingLength 
 		<<	indent << "Minimum Number Of Particles: " 
 		<<  this->MinimumNumberOfParticles << "\n";
