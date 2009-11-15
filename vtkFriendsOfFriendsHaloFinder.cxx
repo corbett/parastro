@@ -139,8 +139,6 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
 		 	++nextHaloId)
 			{
 			vtkIdType haloId = nextHaloIdArray->GetValue(nextHaloId);
-			haloCount[haloId]+=1;
-			/* removing this for now 
 			TODO: add back in 
 			if(haloCount[haloId]==-1*this->MinimumNumberOfParticles)
 				{
@@ -155,7 +153,6 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
 				// minimum number of particles to count as a halo
 				haloCount[haloId]-=1;
 				}
-				*/
 			}
 		}	
 	// finally setting to zero points which have 
@@ -176,20 +173,6 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
 		 	++nextHaloId)
 			{
 			vtkIdType haloId = nextHaloIdArray->GetValue(nextHaloId);	
-			// TODO: remove this entire if statement, add in the one below
-			if(haloCount[haloId]<this->MinimumNumberOfParticles)
-				{
-				// we only saw it less than requisite number of times
-				nextHaloIdArray->SetValue(nextHaloId,0);
-				}
-			else
-				{
-				// we saw it more than the requisite number,
-				nextHaloIdArray->SetValue(nextHaloId,haloCount[haloId]);
-				}
-
-			/* removing this for now 
-			TODO: add back in	
 			if(haloCount[haloId]<1)
 				{
 				// we only saw it less than requisite number of times
@@ -200,8 +183,6 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
 				// we saw it more than once, assign it to its unique id
 				nextHaloIdArray->SetValue(nextHaloId,haloCount[haloId]);
 				}
-			*/
-
 			}
 		if(RunInParallel(this->GetController()) && procHaloIdArrayIndex > 0)
 			{
