@@ -74,6 +74,8 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
 		}
 	// building a locator
 	pointTree->BuildLocatorFromPoints(output);
+	cout << "locator tree has " << pointTree->GetNumberOfRegions()
+		<< " number of regions\n";
 	// calculating the initial haloes- yes it really is done in just this 
 	// one line.
 	// TODO: manage memory
