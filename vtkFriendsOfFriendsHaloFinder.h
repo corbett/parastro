@@ -25,13 +25,14 @@
 //    apart. if so, merge haloes. Continue until every halo's bounds
 //    have been checked against every other halo's
 // .SECTION See Also
-// vtkKdTree, vtkPKdTree, vtkDistributedDataFilter.h
+// vtkKdTree, vtkKdTree, vtkDistributedDataFilter.h
 
 #ifndef __vtkFriendsOfFriendsHaloFinder_h
 #define __vtkFriendsOfFriendsHaloFinder_h
 #include "vtkDistributedDataFilter.h"
 
 class vtkPointSet;
+class vtkKdTree;
 enum FriendsOfFriendsMPIData 
 {
 	HALO_ID_ARRAY_INITIAL,
@@ -62,7 +63,7 @@ public:
 	// has more than the requisite number of particles, as input by user. 
 	// Output should contain the data set in which halos should be searched
 	// before calling.
-	int FindHaloes(vtkPKdTree* pointTree, vtkPointSet* output);
+	int FindHaloes(vtkKdTree* pointTree, vtkPointSet* output);
 
 //BTX
 protected:

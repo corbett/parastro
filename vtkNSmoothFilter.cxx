@@ -10,16 +10,13 @@
 #include "vtkObjectFactory.h"
 #include "vtkPointData.h"
 #include "vtkSmartPointer.h"
-#include "vtkPKdTree.h"
 #include "vtkPointSet.h"
 #include "vtkPoints.h"
 #include "vtkGenericPointIterator.h"
 #include "vtkDataArray.h"
 #include "vtkMath.h"
-#include "vtkMultiProcessController.h"
-#include "vtkPKdTree.h"
-#include "vtkDistributedDataFilter.h"
 #include "vtkCallbackCommand.h"
+#include "vtkPointLocator.h"
 #include "astrovizhelpers/DataSetHelpers.h"
 
 using vtkstd::string;
@@ -96,7 +93,6 @@ int vtkNSmoothFilter::RequestData(vtkInformation *request,
     return 0;
     }
   vtkPointSet* output;
-	vtkSmartPointer<vtkPKdTree> pointTree;
 	// smoothing each quantity in the output
 	int numberOriginalArrays = input->GetPointData()->GetNumberOfArrays();
 	if(RunInParallel(this->GetController()))
@@ -110,17 +106,16 @@ int vtkNSmoothFilter::RequestData(vtkInformation *request,
 		output = vtkPointSet::GetData(outputVector);
 		// calling build locator
 		// setting the KdTree
-		pointTree=this->GetKdtree();
-		pointTree->BuildLocatorFromPoints(output);
 		}
 	else
 		{		
 		output = vtkPointSet::GetData(outputVector);
   	output->ShallowCopy(input);
-		// Building the Kd tree, should already be built
-		pointTree = vtkSmartPointer<vtkPKdTree>::New();
-		pointTree->BuildLocatorFromPoints(output);
 		}
+	// 1. Building the point locator, locale to this process
+	vtkPointLocator* locator = vtkPointLocator::New();
+		locator->SetDataSet(output);
+		locator->BuildLocator();
 	// Allocating arrays to store our smoothed values
 	// smoothed density
  	AllocateDoubleDataArray(output,"smoothed density", 
@@ -149,7 +144,7 @@ int vtkNSmoothFilter::RequestData(vtkInformation *request,
 		// plus one as the first point returned by locator is always one's self, 
 		// and the user expects specifying 1 neighbor will actually find
 		// one neighbor 
-		pointTree->FindClosestNPoints(this->NeighborNumber+1,
+		locator->FindClosestNPoints(this->NeighborNumber+1,
 																	nextPoint,closestNPoints);
 		// looping over the closestNPoints, 
 		// only if we have more neighbors than ourselves

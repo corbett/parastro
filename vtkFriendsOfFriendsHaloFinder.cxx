@@ -10,7 +10,7 @@
 #include "vtkObjectFactory.h"
 #include "vtkPointData.h"
 #include "vtkSmartPointer.h"
-#include "vtkPKdTree.h"
+#include "vtkKdTree.h"
 #include "vtkPointSet.h"
 #include "vtkPoints.h"
 #include "vtkGenericPointIterator.h"
@@ -64,7 +64,7 @@ int vtkFriendsOfFriendsHaloFinder::FillOutputPortInformation(
 }
 
 //----------------------------------------------------------------------------
-int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
+int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkKdTree* pointTree,
 	vtkPointSet* output)
 {
 	if(this->MinimumNumberOfParticles < 2)
@@ -72,10 +72,6 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkPKdTree* pointTree,
 		vtkWarningMacro("setting minimum number of particles to 2, a minimum number of particles below this makes no sense.");
 		this->MinimumNumberOfParticles=2;
 		}
-	// building a locator
-	pointTree->BuildLocatorFromPoints(output);
-	cout << "locator tree has " << pointTree->GetNumberOfRegions()
-		<< " number of regions\n";
 	// calculating the initial haloes- yes it really is done in just this 
 	// one line.
 	// TODO: manage memory
@@ -206,8 +202,10 @@ int vtkFriendsOfFriendsHaloFinder::RequestData(vtkInformation* request,
 {
   // Get input and output data.
   vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
+	// First running D3 if running in parallel, as this method would function
+	// dismally without spatial locality, as I'm currently not merging halos
+	// across processes
 	vtkPointSet* output;
-	vtkSmartPointer<vtkPKdTree> pointTree;
 	if(RunInParallel(this->GetController()))
 		{
 		// call D3, setting retain PKTree to 1; this can be accessed by later
@@ -219,18 +217,16 @@ int vtkFriendsOfFriendsHaloFinder::RequestData(vtkInformation* request,
 		// PKdTree
 	  this->Superclass::RequestData(request,inputVector,outputVector);
 		output = vtkPointSet::GetData(outputVector);
-		// setting the KdTree to the output from D3
-		pointTree=this->GetKdtree();
-		cout << "tree has " << pointTree->GetNumberOfRegions()
-			<< " number of regions\n";
 		}
 	else
 		{		
 		output = vtkPointSet::GetData(outputVector);
   	output->ShallowCopy(input);
-		// Building the Kd tree, should already be built
-		pointTree = vtkSmartPointer<vtkPKdTree>::New();
 		}
+		// Building a local Kd tree, should already be built
+	vtkSmartPointer<vtkKdTree> pointTree = vtkSmartPointer<vtkKdTree>::New();
+	// building a locator
+	pointTree->BuildLocatorFromPoints(output);	
 	this->FindHaloes(pointTree,output);
   return 1;
 }
