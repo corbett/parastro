@@ -1,19 +1,18 @@
-#include "vtkPolyData.h"
-#include "vtkPointSet.h"
-#include "vtkSmartPointer.h"
-#include "vtkFieldData.h"
-#include "vtkPointData.h"
-#include "vtkDataSetAttributes.h"
-#include "vtkIdTypeArray.h"
-#include "vtkIdList.h"
-#include "vtkCell.h"
-#include "vtkCellArray.h"
-#include "vtkTable.h"
-#include "vtkFloatArray.h"
-#include "vtkInformationVector.h"
+#include "vtkIdTypeArray.h" // TODO: needed to include this, figure out why
 #include <iostream>
 #include <sstream>
-
+class vtkPolyData;
+class vtkPointSet;
+class vtkFieldData;
+class vtkPointData;
+class vtkDataSetAttributes;
+class vtkIdTypeArray;
+class vtkIdList;
+class vtkCell;
+class vtkCellArray;
+class vtkTable;
+class vtkFloatArray;
+class vtkInformationVector;
 class vtkMultiProcessController;
 /*
 * The following methods take and modify vtkPolyData

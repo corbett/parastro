@@ -4,6 +4,7 @@
   Module:    $RCSfile: vtkFriendsOfFriendsHaloFinder.cxx,v $
 =========================================================================*/
 #include "vtkFriendsOfFriendsHaloFinder.h"
+#include "astrovizhelpers/DataSetHelpers.h"
 #include "vtkIdList.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
@@ -20,7 +21,6 @@
 #include "vtkCallbackCommand.h"
 #include <vtkstd/vector>
 #include <vtkstd/map>
-#include "astrovizhelpers/DataSetHelpers.h"
 
 
 vtkCxxRevisionMacro(vtkFriendsOfFriendsHaloFinder, "$Revision: 1.72 $");

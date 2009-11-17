@@ -1,13 +1,26 @@
 #include "ProfileHelpers.h"
+#include "DataSetHelpers.h"
+#include "vtkDataSet.h"
+#include "vtkPolyData.h"
+#include "vtkPointSet.h"
+#include "vtkFieldData.h"
+#include "vtkTable.h"
+#include "vtkDataSetAttributes.h"
 #include "vtkPointData.h"
+#include "vtkPointLocator.h"
+#include "vtkIdList.h"
+#include "vtkIdTypeArray.h"
 #include "vtkFloatArray.h"
 #include "vtkDoubleArray.h"
 #include "vtkIntArray.h"
+#include "vtkCellArray.h"
+#include "vtkFloatArray.h"
+#include "vtkCell.h"
 #include "vtkSmartPointer.h"
-#include "DataSetHelpers.h"
+#include "vtkMath.h"
+#include "vtkMultiProcessController.h"
 #include <assert.h>
 #include <cmath>
-#include "vtkMath.h"
 //----------------------------------------------------------------------------
 double IllinoisRootFinder(double (*func)(double,void *),void *ctx,\
 											double r,double s,double xacc,double yacc,\

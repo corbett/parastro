@@ -4,6 +4,10 @@
   Module:    $RCSfile: vtkCenterOfMassFilter.cxx,v $
 =========================================================================*/
 #include "vtkCenterOfMassFilter.h"
+#include "astrovizhelpers/DataSetHelpers.h"
+#include "astrovizhelpers/ProfileHelpers.h"
+#include "vtkDataSetAttributes.h"
+#include "vtkCellArray.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
 #include "vtkObjectFactory.h"
@@ -11,9 +15,7 @@
 #include "vtkStringArray.h"
 #include "vtkSphereSource.h"
 #include "vtkMultiProcessController.h"
-#include "astrovizhelpers/DataSetHelpers.h"
-#include "astrovizhelpers/ProfileHelpers.h"
-
+#include "vtkSmartPointer.h"
 
 vtkCxxRevisionMacro(vtkCenterOfMassFilter, "$Revision: 1.72 $");
 vtkStandardNewMacro(vtkCenterOfMassFilter);

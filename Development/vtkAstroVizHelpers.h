@@ -42,6 +42,24 @@ class vtkTable;
 class vtkInformationVector;
 class vtkTable;
 class vtkMultiProcessController;
+	
+// Description:
+// The VirialRadiusInfo struct is an containing:
+// .locator which is a vtkPointLocator
+// .center  which is a double[3]
+// .criticalDensity which is a double
+// .virialRadius
+struct VirialRadiusInfo 
+{
+	vtkPointLocator* locator;
+	vtkMultiProcessController* controller;
+	double center[3];
+	double criticalValue;
+	double virialRadius;
+	double softening;
+	vtkstd::string massArrayName;
+};
+
 class VTK_COMMON_EXPORT vtkAstroVizHelpers : public vtkObject
 {
 public:
@@ -55,23 +73,6 @@ public:
 		TOTAL_NUMBER_IN_SPHERE,
 		MAX_R
 	};	
-	
-	// Description:
-	// The VirialRadiusInfo struct is an containing:
-	// .locator which is a vtkPointLocator
-	// .center  which is a double[3]
-	// .criticalDensity which is a double
-	// .virialRadius
-	struct VirialRadiusInfo 
-	{
-		vtkPointLocator* locator;
-		vtkMultiProcessController* controller;
-		double center[3];
-		double criticalValue;
-		double virialRadius;
-		double softening;
-		vtkstd::string massArrayName;
-	};
 	
 	/*
 	* The following methods take and modify vtkPolyData
@@ -338,8 +339,7 @@ public:
 	// Description
 	// Given a vSquaredAve and a vAve calculates the velocity dispersion
 	// placing it in the output vector velocityDispersion
-	static double* ComputeVelocityDispersion(vtkVariant vSquaredAve, 
-		vtkVariant vAve);
+	static double* ComputeVelocityDispersion(vtkVariant vSquaredAve, vtkVariant vAve);
 	
 	// Description:
 	// helper function to compute radial velocity
@@ -381,7 +381,19 @@ public:
 	// shifts every item in array one to left (the first element is thrown away)
 	// then sets inserts updateValue in the last, free slot
 	static template <class T> void shiftLeftUpdate(T* array,
-		int size, T updateValue);
+		int size, T updateValue)
+		{
+			// for everything but the last, value is equal to item one to right
+			for(int i = 0; i < size-1; ++i)
+				{
+				array[i]=array[i+1];
+				}
+			// for last item, value is equal to updateValue
+			array[size-1]=updateValue;
+		}
+protected:
+  vtkAstroVizHelpers() {};
+  ~vtkAstroVizHelpers() {};
 private:
 	vtkAstroVizHelpers(const vtkAstroVizHelpers&);  // Not implemented.
   void operator=(const vtkAstroVizHelpers&);  // Not implemented.

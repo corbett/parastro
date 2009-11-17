@@ -4,9 +4,12 @@
   Module:    $RCSfile: vtkMomentsOfInertiaFilter.cxx,v $
 =========================================================================*/
 #include "vtkMomentsOfInertiaFilter.h"
+#include "astrovizhelpers/DataSetHelpers.h"
+#include "astrovizhelpers/ProfileHelpers.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
 #include "vtkObjectFactory.h"
+#include "vtkCellArray.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include "vtkStringArray.h"
 #include "vtkSphereSource.h"
@@ -16,8 +19,7 @@
 #include "vtkPoints.h"
 #include "vtkLine.h"
 #include "vtkUnsignedCharArray.h"
-#include "astrovizhelpers/DataSetHelpers.h"
-#include "astrovizhelpers/ProfileHelpers.h"
+#include "vtkSmartPointer.h"
 #include "vtkMath.h"
 
 vtkCxxRevisionMacro(vtkMomentsOfInertiaFilter, "$Revision: 1.72 $");

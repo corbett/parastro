@@ -30,8 +30,10 @@ ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.0"
 
 # For helper functions often used, will later include these in a single
 # VTK class
+#eventially I want this to be contained within a single class:
+# vtkAstroVizHelpers.cxx, already working on this
 ADD_LIBRARY(AstroVizHelpers astrovizhelpers/DataSetHelpers.cxx 
-	astrovizhelpers/ProfileHelpers.cxx vtkAstroVizHelpers.cxx)
+	astrovizhelpers/ProfileHelpers.cxx )
 SET_TARGET_PROPERTIES(AstroVizHelpers PROPERTIES COMPILE_FLAGS "-fPIC")
 TARGET_LINK_LIBRARIES(AstroVizPlugin AstroVizHelpers) 
 

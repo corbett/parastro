@@ -1,19 +1,20 @@
-#include "vtkPolyData.h"
-#include "vtkPointSet.h"
-#include "vtkSmartPointer.h"
-#include "vtkFieldData.h"
-#include "vtkPointData.h"
-#include "vtkDataSetAttributes.h"
-#include "vtkIdTypeArray.h"
-#include "vtkIdList.h"
-#include "vtkCell.h"
-#include "vtkPointLocator.h"
-#include "vtkCellArray.h"
-#include "vtkFloatArray.h"
-#include "vtkTable.h"
-#include "vtkPointSet.h"
-#include "vtkMultiProcessController.h"
-#include <vtkstd/string>
+#include <vtkstd/string> // a member of some structs
+class vtkPolyData;
+class vtkPointSet;
+class vtkDataSet;
+class vtkFieldData;
+class vtkPointData;
+class vtkDataSetAttributes;
+class vtkIdTypeArray;
+class vtkIdList;
+class vtkCell;
+class vtkPointLocator;
+class vtkCellArray;
+class vtkFloatArray;
+class vtkTable;
+class vtkPointSet;
+class vtkMultiProcessController;
+class vtkVariant;
 enum PointsInRadiusMPIData
 {
 	TOTAL_MASS_IN_SPHERE,

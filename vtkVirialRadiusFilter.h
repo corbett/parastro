@@ -101,10 +101,10 @@ protected:
 	// based upon the user's input and the boundaries of the dataset.
 	// Works in parallel if necessary
 	void CalculateAndSetBounds(vtkPointSet* input, vtkDataSet* source);
-
 private:
   vtkVirialRadiusFilter(const vtkVirialRadiusFilter&); // Not implemented
   void operator=(const vtkVirialRadiusFilter&); // Not implemented
+
 //ETX
 };
 

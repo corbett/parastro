@@ -5,9 +5,8 @@ this depends on a few header files as well as the Tipsylib library.
 Only reads in standard format Tipsy files.
 @author corbett
 =========================================================================*/
-#include <math.h>
-#include <assert.h>
 #include "vtkTipsyReader.h"
+#include "astrovizhelpers/DataSetHelpers.h"
 #include "vtkObjectFactory.h"
 #include "vtkPointData.h"
 #include "vtkPolyData.h"
@@ -18,8 +17,9 @@ Only reads in standard format Tipsy files.
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include "vtkPolyData.h" 
 #include "vtkInformation.h"
+#include "vtkInformationVector.h"
 #include <cmath>
-#include "astrovizhelpers/DataSetHelpers.h"
+#include <assert.h>
 
 vtkCxxRevisionMacro(vtkTipsyReader, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkTipsyReader);

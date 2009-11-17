@@ -14,14 +14,18 @@
 #include "vtkDataArray.h"
 #include "vtkDoubleArray.h"
 #include "vtkIntArray.h"
+#include "vtkInformationVector.h"
 #include "vtkFloatArray.h"
 #include "vtkObjectFactory.h"
+#include "vtkPointLocator.h"
 #include "vtkSphereSource.h"
 #include "vtkSmartPointer.h"
 #include "vtkMultiProcessController.h"
 #include "vtkMath.h"
+#include "vtkTable.h"
 #include <assert.h>
 #include <cmath>
+
 vtkCxxRevisionMacro(vtkAstroVizHelpers, "$Revision: 1.72 $");
 vtkStandardNewMacro(vtkAstroVizHelpers);
 
@@ -30,7 +34,7 @@ vtkStandardNewMacro(vtkAstroVizHelpers);
 * Work with vtkDataArray
 *
 *---------------------------------------------------------------------------*/
-static void vtkAstroVizHelpers::InitializeDataArray(vtkDataArray* dataArray, 
+void vtkAstroVizHelpers::InitializeDataArray(vtkDataArray* dataArray, 
 	const char* arrayName, int numComponents, int numTuples)
 {
 	dataArray->SetNumberOfComponents(numComponents);
@@ -48,7 +52,7 @@ static void vtkAstroVizHelpers::InitializeDataArray(vtkDataArray* dataArray,
 * Work with vtkTable
 *
 *---------------------------------------------------------------------------*/
-static void vtkAstroVizHelpers::AllocateDataArray(vtkTable* output,
+void vtkAstroVizHelpers::AllocateDataArray(vtkTable* output,
  	const char* arrayName,int numComponents, int numTuples)
 {
 	vtkFloatArray* dataArray=vtkFloatArray::New();
@@ -62,7 +66,7 @@ static void vtkAstroVizHelpers::AllocateDataArray(vtkTable* output,
 *---------------------------------------------------------------------------*/
 
 //----------------------------------------------------------------------------
-static vtkIdType vtkAstroVizHelpers::SetPointValue(vtkPolyData* output,float pos[])
+vtkIdType vtkAstroVizHelpers::SetPointValue(vtkPolyData* output,float pos[])
 {
 	vtkIdType id=output->GetPoints()->InsertNextPoint(pos);
 	output->GetVerts()->InsertNextCell(1, &id);
@@ -70,7 +74,7 @@ static vtkIdType vtkAstroVizHelpers::SetPointValue(vtkPolyData* output,float pos
 }
 
 //----------------------------------------------------------------------------
-static float* vtkAstroVizHelpers::DoublePointToFloat(double point[])
+float* vtkAstroVizHelpers::DoublePointToFloat(double point[])
 {
 	float* floatPoint = new float[3];
 	for(int i = 0; i < 3; ++i)
@@ -81,7 +85,7 @@ static float* vtkAstroVizHelpers::DoublePointToFloat(double point[])
 }
 
 //----------------------------------------------------------------------------
-static void vtkAstroVizHelpers::CreateSphere(vtkPolyData* output,
+void vtkAstroVizHelpers::CreateSphere(vtkPolyData* output,
 	double radius, double center[])
 {
 	vtkSmartPointer<vtkSphereSource> sphere = \
@@ -101,7 +105,7 @@ static void vtkAstroVizHelpers::CreateSphere(vtkPolyData* output,
 *
 *---------------------------------------------------------------------------*/
 //----------------------------------------------------------------------------
-static vtkIdType vtkAstroVizHelpers::SetPointValue(vtkPointSet* output,
+vtkIdType vtkAstroVizHelpers::SetPointValue(vtkPointSet* output,
 	float pos[])
 {
 	vtkIdType id=output->GetPoints()->InsertNextPoint(pos);
@@ -109,7 +113,7 @@ static vtkIdType vtkAstroVizHelpers::SetPointValue(vtkPointSet* output,
 }
 
 //----------------------------------------------------------------------------
-static void vtkAstroVizHelpers::AllocateDataArray(vtkPointSet* output, 
+void vtkAstroVizHelpers::AllocateDataArray(vtkPointSet* output, 
 	const char* arrayName,int numComponents, int numTuples)
 {
 	vtkSmartPointer<vtkFloatArray> dataArray = \
@@ -119,7 +123,7 @@ static void vtkAstroVizHelpers::AllocateDataArray(vtkPointSet* output,
 }
 
 //----------------------------------------------------------------------------
-static void vtkAstroVizHelpers::AllocateDoubleDataArray(vtkPointSet* output, 
+void vtkAstroVizHelpers::AllocateDoubleDataArray(vtkPointSet* output, 
 	const char* arrayName, int numComponents, int numTuples)
 {
 	vtkSmartPointer<vtkDoubleArray> dataArray=\
@@ -129,7 +133,7 @@ static void vtkAstroVizHelpers::AllocateDoubleDataArray(vtkPointSet* output,
 }
 
 //----------------------------------------------------------------------------
-static void vtkAstroVizHelpers::AllocateIntDataArray(vtkPointSet* output, 
+void vtkAstroVizHelpers::AllocateIntDataArray(vtkPointSet* output, 
 	const char* arrayName, int numComponents, int numTuples)
 {
 	vtkSmartPointer<vtkIntArray> dataArray=\
@@ -139,7 +143,7 @@ static void vtkAstroVizHelpers::AllocateIntDataArray(vtkPointSet* output,
 }
 
 //----------------------------------------------------------------------------
-static double* vtkAstroVizHelpers::GetPoint(vtkPointSet* output,vtkIdType id)
+double* vtkAstroVizHelpers::GetPoint(vtkPointSet* output,vtkIdType id)
 {
 	double* nextPoint=new double[3]; 
 	output->GetPoints()->GetPoint(id,nextPoint);
@@ -147,21 +151,21 @@ static double* vtkAstroVizHelpers::GetPoint(vtkPointSet* output,vtkIdType id)
 }
 
 //----------------------------------------------------------------------------
-static void vtkAstroVizHelpers::SetDataValue(vtkPointSet* output, 
+void vtkAstroVizHelpers::SetDataValue(vtkPointSet* output, 
 	const char* arrayName, vtkIdType id,float data[])
 {
 	output->GetPointData()->GetArray(arrayName)->SetTuple(id,data);
 }
 
 //----------------------------------------------------------------------------
-static void vtkAstroVizHelpers::SetDataValue(vtkPointSet* output, 
+void vtkAstroVizHelpers::SetDataValue(vtkPointSet* output, 
 	const char* arrayName, vtkIdType id,double data[])
 {
 	output->GetPointData()->GetArray(arrayName)->SetTuple(id,data);
 }
 
 //----------------------------------------------------------------------------
-static double* vtkAstroVizHelpers::GetDataValue(vtkPointSet* output, 
+double* vtkAstroVizHelpers::GetDataValue(vtkPointSet* output, 
 	const char* arrayName, vtkIdType id)
 {
 	double* data=new double[3];
@@ -175,7 +179,7 @@ static double* vtkAstroVizHelpers::GetDataValue(vtkPointSet* output,
 *
 *---------------------------------------------------------------------------*/
 //----------------------------------------------------------------------------
-static vtkInformationVector** vtkAstroVizHelpers::DeepCopyInputVector(
+vtkInformationVector** vtkAstroVizHelpers::DeepCopyInputVector(
 	vtkInformationVector** inputVector, int inputVectorSize)
 {
 	vtkInformationVector** newInputVector = \
@@ -197,13 +201,13 @@ static vtkInformationVector** vtkAstroVizHelpers::DeepCopyInputVector(
 *
 *---------------------------------------------------------------------------*/
 //----------------------------------------------------------------------------
-static bool vtkAstroVizHelpers::RunInParallel(vtkMultiProcessController* controller)
+bool vtkAstroVizHelpers::RunInParallel(vtkMultiProcessController* controller)
 {
 	return (controller != NULL && controller->GetNumberOfProcesses() > 1);
 }
 
 //----------------------------------------------------------------------------
-static double vtkAstroVizHelpers::IllinoisRootFinder(
+double vtkAstroVizHelpers::IllinoisRootFinder(
 	double (*func)(double,void *),void *ctx,
 	double r,double s,double xacc,double yacc,int *pnIter) 
 {
@@ -269,7 +273,7 @@ static double vtkAstroVizHelpers::IllinoisRootFinder(
 
 //----------------------------------------------------------------------------
 
-static double vtkAstroVizHelpers::ComputeMaxRadiusInParallel(
+double vtkAstroVizHelpers::ComputeMaxRadiusInParallel(
 	vtkMultiProcessController* controller,vtkPointSet* input,double point[])
 {
 	double maxR=ComputeMaxR(input,point);
@@ -302,7 +306,7 @@ static double vtkAstroVizHelpers::ComputeMaxRadiusInParallel(
 }
 
 //----------------------------------------------------------------------------
-static double vtkAstroVizHelpers::ComputeMaxR(vtkPointSet* input,
+double vtkAstroVizHelpers::ComputeMaxR(vtkPointSet* input,
 	double point[])
 {
 	double bounds[6]; //xmin,xmax,ymin,ymax,zmin,zmax
@@ -329,7 +333,7 @@ static double vtkAstroVizHelpers::ComputeMaxR(vtkPointSet* input,
 }
 
 //----------------------------------------------------------------------------
-static double vtkAstroVizHelpers::OverDensityInSphere(double r,
+double vtkAstroVizHelpers::OverDensityInSphere(double r,
 	void* inputVirialRadiusInfo)
 {
 	VirialRadiusInfo* virialRadiusInfo = \
@@ -396,7 +400,7 @@ static double vtkAstroVizHelpers::OverDensityInSphere(double r,
 }
 
 //----------------------------------------------------------------------------
-static double vtkAstroVizHelpers::OverNumberInSphere(double r,
+double vtkAstroVizHelpers::OverNumberInSphere(double r,
 	void* inputVirialRadiusInfo)
 {
 	VirialRadiusInfo* virialRadiusInfo = \
@@ -444,7 +448,7 @@ static double vtkAstroVizHelpers::OverNumberInSphere(double r,
 }
 
 //----------------------------------------------------------------------------
-static vtkIdList* vtkAstroVizHelpers::FindPointsWithinRadius(double r, 
+vtkIdList* vtkAstroVizHelpers::FindPointsWithinRadius(double r, 
 	double* center, vtkPointLocator* locatorOfThisProcess)
 {
 	// find points within r, all will need this
@@ -459,7 +463,7 @@ static vtkIdList* vtkAstroVizHelpers::FindPointsWithinRadius(double r,
 }
 
 //----------------------------------------------------------------------------
-static double* vtkAstroVizHelpers::CalculateCenter(vtkDataSet* source)
+double* vtkAstroVizHelpers::CalculateCenter(vtkDataSet* source)
 {
 	double* center;
 	if(source->GetNumberOfPoints()==1)
@@ -479,7 +483,7 @@ static double* vtkAstroVizHelpers::CalculateCenter(vtkDataSet* source)
 }
 
 //----------------------------------------------------------------------------
-static VirialRadiusInfo vtkAstroVizHelpers::ComputeVirialRadius(
+VirialRadiusInfo vtkAstroVizHelpers::ComputeVirialRadius(
 	vtkMultiProcessController* controller, vtkPointLocator* locator,
 	vtkstd::string massArrayName, double softening,double overdensity,
 	double maxR,double center[])
@@ -544,20 +548,7 @@ static VirialRadiusInfo vtkAstroVizHelpers::ComputeVirialRadius(
 }
 
 //----------------------------------------------------------------------------
-static template <class T> void vtkAstroVizHelpers::shiftLeftUpdate(
-	T* array,int size, T updateValue)
-{
-	// for everything but the last, value is equal to item one to right
-	for(int i = 0; i < size-1; ++i)
-		{
-		array[i]=array[i+1];
-		}
-	// for last item, value is equal to updateValue
-	array[size-1]=updateValue;
-}
-
-//----------------------------------------------------------------------------
-static vtkPointSet* vtkAstroVizHelpers::CopyPointsAndData(
+vtkPointSet* vtkAstroVizHelpers::CopyPointsAndData(
 	vtkPointSet* dataSet, vtkIdList* pointsInRadius)
 {
 	// TODO: I was using CopyCells method of vtkPolyData
@@ -604,7 +595,7 @@ static vtkPointSet* vtkAstroVizHelpers::CopyPointsAndData(
 }
 
 //----------------------------------------------------------------------------
-static vtkPointSet* vtkAstroVizHelpers::GetDatasetWithinVirialRadius(
+vtkPointSet* vtkAstroVizHelpers::GetDatasetWithinVirialRadius(
 	VirialRadiusInfo virialRadiusInfo)
 {
 
@@ -624,14 +615,14 @@ static vtkPointSet* vtkAstroVizHelpers::GetDatasetWithinVirialRadius(
 
 
 //----------------------------------------------------------------------------
-static double* vtkAstroVizHelpers::ComputeRadialVelocity(double v[],
+double* vtkAstroVizHelpers::ComputeRadialVelocity(double v[],
 	double r[])
 {
 	return ComputeProjection(v,r);
 }
 
 //----------------------------------------------------------------------------
-static double* vtkAstroVizHelpers::ComputeTangentialVelocity(double v[],
+double* vtkAstroVizHelpers::ComputeTangentialVelocity(double v[],
 	double r[])
 {
 	double* vRad=ComputeRadialVelocity(v,r);
@@ -640,7 +631,7 @@ static double* vtkAstroVizHelpers::ComputeTangentialVelocity(double v[],
 	return vTan;	
 }
 //----------------------------------------------------------------------------
-static double* vtkAstroVizHelpers::ComputeAngularMomentum(double v[],
+double* vtkAstroVizHelpers::ComputeAngularMomentum(double v[],
  	double r[])
 {
 	double* angularMomentum = new double[3];
@@ -649,7 +640,7 @@ static double* vtkAstroVizHelpers::ComputeAngularMomentum(double v[],
 }
 
 //----------------------------------------------------------------------------
-static double* vtkAstroVizHelpers::ComputeVelocitySquared(double v[],
+double* vtkAstroVizHelpers::ComputeVelocitySquared(double v[],
 	double r[])
 {
 	double* velocitySquared = new double[1];
@@ -658,7 +649,7 @@ static double* vtkAstroVizHelpers::ComputeVelocitySquared(double v[],
 }
 
 //----------------------------------------------------------------------------
-static double* vtkAstroVizHelpers::ComputeRadialVelocitySquared(
+double* vtkAstroVizHelpers::ComputeRadialVelocitySquared(
 	double v[],double r[])
 {
 	double* vRad=ComputeRadialVelocity(v,r);
@@ -669,7 +660,7 @@ static double* vtkAstroVizHelpers::ComputeRadialVelocitySquared(
 }
 
 //----------------------------------------------------------------------------
-static double* vtkAstroVizHelpers::ComputeTangentialVelocitySquared(
+double* vtkAstroVizHelpers::ComputeTangentialVelocitySquared(
 	double v[],double r[])
 {
 	double* vRad=ComputeRadialVelocity(v,r);
@@ -682,7 +673,7 @@ static double* vtkAstroVizHelpers::ComputeTangentialVelocitySquared(
 }
 
 //----------------------------------------------------------------------------
-static double* vtkAstroVizHelpers::ComputeVelocityDispersion(
+double* vtkAstroVizHelpers::ComputeVelocityDispersion(
 	vtkVariant vSquaredAve, vtkVariant vAve)
 {
 	// vSquared ave required to be a variant which holds a double,
@@ -698,7 +689,7 @@ static double* vtkAstroVizHelpers::ComputeVelocityDispersion(
 }
 
 //----------------------------------------------------------------------------
-static double* vtkAstroVizHelpers::ComputeCircularVelocity(vtkVariant cumulativeMass, vtkVariant binRadius)
+double* vtkAstroVizHelpers::ComputeCircularVelocity(vtkVariant cumulativeMass, vtkVariant binRadius)
 {
 	double* circularVelocity = new double[1];
 	circularVelocity[0]=cumulativeMass.ToDouble()/binRadius.ToDouble();
@@ -706,7 +697,7 @@ static double* vtkAstroVizHelpers::ComputeCircularVelocity(vtkVariant cumulative
 }
 
 //----------------------------------------------------------------------------
-static double* vtkAstroVizHelpers::ComputeDensity(vtkVariant cumulativeMass, 
+double* vtkAstroVizHelpers::ComputeDensity(vtkVariant cumulativeMass, 
 	vtkVariant binRadius)
 {
 	double* density = new double[1];
@@ -716,7 +707,7 @@ static double* vtkAstroVizHelpers::ComputeDensity(vtkVariant cumulativeMass,
 }
 
 //----------------------------------------------------------------------------
-static double* vtkAstroVizHelpers::ComputeProjection(
+double* vtkAstroVizHelpers::ComputeProjection(
 	double  vectorOne[],double vectorTwo[])
 {
 	double normVectorTwo = vtkMath::Norm(vectorTwo);
@@ -731,7 +722,7 @@ static double* vtkAstroVizHelpers::ComputeProjection(
 }
 
 //----------------------------------------------------------------------------
-static double* vtkAstroVizHelpers::PointVectorDifference(double vectorOne[],
+double* vtkAstroVizHelpers::PointVectorDifference(double vectorOne[],
  	double vectorTwo[])
 {
 	double* pointVectorDifference = new double[3];
@@ -743,7 +734,7 @@ static double* vtkAstroVizHelpers::PointVectorDifference(double vectorOne[],
 }
 
 //----------------------------------------------------------------------------
-static double* vtkAstroVizHelpers::ComputeMidpoint(double pointOne[],
+double* vtkAstroVizHelpers::ComputeMidpoint(double pointOne[],
  	double pointTwo[])
 {
 	double* midpoint = new double[3];
@@ -755,7 +746,7 @@ static double* vtkAstroVizHelpers::ComputeMidpoint(double pointOne[],
 }
 
 //----------------------------------------------------------------------------
-static void vtkAstroVizHelpers::VecMultConstant(double vector[],
+void vtkAstroVizHelpers::VecMultConstant(double vector[],
 	double constant)
 {
 	for(int i = 0; i < 3; ++i)

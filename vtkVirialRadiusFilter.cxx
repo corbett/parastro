@@ -4,20 +4,22 @@
   Module:    $RCSfile: vtkVirialRadiusFilter.cxx,v $
 =========================================================================*/
 #include "vtkVirialRadiusFilter.h"
+#include "astrovizhelpers/DataSetHelpers.h"
+#include "astrovizhelpers/ProfileHelpers.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
 #include "vtkObjectFactory.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include "vtkDoubleArray.h"
 #include "vtkIntArray.h"
-#include "astrovizhelpers/DataSetHelpers.h"
-#include "astrovizhelpers/ProfileHelpers.h"
 #include "vtkCellData.h"
 #include "vtkSortDataArray.h"
 #include "vtkDataSet.h"
 #include "vtkMath.h"
 #include "vtkInformationDataObjectKey.h"
 #include "vtkPointSet.h" 
+#include "vtkPointLocator.h"
+#include "vtkMultiProcessController.h"
 #include <cmath>
 using vtkstd::string;
 

@@ -4,6 +4,8 @@
   Module:    $RCSfile: vtkAddAdditionalAttribute.cxx,v $
 =========================================================================*/
 #include "vtkAddAdditionalAttribute.h"
+#include "astrovizhelpers/DataSetHelpers.h"
+#include "astrovizhelpers/ProfileHelpers.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
 #include "vtkObjectFactory.h"
@@ -16,8 +18,6 @@
 #include "vtkPoints.h"
 #include "vtkLine.h"
 #include "vtkUnsignedCharArray.h"
-#include "astrovizhelpers/DataSetHelpers.h"
-#include "astrovizhelpers/ProfileHelpers.h"
 #include <vtkstd/string>
 #include "vtkMath.h"
 

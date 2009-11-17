@@ -4,21 +4,23 @@
   Module:    $RCSfile: vtkProfileFilter.cxx,v $
 =========================================================================*/
 #include "vtkProfileFilter.h"
+#include "astrovizhelpers/DataSetHelpers.h"
+#include "astrovizhelpers/ProfileHelpers.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
 #include "vtkObjectFactory.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include "vtkDoubleArray.h"
 #include "vtkIntArray.h"
-#include "astrovizhelpers/DataSetHelpers.h"
-#include "astrovizhelpers/ProfileHelpers.h"
 #include "vtkCellData.h"
 #include "vtkTable.h"
 #include "vtkSortDataArray.h"
 #include "vtkMath.h"
 #include "vtkInformationDataObjectKey.h"
-#include "vtkPointSet.h" // helper functions take this as argument
+#include "vtkPointSet.h" 
 #include "vtkMultiProcessController.h"
+#include "vtkSmartPointer.h"
+#include "vtkPointData.h"
 #include <cmath>
 using vtkstd::string;
 
