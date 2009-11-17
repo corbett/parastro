@@ -4,8 +4,7 @@
   Module:    $RCSfile: vtkVirialRadiusFilter.cxx,v $
 =========================================================================*/
 #include "vtkVirialRadiusFilter.h"
-#include "astrovizhelpers/DataSetHelpers.h"
-#include "astrovizhelpers/ProfileHelpers.h"
+#include "AstroVizHelpersLib/AstroVizHelpers.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
 #include "vtkObjectFactory.h"

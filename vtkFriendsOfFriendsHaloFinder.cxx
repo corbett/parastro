@@ -4,7 +4,7 @@
   Module:    $RCSfile: vtkFriendsOfFriendsHaloFinder.cxx,v $
 =========================================================================*/
 #include "vtkFriendsOfFriendsHaloFinder.h"
-#include "astrovizhelpers/DataSetHelpers.h"
+#include "AstroVizHelpersLib/AstroVizHelpers.h"
 #include "vtkIdList.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"

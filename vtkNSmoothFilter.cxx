@@ -4,7 +4,7 @@
   Module:    $RCSfile: vtkNSmoothFilter.cxx,v $
 =========================================================================*/
 #include "vtkNSmoothFilter.h"
-#include "astrovizhelpers/DataSetHelpers.h"
+#include "AstroVizHelpersLib/AstroVizHelpers.h"
 #include "vtkIdList.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"

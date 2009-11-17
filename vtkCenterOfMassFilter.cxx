@@ -4,8 +4,7 @@
   Module:    $RCSfile: vtkCenterOfMassFilter.cxx,v $
 =========================================================================*/
 #include "vtkCenterOfMassFilter.h"
-#include "astrovizhelpers/DataSetHelpers.h"
-#include "astrovizhelpers/ProfileHelpers.h"
+#include "AstroVizHelpersLib/AstroVizHelpers.h"
 #include "vtkDataSetAttributes.h"
 #include "vtkCellArray.h"
 #include "vtkInformation.h"

@@ -6,7 +6,7 @@ Only reads in standard format Tipsy files.
 @author corbett
 =========================================================================*/
 #include "vtkTipsyReader.h"
-#include "astrovizhelpers/DataSetHelpers.h"
+#include "AstroVizHelpersLib/AstroVizHelpers.h"
 #include "vtkObjectFactory.h"
 #include "vtkPointData.h"
 #include "vtkPolyData.h"

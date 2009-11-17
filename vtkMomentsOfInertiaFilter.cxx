@@ -4,8 +4,7 @@
   Module:    $RCSfile: vtkMomentsOfInertiaFilter.cxx,v $
 =========================================================================*/
 #include "vtkMomentsOfInertiaFilter.h"
-#include "astrovizhelpers/DataSetHelpers.h"
-#include "astrovizhelpers/ProfileHelpers.h"
+#include "AstroVizHelpersLib/AstroVizHelpers.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
 #include "vtkObjectFactory.h"
