@@ -1,6 +1,0 @@
-<ParaViewReaders>
-	<Reader name="TxtReader"
-			extensions="txt txts"
-			file_description="reads in ascii, one point per line">
-	</Reader>
-</ParaViewReaders>
