@@ -31,9 +31,9 @@ ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.0"
 # For helper functions often used, will later include these in a single
 # VTK class
 ADD_LIBRARY(AstroVizHelpers astrovizhelpers/DataSetHelpers.cxx 
-	astrovizhelpers/ProfileHelpers.cxx)
+	astrovizhelpers/ProfileHelpers.cxx vtkAstroVizHelpers.cxx)
 SET_TARGET_PROPERTIES(AstroVizHelpers PROPERTIES COMPILE_FLAGS "-fPIC")
-TARGET_LINK_LIBRARIES(AstroVizPlugin AstroVizHelpers)
+TARGET_LINK_LIBRARIES(AstroVizPlugin AstroVizHelpers) 
 
 # For the Tipsy reader plugin I use some of Doug Potter's Tipsy lib
 ADD_LIBRARY(TipsyHelpers SHARED tipsylib/adapter.cpp tipsylib/binner.cpp 

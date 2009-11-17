@@ -7,20 +7,21 @@
   Program:   Visualization Toolkit
   Module:    $RCSfile: vtkAddAdditionalAttribute.cxx,v $
 =========================================================================*/
-#include "vtkAstroVizHelpers.cxx"
+#include "vtkAstroVizHelpers.h"
 #include "vtkPointData.h"
 #include "vtkCellArray.h"
 #include "vtkFloatArray.h"
+#include "vtkDataArray.h"
 #include "vtkDoubleArray.h"
 #include "vtkIntArray.h"
 #include "vtkFloatArray.h"
+#include "vtkObjectFactory.h"
 #include "vtkSphereSource.h"
 #include "vtkSmartPointer.h"
 #include "vtkMultiProcessController.h"
 #include "vtkMath.h"
 #include <assert.h>
 #include <cmath>
-
 vtkCxxRevisionMacro(vtkAstroVizHelpers, "$Revision: 1.72 $");
 vtkStandardNewMacro(vtkAstroVizHelpers);
 

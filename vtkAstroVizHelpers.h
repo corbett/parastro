@@ -21,11 +21,15 @@
 
 #ifndef __vtkAstroVizHelpers_h
 #define __vtkAstroVizHelpers_h
+#include "vtkObject.h"
 #include <vtkstd/string> // some functions use this as argument
+#include <iostream> // needed for cstring/vtkstring conversion
+#include <sstream> // needed for cstring/vtkstring conversion
 // Forward declarations in the vtk style
 class vtkCell;
 class vtkCellArray;
 class vtkDataSetAttributes;
+class vtkDataArray;
 class vtkFloatArray;
 class vtkFieldData;
 class vtkIdTypeArray;
@@ -34,16 +38,15 @@ class vtkPolyData;
 class vtkPointData;
 class vtkPointLocator;
 class vtkPointSet;
-class vtkSmartPointer;
 class vtkTable;
 class vtkInformationVector;
-class vtkSmartPointer;
 class vtkTable;
 class vtkMultiProcessController;
-class VTK_EXPORT vtkAstroVizHelpers
+class VTK_COMMON_EXPORT vtkAstroVizHelpers : public vtkObject
 {
 public:
 	static vtkAstroVizHelpers *New();
+	vtkTypeRevisionMacro(vtkAstroVizHelpers, vtkObject);
   void PrintSelf(ostream& os, vtkIndent indent);
 	// TODO: include all MPI enums here in a single enum
 	enum PointsInRadiusMPIData
@@ -280,8 +283,7 @@ public:
 	// Given a populated virialradiusinfo struct, returns a dataset
 	// corresponding to only those points within the virial radius.
 	// This method only works if input was vtkPolyData...
-	static vtkPointSet* GetDatasetWithinVirialRadius(
-		VirialRadiusInfo virialRadiusInfo);
+	static vtkPointSet* GetDatasetWithinVirialRadius(VirialRadiusInfo virialRadiusInfo);
 
 	// Description:
 	// helper function to calculate the center based upon the source.
@@ -346,10 +348,6 @@ public:
 	// Description:
 	// helper function to compute tangential velocity
 	static double* ComputeTangentialVelocity(double v[],double r[]);
-
-	// Description:
-	// helper function to compute angular momentum
-	static double* ComputeAngularMomentum(double v[], double r[]);
 
 	// Description:
 	// helper function to compute velocity squared
