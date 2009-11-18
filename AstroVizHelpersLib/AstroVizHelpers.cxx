@@ -125,10 +125,20 @@ void AllocateDoubleDataArray(vtkPointSet* output, const char* arrayName,
 void AllocateIntDataArray(vtkPointSet* output, const char* arrayName,
  	int numComponents, int numTuples)
 {
-	vtkSmartPointer<vtkIntArray> dataArray=\
+	vtkSmartPointer<vtkIntArray> dataArray = \
 		vtkSmartPointer<vtkIntArray>::New();
 	InitializeDataArray(dataArray,arrayName,numComponents,numTuples);
   output->GetPointData()->AddArray(dataArray);
+}
+
+//----------------------------------------------------------------------------
+void AllocateIdTypeDataArray(vtkPointSet* output, const char* arrayName,
+ 	int numComponents, int numTuples)
+{
+	vtkSmartPointer<vtkIdTypeArray> idArray = \
+		vtkSmartPointer<vtkIdTypeArray>::New();
+	InitializeDataArray(idArray,"global id",1,numTuples);
+	output->GetPointData()->AddArray(idArray);
 }
 
 //----------------------------------------------------------------------------
@@ -147,11 +157,20 @@ void SetDataValue(vtkPointSet* output, const char* arrayName,
 }
 
 //----------------------------------------------------------------------------
+void SetIdTypeValue(vtkPointSet* output, const char* arrayName,
+	const vtkIdType indexId,const vtkIdType globalId)
+{
+	vtkIdTypeArray::SafeDownCast(output->GetPointData()->GetArray(
+		arrayName))->SetValue(indexId,globalId);
+}
+
+//----------------------------------------------------------------------------
 void SetDataValue(vtkPointSet* output, const char* arrayName,
 	vtkIdType id,double data[])
 {
 	output->GetPointData()->GetArray(arrayName)->SetTuple(id,data);
 }
+
 
 //----------------------------------------------------------------------------
 double* GetDataValue(vtkPointSet* output, const char* arrayName,

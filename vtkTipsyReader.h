@@ -34,6 +34,11 @@ public:
 	vtkSetMacro(ReadPositionsOnly,int);
 	vtkGetMacro(ReadPositionsOnly,int);
 
+  // Description:
+  // Get/Set whether to distribute data
+	vtkSetMacro(DistributeDataOn,int);
+	vtkGetMacro(DistributeDataOn,int);
+
 // The BTX, ETX comments bracket the portion of the code which should not be
 // attempted to wrap for use by python, specifically the code which uses
 // C++ templates as this code is unable to be wrapped. DO NOT REMOVE. 
@@ -44,6 +49,7 @@ protected:
 	char* MarkFileName;
 	char* FileName;
 	int ReadPositionsOnly;
+	int DistributeDataOn;
 	int RequestInformation(
 		vtkInformation*,
 		vtkInformationVector**,

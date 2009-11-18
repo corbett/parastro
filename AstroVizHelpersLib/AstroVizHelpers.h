@@ -43,7 +43,20 @@ vtkIdType SetPointValue(vtkPointSet* output,float pos[]);
 // position id to data.
 void SetDataValue(vtkPointSet* output, const char* arrayName,
 	vtkIdType id,float data[]);
-void SetDataValue(vtkPointSet* output, const char* arrayName,vtkIdType id,double data[]);
+// Description:
+// sets the data value in the output vector in array arrayName at 
+// position id to data.
+void SetDataValue(vtkPointSet* output, const char* arrayName,
+	vtkIdType id,double data[]);
+// Description:
+// sets the data value in the output vector in array arrayName at 
+// position id to data.
+// SetIdTypeValue performs a safe downcast from vtkDataArray to 
+// vtkIdTypeValue, unlike the other SetDataValue methods, which have
+// no need for downcast. Thus array requested MUST be a vtkIdType array
+void SetIdTypeValue(vtkPointSet* output, const char* arrayName,
+	const vtkIdType indexId,const vtkIdType globalId);
+
 
 // Description:
 // points the double* data to the value in the output vector in 
@@ -64,6 +77,14 @@ void AllocateDataArray(vtkPointSet* output, const char* arrayName,
 // the vtkTable
 void AllocateDataArray(vtkTable* output, const char* arrayName,
 	int numComponents, int numTuples);
+
+// Description:
+// create a vtkDataArray with the  name arrayName, number of components 
+// numComponents and number of tuples numTuples of type T. place it in
+// the output
+void AllocateIdTypeDataArray(vtkPointSet* output, const char* arrayName,
+	int numComponents, int numTuples);
+	
 
 // Description:
 // create a vtkDataArray with the  name arrayName, number of components 

@@ -15,6 +15,8 @@ Only reads in standard format Tipsy files.
 #include "vtkFloatArray.h" 
 #include "vtkIntArray.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
+#include "vtkDistributedDataFilter.h"
+#include "vtkMultiProcessController.h"
 #include "vtkPolyData.h" 
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
@@ -30,6 +32,7 @@ vtkTipsyReader::vtkTipsyReader()
   this->MarkFileName = 0; // this file is optional
   this->FileName = 0;
 	this->ReadPositionsOnly = 0;
+	this->DistributeDataOn = 1;
   this->SetNumberOfInputPorts(0); 
 }
 
@@ -39,6 +42,7 @@ vtkTipsyReader::~vtkTipsyReader()
   this->SetFileName(0);
   this->SetMarkFileName(0);
 	this->SetReadPositionsOnly(0);
+	this->SetDistributeDataOn(0);
 }
 
 //----------------------------------------------------------------------------
@@ -215,6 +219,7 @@ vtkIdType vtkTipsyReader::ReadParticle(int index, TipsyHeader& tipsyHeader,
      assert(0);
      break;
     }
+	SetIdTypeValue(output,"global id",id,index);
   return id;
 }
 
@@ -281,7 +286,9 @@ void vtkTipsyReader::AllocateAllTipsyVariableArrays(int numBodies,\
 	// Storing the points and cells in the output data object.
   output->SetPoints(vtkSmartPointer<vtkPoints>::New());
   output->SetVerts(vtkSmartPointer<vtkCellArray>::New()); 
+  AllocateIdTypeDataArray(output,"global id",1,numBodies);
 	// Only allocate the other arrays if we are to read this data in
+	// for global ids
   if(!this->ReadPositionsOnly)
 		{
 		// the default scalars to be displayed
@@ -387,6 +394,30 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 		}
   // Close the tipsy in file.
 	tipsyInfile.close();
+	// If we need to, run D3 on the output, producing one level of 
+	// ghost cells
+	/*
+	if(this->GetDistributeDataOn() && \
+	 	RunInParallel(vtkMultiProcessController::GetGlobalController()))
+		{
+		vtkSmartPointer<vtkDistributedDataFilter> d3 = \
+		    vtkSmartPointer<vtkDistributedDataFilter>::New();
+		d3->AddInput(output);
+		d3->UpdateInformation();
+		vtkStreamingDemandDrivenPipeline* exec = \
+		 	static_cast<vtkStreamingDemandDrivenPipeline*>(d3->GetExecutive()); 	
+		// adds one ghostlevel
+		// TODO: add back in
+		// exec->SetUpdateExtent(exec->GetOutputInformation(), piece, numPieces, 1); 
+		d3->Update();
+		// Changing output to output of d3
+		// TODO: add back in
+		// output->ShallowCopy(d3->GetOutput()); 
+		// TODO: add back in
+		// output->GetInformation()->Set(
+		// vtkDataObject::DATA_NUMBER_OF_GHOST_LEVELS(), 1);
+		}
+	*/
 	// Read Successfully
 	vtkDebugMacro("Read " << output->GetPoints()->GetNumberOfPoints() \
 		<< " points.");
