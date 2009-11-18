@@ -4,20 +4,18 @@
 #ifndef __vtkTipsyReader_h
 #define __vtkTipsyReader_h
 
-#include "vtkPolyDataReader.h" // superclass
-#include "vtkSmartPointer.h" // needed for the functions to initialize arrays
+#include "vtkUnstructuredGridReader.h" // superclass
 #include "tipsylib/ftipsy.hpp" // functions take tipsy particle objects
 #include <vtkstd/vector>
 
 class vtkPolyData;
 class vtkCharArray;
 
-
-class VTK_IO_EXPORT vtkTipsyReader : public vtkPolyDataReader
+class VTK_IO_EXPORT vtkTipsyReader : public vtkUnstructuredGridReader
 {
 public:
   static vtkTipsyReader* New();
-  vtkTypeRevisionMacro(vtkTipsyReader,vtkPolyDataReader);
+  vtkTypeRevisionMacro(vtkTipsyReader,vtkUnstructuredGridReader);
   void PrintSelf(ostream& os, vtkIndent indent);
   // Description:
   // Set/Get the name of the file from which to read the marked points.

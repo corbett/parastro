@@ -7,6 +7,7 @@ Only reads in standard format Tipsy files.
 =========================================================================*/
 #include "vtkTipsyReader.h"
 #include "AstroVizHelpersLib/AstroVizHelpers.h"
+#include "vtkUnstructuredGrid.h"
 #include "vtkObjectFactory.h"
 #include "vtkPointData.h"
 #include "vtkPolyData.h"
@@ -17,9 +18,9 @@ Only reads in standard format Tipsy files.
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include "vtkDistributedDataFilter.h"
 #include "vtkMultiProcessController.h"
-#include "vtkPolyData.h" 
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
+#include "vtkSmartPointer.h"
 #include <cmath>
 #include <assert.h>
 
@@ -349,7 +350,11 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 	  return 0;	
     }
 	//All helper functions will need access to this
-	vtkPolyData* output = vtkPolyData::GetData(outputVector);
+	// TODO: this memory probably needs to be managed
+	vtkPolyData* tipsyReadInitialOutput = vtkPolyData::New();
+	tipsyReadInitialOutput->Initialize();
+	vtkUnstructuredGrid* output = vtkUnstructuredGrid::GetData(
+		outputVector);
 	// This tells us which portion of the file to read, relevant if in parallel
 	vtkInformation* outInfo = outputVector->GetInformationObject(0);
 	int piece = outInfo->Get(
@@ -379,7 +384,8 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 		// no marked particle file or there was an error reading the mark file, 
 		// so reading all particles
 		vtkDebugMacro("Reading all points from file " << this->FileName);
-		this->ReadAllParticles(tipsyHeader,tipsyInfile,piece,numPieces,output);
+		this->ReadAllParticles(tipsyHeader,tipsyInfile,piece,numPieces,
+			tipsyReadInitialOutput);
 		}
 	else 
 		{
@@ -390,19 +396,19 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 		vtkDebugMacro("Reading only the marked points in file: " \
 				<< this->MarkFileName << " from file " << this->FileName);
 		this->ReadMarkedParticles(markedParticleIndices,
-			tipsyHeader,tipsyInfile,output);	
+			tipsyHeader,tipsyInfile,
+			tipsyReadInitialOutput);	
 		}
   // Close the tipsy in file.
 	tipsyInfile.close();
-	// If we need to, run D3 on the output, producing one level of 
-	// ghost cells
-	/*
+	// If we need to, run D3 on the tipsyReadInitialOutput
+	// producing one level of ghost cells
 	if(this->GetDistributeDataOn() && \
 	 	RunInParallel(vtkMultiProcessController::GetGlobalController()))
 		{
 		vtkSmartPointer<vtkDistributedDataFilter> d3 = \
 		    vtkSmartPointer<vtkDistributedDataFilter>::New();
-		d3->AddInput(output);
+		d3->AddInput(tipsyReadInitialOutput);
 		d3->UpdateInformation();
 		vtkStreamingDemandDrivenPipeline* exec = \
 		 	static_cast<vtkStreamingDemandDrivenPipeline*>(d3->GetExecutive()); 	
@@ -411,13 +417,15 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 		// exec->SetUpdateExtent(exec->GetOutputInformation(), piece, numPieces, 1); 
 		d3->Update();
 		// Changing output to output of d3
-		// TODO: add back in
-		// output->ShallowCopy(d3->GetOutput()); 
+	 	output->ShallowCopy(d3->GetOutput()); 
 		// TODO: add back in
 		// output->GetInformation()->Set(
 		// vtkDataObject::DATA_NUMBER_OF_GHOST_LEVELS(), 1);
 		}
-	*/
+	else
+		{
+		output->ShallowCopy(tipsyReadInitialOutput);
+		}
 	// Read Successfully
 	vtkDebugMacro("Read " << output->GetPoints()->GetNumberOfPoints() \
 		<< " points.");
