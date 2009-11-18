@@ -413,14 +413,12 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 		vtkStreamingDemandDrivenPipeline* exec = \
 		 	static_cast<vtkStreamingDemandDrivenPipeline*>(d3->GetExecutive()); 	
 		// adds one ghostlevel
-		// TODO: add back in
-		// exec->SetUpdateExtent(exec->GetOutputInformation(), piece, numPieces, 1); 
+		exec->SetUpdateExtent(exec->GetOutputInformation(0), piece, numPieces, 1); 
 		d3->Update();
 		// Changing output to output of d3
 	 	output->ShallowCopy(d3->GetOutput()); 
-		// TODO: add back in
-		// output->GetInformation()->Set(
-		// vtkDataObject::DATA_NUMBER_OF_GHOST_LEVELS(), 1);
+		output->GetInformation()->Set(
+			vtkDataObject::DATA_NUMBER_OF_GHOST_LEVELS(), 1);
 		}
 	else
 		{
