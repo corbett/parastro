@@ -350,8 +350,8 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 	  return 0;	
     }
 	//All helper functions will need access to this
-	// TODO: this memory probably needs to be managed
-	vtkPolyData* tipsyReadInitialOutput = vtkPolyData::New();
+	vtkSmartPointer<vtkPolyData> tipsyReadInitialOutput = \
+	 	vtkSmartPointer<vtkPolyData>::New();
 	tipsyReadInitialOutput->Initialize();
 	vtkUnstructuredGrid* output = vtkUnstructuredGrid::GetData(
 		outputVector);
