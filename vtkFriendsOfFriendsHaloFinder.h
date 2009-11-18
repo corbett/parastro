@@ -25,25 +25,26 @@
 //    apart. if so, merge haloes. Continue until every halo's bounds
 //    have been checked against every other halo's
 // .SECTION See Also
-// vtkKdTree, vtkKdTree, vtkDistributedDataFilter.h
+// vtkKdTree, vtkKdTree, vtkPointSetAlgorithm.h
 
 #ifndef __vtkFriendsOfFriendsHaloFinder_h
 #define __vtkFriendsOfFriendsHaloFinder_h
-#include "vtkDistributedDataFilter.h"
+#include "vtkPointSetAlgorithm.h"
 
 class vtkPointSet;
 class vtkKdTree;
+class vtkMultiProcessController;
 enum FriendsOfFriendsMPIData 
 {
 	HALO_ID_ARRAY_INITIAL,
 	HALO_ID_ARRAY_FINAL
 };
-class VTK_GRAPHICS_EXPORT vtkFriendsOfFriendsHaloFinder : public vtkDistributedDataFilter
+class VTK_GRAPHICS_EXPORT vtkFriendsOfFriendsHaloFinder : public vtkPointSetAlgorithm
 {
 public:
   static vtkFriendsOfFriendsHaloFinder *New();
   vtkTypeRevisionMacro(vtkFriendsOfFriendsHaloFinder,
-		vtkDistributedDataFilter);
+		vtkPointSetAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent);
 
   // Description:
@@ -57,6 +58,12 @@ public:
   vtkSetMacro(MinimumNumberOfParticles, int);
   vtkGetMacro(MinimumNumberOfParticles, int);
 
+ 	// Description:
+	// By defualt this filter uses the global controller,
+	// but this method can be used to set another instead.
+	virtual void SetController(vtkMultiProcessController*);
+	vtkGetObjectMacro(Controller, vtkMultiProcessController);
+	
   // Description:
 	// Groups all particles within a certain linking length of eachother into
 	// a single halo. Considers particles to comprise a halo only if its group
@@ -71,15 +78,13 @@ protected:
   ~vtkFriendsOfFriendsHaloFinder();
   // Override to specify support for any vtkDataSet input type.
   virtual int FillInputPortInformation(int port, vtkInformation* info);
-	// Override to specify different type of output
-	virtual int FillOutputPortInformation(int vtkNotUsed(port), 
-		vtkInformation* info);
   // Main implementation.
   virtual int RequestData(vtkInformation*,
    	vtkInformationVector**,
     vtkInformationVector*);
   double LinkingLength;
 	int MinimumNumberOfParticles;
+	vtkMultiProcessController* Controller;
 
 private:
   vtkFriendsOfFriendsHaloFinder(const vtkFriendsOfFriendsHaloFinder&);  // Not implemented.

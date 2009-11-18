@@ -25,17 +25,22 @@
 
 vtkCxxRevisionMacro(vtkFriendsOfFriendsHaloFinder, "$Revision: 1.72 $");
 vtkStandardNewMacro(vtkFriendsOfFriendsHaloFinder);
+vtkCxxSetObjectMacro(vtkFriendsOfFriendsHaloFinder,Controller,
+	vtkMultiProcessController);
 
 //----------------------------------------------------------------------------
-vtkFriendsOfFriendsHaloFinder::vtkFriendsOfFriendsHaloFinder():vtkDistributedDataFilter()
+vtkFriendsOfFriendsHaloFinder::vtkFriendsOfFriendsHaloFinder()
 {
   this->LinkingLength = 1e-6; //default
 	this->MinimumNumberOfParticles = 50; // default
+	this->Controller = NULL;
+	this->SetController(vtkMultiProcessController::GetGlobalController());
 }
 
 //----------------------------------------------------------------------------
 vtkFriendsOfFriendsHaloFinder::~vtkFriendsOfFriendsHaloFinder()
 {
+	this->SetController(NULL);
 }
 
 //----------------------------------------------------------------------------
@@ -52,14 +57,6 @@ int vtkFriendsOfFriendsHaloFinder::FillInputPortInformation(int,
   vtkInformation* info)
 {
   info->Set(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), "vtkPointSet");
-  return 1;
-}
-
-//----------------------------------------------------------------------------
-int vtkFriendsOfFriendsHaloFinder::FillOutputPortInformation(
-  int vtkNotUsed(port), vtkInformation* info)
-{
-  info->Set(vtkDataObject::DATA_TYPE_NAME(), "vtkPointSet");
   return 1;
 }
 
@@ -202,28 +199,9 @@ int vtkFriendsOfFriendsHaloFinder::RequestData(vtkInformation* request,
 {
   // Get input and output data.
   vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
-	// First running D3 if running in parallel, as this method would function
-	// dismally without spatial locality, as I'm currently not merging halos
-	// across processes
-	vtkPointSet* output;
-	if(RunInParallel(this->GetController()))
-		{
-		// call D3, setting retain PKTree to 1; this can be accessed by later
-		// methods
-		this->RetainKdtreeOn();
-		// requesting ghost cells
-		this->SetBoundaryModeToAssignToAllIntersectingRegions(); 
-		// Just calling the superclass' method to distribute data and build
-		// PKdTree
-	  this->Superclass::RequestData(request,inputVector,outputVector);
-		output = vtkPointSet::GetData(outputVector);
-		}
-	else
-		{		
-		output = vtkPointSet::GetData(outputVector);
-  	output->ShallowCopy(input);
-		}
-		// Building a local Kd tree, should already be built
+	vtkPointSet* output = vtkPointSet::GetData(outputVector);
+	output->ShallowCopy(input);
+	// Building a local KdTree for locator purposes
 	vtkSmartPointer<vtkKdTree> pointTree = vtkSmartPointer<vtkKdTree>::New();
 	// building a locator
 	pointTree->BuildLocatorFromPoints(output);	
