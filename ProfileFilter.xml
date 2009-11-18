@@ -79,7 +79,7 @@
         </Documentation>
      </IntVectorProperty>
       <Hints>
-	  	<View type="ClientTableView" />
+	  	<View type="SpreadSheetView" />
       	<Visibility replace_input="0" />
       <Plotable />
       </Hints>
