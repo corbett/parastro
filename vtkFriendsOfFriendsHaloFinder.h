@@ -30,10 +30,11 @@
 #ifndef __vtkFriendsOfFriendsHaloFinder_h
 #define __vtkFriendsOfFriendsHaloFinder_h
 #include "vtkPointSetAlgorithm.h"
-
 class vtkPointSet;
 class vtkKdTree;
 class vtkMultiProcessController;
+class vtkIdTypeArray;
+
 enum FriendsOfFriendsMPIData 
 {
 	HALO_ID_ARRAY_INITIAL,
@@ -70,7 +71,8 @@ public:
 	// has more than the requisite number of particles, as input by user. 
 	// Output should contain the data set in which halos should be searched
 	// before calling.
-	int FindHaloes(vtkKdTree* pointTree, vtkPointSet* output);
+	int FindHaloes(vtkKdTree* pointTree, vtkIdTypeArray* globalIdArray,
+		vtkPointSet* output);
 
 //BTX
 protected:
@@ -85,6 +87,14 @@ protected:
   double LinkingLength;
 	int MinimumNumberOfParticles;
 	vtkMultiProcessController* Controller;
+
+	// Description:
+	// Returns unique id, simply equal to index+1 if running in serial,
+	// or equal to the id at index+1 in the globalIdArray if running in parallel
+	// The plus one is so that we can tell whether a unique id has been assigned
+	// yet in a map (has not been assigned if = 0, which would break down if 
+	// assigned ids were not strictly greater than zero)
+	vtkIdType GetUniqueId(int index, vtkIdTypeArray* globalIdArray);
 
 private:
   vtkFriendsOfFriendsHaloFinder(const vtkFriendsOfFriendsHaloFinder&);  // Not implemented.

@@ -6,6 +6,7 @@
 #include "vtkFriendsOfFriendsHaloFinder.h"
 #include "AstroVizHelpersLib/AstroVizHelpers.h"
 #include "vtkIdList.h"
+#include "vtkIdTypeArray.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
 #include "vtkObjectFactory.h"
@@ -19,6 +20,7 @@
 #include "vtkMath.h"
 #include "vtkMultiProcessController.h"
 #include "vtkCallbackCommand.h"
+#include "vtkPolyData.h"
 #include <vtkstd/vector>
 #include <vtkstd/map>
 
@@ -67,8 +69,22 @@ int vtkFriendsOfFriendsHaloFinder::FillInputPortInformation(int,
 }
 
 //----------------------------------------------------------------------------
+vtkIdType vtkFriendsOfFriendsHaloFinder::GetUniqueId(
+	int index, vtkIdTypeArray* globalIdArray)
+{
+	if(RunInParallel(this->GetController()))
+		{
+		return globalIdArray->GetValue(index)+1;
+		}
+	else
+		{
+		return index+1;
+		}
+}		
+
+//----------------------------------------------------------------------------
 int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkKdTree* pointTree,
-	vtkPointSet* output)
+	vtkIdTypeArray* globalIdArray, vtkPointSet* output)
 {
 	if(this->MinimumNumberOfParticles < 2)
 		{
@@ -83,118 +99,88 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkKdTree* pointTree,
 	haloIdArray->SetNumberOfComponents(1);
 	haloIdArray->SetNumberOfTuples(output->GetPoints()->GetNumberOfPoints());
 	haloIdArray->SetName("halo ID");
-	vtkstd::vector<vtkIdTypeArray*> allHaloIdArrays;
-	if(RunInParallel(this->GetController()))
-		{
-		int procId=this->GetController()->GetLocalProcessId();
-		int numProc=this->GetController()->GetNumberOfProcesses();
-		if(procId!=0)
-			{
-			this->GetController()->Send(haloIdArray,0,HALO_ID_ARRAY_INITIAL);
-			// waiting to recieve the final result, as computed by root
-			haloIdArray->Initialize();
-			this->GetController()->Receive(haloIdArray,0,
-				HALO_ID_ARRAY_FINAL);
-			// setting output
-			output->GetPointData()->AddArray(haloIdArray);
-			// returning	
-			return 1;
-			}
-		else
-			{
-			// Syncing all hashtables if process 0
-			// Filling it first with process zero's info
-			allHaloIdArrays.push_back(haloIdArray);
-			// TODO: manage memory
-			vtkIdTypeArray* recHaloIdArray = vtkIdTypeArray::New();
-			recHaloIdArray->Initialize();
-			for(int proc = 1; proc < numProc; ++proc)
-				{
-				this->GetController()->Receive(recHaloIdArray,proc,
-					HALO_ID_ARRAY_INITIAL);
-				allHaloIdArrays.push_back(recHaloIdArray);
-				}
-			// don't return, proc 0 should execute code after if statement
-			}
-		}
-	else
-		{
-		// running in serial
-		allHaloIdArrays.push_back(haloIdArray);
-		}
 	// Now assign halos, if this point has at least one other pair,
 	// it is a halo, if not it is not (set to 0)
 	// first building map of id to count of that id, O(N)
 	vtkstd::map<vtkIdType,int> haloCount;
-	int uniqueId=1;
-	for(int procHaloIdArrayIndex = 0; 
-		procHaloIdArrayIndex < allHaloIdArrays.size(); 
-		++procHaloIdArrayIndex)
+	vtkstd::map<vtkIdType,int> haloUniqueId;	
+	// Will only use the following quantities if running in parallel
+	vtkstd::map<vtkIdType,int> isHaloSpitAcrossProcessors;
+	vtkSmartPointer<vtkPointSet> ghostPoints = \
+		vtkSmartPointer<vtkPolyData>::New();
+		ghostPoints->Initialize();
+		
+	vtkSmartPointer<vtkIdTypeArray> ghostPointLocalHaloIdArray=\
+		vtkSmartPointer<vtkIdTypeArray>::New();
+		ghostPointLocalHaloIdArray->Initialize();
+		ghostPointLocalHaloIdArray->SetName("local halo id");
+	for(int nextHaloId = 0;
+		nextHaloId < haloIdArray->GetNumberOfTuples();
+	 	++nextHaloId)
 		{
-		vtkIdTypeArray* nextHaloIdArray = \
-				allHaloIdArrays[procHaloIdArrayIndex];
-		// use negatives to figure differentiate between unique id assignment 
-		// (positive) and count (negative) in the same map
-		for(int nextHaloId = 0;
-			nextHaloId < nextHaloIdArray->GetNumberOfTuples();
-		 	++nextHaloId)
+		vtkIdType haloId = haloIdArray->GetValue(nextHaloId);
+		if(RunInParallel(this->GetController()))
 			{
-			vtkIdType haloId = nextHaloIdArray->GetValue(nextHaloId);
-			if(haloCount[haloId]==-1*this->MinimumNumberOfParticles)
-				{
-				// we have seen the id minimum number of particles times,
-				// so we assign it a unique halo id, considering it a halo
-				haloCount[haloId]=uniqueId;
-				uniqueId+=1;
-				}
-			else if(haloCount[haloId]<1)
-				{
-				// this counts each time we see the id, until we reach the
-				// minimum number of particles to count as a halo
-				haloCount[haloId]-=1;
-				}
+			// TODO:
+			// this is where we check if the point for which the nextHaloId
+			// is recorded is a ghost cell. 
+			//if it is:
+			// o set isHaloSpitAcrossProcessors[haloId] = 1
+			// o add it to the ghost point set
+			// ghostPoints->SetNextPoint(nextHaloId,output->getPoint(nextHaloId))
+			// record this ghostPoint's local haloID in  ghostPointLocalHaloIdArray
 			}
-		}	
+		haloCount[haloId]+=1;
+		}
+
+	if(RunInParallel(this->GetController()))
+		{
+		// TODO:
+		// if we are not root:
+			// Sending	ghostPoints to root 
+			// waiting for root's response with global ID
+			// waiting for root's response with total globalIds already assigned
+		// if we are root:
+		// Receiving ghostPoints from all processors if we are root
+		// Adding these data sets to a point locator, one by one
+		// Merging duplicate points in this point locator
+		// Calculating a global ID for each of the points, as below
+
+		}
+
 	// finally setting to zero points which have 
 	// count < this->MinimumNumberOfParticles, O(N), and
 	// assigning those we have seen more the requisite number
 	// of times to their unique id
 	// process 0 or running in serial
-	for(int procHaloIdArrayIndex = 0; 
-		procHaloIdArrayIndex < allHaloIdArrays.size(); 
-		++procHaloIdArrayIndex)
+	for(int nextHaloId = 0;
+		nextHaloId < haloIdArray->GetNumberOfTuples();
+	 	++nextHaloId)
 		{
-		vtkIdTypeArray* nextHaloIdArray = \
-			allHaloIdArrays[procHaloIdArrayIndex];
-		// use negatives to figure differentiate between unique id assignment 
-		// (positive) and count (negative) in the same map
-		for(int nextHaloId = 0;
-			nextHaloId < nextHaloIdArray->GetNumberOfTuples();
-		 	++nextHaloId)
+		vtkIdType haloId = haloIdArray->GetValue(nextHaloId);	
+		if(isHaloSpitAcrossProcessors[haloId])
 			{
-			vtkIdType haloId = nextHaloIdArray->GetValue(nextHaloId);	
-			if(haloCount[haloId]<1)
-				{
-				// we only saw it less than requisite number of times
-				nextHaloIdArray->SetValue(nextHaloId,0);
-				}
-			else
-				{
-				// we saw it more than once, assign it to its unique id
-				nextHaloIdArray->SetValue(nextHaloId,haloCount[haloId]);
-				}
+			// TODO:
+			// we use the unique id sent to us by the root process, instead of
+			// one that we calculate on our own
 			}
-		if(RunInParallel(this->GetController()) && procHaloIdArrayIndex > 0)
+		else if(haloCount[haloId]<this->GetMinimumNumberOfParticles())
 			{
-			
-			// if running in parallel and if we are not dealing with our own 
-			// halo array on process 0
-			// dispatch it to its process processes
-			this->GetController()->Send(nextHaloIdArray,
-				procHaloIdArrayIndex,HALO_ID_ARRAY_FINAL);
+			// we only saw it less than requisite number of times
+			haloIdArray->SetValue(nextHaloId,0);
+			}
+		else
+			{
+			// we saw it requisite number of times, getting global id
+			int uniqueId = haloUniqueId[haloId];
+			if(!uniqueId)
+				{
+				haloUniqueId[haloId] = this->GetUniqueId(nextHaloId,globalIdArray);
+				}
+			haloIdArray->SetValue(nextHaloId,uniqueId);
 			}
 		}
-	output->GetPointData()->AddArray(allHaloIdArrays[0]);
+	output->GetPointData()->AddArray(haloIdArray);
 	return 1;
 }
 
@@ -208,17 +194,27 @@ int vtkFriendsOfFriendsHaloFinder::RequestData(vtkInformation* request,
 	vtkPointSet* output = vtkPointSet::GetData(outputVector);
 	output->ShallowCopy(input);
 	// Get name of data array containing global ids
-	vtkDataArray* globalIdArray = this->GetInputArrayToProcess(0,
-	 	inputVector);
-  if (RunInParallel(this->GetController()) && !globalIdArray)
-    {
-    vtkErrorMacro("Failed to locate global ID array, this is required if running in parallel. Generate by using Tipsy Reader to read in data, by running D3 with ghost cell generation, or by loading in with the original data in your preferred reader.");
-    return 0;
+	// Simply ignored if we are not running in parallel
+	vtkSmartPointer<vtkIdTypeArray> globalIdArray = \
+		vtkSmartPointer<vtkIdTypeArray>::New();
+	if (RunInParallel(this->GetController()))  
+		{
+		vtkSmartPointer<vtkDataArray> globalIdArrayGeneric = \
+		 	this->GetInputArrayToProcess(0, inputVector);
+		if(!globalIdArray || !globalIdArray->IsA("vtkIdTypeArray"))
+	    {
+	    vtkErrorMacro("Failed to locate global ID array, this is required if running in parallel. Generate by using Tipsy Reader to read in data, by running D3 with ghost cell generation, or by loading in with the original data in your preferred reader.");
+	    return 0;
+			}
+		else
+			{
+			globalIdArray = vtkIdTypeArray::SafeDownCast(globalIdArrayGeneric);
+			}
 		}
 	// Building a local KdTree for locator purposes
 	vtkSmartPointer<vtkKdTree> pointTree = vtkSmartPointer<vtkKdTree>::New();
 	// building a locator
 	pointTree->BuildLocatorFromPoints(output);	
-	this->FindHaloes(pointTree,output);
+	this->FindHaloes(pointTree,globalIdArray,output);
   return 1;
 }
