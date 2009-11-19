@@ -33,19 +33,26 @@
 
 #ifndef __vtkNSmoothFilter_h
 #define __vtkNSmoothFilter_h
-#include "vtkDistributedDataFilter.h"
+#include "vtkPointSetAlgorithm.h"
+class vtkMultiProcessController;
 
-class VTK_GRAPHICS_EXPORT vtkNSmoothFilter : public vtkDistributedDataFilter
+class VTK_GRAPHICS_EXPORT vtkNSmoothFilter : public vtkPointSetAlgorithm
 {
 public:
   static vtkNSmoothFilter *New();
-  vtkTypeRevisionMacro(vtkNSmoothFilter,vtkDistributedDataFilter);
+  vtkTypeRevisionMacro(vtkNSmoothFilter,vtkPointSetAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent);
 
   // Description:
   // Get/Set the number of neighbors to search
   vtkSetMacro(NeighborNumber, int);
   vtkGetMacro(NeighborNumber, int);
+
+ 	// Description:
+	// By defualt this filter uses the global controller,
+	// but this method can be used to set another instead.
+	virtual void SetController(vtkMultiProcessController*);
+	vtkGetObjectMacro(Controller, vtkMultiProcessController);
 
 //BTX
 protected:
@@ -55,15 +62,11 @@ protected:
   // Override to specify support for any vtkDataSet input type.
   virtual int FillInputPortInformation(int port, vtkInformation* info);
 
-	// Override to specify different type of output
-	virtual int FillOutputPortInformation(int vtkNotUsed(port), 
-		vtkInformation* info);
-
   // Main implementation.
   virtual int RequestData(vtkInformation*,
    	vtkInformationVector**,
     vtkInformationVector*);
-
+	vtkMultiProcessController* Controller;
   int NeighborNumber;
 
 private:

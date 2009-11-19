@@ -5,6 +5,7 @@
 =========================================================================*/
 #include "vtkNSmoothFilter.h"
 #include "AstroVizHelpersLib/AstroVizHelpers.h"
+#include "vtkMultiProcessController.h"
 #include "vtkIdList.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
@@ -23,16 +24,20 @@ using vtkstd::string;
 
 vtkCxxRevisionMacro(vtkNSmoothFilter, "$Revision: 1.72 $");
 vtkStandardNewMacro(vtkNSmoothFilter);
-
+vtkCxxSetObjectMacro(vtkNSmoothFilter,Controller,
+	vtkMultiProcessController);
 //----------------------------------------------------------------------------
-vtkNSmoothFilter::vtkNSmoothFilter():vtkDistributedDataFilter()
+vtkNSmoothFilter::vtkNSmoothFilter():vtkPointSetAlgorithm()
 {
   this->NeighborNumber = 50; //default
+	this->Controller = NULL;
+	this->SetController(vtkMultiProcessController::GetGlobalController());
 }
 
 //----------------------------------------------------------------------------
 vtkNSmoothFilter::~vtkNSmoothFilter()
 {
+	this->SetController(NULL);
 }
 
 //----------------------------------------------------------------------------
@@ -48,15 +53,6 @@ int vtkNSmoothFilter::FillInputPortInformation(int, vtkInformation* info)
   // This filter uses the vtkDataSet cell traversal methods so it
   // suppors any data set type as input.
   info->Set(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), "vtkPointSet");
-  return 1;
-}
-
-//----------------------------------------------------------------------------
-int vtkNSmoothFilter::FillOutputPortInformation(
-  int vtkNotUsed(port), vtkInformation* info)
-{
-  // now add our info
-  info->Set(vtkDataObject::DATA_TYPE_NAME(), "vtkPointSet");
   return 1;
 }
 
@@ -92,26 +88,10 @@ int vtkNSmoothFilter::RequestData(vtkInformation *request,
     vtkErrorMacro("Failed to locate mass array");
     return 0;
     }
-  vtkPointSet* output;
+  vtkPointSet* output = vtkPointSet::GetData(outputVector);
+  output->ShallowCopy(input);
 	// smoothing each quantity in the output
 	int numberOriginalArrays = input->GetPointData()->GetNumberOfArrays();
-	if(RunInParallel(this->GetController()))
-		{
-		// call D3, setting retain PKTree to 1; this can be accessed by later
-		// methods
-		this->RetainKdtreeOn();
-		// Just calling the superclass' method to distribute data and build
-		// PkDTree
-	  this->Superclass::RequestData(request,inputVector,outputVector);
-		output = vtkPointSet::GetData(outputVector);
-		// calling build locator
-		// setting the KdTree
-		}
-	else
-		{		
-		output = vtkPointSet::GetData(outputVector);
-  	output->ShallowCopy(input);
-		}
 	// 1. Building the point locator, locale to this process
 	vtkPointLocator* locator = vtkPointLocator::New();
 		locator->SetDataSet(output);
