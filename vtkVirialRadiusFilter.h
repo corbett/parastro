@@ -17,11 +17,12 @@
 
 #ifndef __vtkVirialRadiusFilter_h
 #define __vtkVirialRadiusFilter_h
-#include "vtkDistributedDataFilter.h"
+#include "vtkPointSetAlgorithm.h"
 #include "vtkStringArray.h" // some class variables are vtkStringArrays
 
 class vtkPointSet;
 class vtkDataSet;
+class vtkMultiProcessController;
 //----------------------------------------------------------------------------
 enum BinUpdateType
 {
@@ -39,11 +40,11 @@ enum ColumnType
 
 
 //----------------------------------------------------------------------------
-class VTK_EXPORT vtkVirialRadiusFilter : public vtkDistributedDataFilter
+class VTK_EXPORT vtkVirialRadiusFilter : public vtkPointSetAlgorithm
 {
 public:
   static vtkVirialRadiusFilter* New();
-  vtkTypeRevisionMacro(vtkVirialRadiusFilter, vtkDistributedDataFilter);
+  vtkTypeRevisionMacro(vtkVirialRadiusFilter, vtkPointSetAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent);
   // Description:
   // Get/Set the softening parameter
@@ -57,7 +58,13 @@ public:
   // Get/Set the center
   vtkSetVector3Macro(Center,double);
   vtkGetVectorMacro(Center,double,3);
-  // Description:
+ 	// Description:
+	// By defualt this filter uses the global controller,
+	// but this method can be used to set another instead.
+	virtual void SetController(vtkMultiProcessController*);
+	vtkGetObjectMacro(Controller, vtkMultiProcessController);  
+	
+	// Description:
   // Specify the point locations used to probe input. Any geometry
   // can be used. New style. Equivalent to SetInputConnection(1, algOutput).
   void SetSourceConnection(vtkAlgorithmOutput* algOutput);
@@ -68,6 +75,7 @@ public:
 	// Override to specify different type of output
 	virtual int FillOutputPortInformation(int vtkNotUsed(port), 
 		vtkInformation* info);
+	
 //BTX
 protected:
   vtkVirialRadiusFilter();
@@ -96,6 +104,9 @@ protected:
 	// Max distance from center point to the data set boundaries, or to
 	// the virial radius if applicable
 	double MaxR;
+	// Description:
+	// The MPI controller for this filter, if needed
+	vtkMultiProcessController* Controller;
 	// Description:
   // Calculates the center and the maximum distance from the center
 	// based upon the user's input and the boundaries of the dataset.

@@ -24,7 +24,9 @@ using vtkstd::string;
 
 vtkCxxRevisionMacro(vtkVirialRadiusFilter, "$Revision: 1.72 $");
 vtkStandardNewMacro(vtkVirialRadiusFilter);
-
+vtkCxxSetObjectMacro(vtkVirialRadiusFilter,Controller,
+	vtkMultiProcessController);
+	
 //----------------------------------------------------------------------------
 vtkVirialRadiusFilter::vtkVirialRadiusFilter()
 {
@@ -39,11 +41,14 @@ vtkVirialRadiusFilter::vtkVirialRadiusFilter()
 	// later input
 	this->MaxR=1.0;
 	this->Delta=0.0;
+	this->Controller = NULL;
+	this->SetController(vtkMultiProcessController::GetGlobalController());
 }
 
 //----------------------------------------------------------------------------
 vtkVirialRadiusFilter::~vtkVirialRadiusFilter()
 {
+	this->SetController(NULL);
 }
 
 //----------------------------------------------------------------------------
@@ -86,6 +91,9 @@ int vtkVirialRadiusFilter::RequestData(vtkInformation *request,
  	vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
 	// Setting the center based upon the selection in the GUI
 	vtkDataSet* pointInfo = vtkDataSet::GetData(inputVector[1]);
+	// Output
+	vtkPointSet* output = vtkPointSet::GetData(outputVector);
+ 	output->ShallowCopy(input);
 	// Get name of data array containing mass
 	vtkDataArray* massArray = this->GetInputArrayToProcess(0, inputVector);
   if (!massArray)
@@ -93,24 +101,6 @@ int vtkVirialRadiusFilter::RequestData(vtkInformation *request,
     vtkErrorMacro("Failed to locate mass array");
     return 0;
     }
-	// Running D3 if necessary
-	vtkPointSet* output;
-	if(RunInParallel(this->GetController()))
-		{
-		// call D3, setting retain PKTree to 1; this can be accessed by later
-		// methods
-		this->RetainKdtreeOn();
-		// Just calling the superclass' method to distribute data and build
-		// PkDTree
-	  this->Superclass::RequestData(request,inputVector,outputVector);
-		output = vtkPointSet::GetData(outputVector);
-		}
-	else
-		{		
-		output = vtkPointSet::GetData(outputVector);
-  	output->ShallowCopy(input);
-		}
-	
 	this->CalculateAndSetBounds(output,pointInfo);
 	
 	// Building the point locator and the struct to use as an 

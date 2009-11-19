@@ -57,13 +57,13 @@ int vtkNSmoothFilter::FillInputPortInformation(int, vtkInformation* info)
 }
 
 //----------------------------------------------------------------------------
-double vtkNSmoothFilter::CalculateDensity(double pointOne[],\
-													double pointTwo[], double smoothedMass)
+double vtkNSmoothFilter::CalculateDensity(double pointOne[],
+	double pointTwo[], double smoothedMass)
 {
 	// now calculating the radial distance from the last point to the
   // center point to which it is a neighbor
-	double radialDistance=sqrt(vtkMath::Distance2BetweenPoints(pointOne,\
-																														pointTwo));
+	double radialDistance=sqrt(vtkMath::Distance2BetweenPoints(pointOne,
+		pointTwo));
 	// the volume is a sphere around nextPoint with radius of the 
 	// last in the list of the closestNpoints
 	// so 4/3 pi r^3 where 
