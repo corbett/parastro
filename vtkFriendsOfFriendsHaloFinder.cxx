@@ -21,6 +21,7 @@
 #include "vtkMultiProcessController.h"
 #include "vtkCallbackCommand.h"
 #include "vtkPolyData.h"
+#include "vtkStreamingDemandDrivenPipeline.h"
 #include <vtkstd/vector>
 #include <vtkstd/map>
 
@@ -120,10 +121,11 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkKdTree* pointTree,
 		if(RunInParallel(this->GetController()))
 			{
 			// TODO: remove, just testing ghost level functionality
-			cout << "id " << haloId << " has ghost level " \
-			 << output->GetPointData()->GetArray("vtkGhostLevels")->GetTuple(
-				nextHaloId)[0]
-			 << "\n";
+			if(output->GetPointData()->GetArray("vtkGhostLevels")->GetTuple(
+					nextHaloId)[0]==1)
+				{
+					cout << "id " << nextHaloId << " has ghost level 1 ";
+				}
 			// TODO:
 			// this is where we check if the point for which the nextHaloId
 			// is recorded is a ghost cell. 
@@ -194,6 +196,7 @@ int vtkFriendsOfFriendsHaloFinder::RequestData(vtkInformation* request,
 {
   // Get input and output data.
   vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
+  vtkInformation* inInfo = inputVector[0]->GetInformationObject(0);
 	vtkPointSet* output = vtkPointSet::GetData(outputVector);
 	output->ShallowCopy(input);
 	// Get name of data array containing global ids
@@ -202,6 +205,10 @@ int vtkFriendsOfFriendsHaloFinder::RequestData(vtkInformation* request,
 		vtkSmartPointer<vtkIdTypeArray>::New();
 	if (RunInParallel(this->GetController()))  
 		{
+		// Requesting one level of ghost cells
+		inInfo->Set(
+			vtkStreamingDemandDrivenPipeline::UPDATE_NUMBER_OF_GHOST_LEVELS(),1);
+		// TODO: also assert here that we have a ghost cell array
 		vtkSmartPointer<vtkDataArray> globalIdArrayGeneric = \
 		 	this->GetInputArrayToProcess(0, inputVector);
 		if(!globalIdArray || !globalIdArray->IsA("vtkIdTypeArray"))
