@@ -119,6 +119,11 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkKdTree* pointTree,
 		vtkIdType haloId = haloIdArray->GetValue(nextHaloId);
 		if(RunInParallel(this->GetController()))
 			{
+			// TODO: remove, just testing ghost level functionality
+			cout << "id " << haloId << " has ghost level " \
+			 << output->GetPointData()->GetArray("vtkGhostLevels")->GetTuple(
+				nextHaloId)[0]
+			 << "\n";
 			// TODO:
 			// this is where we check if the point for which the nextHaloId
 			// is recorded is a ghost cell. 
@@ -208,11 +213,6 @@ int vtkFriendsOfFriendsHaloFinder::RequestData(vtkInformation* request,
 			{
 			globalIdArray = vtkIdTypeArray::SafeDownCast(globalIdArrayGeneric);
 			}
-		// TODO: right now this is a simple test to see if we have generated
-		// ghost levels, remove
-		cout << "id 0 has ghost level " \
-		 << output->GetPointData()->GetArray("vtkGhostLevels")->GetTuple(0)[0]
-		 << "\n";
 		}
 	// Building a local KdTree for locator purposes
 	vtkSmartPointer<vtkKdTree> pointTree = vtkSmartPointer<vtkKdTree>::New();
