@@ -29,6 +29,12 @@ vtkCxxSetObjectMacro(vtkNSmoothFilter,Controller,
 //----------------------------------------------------------------------------
 vtkNSmoothFilter::vtkNSmoothFilter():vtkPointSetAlgorithm()
 {
+	this->SetInputArrayToProcess(
+    0,
+    0,
+    0,
+    vtkDataObject::FIELD_ASSOCIATION_POINTS_THEN_CELLS,
+    vtkDataSetAttributes::SCALARS);
   this->NeighborNumber = 50; //default
 	this->Controller = NULL;
 	this->SetController(vtkMultiProcessController::GetGlobalController());

@@ -31,6 +31,12 @@ vtkCxxSetObjectMacro(vtkFriendsOfFriendsHaloFinder,Controller,
 //----------------------------------------------------------------------------
 vtkFriendsOfFriendsHaloFinder::vtkFriendsOfFriendsHaloFinder()
 {
+	this->SetInputArrayToProcess(
+    0,
+    0,
+    0,
+    vtkDataObject::FIELD_ASSOCIATION_POINTS_THEN_CELLS,
+    vtkDataSetAttributes::SCALARS);
   this->LinkingLength = 1e-6; //default
 	this->MinimumNumberOfParticles = 50; // default
 	this->Controller = NULL;
@@ -201,6 +207,14 @@ int vtkFriendsOfFriendsHaloFinder::RequestData(vtkInformation* request,
   vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
 	vtkPointSet* output = vtkPointSet::GetData(outputVector);
 	output->ShallowCopy(input);
+	// Get name of data array containing global ids
+	vtkDataArray* globalIdArray = this->GetInputArrayToProcess(0,
+	 	inputVector);
+  if (RunInParallel(this->GetController()) && !globalIdArray)
+    {
+    vtkErrorMacro("Failed to locate global ID array, this is required if running in parallel. Generate by using Tipsy Reader to read in data, by running D3 with ghost cell generation, or by loading in with the original data in your preferred reader.");
+    return 0;
+		}
 	// Building a local KdTree for locator purposes
 	vtkSmartPointer<vtkKdTree> pointTree = vtkSmartPointer<vtkKdTree>::New();
 	// building a locator
