@@ -211,7 +211,7 @@ int vtkFriendsOfFriendsHaloFinder::RequestData(vtkInformation* request,
 		// TODO: right now this is a simple test to see if we have generated
 		// ghost levels, remove
 		cout << "id 0 has ghost level " \
-		 << output->GetPointData()->GetArray("vtkGhostLevels")->GetTuple(0)
+		 << output->GetPointData()->GetArray("vtkGhostLevels")->GetTuple(0)[0]
 		 << "\n";
 		}
 	// Building a local KdTree for locator purposes
