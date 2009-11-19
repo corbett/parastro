@@ -91,8 +91,7 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkKdTree* pointTree,
 		vtkWarningMacro("setting minimum number of particles to 2, a minimum number of particles below this makes no sense.");
 		this->MinimumNumberOfParticles=2;
 		}
-	// calculating the initial haloes- yes it really is done in just this 
-	// one line.
+	// calculating the initial haloes
 	// TODO: manage memory
 	vtkIdTypeArray* haloIdArray = \
 		pointTree->BuildMapForDuplicatePoints(this->LinkingLength);
@@ -109,7 +108,6 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkKdTree* pointTree,
 	vtkSmartPointer<vtkPointSet> ghostPoints = \
 		vtkSmartPointer<vtkPolyData>::New();
 		ghostPoints->Initialize();
-		
 	vtkSmartPointer<vtkIdTypeArray> ghostPointLocalHaloIdArray=\
 		vtkSmartPointer<vtkIdTypeArray>::New();
 		ghostPointLocalHaloIdArray->Initialize();
@@ -210,6 +208,11 @@ int vtkFriendsOfFriendsHaloFinder::RequestData(vtkInformation* request,
 			{
 			globalIdArray = vtkIdTypeArray::SafeDownCast(globalIdArrayGeneric);
 			}
+		// TODO: right now this is a simple test to see if we have generated
+		// ghost levels, remove
+		cout << "id 0 has ghost level " \
+		 << output->GetPointData()->GetArray("vtkGhostLevels")->GetTuple(0)
+		 << "\n";
 		}
 	// Building a local KdTree for locator purposes
 	vtkSmartPointer<vtkKdTree> pointTree = vtkSmartPointer<vtkKdTree>::New();
