@@ -180,13 +180,13 @@ vtkIdTypeArray* vtkFriendsOfFriendsHaloFinder::FindHaloes(
 				recGhostPointSet->Initialize();
 				this->GetController()->Receive(recGhostPointSet,proc,
 					GHOST_POINTS_AND_LOCAL_HALO_IDS);
-				allGhostPointSetArrays[numProc] = recGhostPointSet;
-				allGhostPointArrays[numProc] = recGhostPointSet->GetPoints();
+				allGhostPointSetArrays[proc] = recGhostPointSet;
+				allGhostPointArrays[proc] = recGhostPointSet->GetPoints();
 				}
-			// TODO: add back in
-			/*
 			// building a locator from all the points we have received
  		  ghostPointTree->BuildLocatorFromPoints(allGhostPointArrays,numProc);
+			// TODO: add back in
+			/*
 			// merging these point ids within the linking length across processors
 			vtkIdTypeArray* mergeGhostPointHalosIdArray = \
 				pointTree->BuildMapForDuplicatePoints(this->LinkingLength);
