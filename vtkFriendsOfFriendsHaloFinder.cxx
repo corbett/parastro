@@ -108,7 +108,7 @@ vtkIdTypeArray* vtkFriendsOfFriendsHaloFinder::FindHaloes(
 	vtkstd::map<vtkIdType,int> isHaloSpitAcrossProcessors;
 	vtkSmartPointer<vtkPointSet> ghostPoints = \
 		vtkSmartPointer<vtkPolyData>::New();
-		ghostPoints->Initialize();
+		ghostPoints->SetPoints(vtkSmartPointer<vtkPoints>::New());
 	vtkSmartPointer<vtkIdTypeArray> ghostPointLocalHaloIdArray=\
 		vtkSmartPointer<vtkIdTypeArray>::New();
 		ghostPointLocalHaloIdArray->Initialize();
@@ -130,7 +130,6 @@ vtkIdTypeArray* vtkFriendsOfFriendsHaloFinder::FindHaloes(
 			// ghostPoints->SetNextPoint(nextHaloIdIndex,output->getPoint(nextHaloIdIndex))
 			// record this ghostPoint's local haloID in  ghostPointLocalHaloIdArray
 			// TODO: remove, always inserting a ghost point
-			ghostPoints->GetPoints()->InsertNextPoint(1,1,1);
 			if(input->GetPointData()->GetArray("vtkGhostLevels")->GetTuple(
 					nextHaloIdIndex)[0]==1)
 				{
