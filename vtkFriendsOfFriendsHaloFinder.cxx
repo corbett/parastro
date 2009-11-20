@@ -233,9 +233,10 @@ int vtkFriendsOfFriendsHaloFinder::RequestData(vtkInformation* request,
 	// Building a local KdTree for locator purposes
 	vtkSmartPointer<vtkKdTree> pointTree = vtkSmartPointer<vtkKdTree>::New();
 	// building a locator
-	pointTree->BuildLocatorFromPoints(input);	
+	// changing back as input didn't find my ghost cells
+	pointTree->BuildLocatorFromPoints(output);	
 	vtkIdTypeArray* haloIdArray = \
-		this->FindHaloes(pointTree,globalIdArray,input);
+		this->FindHaloes(pointTree,globalIdArray,output);
 		
 	// TODO add back in
 	// output->GetPointData()->AddArray(haloIdArray);
