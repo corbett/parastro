@@ -166,6 +166,7 @@ vtkIdTypeArray* vtkFriendsOfFriendsHaloFinder::FindHaloes(
 			// if we are root:
 			vtkSmartPointer<vtkKdTree> ghostPointTree = \
 			 	vtkSmartPointer<vtkKdTree>::New();
+			ghostPointTree->Initialize();
 			vtkPointSet** allGhostPointSetArrays = new vtkPointSet*[numProc];
 			vtkPoints** allGhostPointArrays = new vtkPoints*[numProc];
 			// first add process 0's ghost points
@@ -184,7 +185,9 @@ vtkIdTypeArray* vtkFriendsOfFriendsHaloFinder::FindHaloes(
 				allGhostPointArrays[proc] = recGhostPointSet->GetPoints();
 				}
 			// building a locator from all the points we have received
- 		  ghostPointTree->BuildLocatorFromPoints(allGhostPointArrays,numProc);
+			// TODO: change back
+			ghostPointTree->BuildLocatorFromPoints(allGhostPointArrays,1);
+// 		  ghostPointTree->BuildLocatorFromPoints(allGhostPointArrays,numProc);
 			// TODO: add back in
 			/*
 			// merging these point ids within the linking length across processors
