@@ -113,44 +113,90 @@ vtkIdTypeArray* vtkFriendsOfFriendsHaloFinder::FindHaloes(
 		vtkSmartPointer<vtkIdTypeArray>::New();
 		ghostPointLocalHaloIdArray->Initialize();
 		ghostPointLocalHaloIdArray->SetName("local halo id");
-	for(int nextHaloId = 0;
-		nextHaloId < haloIdArray->GetNumberOfTuples();
-	 	++nextHaloId)
+	for(int nextHaloIdIndex = 0;
+		nextHaloIdIndex < haloIdArray->GetNumberOfTuples();
+	 	++nextHaloIdIndex)
 		{
-		vtkIdType haloId = haloIdArray->GetValue(nextHaloId);
+		vtkIdType haloId = haloIdArray->GetValue(nextHaloIdIndex);
 		if(RunInParallel(this->GetController()))
 			{
 			// TODO: remove, just testing ghost level functionality
-			if(input->GetPointData()->GetArray("vtkGhostLevels")->GetTuple(
-					nextHaloId)[0]==1)
-				{
-					cout << "id " << nextHaloId << " has ghost level 1 ";
-				}
 			// TODO:
-			// this is where we check if the point for which the nextHaloId
+			// this is where we check if the point for which the nextHaloIdIndex
 			// is recorded is a ghost cell. 
 			//if it is:
 			// o set isHaloSpitAcrossProcessors[haloId] = 1
 			// o add it to the ghost point set
-			// ghostPoints->SetNextPoint(nextHaloId,output->getPoint(nextHaloId))
+			// ghostPoints->SetNextPoint(nextHaloIdIndex,output->getPoint(nextHaloIdIndex))
 			// record this ghostPoint's local haloID in  ghostPointLocalHaloIdArray
+			if(input->GetPointData()->GetArray("vtkGhostLevels")->GetTuple(
+					nextHaloIdIndex)[0]==1)
+				{
+				cout << "id " << nextHaloIdIndex << " has ghost level 1 ";
+				isHaloSpitAcrossProcessors[haloId] = 1;
+				ghostPoints->GetPoints()->InsertNextPoint(
+					input->GetPoint(nextHaloIdIndex));
+				ghostPointLocalHaloIdArray->InsertNextValue(haloId);
+				}
 			}
 		haloCount[haloId]+=1;
 		}
 
 	if(RunInParallel(this->GetController()))
 		{
-		// TODO:
-		// if we are not root:
+		ghostPoints->GetPointData()->AddArray(ghostPointLocalHaloIdArray);
+		int procId=this->GetController()->GetLocalProcessId();
+		int numProc=this->GetController()->GetNumberOfProcesses();
+		if(procId!=0)
+			{
 			// Sending	ghostPoints to root 
-			// waiting for root's response with global ID
-			// waiting for root's response with total globalIds already assigned
-		// if we are root:
-		// Receiving ghostPoints from all processors if we are root
-		// Adding these data sets to a point locator, one by one
-		// Merging duplicate points in this point locator
-		// Calculating a global ID for each of the points, as below
+			this->GetController()->Send(ghostPoints,0,
+				GHOST_POINTS_AND_LOCAL_HALO_IDS);
+			// Wait for roots response with same point set, only containing
+			// additional "global halo id" array that root has assigned
+			ghostPoints->Initialize();
+			this->GetController()->Receive(ghostPoints,0,
+				GHOST_POINTS_AND_LOCAL_HALO_IDS_TO_GLOBAL);
+			}
+		else
+			{
+			// if we are root:
+			vtkSmartPointer<vtkKdTree> ghostPointTree = \
+			 	vtkSmartPointer<vtkKdTree>::New();
+			vtkPointSet** allGhostPointSetArrays = new vtkPointSet*[numProc];
+			vtkPoints** allGhostPointArrays = new vtkPoints*[numProc];
+			// first add process 0's ghost points
+			allGhostPointSetArrays[0] = ghostPoints;
+			allGhostPointArrays[0] = ghostPoints->GetPoints();
+			// Receiving ghostPoints from all processors if we are root
+			// adding these data sets to pointTree one by one
+			for(int proc = 1; proc < numProc; ++proc)
+				{
+				// this memory will be managed below
+				vtkPointSet* recGhostPointSet = vtkPolyData::New();
+				recGhostPointSet->Initialize();
+				this->GetController()->Receive(recGhostPointSet,proc,
+					GHOST_POINTS_AND_LOCAL_HALO_IDS);
+				allGhostPointSetArrays[numProc] = recGhostPointSet;
+				allGhostPointArrays[numProc] = recGhostPointSet->GetPoints();
+				}
+			// building a locator from all the points we have received
+ 		  ghostPointTree->BuildLocatorFromPoints(allGhostPointArrays,numProc);
+			// merging these point ids within the linking length across processors
+			vtkIdTypeArray* mergeGhostPointHalosIdArray = \
+				pointTree->BuildMapForDuplicatePoints(this->LinkingLength);
+			// TODO:
+			// Calculating a global ID for each of the points, as below
 
+			// Sending result set to the process that root received pointset from
+			for(int proc = 1; proc < numProc; ++proc)
+				{
+				vtkPointSet* sendGhostPointSet = allGhostPointSetArrays[proc];
+				this->GetController()->Send(sendGhostPointSet,proc,
+				GHOST_POINTS_AND_LOCAL_HALO_IDS_TO_GLOBAL);
+				sendGhostPointSet->Delete();
+				}
+			}
 		}
 
 	// finally setting to zero points which have 
@@ -158,11 +204,11 @@ vtkIdTypeArray* vtkFriendsOfFriendsHaloFinder::FindHaloes(
 	// assigning those we have seen more the requisite number
 	// of times to their unique id
 	// process 0 or running in serial
-	for(int nextHaloId = 0;
-		nextHaloId < haloIdArray->GetNumberOfTuples();
-	 	++nextHaloId)
+	for(int nextHaloIdIndex = 0;
+		nextHaloIdIndex < haloIdArray->GetNumberOfTuples();
+	 	++nextHaloIdIndex)
 		{
-		vtkIdType haloId = haloIdArray->GetValue(nextHaloId);
+		vtkIdType haloId = haloIdArray->GetValue(nextHaloIdIndex);
 		// TODO: check this
 		/*
 		if(RunInParallel(this->GetController()) && \
@@ -182,7 +228,7 @@ vtkIdTypeArray* vtkFriendsOfFriendsHaloFinder::FindHaloes(
 		else if(haloCount[haloId]<this->GetMinimumNumberOfParticles())
 			{
 			// we only saw it less than requisite number of times
-			haloIdArray->SetValue(nextHaloId,0);
+			haloIdArray->SetValue(nextHaloIdIndex,0);
 			}
 		else
 			{
@@ -190,9 +236,10 @@ vtkIdTypeArray* vtkFriendsOfFriendsHaloFinder::FindHaloes(
 			int uniqueId = haloUniqueId[haloId];
 			if(!uniqueId)
 				{
-				haloUniqueId[haloId] = this->GetUniqueId(nextHaloId,globalIdArray);
+				haloUniqueId[haloId] = \
+				 	this->GetUniqueId(nextHaloIdIndex,globalIdArray);
 				}
-			haloIdArray->SetValue(nextHaloId,uniqueId);
+			haloIdArray->SetValue(nextHaloIdIndex,uniqueId);
 			}
 		}
 	return haloIdArray;

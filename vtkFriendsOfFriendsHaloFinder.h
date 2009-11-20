@@ -37,8 +37,8 @@ class vtkIdTypeArray;
 
 enum FriendsOfFriendsMPIData 
 {
-	HALO_ID_ARRAY_INITIAL,
-	HALO_ID_ARRAY_FINAL
+	GHOST_POINTS_AND_LOCAL_HALO_IDS,
+	GHOST_POINTS_AND_LOCAL_HALO_IDS_TO_GLOBAL,
 };
 class VTK_GRAPHICS_EXPORT vtkFriendsOfFriendsHaloFinder : public vtkPointSetAlgorithm
 {
