@@ -71,8 +71,8 @@ public:
 	// has more than the requisite number of particles, as input by user. 
 	// Output should contain the data set in which halos should be searched
 	// before calling.
-	int FindHaloes(vtkKdTree* pointTree, vtkIdTypeArray* globalIdArray,
-		vtkPointSet* output);
+	vtkIdTypeArray* FindHaloes(vtkKdTree* pointTree, 
+		vtkIdTypeArray* globalIdArray, vtkPointSet* input);
 
 //BTX
 protected:

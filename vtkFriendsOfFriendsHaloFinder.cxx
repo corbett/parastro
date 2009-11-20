@@ -84,8 +84,8 @@ vtkIdType vtkFriendsOfFriendsHaloFinder::GetUniqueId(
 }		
 
 //----------------------------------------------------------------------------
-int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkKdTree* pointTree,
-	vtkIdTypeArray* globalIdArray, vtkPointSet* output)
+vtkIdTypeArray* vtkFriendsOfFriendsHaloFinder::FindHaloes(
+	vtkKdTree* pointTree, vtkIdTypeArray* globalIdArray, vtkPointSet* input)
 {
 	if(this->MinimumNumberOfParticles < 2)
 		{
@@ -97,7 +97,7 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkKdTree* pointTree,
 	vtkIdTypeArray* haloIdArray = \
 		pointTree->BuildMapForDuplicatePoints(this->LinkingLength);
 	haloIdArray->SetNumberOfComponents(1);
-	haloIdArray->SetNumberOfTuples(output->GetPoints()->GetNumberOfPoints());
+	haloIdArray->SetNumberOfTuples(input->GetPoints()->GetNumberOfPoints());
 	haloIdArray->SetName("halo ID");
 	// Now assign halos, if this point has at least one other pair,
 	// it is a halo, if not it is not (set to 0)
@@ -121,7 +121,7 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkKdTree* pointTree,
 		if(RunInParallel(this->GetController()))
 			{
 			// TODO: remove, just testing ghost level functionality
-			if(output->GetPointData()->GetArray("vtkGhostLevels")->GetTuple(
+			if(input->GetPointData()->GetArray("vtkGhostLevels")->GetTuple(
 					nextHaloId)[0]==1)
 				{
 					cout << "id " << nextHaloId << " has ghost level 1 ";
@@ -162,7 +162,17 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkKdTree* pointTree,
 		nextHaloId < haloIdArray->GetNumberOfTuples();
 	 	++nextHaloId)
 		{
-		vtkIdType haloId = haloIdArray->GetValue(nextHaloId);	
+		vtkIdType haloId = haloIdArray->GetValue(nextHaloId);
+		// TODO: check this
+		/*
+		if(RunInParallel(this->GetController()) && \
+			input->GetPointData()->GetArray("vtkGhostLevels")->GetTuple(
+				haloId)[0]==1)
+			{
+			// This point is a ghost point, ignore in output
+			continue;
+			}
+		*/
 		if(isHaloSpitAcrossProcessors[haloId])
 			{
 			// TODO:
@@ -185,8 +195,7 @@ int vtkFriendsOfFriendsHaloFinder::FindHaloes(vtkKdTree* pointTree,
 			haloIdArray->SetValue(nextHaloId,uniqueId);
 			}
 		}
-	output->GetPointData()->AddArray(haloIdArray);
-	return 1;
+	return haloIdArray;
 }
 
 //----------------------------------------------------------------------------
@@ -224,7 +233,15 @@ int vtkFriendsOfFriendsHaloFinder::RequestData(vtkInformation* request,
 	// Building a local KdTree for locator purposes
 	vtkSmartPointer<vtkKdTree> pointTree = vtkSmartPointer<vtkKdTree>::New();
 	// building a locator
-	pointTree->BuildLocatorFromPoints(output);	
-	this->FindHaloes(pointTree,globalIdArray,output);
+	pointTree->BuildLocatorFromPoints(input);	
+	vtkIdTypeArray* haloIdArray = \
+		this->FindHaloes(pointTree,globalIdArray,input);
+		
+	// TODO add back in
+	// output->GetPointData()->AddArray(haloIdArray);
+	// TODO: manage memory
+	// TODO: haloIdArray may be longer than number of points in output
+	// if output doesn't copy ghost cells as I expect, should remove
+	// ghost point
   return 1;
 }
