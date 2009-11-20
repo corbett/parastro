@@ -154,9 +154,12 @@ vtkIdTypeArray* vtkFriendsOfFriendsHaloFinder::FindHaloes(
 				GHOST_POINTS_AND_LOCAL_HALO_IDS);
 			// Wait for roots response with same point set, only containing
 			// additional "global halo id" array that root has assigned
+			// TODO: add back in
+			/*
 			ghostPoints->Initialize();
 			this->GetController()->Receive(ghostPoints,0,
 				GHOST_POINTS_AND_LOCAL_HALO_IDS_TO_GLOBAL);
+			*/
 			}
 		else
 			{
@@ -180,6 +183,8 @@ vtkIdTypeArray* vtkFriendsOfFriendsHaloFinder::FindHaloes(
 				allGhostPointSetArrays[numProc] = recGhostPointSet;
 				allGhostPointArrays[numProc] = recGhostPointSet->GetPoints();
 				}
+			// TODO: add back in
+			/*
 			// building a locator from all the points we have received
  		  ghostPointTree->BuildLocatorFromPoints(allGhostPointArrays,numProc);
 			// merging these point ids within the linking length across processors
@@ -196,6 +201,7 @@ vtkIdTypeArray* vtkFriendsOfFriendsHaloFinder::FindHaloes(
 				GHOST_POINTS_AND_LOCAL_HALO_IDS_TO_GLOBAL);
 				sendGhostPointSet->Delete();
 				}
+			*/
 			}
 		}
 
