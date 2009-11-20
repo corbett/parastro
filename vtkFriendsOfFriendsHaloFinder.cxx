@@ -284,9 +284,7 @@ int vtkFriendsOfFriendsHaloFinder::RequestData(vtkInformation* request,
 	pointTree->BuildLocatorFromPoints(output);	
 	vtkIdTypeArray* haloIdArray = \
 		this->FindHaloes(pointTree,globalIdArray,output);
-		
-	// TODO add back in
-	// output->GetPointData()->AddArray(haloIdArray);
+	output->GetPointData()->AddArray(haloIdArray);
 	// TODO: manage memory
 	// TODO: haloIdArray may be longer than number of points in output
 	// if output doesn't copy ghost cells as I expect, should remove
