@@ -106,6 +106,7 @@ vtkIdTypeArray* vtkFriendsOfFriendsHaloFinder::FindHaloes(
 	vtkstd::map<vtkIdType,int> haloUniqueId;	
 	// Will only use the following quantities if running in parallel
 	vtkstd::map<vtkIdType,int> isHaloSpitAcrossProcessors;
+	vtkstd::map<vtkIdType,vtkIdType> ghostHaloLocalToGlobalHaloIds;
 	vtkSmartPointer<vtkPointSet> ghostPoints = \
 		vtkSmartPointer<vtkPolyData>::New();
 		ghostPoints->SetPoints(vtkSmartPointer<vtkPoints>::New());
@@ -146,6 +147,20 @@ vtkIdTypeArray* vtkFriendsOfFriendsHaloFinder::FindHaloes(
 	if(RunInParallel(this->GetController()))
 		{
 		ghostPoints->GetPointData()->AddArray(ghostPointLocalHaloIdArray);
+		// Initializing a global point id array
+		AllocateIdTypeArray(ghostPoints,1,"global halo id",
+			ghostPoints->GetPoints()->GetNumberOfPoints());
+		AllocateIdTypeArray(ghostPoints,1,"global halo count",
+			ghostPoints->GetPoints()->GetNumberOfPoints());
+		// updating each ghost point with the count of its elements
+		for(int i = 0; 
+			i < ghostPoints->GetPoints()->GetNumberOfPoints(); ++i)
+			{
+			vtkIdType localGhostId = ghostPoints->GetPoints()->GetArray(
+				"local halo id")->GetValue(i);
+			ghostPoints->GetPointData()->GetArray(
+						"global halo count")->SetValue(i,haloCount[localGhostId]);
+			}
 		int procId=this->GetController()->GetLocalProcessId();
 		int numProc=this->GetController()->GetNumberOfProcesses();
 		if(procId!=0)
@@ -155,10 +170,10 @@ vtkIdTypeArray* vtkFriendsOfFriendsHaloFinder::FindHaloes(
 				GHOST_POINTS_AND_LOCAL_HALO_IDS);
 			// Wait for roots response with same point set, only containing
 			// additional "global halo id" array that root has assigned
-			// TODO: add back in
 			ghostPoints->Initialize();
 			this->GetController()->Receive(ghostPoints,0,
 				GHOST_POINTS_AND_LOCAL_HALO_IDS_TO_GLOBAL);
+
 			}
 		else
 			{
@@ -190,16 +205,12 @@ vtkIdTypeArray* vtkFriendsOfFriendsHaloFinder::FindHaloes(
 				{
 				// building a locator from all the points we have received
 	 		  ghostPointTree->BuildLocatorFromPoints(allGhostPointArrays,numProc);
-				// TODO: add back in
-				/*
 				// merging these point ids within the linking length across processors
 				vtkIdTypeArray* mergeGhostPointHalosIdArray = \
 					pointTree->BuildMapForDuplicatePoints(this->LinkingLength);
 				// TODO:
-				// Calculating a global ID for each of the points, as below
-				*/
+
 				}
-			//TODO: add back in
 			// Sending result set to the process that root received pointset from
 			for(int proc = 1; proc < numProc; ++proc)
 				{
@@ -208,6 +219,23 @@ vtkIdTypeArray* vtkFriendsOfFriendsHaloFinder::FindHaloes(
 				GHOST_POINTS_AND_LOCAL_HALO_IDS_TO_GLOBAL);
 				sendGhostPointSet->Delete();
 				}
+			}
+		// for each ghost point, get its local id and global id
+		// set ghost hash[local]=global
+		for(int i = 0; 
+			i < ghostPoints->GetPoints()->GetNumberOfPoints(); ++i)
+			{
+			vtkIdType localId = \
+				ghostPoints->GetPointData()->GetArray("local halo id")->GetValue(i);
+			vtkIdType globalId = \
+				ghostPoints->GetPointData()->GetArray("global halo id")->GetValue(i);
+			int globalHaloCount = \
+				ghostPoints->GetPointData()->GetArray(
+				"global halo count")->GetValue(i);
+			ghostHaloLocalToGlobalHaloIds[localId]=globalId;
+			// TODO: right now not keeping track of global halo count, but need
+			// to do this
+			haloCount[localId] = globalHaloCount;
 			}
 		}
 
@@ -221,23 +249,10 @@ vtkIdTypeArray* vtkFriendsOfFriendsHaloFinder::FindHaloes(
 	 	++nextHaloIdIndex)
 		{
 		vtkIdType haloId = haloIdArray->GetValue(nextHaloIdIndex);
-		// TODO: check this
-		/*
-		if(RunInParallel(this->GetController()) && \
-			input->GetPointData()->GetArray("vtkGhostLevels")->GetTuple(
-				haloId)[0]==1)
-			{
-			// This point is a ghost point, ignore in output
-			continue;
-			}
-		*/
-		if(isHaloSpitAcrossProcessors[haloId])
-			{
-			// TODO:
-			// we use the unique id sent to us by the root process, instead of
-			// one that we calculate on our own
-			}
-		else if(haloCount[haloId]<this->GetMinimumNumberOfParticles())
+		// Switching to the global ID if this halo is split accross processsors
+		haloId = (isHaloSpitAcrossProcessors[haloId]) ? \
+		 	ghostHaloLocalToGlobalHaloIds[haloId] : haloId;
+		if(haloCount[haloId]<this->GetMinimumNumberOfParticles())
 			{
 			// we only saw it less than requisite number of times
 			haloIdArray->SetValue(nextHaloIdIndex,0);

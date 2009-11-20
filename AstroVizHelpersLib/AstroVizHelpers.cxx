@@ -137,7 +137,7 @@ void AllocateIdTypeDataArray(vtkPointSet* output, const char* arrayName,
 {
 	vtkSmartPointer<vtkIdTypeArray> idArray = \
 		vtkSmartPointer<vtkIdTypeArray>::New();
-	InitializeDataArray(idArray,"global id",1,numTuples);
+	InitializeDataArray(idArray,arrayName,1,numTuples);
 	output->GetPointData()->AddArray(idArray);
 }
 
