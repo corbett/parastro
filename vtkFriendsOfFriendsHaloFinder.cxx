@@ -129,6 +129,8 @@ vtkIdTypeArray* vtkFriendsOfFriendsHaloFinder::FindHaloes(
 			// o add it to the ghost point set
 			// ghostPoints->SetNextPoint(nextHaloIdIndex,output->getPoint(nextHaloIdIndex))
 			// record this ghostPoint's local haloID in  ghostPointLocalHaloIdArray
+			// TODO: remove, always inserting a ghost point
+			ghostPoints->GetPoints()->InsertNextPoint(1,1,1);
 			if(input->GetPointData()->GetArray("vtkGhostLevels")->GetTuple(
 					nextHaloIdIndex)[0]==1)
 				{
@@ -186,7 +188,7 @@ vtkIdTypeArray* vtkFriendsOfFriendsHaloFinder::FindHaloes(
 				}
 			// building a locator from all the points we have received
 			// TODO: change back
-			ghostPointTree->BuildLocatorFromPoints(ghostPoints);
+//			ghostPointTree->BuildLocatorFromPoints(ghostPoints);
 // 		  ghostPointTree->BuildLocatorFromPoints(allGhostPointArrays,numProc);
 			// TODO: add back in
 			/*
