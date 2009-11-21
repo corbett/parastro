@@ -24,8 +24,6 @@ using vtkstd::string;
 
 vtkCxxRevisionMacro(vtkNSmoothFilter, "$Revision: 1.72 $");
 vtkStandardNewMacro(vtkNSmoothFilter);
-vtkCxxSetObjectMacro(vtkNSmoothFilter,Controller,
-	vtkMultiProcessController);
 //----------------------------------------------------------------------------
 vtkNSmoothFilter::vtkNSmoothFilter():vtkPointSetAlgorithm()
 {
@@ -36,14 +34,11 @@ vtkNSmoothFilter::vtkNSmoothFilter():vtkPointSetAlgorithm()
     vtkDataObject::FIELD_ASSOCIATION_POINTS_THEN_CELLS,
     vtkDataSetAttributes::SCALARS);
   this->NeighborNumber = 50; //default
-	this->Controller = NULL;
-	this->SetController(vtkMultiProcessController::GetGlobalController());
 }
 
 //----------------------------------------------------------------------------
 vtkNSmoothFilter::~vtkNSmoothFilter()
 {
-	this->SetController(NULL);
 }
 
 //----------------------------------------------------------------------------

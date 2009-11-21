@@ -20,13 +20,12 @@ ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.0"
 	vtkNSmoothFilter.cxx vtkCenterOfMassFilter.cxx 
 	vtkProfileFilter.cxx vtkMomentsOfInertiaFilter.cxx
 	vtkVirialRadiusFilter.cxx vtkAddAdditionalAttribute.cxx 
-	vtkFriendsOfFriendsHaloFinder.cxx 
-	vtkDelaunaySmoothFilter.cxx #<-- for server
+	vtkFriendsOfFriendsHaloFinder.cxx #<-- for server
 	SERVER_MANAGER_XML  TipsyReaderSM.xml 
 	NSmoothFilterSM.xml  CenterOfMassFilter.xml
 	ProfileFilter.xml MomentsOfInertiaFilter.xml 
 	VirialRadiusFilter.xml AddAdditionalAttribute.xml 
-	FriendsOfFriendsHaloFinder.xml DelaunaySmoothFilter.xml #<-- for server
+	FriendsOfFriendsHaloFinder.xml  #<-- for server
 	GUI_RESOURCES TipsyReader.qrc AstroVizFilterMenu.xml) #<-- for client
 
 # For helper functions often used, will later include these in a single

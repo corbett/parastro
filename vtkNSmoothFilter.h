@@ -34,7 +34,7 @@
 #ifndef __vtkNSmoothFilter_h
 #define __vtkNSmoothFilter_h
 #include "vtkPointSetAlgorithm.h"
-class vtkMultiProcessController;
+
 
 class VTK_GRAPHICS_EXPORT vtkNSmoothFilter : public vtkPointSetAlgorithm
 {
@@ -48,11 +48,6 @@ public:
   vtkSetMacro(NeighborNumber, int);
   vtkGetMacro(NeighborNumber, int);
 
- 	// Description:
-	// By defualt this filter uses the global controller,
-	// but this method can be used to set another instead.
-	virtual void SetController(vtkMultiProcessController*);
-	vtkGetObjectMacro(Controller, vtkMultiProcessController);
 
 //BTX
 protected:
@@ -66,7 +61,6 @@ protected:
   virtual int RequestData(vtkInformation*,
    	vtkInformationVector**,
     vtkInformationVector*);
-	vtkMultiProcessController* Controller;
   int NeighborNumber;
 
 private:
@@ -77,7 +71,8 @@ private:
 	// where r=dist(pointOne,pointTwo), and diving the smoothed mass
 	// which is the average mass in that volume by the volume
 
-	double CalculateDensity(double pointOne[],double pointTwo[], double smoothedMass);
+	double CalculateDensity(double pointOne[],
+		double pointTwo[], double smoothedMass);
 	// Description:
 	// returns a string representing the name of the smoothed array
 	vtkstd::string GetSmoothedArrayName(vtkstd::string baseName, int dataIndex);
