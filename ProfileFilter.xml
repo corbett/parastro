@@ -1,13 +1,9 @@
 <ServerManagerConfiguration>
-  <!-- This is the server manager configuration XML. It defines the interface to
-       a new filter. As a rule of thumb, try to locate the configuration for
-       a filter already in ParaView (in Servers/ServerManager/Resources/*.xml)
-       that matches your filter and then model your xml on it -->
   <ProxyGroup name="filters">
    <SourceProxy name="Profile Filter" class="vtkProfileFilter" label="Profile Filter">
      <Documentation
-        long_help="Calculates various physical profiles as a func-
-		       tion of radius"
+        long_help="Calculates various physical quantities as a func-
+		       tion of radius. Fully parallel."
         short_help="physical profile">
      </Documentation>
 	<!--Sets the input dataset-->

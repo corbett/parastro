@@ -1,4 +1,19 @@
-#include "vtkIdTypeArray.h" // TODO: needed to include this, figure out why
+/*=========================================================================
+
+  Program:   AstroViz plugin for ParaView
+  Module:    $RCSfile: AstroVizHelpers.h,v $
+
+  Copyright (c) Christine Corbett Moran
+  All rights reserved.
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+     PURPOSE.  See the above copyright notice for more information.
+
+=========================================================================*/
+// .NAME AstroVizHelpers
+// .SECTION Description
+// Helper library for many common tasks in AstroViz
+#include "vtkIdTypeArray.h" // TODO: needed to include this, but should figure out how to remove
 #include <iostream>
 #include <sstream>
 class vtkPolyData;

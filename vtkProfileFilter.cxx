@@ -1,6 +1,6 @@
 /*=========================================================================
 
-  Program:   Visualization Toolkit
+  Program:   AstroViz plugin for ParaView
   Module:    $RCSfile: vtkProfileFilter.cxx,v $
 =========================================================================*/
 #include "vtkProfileFilter.h"

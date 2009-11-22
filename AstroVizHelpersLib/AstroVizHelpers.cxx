@@ -1,3 +1,8 @@
+/*=========================================================================
+
+  Program:   AstroViz plugin for ParaView
+  Module:    $RCSfile: AstroVizHelpers.cxx,v $
+=========================================================================*/
 #include "AstroVizHelpers.h"
 #include "vtkCell.h"
 #include "vtkCellArray.h"
@@ -573,7 +578,6 @@ vtkPointSet* CopyPointsAndData(vtkPointSet* dataSet, vtkIdList*
 			numNewPoints);
 		}
 	// Copying
-
 	for(int pointLocalId = 0; 
 			pointLocalId < pointsInRadius->GetNumberOfIds(); 
 			++pointLocalId)

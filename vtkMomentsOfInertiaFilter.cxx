@@ -1,6 +1,6 @@
 /*=========================================================================
 
-  Program:   Visualization Toolkit
+  Program:   AstroViz plugin for ParaView
   Module:    $RCSfile: vtkMomentsOfInertiaFilter.cxx,v $
 =========================================================================*/
 #include "vtkMomentsOfInertiaFilter.h"
@@ -216,7 +216,7 @@ int vtkMomentsOfInertiaFilter::RequestData(vtkInformation*,
 		// computing the moment of inertia tensor 3x3 matrix
 		this->UpdateInertiaTensor(input,massArray->GetName(), 
 			syncedCenterOfMass,inertiaTensor);
-		// TODO: see if there's an easier way to send a 2d array
+		// TODO: can send this as one array instead of 3
 		if(procId!=0)
 			{
 			// send result to root

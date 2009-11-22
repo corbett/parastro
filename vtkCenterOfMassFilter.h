@@ -10,13 +10,11 @@
      PURPOSE.  See the above copyright notice for more information.
 
 =========================================================================*/
-// .NAME vtkCenterOfMassFilter - shrink cells composing an arbitrary data set
+// .NAME vtkCenterOfMassFilter 
 // .SECTION Description
 // vtkCenterOfMassFilter 
-// finds the center of mass of a collection of particles. Either of all marked
-// particles or of all particles
-// .SECTION See Also
-// vtkKdTree
+// Finds the center of mass of a collection of particles. Either of all marked
+// particles or of all particles. Fully parallel.
 
 #ifndef __vtkCenterOfMassFilter_h
 #define __vtkCenterOfMassFilter_h

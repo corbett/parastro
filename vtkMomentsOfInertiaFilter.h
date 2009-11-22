@@ -10,13 +10,10 @@
      PURPOSE.  See the above copyright notice for more information.
 
 =========================================================================*/
-// .NAME vtkMomentsOfInertiaFilter - shrink cells composing an arbitrary data set
-// .SECTION Description
+// .NAME vtkMomentsOfInertiaFilter 
 // vtkMomentsOfInertiaFilter 
-// finds the moment of inertia tensor of a collection of particles, then
-// displays graphically the principle moments of inertia
-// .SECTION See Also
-// vtkKdTree
+// Finds the moment of inertia tensor of a collection of particles, then
+// displays graphically the principle moments of inertia. Fully parallel.
 
 #ifndef __vtkMomentsOfInertiaFilter_h
 #define __vtkMomentsOfInertiaFilter_h

@@ -1,9 +1,7 @@
 /*=========================================================================
-Modified from vtkSimplePointsReader and from Doug Potter's Tipsylib, 
-this depends on a few header files as well as the Tipsylib library.
 
-Only reads in standard format Tipsy files.
-@author corbett
+  Program:   AstroViz plugin for ParaView
+  Module:    $RCSfile: vtkTipsyReader.cxx,v $
 =========================================================================*/
 #include "vtkTipsyReader.h"
 #include "AstroVizHelpersLib/AstroVizHelpers.h"

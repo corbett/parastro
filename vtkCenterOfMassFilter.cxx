@@ -1,6 +1,6 @@
 /*=========================================================================
 
-  Program:   Visualization Toolkit
+  Program:   AstroViz plugin for ParaView
   Module:    $RCSfile: vtkCenterOfMassFilter.cxx,v $
 =========================================================================*/
 #include "vtkCenterOfMassFilter.h"
@@ -131,8 +131,6 @@ double* vtkCenterOfMassFilter::ComputeWeightedMass(double& mass,double* point)
 double* vtkCenterOfMassFilter::ComputeCenterOfMass(vtkPointSet* input,
 	vtkstd::string massArrayName)
 {
-
-	// TODO: use the massArrayName
 	// Allocating data arrays and setting to zero
 	double totalMass[1];
 	double totalWeightedMass[3];
@@ -212,7 +210,6 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 	// need to output point set, otherwise D3 is VERY unhappy
 	output->SetPoints(vtkSmartPointer<vtkPoints>::New());
 	output->SetVerts(vtkSmartPointer<vtkCellArray>::New());
-	// TODO: actually use array name
 	double* dbCenterOfMass=this->ComputeCenterOfMass(input,
 		massArray->GetName());
 	if(dbCenterOfMass!=NULL)

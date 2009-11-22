@@ -10,10 +10,9 @@
      PURPOSE.  See the above copyright notice for more information.
 
 =========================================================================*/
-// .NAME vtkVirialRadiusFilter - shrink cells composing an arbitrary data set
-// .SECTION Description
-// Plots the mass function N(>M) as a scatter plot
-// .SECTION See Also
+// .NAME vtkVirialRadiusFilter
+// Given an overdensity and a center, calculates and cuts off 
+// the data set at the point where the density equals this overdensity.
 
 #ifndef __vtkVirialRadiusFilter_h
 #define __vtkVirialRadiusFilter_h

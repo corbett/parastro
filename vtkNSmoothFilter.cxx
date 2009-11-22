@@ -1,6 +1,6 @@
 /*=========================================================================
 
-  Program:   Visualization Toolkit
+  Program:   AstroViz plugin for ParaView
   Module:    $RCSfile: vtkNSmoothFilter.cxx,v $
 =========================================================================*/
 #include "vtkNSmoothFilter.h"
@@ -81,6 +81,13 @@ double vtkNSmoothFilter::CalculateDensity(double pointOne[],
 int vtkNSmoothFilter::RequestData(vtkInformation *request,
 	vtkInformationVector** inputVector, vtkInformationVector* outputVector)
 {
+	 // Outline of this filter:
+	// 1. Build Kd tree
+	// 2. Go through each point in output
+	// 		o calculate N nearest neighbors
+	//		o calculate smoothed quantities
+	// 		o add to their respective arrays.
+	// 3. Add the arrays of smoothed variables to the output
   // Get input and output data.
   vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
 	vtkDataArray* massArray = this->GetInputArrayToProcess(0, inputVector);

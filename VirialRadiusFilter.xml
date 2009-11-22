@@ -1,14 +1,9 @@
 <ServerManagerConfiguration>
-  <!-- This is the server manager configuration XML. It defines the interface to
-       a new filter. As a rule of thumb, try to locate the configuration for
-       a filter already in ParaView (in Servers/ServerManager/Resources/*.xml)
-       that matches your filter and then model your xml on it -->
   <ProxyGroup name="filters">
    <SourceProxy name="Virial Radius Filter" class="vtkVirialRadiusFilter" label="Virial Radius Filter">
      <Documentation
-        long_help="Calculates various physical profiles as a func-
-		       tion of radius"
-        short_help="physical profile">
+        long_help="Given an overdensity and a center, calculates and cuts off  the data set at the point where the density equals this overdensity."
+        short_help="virial radius">
      </Documentation>
 	<!--Sets the input dataset-->
      <InputProperty name="Input" command="SetInputConnection">

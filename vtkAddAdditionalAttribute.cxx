@@ -1,6 +1,6 @@
 /*=========================================================================
 
-  Program:   Visualization Toolkit
+  Program:   AstroViz plugin for ParaView
   Module:    $RCSfile: vtkAddAdditionalAttribute.cxx,v $
 =========================================================================*/
 #include "vtkAddAdditionalAttribute.h"

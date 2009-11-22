@@ -10,11 +10,11 @@
      PURPOSE.  See the above copyright notice for more information.
 
 =========================================================================*/
-// .NAME vtkAddAdditionalAttribute - shrink cells composing an arbitrary data set
+// .NAME vtkAddAdditionalAttribute 
 // .SECTION Description
 // vtkAddAdditionalAttribute 
-// finds the moment of inertia tensor of a collection of particles, then
-// displays graphically the principle moments of inertia
+//Additional attribute files set are merged into existing input. 
+// Works only in serial.
 // .SECTION See Also
 // vtkKdTree
 

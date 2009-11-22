@@ -1,6 +1,6 @@
 /*=========================================================================
 
-  Program:   Visualization Toolkit
+  Program:   AstroViz plugin for ParaView
   Module:    $RCSfile: vtkFriendsOfFriendsHaloFinder.cxx,v $
 =========================================================================*/
 #include "vtkFriendsOfFriendsHaloFinder.h"
@@ -145,6 +145,15 @@ int vtkFriendsOfFriendsHaloFinder::RequestData(vtkInformation* request,
 	vtkInformationVector** inputVector,
   vtkInformationVector* outputVector)
 {
+	// Outline of this filter:
+	// 1. Build Kd tree
+	// 2. Go through each point in output
+	// 		o calculate points within linking length
+	// 		o these form a halo
+	// 3. Cutoff by particle count
+	// 		o if proto-halo doesn't have minimum particle count, 
+	// 		it is not considered a halo. if it does, it is given a unique id.
+	
   // Get input and output data.
   vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
   vtkInformation* inInfo = inputVector[0]->GetInformationObject(0);

@@ -20,14 +20,9 @@
 // average over them to find smoothed variable value. For those 
 // variables which need a volume to be computed
 // consider the volume as sphere around point with radius of the
-// outermost neighbor point.
- // Outline of this filter:
-// 1. Build Kd tree, or if running in parallel run D3 filter and use its KDT
-// 2. Go through each point in output
-// 		o calculate N nearest neighbors
-//		o calculate smoothed quantities
-// 		o add to their respective arrays.
-// 3. Add the arrays of smoothed variables to the output
+// outermost neighbor point. Runs in parallel but can be slow for large
+// number of neighbors or large particle/process ratio and does not smooth
+// over particles in neighbor processes.
 // .SECTION See Also
 // vtkKdTree, vtkPKdTree
 

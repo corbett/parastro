@@ -12,18 +12,14 @@
 
 
 =========================================================================*/
-// .NAME vtkFriendsOfFriendsHaloFinder - shrink cells composing an arbitrary data set
+// .NAME vtkFriendsOfFriendsHaloFinder 
 // .SECTION Description
 // vtkFriendsOfFriendsHaloFinder 
- // Outline of this filter:
-// 1. Build Kd tree
-// 2. Go through each point in output
-// 		o calculate points within linking length
-// 		o these form a halo
-// 3. Merge haloes
-// 		o check each against each other if their bounds are linking length
-//    apart. if so, merge haloes. Continue until every halo's bounds
-//    have been checked against every other halo's
+// Finds groups of particles, defined to be haloes each within a specified
+//  linking length of each other. Parallel by process, and halo ids are 
+//  guaranteed to be globally unique, but does not merge haloes
+//  accross processes. If run in parallel requires a unique ID list as input
+// otherwise, this is unused.
 // .SECTION See Also
 // vtkKdTree, vtkKdTree, vtkPointSetAlgorithm.h
 

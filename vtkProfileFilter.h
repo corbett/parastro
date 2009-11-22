@@ -10,11 +10,10 @@
      PURPOSE.  See the above copyright notice for more information.
 
 =========================================================================*/
-// .NAME vtkProfileFilter - shrink cells composing an arbitrary data set
+// .NAME vtkProfileFilter 
 // .SECTION Description
-// Plots the mass function N(>M) as a scatter plot
-// .SECTION See Also
-
+// Calculates various physical profiles as a function of radius.
+// Fully parallel.
 #ifndef __vtkProfileFilter_h
 #define __vtkProfileFilter_h
 #include "vtkTableAlgorithm.h" // super class
@@ -134,7 +133,6 @@ protected:
 			vtkstd::string argTwoBaseName, ColumnType argTwoColumnType);
 		~ProfileElement();
  	};
-	// TODO: remove
 	double Delta;
   // Description:
 	// Center around which to compute radial bins

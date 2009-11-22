@@ -1,6 +1,20 @@
+/*=========================================================================
+
+  Program:   AstroViz plugin for ParaView
+  Module:    $RCSfile: vtkTipsyReader.h,v $
+
+  Copyright (c) Christine Corbett Moran
+  All rights reserved.
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+     PURPOSE.  See the above copyright notice for more information.
+
+=========================================================================*/
 // .NAME vtkTipsyReader - Read points from a Tipsy standard binary file
 // .SECTION Description
-// here is the desciprtion
+// Read points from a Tipsy standard binary file. Fully parallel. Has ability
+// to read in additional attributes from an ascii file, and to only load in
+// marked particles but both these functions are serial only.
 #ifndef __vtkTipsyReader_h
 #define __vtkTipsyReader_h
 
