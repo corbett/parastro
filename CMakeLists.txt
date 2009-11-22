@@ -26,7 +26,8 @@ ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.0"
 	ProfileFilter.xml MomentsOfInertiaFilter.xml 
 	VirialRadiusFilter.xml AddAdditionalAttribute.xml 
 	FriendsOfFriendsHaloFinder.xml  #<-- for server
-	GUI_RESOURCES TipsyReader.qrc AstroVizFilterMenu.xml) #<-- for client
+	GUI_RESOURCES TipsyReader.qrc  #<-- for client
+	GUI_RESOURCE_FILES AstroVizFilterMenu.xml) #<-- for client
 
 # For helper functions often used, will later include these in a single
 # VTK class
