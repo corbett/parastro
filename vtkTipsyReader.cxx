@@ -371,7 +371,7 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 		// parallel
 		if(RunInParallel(vtkMultiProcessController::GetGlobalController()))
 			{
-			vtkErrorMacro("This filter is not supported in parallel.");
+			vtkErrorMacro("Reading from a mark file is not supported in parallel.");
 			return 0;
 			}
 		vtkDebugMacro("Reading marked point indices from file:" 
