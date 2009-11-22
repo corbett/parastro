@@ -65,11 +65,11 @@ TipsyHeader vtkTipsyReader::ReadTipsyHeader(ifTipsy& tipsyInfile)
 }
 
 //----------------------------------------------------------------------------
-vtkstd::vector<int> vtkTipsyReader::ReadMarkedParticleIndices(\
-														TipsyHeader& tipsyHeader,ifTipsy& tipsyInfile)
+vtkstd::vector<unsigned long> vtkTipsyReader::ReadMarkedParticleIndices(
+	TipsyHeader& tipsyHeader,ifTipsy& tipsyInfile)
 {
 	ifstream markInFile(this->MarkFileName);
-	vtkstd::vector<int> markedParticleIndices;
+	vtkstd::vector<unsigned long> markedParticleIndices;
 	if(!markInFile)
  		{
  		vtkErrorMacro("Error opening marked particle file: " 
@@ -79,7 +79,7 @@ vtkstd::vector<int> vtkTipsyReader::ReadMarkedParticleIndices(\
  		}
 	else
 		{
-		int mfIndex,mfBodies,mfGas,mfStar,mfDark,numBodies;
+		unsigned long mfIndex,mfBodies,mfGas,mfStar,mfDark,numBodies;
 		// first line of the mark file is of a different format:
 		// intNumBodies intNumGas intNumStars
 		if(markInFile >> mfBodies >> mfGas >> mfStar)
@@ -120,13 +120,13 @@ vtkstd::vector<int> vtkTipsyReader::ReadMarkedParticleIndices(\
 void vtkTipsyReader::ReadAllParticles(TipsyHeader& tipsyHeader,
 	ifTipsy& tipsyInfile,int piece,int numPieces,vtkPolyData* output)
 {
-	int pieceSize = floor(tipsyHeader.h_nBodies*1./numPieces);
-	int beginIndex = piece*pieceSize;
-	int endIndex = (piece == numPieces - 1) ? tipsyHeader.h_nBodies : \
-		(piece+1)*pieceSize;
+	unsigned long pieceSize = floor(tipsyHeader.h_nBodies*1./numPieces);
+	unsigned long beginIndex = piece*pieceSize;
+	unsigned long endIndex = (piece == numPieces - 1) ? \
+	 	tipsyHeader.h_nBodies : (piece+1)*pieceSize;
 	// Allocates vtk scalars and vector arrays to hold particle data, 
 	this->AllocateAllTipsyVariableArrays(endIndex-beginIndex,output);
-	for(int i=beginIndex; i < endIndex; i++)  
+	for(unsigned long i=beginIndex; i < endIndex; i++)  
   	{ 
 		this->ReadParticle(i,tipsyHeader,tipsyInfile,output);
   	}
@@ -134,7 +134,7 @@ void vtkTipsyReader::ReadAllParticles(TipsyHeader& tipsyHeader,
 
 //----------------------------------------------------------------------------
 void vtkTipsyReader::ReadMarkedParticles(
-	vtkstd::vector<int>& markedParticleIndices,
+	vtkstd::vector<unsigned long>& markedParticleIndices,
 	TipsyHeader& tipsyHeader,
 	ifTipsy& tipsyInfile,
 	vtkPolyData* output)
@@ -143,9 +143,9 @@ void vtkTipsyReader::ReadMarkedParticles(
 	// As marked file was read, only allocates numBodies which 
 	// now equals the number of marked particles
 	this->AllocateAllTipsyVariableArrays(markedParticleIndices.size(),output);
-	int nextMarkedParticleIndex=0;
-	for(vtkstd::vector<int>::iterator it = markedParticleIndices.begin();
-		it != markedParticleIndices.end(); ++it)		
+	unsigned long nextMarkedParticleIndex=0;
+	for(vtkstd::vector<unsigned long>::iterator it = \
+	 	markedParticleIndices.begin(); it != markedParticleIndices.end(); ++it)		
 		{
  		nextMarkedParticleIndex=*it;
 		// reading in the particle
@@ -155,7 +155,7 @@ void vtkTipsyReader::ReadMarkedParticles(
 }
 
 //----------------------------------------------------------------------------
-tipsypos::section_type vtkTipsyReader::SeekToIndex(int index,
+tipsypos::section_type vtkTipsyReader::SeekToIndex(unsigned long index,
 	TipsyHeader& tipsyHeader, ifTipsy& tipsyInfile)
 {
 	if(index < tipsyHeader.h_nSph)
@@ -190,8 +190,8 @@ tipsypos::section_type vtkTipsyReader::SeekToIndex(int index,
 
 //----------------------------------------------------------------------------
 //i,tipsyHeader,tipsyInfile,output)
-vtkIdType vtkTipsyReader::ReadParticle(int index, TipsyHeader& tipsyHeader,
-	ifTipsy& tipsyInfile, vtkPolyData* output) 
+vtkIdType vtkTipsyReader::ReadParticle(unsigned long index, 
+	TipsyHeader& tipsyHeader, ifTipsy& tipsyInfile, vtkPolyData* output) 
 {
   // allocating variables for reading
   vtkIdType id;
@@ -224,8 +224,8 @@ vtkIdType vtkTipsyReader::ReadParticle(int index, TipsyHeader& tipsyHeader,
 
 
 //----------------------------------------------------------------------------
-vtkIdType vtkTipsyReader::ReadBaseParticle(vtkPolyData* output,\
-														TipsyBaseParticle& b) 
+vtkIdType vtkTipsyReader::ReadBaseParticle(vtkPolyData* output,
+	TipsyBaseParticle& b) 
 {
 	vtkIdType id = SetPointValue(output,b.pos);
   if(!this->ReadPositionsOnly)
@@ -238,8 +238,8 @@ vtkIdType vtkTipsyReader::ReadBaseParticle(vtkPolyData* output,\
 }
 
 //----------------------------------------------------------------------------
-vtkIdType vtkTipsyReader::ReadGasParticle(vtkPolyData* output,\
- 																					TipsyGasParticle& g)
+vtkIdType vtkTipsyReader::ReadGasParticle(vtkPolyData* output,
+ 	TipsyGasParticle& g)
 {
  	vtkIdType id=ReadBaseParticle(output,g);
   if(!this->ReadPositionsOnly)
@@ -253,8 +253,8 @@ vtkIdType vtkTipsyReader::ReadGasParticle(vtkPolyData* output,\
 }
 
 //----------------------------------------------------------------------------
-vtkIdType vtkTipsyReader::ReadStarParticle(vtkPolyData* output,\
- 																					TipsyStarParticle& s)
+vtkIdType vtkTipsyReader::ReadStarParticle(vtkPolyData* output,
+ 	TipsyStarParticle& s)
 {
 	vtkIdType id=ReadBaseParticle(output,s);
 	if(!this->ReadPositionsOnly)
@@ -266,8 +266,8 @@ vtkIdType vtkTipsyReader::ReadStarParticle(vtkPolyData* output,\
 	return id;
 }
 //----------------------------------------------------------------------------	
-vtkIdType vtkTipsyReader::ReadDarkParticle(vtkPolyData* output,\
- 																					TipsyDarkParticle& d)
+vtkIdType vtkTipsyReader::ReadDarkParticle(vtkPolyData* output,
+	TipsyDarkParticle& d)
 {
  	vtkIdType id=this->ReadBaseParticle(output,d);
   if(!this->ReadPositionsOnly)
@@ -278,8 +278,8 @@ vtkIdType vtkTipsyReader::ReadDarkParticle(vtkPolyData* output,\
 }
 		
 //----------------------------------------------------------------------------
-void vtkTipsyReader::AllocateAllTipsyVariableArrays(int numBodies,\
-											vtkPolyData* output)
+void vtkTipsyReader::AllocateAllTipsyVariableArrays(unsigned long numBodies,
+	vtkPolyData* output)
 {
   // Allocate objects to hold points and vertex cells. 
 	// Storing the points and cells in the output data object.
@@ -363,7 +363,7 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 	TipsyHeader tipsyHeader=this->ReadTipsyHeader(tipsyInfile);
 	// Next considering whether to read in a mark file, 
 	// and if so whether that reading was a success 
-	vtkstd::vector<int> markedParticleIndices;
+	vtkstd::vector<unsigned long> markedParticleIndices;
 	if(strcmp(this->MarkFileName,"")!=0)
 		{
 		//reading only marked particles

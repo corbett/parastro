@@ -62,13 +62,10 @@ protected:
 	char* FileName;
 	int ReadPositionsOnly;
 	int DistributeDataOn;
-	int RequestInformation(
-		vtkInformation*,
-		vtkInformationVector**,
+	int RequestInformation(vtkInformation*,	vtkInformationVector**,
 		vtkInformationVector*);
 
-  int RequestData(vtkInformation*,
-		vtkInformationVector**,
+  int RequestData(vtkInformation*,vtkInformationVector**,
     vtkInformationVector*);
 
 private:
@@ -85,7 +82,7 @@ private:
 	// Description:
 	// reads in a particle (either gas, dark or star as appropriate) 
 	//from the tipsy in file of this class
-	vtkIdType ReadParticle(int index, TipsyHeader& tipsyHeader,
+	vtkIdType ReadParticle(unsigned long index, TipsyHeader& tipsyHeader,
 		ifTipsy& tipsyInfile, vtkPolyData* output);
 	// Description:
 	// reads variables common to all particles
@@ -102,23 +99,25 @@ private:
 	// Description:
 	// Reads only Marked particles from the tipsy file.
 	// Must be called after function ReadMarkedParticleIndices.
-	void ReadMarkedParticles(vtkstd::vector<int>& markedParticleIndices,
+	void ReadMarkedParticles(
+		vtkstd::vector<unsigned long>& markedParticleIndices,
 		TipsyHeader& tipsyHeader,ifTipsy& tipsyInfile,vtkPolyData* output);
 	// Description:
 	// Helper function to read seek to a given index before reading
-	tipsypos::section_type SeekToIndex(int index,TipsyHeader& tipsyHeader,
-		ifTipsy& tipsyInfile);
+	tipsypos::section_type SeekToIndex(unsigned long index,
+		TipsyHeader& tipsyHeader, ifTipsy& tipsyInfile);
 	// Description:
 	// reads in an array of the indices of marked particles from a file, 
 	// returns a queue of marked particles
 	// which is empty if reading was unsucessful.
-	vtkstd::vector<int> ReadMarkedParticleIndices(TipsyHeader& tipsyHeader,
-		ifTipsy& tipsyInfile);
+	vtkstd::vector<unsigned long> ReadMarkedParticleIndices(
+		TipsyHeader& tipsyHeader,	ifTipsy& tipsyInfile);
 	/* Helper functions for storing data in output vector*/
 	// Description:
 	// allocates all vtk arrays for Tipsy variables and places them 
 	// in the output vector
-	void AllocateAllTipsyVariableArrays(int numBodies,vtkPolyData* output);
+	void AllocateAllTipsyVariableArrays(unsigned long numBodies,
+		vtkPolyData* output);
 //ETX
 
 };
