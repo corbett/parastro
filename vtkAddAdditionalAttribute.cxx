@@ -59,9 +59,6 @@ int vtkAddAdditionalAttribute::FillInputPortInformation(int,
 int vtkAddAdditionalAttribute::ReadAdditionalAttributeFile(
 	vtkstd::vector<unsigned long>& markedParticleIndices, vtkPointSet* output)
 {
-	// TODO: remove, debugging
-	return 1;
-
 	// open file
 	ifstream attributeInFile(this->AttributeFile);
 	if(strcmp(this->AttributeFile,"")==0||!attributeInFile)
@@ -138,7 +135,7 @@ int vtkAddAdditionalAttribute::RequestData(vtkInformation*,
 {
   // get input and output data
   vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
-  vtkPointSet* output = vtkPolyData::GetData(outputVector);
+  vtkPointSet* output = vtkPointSet::GetData(outputVector);
 	output->Initialize();
 	output->ShallowCopy(input);
 	// Make sure we have a file to read.
