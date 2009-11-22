@@ -59,6 +59,9 @@ int vtkAddAdditionalAttribute::FillInputPortInformation(int,
 int vtkAddAdditionalAttribute::ReadAdditionalAttributeFile(
 	vtkstd::vector<unsigned long>& markedParticleIndices, vtkPointSet* output)
 {
+	// TODO: remove, debugging
+	return 1;
+
 	// open file
 	ifstream attributeInFile(this->AttributeFile);
 	if(strcmp(this->AttributeFile,"")==0||!attributeInFile)
@@ -71,8 +74,6 @@ int vtkAddAdditionalAttribute::ReadAdditionalAttributeFile(
 		vtkErrorMacro("Please specify an attribute name.");
 		return 0;
 		}
-	// TODO: remove, debugging
-	return 1;
 	unsigned long numBodies;
 	attributeInFile >> numBodies;
 	if(numBodies==output->GetPoints()->GetNumberOfPoints())
