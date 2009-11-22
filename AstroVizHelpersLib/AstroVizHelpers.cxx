@@ -469,21 +469,8 @@ vtkIdList* FindPointsWithinRadius(double r,
 //----------------------------------------------------------------------------
 double* CalculateCenter(vtkDataSet* source)
 {
-	double* center;
-	if(source->GetNumberOfPoints()==1)
-		{
-		// we are dealing with a point
-		center = source->GetPoint(0);
-		}
-	else
-		{
-		// we are dealing with a line
-		double* pointOne=source->GetPoint(0);
-		double* pointTwo=source->GetPoint(source->GetNumberOfPoints()-1);
-		// TODO: fix this is currently == pointTwo (for some reason p1=p2?)
-		center=ComputeMidpoint(pointOne,pointTwo);
-		}
-	return center;
+	//TODO: test
+	return source->GetCenter();
 }
 
 //----------------------------------------------------------------------------
