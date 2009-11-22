@@ -366,10 +366,14 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 	vtkstd::vector<unsigned long> markedParticleIndices;
 	if(strcmp(this->MarkFileName,"")!=0)
 		{
-		//reading only marked particles
-		// TODO: make mark file read in parallel
-		// assert to make sure we are not trying to do this in parallel, for now
-		assert(numPieces==1);
+		// Reading only marked particles
+		// Make sure we are not running in parallel, this filter does not work in 
+		// parallel
+		if(RunInParallel(vtkMultiProcessController::GetGlobalController()))
+			{
+			vtkErrorMacro("This filter is not supported in parallel.");
+			return 0;
+			}
 		vtkDebugMacro("Reading marked point indices from file:" 
 			<< this->MarkFileName);
 		markedParticleIndices=this->ReadMarkedParticleIndices(tipsyHeader,
@@ -388,8 +392,6 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 	else 
 		{
 		//reading only marked particles
-		// TODO: make mark file read in parallel
-		// assert to make sure we are not trying to do this in parallel, for now
 		assert(numPieces==1);
 		vtkDebugMacro("Reading only the marked points in file: " \
 				<< this->MarkFileName << " from file " << this->FileName);
