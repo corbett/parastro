@@ -39,7 +39,7 @@ vtkProfileFilter::vtkProfileFilter()
 	// Defaults for quantities which will be computed based on user's
 	// later input
 	this->MaxR=1.0;
-	this->Delta=1; // TODO: remove
+	this->Delta=1; 
 	this->BinNumber=30;
 	this->Controller = NULL;
   this->SetController(vtkMultiProcessController::GetGlobalController());
@@ -49,8 +49,6 @@ vtkProfileFilter::vtkProfileFilter()
 vtkProfileFilter::~vtkProfileFilter()
 {
  	this->SetController(0);
-	// TODO: here I want to destroy the elements in the
-	// AdditionalProfileQuantities array
 }
 
 //----------------------------------------------------------------------------
@@ -161,8 +159,6 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 						vtkSmartPointer<vtkTable>::New();
 				recLocalTable->Initialize();
 				this->Controller->Receive(recLocalTable,proc,DATA_TABLE);
-				//TODO: implement merge tables, for now does nothing ,
-				// meaning that result is only the localTable of process 
 				this->MergeTables(input,localTable,recLocalTable);
 				}
 			// Perform final computations
