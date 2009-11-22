@@ -121,7 +121,7 @@ int vtkNSmoothFilter::RequestData(vtkInformation *request,
 				1,output->GetPoints()->GetNumberOfPoints());
 			}
 		}
-	for(int nextPointId = 0;
+	for(unsigned long nextPointId = 0;
 		nextPointId < output->GetPoints()->GetNumberOfPoints();
 	 	++nextPointId)
 		{

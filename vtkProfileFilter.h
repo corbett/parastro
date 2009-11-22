@@ -77,8 +77,7 @@ protected:
   // algorithm is designed to do. This happens during the fourth pass in the
   // pipeline execution process.
   virtual int RequestData(vtkInformation*, 
-                          vtkInformationVector**, 
-                          vtkInformationVector*);
+		vtkInformationVector**, vtkInformationVector*);
   vtkMultiProcessController *Controller;
 
 	// Description:

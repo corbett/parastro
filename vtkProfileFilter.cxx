@@ -64,7 +64,7 @@ void vtkProfileFilter::SetSourceConnection(vtkAlgorithmOutput* algOutput)
 }
 
 int vtkProfileFilter::FillInputPortInformation (int port, 
-                                                   vtkInformation *info)
+	vtkInformation *info)
 {
   this->Superclass::FillInputPortInformation(port, info);
   info->Set(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), "vtkPointSet");
@@ -156,7 +156,7 @@ int vtkProfileFilter::RequestData(vtkInformation *request,
 			for(int proc = 1; proc < numProc; ++proc)
 				{
 				vtkSmartPointer<vtkTable> recLocalTable = \
-						vtkSmartPointer<vtkTable>::New();
+					vtkSmartPointer<vtkTable>::New();
 				recLocalTable->Initialize();
 				this->Controller->Receive(recLocalTable,proc,DATA_TABLE);
 				this->MergeTables(input,localTable,recLocalTable);
@@ -334,7 +334,7 @@ double vtkProfileFilter::CalculateBinSpacing(double maxR,int binNumber)
 //----------------------------------------------------------------------------
 void vtkProfileFilter::UpdateStatistics(vtkPointSet* input,vtkTable* output)
 {
-	for(int nextPointId = 0;
+	for(unsigned long nextPointId = 0;
 	 		nextPointId < input->GetPoints()->GetNumberOfPoints();
 	 		++nextPointId)
 		{
