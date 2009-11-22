@@ -93,7 +93,7 @@ void vtkCenterOfMassFilter::UpdateCenterOfMassVariables(
 	vtkPointSet* input,vtkstd::string massArrayName,
 	double& totalMass,double totalWeightedMass[])
 {
-	for(int nextPointId = 0;
+	for(unsigned long nextPointId = 0;
 	 		nextPointId < input->GetPoints()->GetNumberOfPoints();
 	 		++nextPointId)
 		{
