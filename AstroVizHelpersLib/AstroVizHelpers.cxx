@@ -31,7 +31,7 @@
 *
 *---------------------------------------------------------------------------*/
 void InitializeDataArray(vtkDataArray* dataArray, const char* arrayName,
-	int numComponents, int numTuples)
+	int numComponents, unsigned long numTuples)
 {
 	dataArray->SetNumberOfComponents(numComponents);
 	dataArray->SetNumberOfTuples(numTuples);
@@ -48,8 +48,8 @@ void InitializeDataArray(vtkDataArray* dataArray, const char* arrayName,
 * Work with vtkTable
 *
 *---------------------------------------------------------------------------*/
-void AllocateDataArray(vtkTable* output, const char* arrayName,\
- 			int numComponents, int numTuples)
+void AllocateDataArray(vtkTable* output, const char* arrayName,
+ 			int numComponents, unsigned long numTuples)
 {
 	vtkFloatArray* dataArray=vtkFloatArray::New();
 	InitializeDataArray(dataArray,arrayName,numComponents,numTuples);		
@@ -108,7 +108,7 @@ vtkIdType SetPointValue(vtkPointSet* output,float pos[])
 
 //----------------------------------------------------------------------------
 void AllocateDataArray(vtkPointSet* output, const char* arrayName,
-	int numComponents, int numTuples)
+	int numComponents, unsigned long numTuples)
 {
 	vtkSmartPointer<vtkFloatArray> dataArray=\
 		vtkSmartPointer<vtkFloatArray>::New();
@@ -118,7 +118,7 @@ void AllocateDataArray(vtkPointSet* output, const char* arrayName,
 
 //----------------------------------------------------------------------------
 void AllocateDoubleDataArray(vtkPointSet* output, const char* arrayName,
- 	int numComponents, int numTuples)
+ 	int numComponents, unsigned long numTuples)
 {
 	vtkSmartPointer<vtkDoubleArray> dataArray=\
 		vtkSmartPointer<vtkDoubleArray>::New();
@@ -128,7 +128,7 @@ void AllocateDoubleDataArray(vtkPointSet* output, const char* arrayName,
 
 //----------------------------------------------------------------------------
 void AllocateIntDataArray(vtkPointSet* output, const char* arrayName,
- 	int numComponents, int numTuples)
+ 	int numComponents, unsigned long numTuples)
 {
 	vtkSmartPointer<vtkIntArray> dataArray = \
 		vtkSmartPointer<vtkIntArray>::New();
@@ -138,7 +138,7 @@ void AllocateIntDataArray(vtkPointSet* output, const char* arrayName,
 
 //----------------------------------------------------------------------------
 void AllocateIdTypeDataArray(vtkPointSet* output, const char* arrayName,
- 	int numComponents, int numTuples)
+ 	int numComponents, unsigned long numTuples)
 {
 	vtkSmartPointer<vtkIdTypeArray> idArray = \
 		vtkSmartPointer<vtkIdTypeArray>::New();
@@ -193,11 +193,11 @@ double* GetDataValue(vtkPointSet* output, const char* arrayName,
 *---------------------------------------------------------------------------*/
 //----------------------------------------------------------------------------
 vtkInformationVector** DeepCopyInputVector(vtkInformationVector** inputVector,
-	int inputVectorSize)
+	unsigned long inputVectorSize)
 {
 	vtkInformationVector** newInputVector = \
 		new vtkInformationVector *[inputVectorSize];
-	for(int i = 0; i < inputVectorSize; ++i)
+	for(unsigned long i = 0; i < inputVectorSize; ++i)
 		{
 		vtkInformationVector* newInput = vtkInformationVector::New();
 		// performas a deep copy of inputVector
@@ -286,7 +286,7 @@ double IllinoisRootFinder(double (*func)(double,void *),void *ctx,\
 
 //----------------------------------------------------------------------------
 double ComputeMaxRadiusInParallel(
-	vtkMultiProcessController* controller,vtkPointSet* input,double point[])
+	vtkMultiProcessController* controller,vtkPointSet* input, double point[])
 {
 	double maxR=ComputeMaxR(input,point);
 	if(RunInParallel(controller))
@@ -357,7 +357,7 @@ double OverDensityInSphere(double r,void* inputVirialRadiusInfo)
 	vtkPointSet* dataSet=\
 		vtkPointSet::SafeDownCast(
 		virialRadiusInfo->locator->GetDataSet());
-	for(int pointLocalId = 0; 
+	for(unsigned long pointLocalId = 0; 
 			pointLocalId < pointsInRadius->GetNumberOfIds(); 
 			++pointLocalId)
 		{
@@ -419,7 +419,7 @@ double OverNumberInSphere(double r,void* inputVirialRadiusInfo)
 		virialRadiusInfo->locator);
 	// If we are running in parallel, update result based on that of other 
 	// processors
-	int totalNumberInSphere = pointsInRadius->GetNumberOfIds();
+	unsigned long totalNumberInSphere = pointsInRadius->GetNumberOfIds();
 	if(RunInParallel(virialRadiusInfo->controller))
 		{
 		int procId=virialRadiusInfo->controller->GetLocalProcessId();
@@ -438,7 +438,7 @@ double OverNumberInSphere(double r,void* inputVirialRadiusInfo)
 			// Now gather results from each process other than this one
 			for(int proc = 1; proc < numProc; ++proc)
 				{
-				int recTotalNumber[1];
+				unsigned long recTotalNumber[1];
 				// Receiving
 				virialRadiusInfo->controller->Receive(recTotalNumber,
 					1,proc,TOTAL_NUMBER_IN_SPHERE);
@@ -562,7 +562,7 @@ vtkPointSet* CopyPointsAndData(vtkPointSet* dataSet, vtkIdList*
 	// TODO: I was using CopyCells method of vtkPolyData
 	// but this wasn't working so I decided to do manually
 	// go back to finding the way using the VTK api to do this
-	int numNewPoints=pointsInRadius->GetNumberOfIds();
+	unsigned long numNewPoints=pointsInRadius->GetNumberOfIds();
 	// Initilizing
 	vtkPointSet* newDataSet = vtkPolyData::New(); // this memory must be managed
 		// Initializing points and verts
@@ -578,7 +578,7 @@ vtkPointSet* CopyPointsAndData(vtkPointSet* dataSet, vtkIdList*
 			numNewPoints);
 		}
 	// Copying
-	for(int pointLocalId = 0; 
+	for(unsigned long pointLocalId = 0; 
 			pointLocalId < pointsInRadius->GetNumberOfIds(); 
 			++pointLocalId)
 		{

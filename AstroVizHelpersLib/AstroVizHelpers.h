@@ -84,21 +84,21 @@ double* GetDataValue(vtkPointSet* output, const char* arrayName,
 // create a vtkDataArray of floats with the  name arrayName, number /
 // of components. place it in the vtkPointSet
 void AllocateDataArray(vtkPointSet* output, const char* arrayName,
-	int numComponents, int numTuples);
+	int numComponents, unsigned long numTuples);
 
 // Description:
 // create a vtkDataArray with the  name arrayName, number of components 
 // numComponents and number of tuples numTuples of type T. place it in
 // the vtkTable
 void AllocateDataArray(vtkTable* output, const char* arrayName,
-	int numComponents, int numTuples);
+	int numComponents, unsigned long numTuples);
 
 // Description:
 // create a vtkDataArray with the  name arrayName, number of components 
 // numComponents and number of tuples numTuples of type T. place it in
 // the output
 void AllocateIdTypeDataArray(vtkPointSet* output, const char* arrayName,
-	int numComponents, int numTuples);
+	int numComponents, unsigned long numTuples);
 	
 
 // Description:
@@ -107,7 +107,7 @@ void AllocateIdTypeDataArray(vtkPointSet* output, const char* arrayName,
 // e.g. AllocateDoubleDataArray("density",1,100) creates a array of 100 
 // scalar double densities
 void AllocateDoubleDataArray(vtkPointSet* output, const char* arrayName,
-	int numComponents, int numTuples);
+	int numComponents, unsigned long numTuples);
 
 // Description:
 // create a vtkDataArray with the  name arrayName, number of components 
@@ -115,13 +115,13 @@ void AllocateDoubleDataArray(vtkPointSet* output, const char* arrayName,
 // e.g. AllocateDoubleDataArray("density",1,100) creates a array of 100 
 // scalar double densities
 void AllocateIntDataArray(vtkPointSet* output, const char* arrayName,
-	int numComponents, int numTuples);
+	int numComponents, unsigned long numTuples);
 // Description:
 // Given a VTK array, sets it to have arrayName, numComponents and numTuples
 // unlike the above methods, does not create the array, nor add it to the 
 // output	
 void InitializeDataArray(vtkDataArray* dataArray, const char* arrayName,
-	int numComponents, int numTuples);
+	int numComponents, unsigned long numTuples);
 
 // Description:
 // returns a pointer to the point's coordinates in output which corresponds 
@@ -138,12 +138,12 @@ float* DoublePointToFloat(double point[]);
 // Note, returned vector of pointers to vtkInformationVectors must be 
 // deleted by caller. See DeleteDeepCopyInput below.
 vtkInformationVector** DeepCopyInputVector(
-	vtkInformationVector** inputVector,int inputVectorSize); 
+	vtkInformationVector** inputVector,unsigned long inputVectorSize); 
 
 // Description: 
 // Deletes an array of pointers to vtkInformationVectors
 void DeleteDeepCopyInputVector(vtkInformationVector** inputVector, 
-	int inputVectorSize);
+	unsigned long inputVectorSize);
 
 // Description:
 // converts a double to a vtkstd::string
