@@ -16,6 +16,7 @@
 #include "vtkPoints.h"
 #include "vtkLine.h"
 #include "vtkUnsignedCharArray.h"
+#include "vtkMultiProcessController.h"
 #include <vtkstd/string>
 #include "vtkMath.h"
 
@@ -138,6 +139,13 @@ int vtkAddAdditionalAttribute::RequestData(vtkInformation*,
   vtkPointSet* output = vtkPointSet::GetData(outputVector);
 	output->Initialize();
 	output->ShallowCopy(input);
+	// Make sure we are not running in parallel, this filter does not work in 
+	// parallel
+	if(RunInParallel(vtkMultiProcessController::GetGlobalController()))
+		{
+		vtkErrorMacro("This filter is not supported in parallel.");
+		return 0;
+		}
 	// Make sure we have a file to read.
   if(!this->AttributeFile)
 	  {
