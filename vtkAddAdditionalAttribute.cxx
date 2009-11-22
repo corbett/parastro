@@ -11,7 +11,6 @@
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include "vtkStringArray.h"
 #include "vtkSphereSource.h"
-#include "vtkMultiProcessController.h"
 #include "vtkCenterOfMassFilter.h"
 #include "vtkCellData.h"
 #include "vtkPoints.h"
@@ -22,21 +21,17 @@
 
 vtkCxxRevisionMacro(vtkAddAdditionalAttribute, "$Revision: 1.72 $");
 vtkStandardNewMacro(vtkAddAdditionalAttribute);
-vtkCxxSetObjectMacro(vtkAddAdditionalAttribute,Controller, vtkMultiProcessController);
 
 //----------------------------------------------------------------------------
 vtkAddAdditionalAttribute::vtkAddAdditionalAttribute()
 {
 	this->AttributeFile = 0;
 	this->AttributeName = 0; 
-	this->Controller = NULL;
-  this->SetController(vtkMultiProcessController::GetGlobalController());
 }
 
 //----------------------------------------------------------------------------
 vtkAddAdditionalAttribute::~vtkAddAdditionalAttribute()
 {
- 	this->SetController(0);
   this->SetAttributeFile(0);
   this->SetAttributeName(0);
 }
@@ -76,7 +71,8 @@ int vtkAddAdditionalAttribute::ReadAdditionalAttributeFile(
 		vtkErrorMacro("Please specify an attribute name.");
 		return 0;
 		}
-
+	// TODO: remove, debugging
+	return 1;
 	int numBodies;
 	attributeInFile >> numBodies;
 	if(numBodies==output->GetPoints()->GetNumberOfPoints())
