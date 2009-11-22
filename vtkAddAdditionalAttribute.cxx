@@ -57,7 +57,7 @@ int vtkAddAdditionalAttribute::FillInputPortInformation(int,
 
 //----------------------------------------------------------------------------
 int vtkAddAdditionalAttribute::ReadAdditionalAttributeFile(
-	vtkstd::vector<int>& markedParticleIndices, vtkPointSet* output)
+	vtkstd::vector<unsigned long>& markedParticleIndices, vtkPointSet* output)
 {
 	// open file
 	ifstream attributeInFile(this->AttributeFile);
@@ -71,12 +71,12 @@ int vtkAddAdditionalAttribute::ReadAdditionalAttributeFile(
 		vtkErrorMacro("Please specify an attribute name.");
 		return 0;
 		}
-	int numBodies;
+	unsigned long numBodies;
 	attributeInFile >> numBodies;
 	if(numBodies==output->GetPoints()->GetNumberOfPoints())
 		{
 		// ready to read in
-		int dataIndex=0;
+		unsigned long dataIndex=0;
 		double attributeData;
 		if(markedParticleIndices.empty())
 			{
@@ -96,8 +96,8 @@ int vtkAddAdditionalAttribute::ReadAdditionalAttributeFile(
 			// read additional attribute only for marked particles
 			AllocateDataArray(output,this->AttributeName,1,
 				markedParticleIndices.size());
-			int nextMarkedParticleIndex=0;
-			for(vtkstd::vector<int>::iterator it = markedParticleIndices.begin();
+			unsigned long nextMarkedParticleIndex=0;
+			for(vtkstd::vector<unsigned long>::iterator it = markedParticleIndices.begin();
 				it != markedParticleIndices.end(); ++it)		
 				{
 		 		nextMarkedParticleIndex=*it;
@@ -145,7 +145,7 @@ int vtkAddAdditionalAttribute::RequestData(vtkInformation*,
     return 0;
     }
 	// For now not supporting marked particle indices. TODO: support
-	vtkstd::vector<int> markedParticleIndices;
+	vtkstd::vector<unsigned long> markedParticleIndices;
 	ReadAdditionalAttributeFile(markedParticleIndices,output);	
 	return 1;
 }

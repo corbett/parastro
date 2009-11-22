@@ -90,7 +90,7 @@ protected:
 	// The plus one is so that we can tell whether a unique id has been assigned
 	// yet in a map (has not been assigned if = 0, which would break down if 
 	// assigned ids were not strictly greater than zero)
-	vtkIdType GetUniqueId(int index, vtkIdTypeArray* globalIdArray);
+	vtkIdType GetUniqueId(unsigned long index, vtkIdTypeArray* globalIdArray);
 
 private:
   vtkFriendsOfFriendsHaloFinder(const vtkFriendsOfFriendsHaloFinder&);  // Not implemented.

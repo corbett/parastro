@@ -71,7 +71,7 @@ int vtkFriendsOfFriendsHaloFinder::FillInputPortInformation(int,
 
 //----------------------------------------------------------------------------
 vtkIdType vtkFriendsOfFriendsHaloFinder::GetUniqueId(
-	int index, vtkIdTypeArray* globalIdArray)
+	unsigned long index, vtkIdTypeArray* globalIdArray)
 {
 	if(RunInParallel(this->GetController()))
 		{
@@ -95,15 +95,15 @@ vtkIdTypeArray* vtkFriendsOfFriendsHaloFinder::FindHaloes(
 	// Initializing maps and sets to keep track of haloes, unique ids, and
 	// if running in parallel ghost cells, whether a halo is split accross 
 	// processors, and a map from the local halo id to the global
-	vtkstd::map<vtkIdType,int> haloCount;
-	vtkstd::map<vtkIdType,int> haloUniqueId;	
+	vtkstd::map<vtkIdType,unsigned long> haloCount;
+	vtkstd::map<vtkIdType,unsigned long> haloUniqueId;	
 	// 1.  Calculating the initial haloes
 	vtkIdTypeArray* haloIdArray = \
 		pointTree->BuildMapForDuplicatePoints(this->LinkingLength);
 	haloIdArray->SetNumberOfComponents(1);
 	haloIdArray->SetNumberOfTuples(input->GetPoints()->GetNumberOfPoints());
 	haloIdArray->SetName("halo ID");
-	for(int nextHaloIdIndex = 0;
+	for(unsigned long nextHaloIdIndex = 0;
 		nextHaloIdIndex < haloIdArray->GetNumberOfTuples();
 	 	++nextHaloIdIndex)
 		{
@@ -114,7 +114,7 @@ vtkIdTypeArray* vtkFriendsOfFriendsHaloFinder::FindHaloes(
 	// count < this->MinimumNumberOfParticles, O(N), and
 	// assigning those we have seen more the requisite number
 	// of times to their unique id, meaning we have truly found a halo.
-	for(int nextHaloIdIndex = 0;
+	for(unsigned long nextHaloIdIndex = 0;
 		nextHaloIdIndex < haloIdArray->GetNumberOfTuples();
 	 	++nextHaloIdIndex)
 		{
@@ -128,7 +128,7 @@ vtkIdTypeArray* vtkFriendsOfFriendsHaloFinder::FindHaloes(
 			{
 			// we saw it requisite number of times, getting unique id if it 
 			// has already been assigned, otherwise assigning it.
-			int uniqueId = haloUniqueId[haloId];
+			unsigned long uniqueId = haloUniqueId[haloId];
 			if(!uniqueId)
 				{
 				haloUniqueId[haloId] = \
@@ -185,7 +185,7 @@ int vtkFriendsOfFriendsHaloFinder::RequestData(vtkInformation* request,
 	vtkIdTypeArray* haloIdArray = \
 		this->FindHaloes(pointTree,globalIdArray,output);
 	output->GetPointData()->AddArray(haloIdArray);
-	// Managing ßmemory
+	// Managing memory
 	haloIdArray->Delete();
   return 1;
 }

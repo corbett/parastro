@@ -53,8 +53,7 @@ protected:
 
   // Main implementation.
   virtual int RequestData(vtkInformation*,
-                          vtkInformationVector**,
-                          vtkInformationVector*);
+   	vtkInformationVector**, vtkInformationVector*);
   vtkMultiProcessController *Controller;
 private:
   vtkMomentsOfInertiaFilter(const vtkMomentsOfInertiaFilter&);  // Not implemented.

@@ -83,7 +83,7 @@ void vtkMomentsOfInertiaFilter::UpdateInertiaTensor(vtkPointSet* input,
 	vtkstd::string massArrayName, double* centerPoint, 
 	double inertiaTensor[3][3])
 {
-	for(int nextPointId = 0;\
+	for(unsigned long nextPointId = 0;\
 	 		nextPointId < input->GetPoints()->GetNumberOfPoints();\
 	 		++nextPointId)
 		{
