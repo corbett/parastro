@@ -66,8 +66,7 @@ private:
 	// Reads this file in as an additional attribute array.
  //  If a marked file was specified, it reads in 
 	// only the particles at indices which were marked
-	int ReadAdditionalAttributeFile(
-		vtkstd::vector<unsigned long int>& markedParticleIndices,
+	int ReadAdditionalAttributeFile(vtkstd::vector<int>& markedParticleIndices,
 		vtkPointSet* output);
 //ETX
 };
