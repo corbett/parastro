@@ -23,17 +23,12 @@
 #include "vtkPointSetAlgorithm.h"
 #include <vtkstd/vector>
 
-class vtkMultiProcessController;
 class VTK_GRAPHICS_EXPORT vtkAddAdditionalAttribute : public vtkPointSetAlgorithm
 {
 public:
   static vtkAddAdditionalAttribute *New();
   vtkTypeRevisionMacro(vtkAddAdditionalAttribute,vtkPointSetAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent);
-  // Description:
-  // By defualt this filter uses the global controller,
-  // but this method can be used to set another instead.
-  virtual void SetController(vtkMultiProcessController*);
   // Description:
   // Set/Get the name of the file from which to get additional attributes
   vtkSetStringMacro(AttributeFile);
@@ -55,7 +50,6 @@ protected:
   virtual int RequestData(vtkInformation*,
                           vtkInformationVector**,
                           vtkInformationVector*);
-  vtkMultiProcessController *Controller;
 	char* AttributeFile;
 	char* AttributeName;
 
