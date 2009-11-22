@@ -1,6 +1,6 @@
 <ServerManagerConfiguration>
   <ProxyGroup name="filters">
-   <SourceProxy name="Virial Radius Filter" class="vtkVirialRadiusFilter" label="Virial Radius Filter">
+   <SourceProxy name="Virial Radius" class="vtkVirialRadiusFilter" label="Virial Radius">
      <Documentation
         long_help="Given an overdensity and a center, calculates and cuts off  the data set at the point where the density equals this overdensity."
         short_help="virial radius">

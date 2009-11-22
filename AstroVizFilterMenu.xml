@@ -4,9 +4,9 @@
 	<Filter name="Add Additional Attribute" />
 	<Filter name="Neighbor Smooth" />
 	<Filter name="Center Of Mass" />
-	<Filter name="Profile Filter" />
+	<Filter name="Profile" />
 	<Filter name="Principle Moments of Inertia" />
-	<Filter name="Virial Radius Filter" />
+	<Filter name="Virial Radius" />
     <Filter name="Friends-Of-Friends Halo Finder" />
  	<Filter name="ExtractHistogram" />
     <Filter name="PlotAttributes" />

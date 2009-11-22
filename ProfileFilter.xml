@@ -1,6 +1,6 @@
 <ServerManagerConfiguration>
   <ProxyGroup name="filters">
-   <SourceProxy name="Profile Filter" class="vtkProfileFilter" label="Profile Filter">
+   <SourceProxy name="Profile" class="vtkProfileFilter" label="Profile">
      <Documentation
         long_help="Calculates various physical quantities as a func-
 		       tion of radius. Fully parallel."
