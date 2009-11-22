@@ -472,7 +472,7 @@ double* CalculateCenter(vtkDataSet* source)
 	//TODO: test, remove printout
 	double* center = new double[3];
 	center = source->GetCenter();
-	cout << "center is: " << center[0] "," << center[1]<< "," << center[2] 
+	cout << "center is: " << center[0] <<  "," << center[1]<< "," << center[2] 
 		<< "\n";
 	return source->GetCenter();
 }
