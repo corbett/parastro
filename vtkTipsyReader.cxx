@@ -414,6 +414,9 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 		 	static_cast<vtkStreamingDemandDrivenPipeline*>(d3->GetExecutive()); 	
 		// adds one ghostlevel
 		exec->SetUpdateExtent(exec->GetOutputInformation(0), piece, numPieces, 1); 
+		// TODO: The following is the line which truly adds the ghost level
+		// remove once I verify that ghost level is being generated.
+		d3->GetOutputPortInformation(0)->Set(UPDATE_NUMBER_OF_GHOST_LEVELS, 1);
 		d3->Update();
 		// Changing output to output of d3
 	 	output->ShallowCopy(d3->GetOutput()); 
