@@ -10,7 +10,6 @@
     <Filter name="Friends-Of-Friends Halo Finder" />
  	<Filter name="ExtractHistogram" />
     <Filter name="PlotAttributes" />
-    <Filter name="Tree Demo" />
    </Category>
  </ParaViewFilters>
 
