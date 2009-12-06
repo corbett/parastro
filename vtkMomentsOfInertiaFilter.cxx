@@ -138,7 +138,7 @@ void vtkMomentsOfInertiaFilter::DisplayVectorsAsLines(vtkPointSet* input,
   vtkSmartPointer<vtkDoubleArray> principleMoment = \
  		vtkSmartPointer<vtkDoubleArray>::New();
 		principleMoment->SetNumberOfComponents(3);
-		principleMoment->SetNumberOfValues(3);
+		principleMoment->SetNumberOfTuples(3);
 		principleMoment->SetName("principle moment");
 	// setting origin
 	points->InsertNextPoint(centerPoint);
