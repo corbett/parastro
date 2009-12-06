@@ -124,7 +124,7 @@ void vtkMomentsOfInertiaFilter::UpdateInertiaTensorFinal(vtkPointSet* input,
 }
 //----------------------------------------------------------------------------
 void vtkMomentsOfInertiaFilter::DisplayVectorsAsLines(vtkPointSet* input,
- 	vtkPolyData* output, double vectors[3][3], double* centerPoint)
+ 	vtkPolyData* output, double vectors[][], double* centerPoint)
 {
 	vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
 	vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
@@ -145,7 +145,7 @@ void vtkMomentsOfInertiaFilter::DisplayVectorsAsLines(vtkPointSet* input,
 	double scale=ComputeMaxR(input,centerPoint);
 	for(int i = 0; i < 3; ++i)
 		{
-		eigenvectors->SetTuple(i,vectors[i]);
+//		eigenvectors->SetTuple(i,vectors[i]);
 		VecMultConstant(vectors[i],scale);	
 		points->InsertNextPoint(vectors[i]);
 		// creating the lines
