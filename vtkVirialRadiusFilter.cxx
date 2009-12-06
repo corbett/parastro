@@ -125,6 +125,7 @@ int vtkVirialRadiusFilter::RequestData(vtkInformation *request,
 		// resetting output, then copying into it the new data set
 		output->Initialize();
 		output->DeepCopy(newDataSet);
+		output->SetCells(VTK_VERTEX,newDataSet->GetVerts());
 		newDataSet->Delete();
 		}
 	else	
