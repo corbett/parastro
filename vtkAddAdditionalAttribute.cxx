@@ -99,6 +99,8 @@ int vtkAddAdditionalAttribute::ReadAdditionalAttributeFile(
 			localId++)
 			{
 			vtkIdType globalId = globalIdArray->GetComponent(localId,0);
+			cout << "previous globalId = " << formerGlobalId << "\n";
+			cout << "next globalId = " << globalIdArray << "\n";
 			// seeking to next data id
 			attributeData = SeekInAsciiAttributeFile(attributeInFile,
 				globalId-formerGlobalId);
