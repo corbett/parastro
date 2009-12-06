@@ -406,6 +406,7 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 	if(this->GetDistributeDataOn() && \
 	 	RunInParallel(vtkMultiProcessController::GetGlobalController()))
 		{
+		cout << "IN PARALLEL\n";
 		vtkSmartPointer<vtkDistributedDataFilter> d3 = \
 		    vtkSmartPointer<vtkDistributedDataFilter>::New();
 		d3->AddInput(tipsyReadInitialOutput);
