@@ -94,7 +94,7 @@ int vtkAddAdditionalAttribute::ReadAdditionalAttributeFile(
 			localId < globalIdArray->GetNumberOfTuples(); 
 			localId++)
 			{
-			vtkIdType globalId = globalIdArray->GetComponent(i,0);
+			vtkIdType globalId = globalIdArray->GetComponent(localId,0);
 			// seeking to next data id
 			// TODO: implement this
 			SeekInAsciiAdditionalAttributeFile(attributeInFile,globalId);
