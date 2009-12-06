@@ -17,7 +17,7 @@
 #include "vtkCellData.h"
 #include "vtkPoints.h"
 #include "vtkLine.h"
-#include "vtkFloatArray.h"
+#include "vtkDoubleArray.h"
 #include "vtkUnsignedCharArray.h"
 #include "vtkSmartPointer.h"
 #include "vtkMath.h"
@@ -135,8 +135,8 @@ void vtkMomentsOfInertiaFilter::DisplayVectorsAsLines(vtkPointSet* input,
 		momentNumber->SetNumberOfValues(3);
 		momentNumber->SetName("moment number");
 	// setup the eigenvector array
-  vtkSmartPointer<vtkFloatArray> eigenvectors = \
- 		vtkSmartPointer<vtkFloatArray>::New();
+  vtkSmartPointer<vtkDoubleArray> eigenvectors = \
+ 		vtkSmartPointer<vtkDoubleArray>::New();
 		eigenvectors->SetNumberOfComponents(3);
 		eigenvectors->SetNumberOfValues(3);
 		eigenvectors->SetName("principle moment of inertia");
@@ -145,6 +145,10 @@ void vtkMomentsOfInertiaFilter::DisplayVectorsAsLines(vtkPointSet* input,
 	double scale=ComputeMaxR(input,centerPoint);
 	for(int i = 0; i < 3; ++i)
 		{
+		for(int j=0; j < 3; j++)
+			{
+			eigenvectors->SetComponent(i,j,vectors[i][j]);	
+			}
 		VecMultConstant(vectors[i],scale);	
 		points->InsertNextPoint(vectors[i]);
 		// creating the lines
@@ -157,12 +161,12 @@ void vtkMomentsOfInertiaFilter::DisplayVectorsAsLines(vtkPointSet* input,
 		lines->InsertNextCell(nextLine);
 		// saving the moment number so the lines can be colored by this
 		momentNumber->SetValue(i,i+1); // i+1 as want to index array by 1
-		eigenvectors->SetTuple(i,vectors[i]);
 		}
 	// ready to update the output
 	output->SetPoints(points);
 	output->SetLines(lines);
 	output->GetCellData()->AddArray(momentNumber);
+	
 	// TODO: add back in
 	// output->GetCellData()->AddArray(eigenvectors);
 }
