@@ -750,10 +750,9 @@ void VecMultConstant(double vector[],double constant)
 double SeekInAsciiAttributeFile(
 	ifstream& asciiFile,const int offset)
 {
-	cout << "offset" << offset << "\n";
 	int pos = 0;
 	double attribute = 0;
-	while(asciiFile >> attribute && pos < offset)
+	while(pos < offset && asciiFile >> attribute )
 		{
 		pos++;
 		}
