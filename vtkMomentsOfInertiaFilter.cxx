@@ -17,6 +17,7 @@
 #include "vtkCellData.h"
 #include "vtkPoints.h"
 #include "vtkLine.h"
+#include "vtkDoubleArray.h"
 #include "vtkUnsignedCharArray.h"
 #include "vtkSmartPointer.h"
 #include "vtkMath.h"
@@ -133,11 +134,23 @@ void vtkMomentsOfInertiaFilter::DisplayVectorsAsLines(vtkPointSet* input,
 		momentNumber->SetNumberOfComponents(1);
 		momentNumber->SetNumberOfValues(3);
 		momentNumber->SetName("moment number");
+	//setup the moment array
+  vtkSmartPointer<vtkDoubleArray> principleMoment = \
+ 		vtkSmartPointer<vtkDoubleArray>::New();
+		principleMoment->SetNumberOfComponents(3);
+		principleMoment->SetNumberOfValues(3);
+		principleMoment->SetName("principle moment");
 	// setting origin
 	points->InsertNextPoint(centerPoint);
 	double scale=ComputeMaxR(input,centerPoint);
+	double* tempVector = new double[3];
 	for(int i = 0; i < 3; ++i)
 		{
+		for(int j=0; j<3; ++j)
+			{
+			tempVector[j]=vectors[i][j];
+			}
+		principleMoment->SetTuple(i,tempVector);
 		VecMultConstant(vectors[i],scale);
 		points->InsertNextPoint(vectors[i]);
 		// creating the lines
@@ -155,6 +168,9 @@ void vtkMomentsOfInertiaFilter::DisplayVectorsAsLines(vtkPointSet* input,
 	output->SetPoints(points);
 	output->SetLines(lines);
 	output->GetCellData()->AddArray(momentNumber);
+	output->GetCellData()->AddArray(principleMoment);
+	// TODO: delete temp vector
+
 }
 
 //----------------------------------------------------------------------------
