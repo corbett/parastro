@@ -147,8 +147,7 @@ void vtkMomentsOfInertiaFilter::DisplayVectorsAsLines(vtkPointSet* input,
 		{
 		for(int j=0; j<3; ++j)
 			{
-			// TODO: change
-			principleMoment->SetComponent(i,j,3.14);
+			principleMoment->SetComponent(i,j,vectors[i][j]);
 			}
 		VecMultConstant(vectors[i],scale);
 		points->InsertNextPoint(vectors[i]);
