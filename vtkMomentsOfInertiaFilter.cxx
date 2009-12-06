@@ -17,6 +17,7 @@
 #include "vtkCellData.h"
 #include "vtkPoints.h"
 #include "vtkLine.h"
+#include "vtkFloatArray.h"
 #include "vtkUnsignedCharArray.h"
 #include "vtkSmartPointer.h"
 #include "vtkMath.h"
@@ -133,11 +134,18 @@ void vtkMomentsOfInertiaFilter::DisplayVectorsAsLines(vtkPointSet* input,
 		momentNumber->SetNumberOfComponents(1);
 		momentNumber->SetNumberOfValues(3);
 		momentNumber->SetName("moment number");
+	// setup the eigenvector array
+  vtkSmartPointer<vtkFloatArray> eigenvectors = \
+ 		vtkSmartPointer<vtkFloatArray>::New();
+		eigenvectors->SetNumberOfComponents(3);
+		eigenvectors->SetNumberOfValues(3);
+		eigenvectors->SetName("principle moment of inertia");
 	// setting origin
 	points->InsertNextPoint(centerPoint);
 	double scale=ComputeMaxR(input,centerPoint);
 	for(int i = 0; i < 3; ++i)
 		{
+		eigenvectors->SetTuple(i,vectors[i]);
 		VecMultConstant(vectors[i],scale);
 		points->InsertNextPoint(vectors[i]);
 		// creating the lines
@@ -155,6 +163,7 @@ void vtkMomentsOfInertiaFilter::DisplayVectorsAsLines(vtkPointSet* input,
 	output->SetPoints(points);
 	output->SetLines(lines);
 	output->GetCellData()->AddArray(momentNumber);
+	output->GetCellData()->AddArray(eigenvectors);
 }
 
 //----------------------------------------------------------------------------
