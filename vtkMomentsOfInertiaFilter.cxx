@@ -145,7 +145,8 @@ void vtkMomentsOfInertiaFilter::DisplayVectorsAsLines(vtkPointSet* input,
 	double scale=ComputeMaxR(input,centerPoint);
 	for(int i = 0; i < 3; ++i)
 		{
-		eigenvectors->SetTuple(i,vectors[i]);
+		// TODO: add back in
+		// eigenvectors->SetTuple(i,vectors[i]);
 		VecMultConstant(vectors[i],scale);
 		points->InsertNextPoint(vectors[i]);
 		// creating the lines
@@ -163,7 +164,8 @@ void vtkMomentsOfInertiaFilter::DisplayVectorsAsLines(vtkPointSet* input,
 	output->SetPoints(points);
 	output->SetLines(lines);
 	output->GetCellData()->AddArray(momentNumber);
-	output->GetCellData()->AddArray(eigenvectors);
+	// TODO: add back in
+	// output->GetCellData()->AddArray(eigenvectors);
 }
 
 //----------------------------------------------------------------------------
