@@ -218,9 +218,6 @@ int vtkCenterOfMassFilter::RequestData(vtkInformation*,
 		float* centerOfMass = DoublePointToFloat(dbCenterOfMass);
 		// Placing the point's data in the output
 		SetPointValue(output,centerOfMass); 
-		// Also saving it as a data array for easy csv export
-		AllocateDataArray(output,"center of mass",3,1);
-		SetDataValue(output,"center of mass",0,centerOfMass);
 		// finally, some memory management
 		delete [] dbCenterOfMass;
 		delete [] centerOfMass;
