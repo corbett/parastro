@@ -163,7 +163,7 @@ void vtkMomentsOfInertiaFilter::DisplayVectorsAsLines(vtkPointSet* input,
 	output->SetPoints(points);
 	output->SetLines(lines);
 	output->GetCellData()->AddArray(momentNumber);
-	output->GetCellData()->AddArray(eigenvectors);
+	output->GetCellData()->SetVectors(eigenvectors);
 }
 
 //----------------------------------------------------------------------------
