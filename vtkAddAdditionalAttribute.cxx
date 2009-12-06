@@ -82,12 +82,12 @@ int vtkAddAdditionalAttribute::ReadAdditionalAttributeFile(
 	if(globalIdArray->GetNumberOfTuples() == \
 		output->GetPoints()->GetNumberOfPoints())
 		{
-		// TODO: add back in
-		/*
 			
 		// read additional attribute for all particles
 		AllocateDataArray(output,this->AttributeName,1,
 			output->GetPoints()->GetNumberOfPoints());		
+		// TODO: add back in
+		/*	
 		double attributeData;
 		// TODO: remove this; should be the number of bodies...
 		attributeInFile >> attributeData;
