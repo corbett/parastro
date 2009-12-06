@@ -428,7 +428,9 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 		}
 	else
 		{
+		// TODO: do I need both of these?
 		output->ShallowCopy(tipsyReadInitialOutput);
+		output->CopyStructure(tipsyReadInitialOutput);
 		}
 	// Read Successfully
 	vtkDebugMacro("Read " << output->GetPoints()->GetNumberOfPoints() \
