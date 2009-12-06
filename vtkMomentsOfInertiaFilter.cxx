@@ -143,14 +143,13 @@ void vtkMomentsOfInertiaFilter::DisplayVectorsAsLines(vtkPointSet* input,
 	// setting origin
 	points->InsertNextPoint(centerPoint);
 	double scale=ComputeMaxR(input,centerPoint);
-	double* tempVector = new double[3];
 	for(int i = 0; i < 3; ++i)
 		{
 		for(int j=0; j<3; ++j)
 			{
-			tempVector[j]=vectors[i][j];
+			// TODO: change
+			principleMoment->SetComponent(i,j,3.14);
 			}
-		principleMoment->SetTuple(i,tempVector);
 		VecMultConstant(vectors[i],scale);
 		points->InsertNextPoint(vectors[i]);
 		// creating the lines
@@ -169,8 +168,6 @@ void vtkMomentsOfInertiaFilter::DisplayVectorsAsLines(vtkPointSet* input,
 	output->SetLines(lines);
 	output->GetCellData()->AddArray(momentNumber);
 	output->GetCellData()->AddArray(principleMoment);
-	// TODO: delete temp vector
-
 }
 
 //----------------------------------------------------------------------------
