@@ -157,12 +157,6 @@ int vtkFriendsOfFriendsHaloFinder::RequestData(vtkInformation* request,
   // Get input and output data.
   vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
   vtkInformation* inInfo = inputVector[0]->GetInformationObject(0);
-	// TODO: trying some ghost level stuff
-	// Requesting one level of ghost cells
-	inInfo->Set(
-		vtkStreamingDemandDrivenPipeline::UPDATE_NUMBER_OF_GHOST_LEVELS(),1);
-	outputVector->GetInformationObject(0)->Set(
-		vtkStreamingDemandDrivenPipeline::UPDATE_NUMBER_OF_GHOST_LEVELS(), 1);
 	vtkPointSet* output = vtkPointSet::GetData(outputVector);
 	output->ShallowCopy(input);
 	// Get name of data array containing global ids
