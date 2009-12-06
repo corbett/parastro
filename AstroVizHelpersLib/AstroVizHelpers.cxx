@@ -560,6 +560,7 @@ vtkPointSet* CopyPointsAndData(vtkPointSet* dataSet, vtkIdList*
 	vtkPolyData* newDataSet = vtkPolyData::New(); // this memory must be managed
 		// Initializing points and verts
 	  newDataSet->SetPoints(vtkSmartPointer<vtkPoints>::New());
+		newDataSet->SetVerts(vtkSmartPointer<vtkCellArray>::New());
 	  // Initializing data
 	vtkSmartPointer<vtkDataArray> nextArray;
 	for(int i = 0; i < dataSet->GetPointData()->GetNumberOfArrays(); ++i)
