@@ -79,6 +79,8 @@ int vtkAddAdditionalAttribute::ReadAdditionalAttributeFile(
 		vtkErrorMacro("Please specify an attribute name.");
 		return 0;
 		}
+	// TODO: add back in
+	/*
 	if(globalIdArray->GetNumberOfTuples() == \
 		output->GetPoints()->GetNumberOfPoints())
 		{
@@ -104,6 +106,9 @@ int vtkAddAdditionalAttribute::ReadAdditionalAttributeFile(
 		return 1;
 		}
 	return 0;
+	*/
+	// TODO: remove
+	return 1;
 }
 
 //----------------------------------------------------------------------------
