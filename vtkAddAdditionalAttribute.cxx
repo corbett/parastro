@@ -79,11 +79,12 @@ int vtkAddAdditionalAttribute::ReadAdditionalAttributeFile(
 		vtkErrorMacro("Please specify an attribute name.");
 		return 0;
 		}
-	// TODO: add back in
-	/*
 	if(globalIdArray->GetNumberOfTuples() == \
 		output->GetPoints()->GetNumberOfPoints())
 		{
+		// TODO: add back in
+		/*
+			
 		// read additional attribute for all particles
 		AllocateDataArray(output,this->AttributeName,1,
 			output->GetPoints()->GetNumberOfPoints());		
@@ -101,14 +102,16 @@ int vtkAddAdditionalAttribute::ReadAdditionalAttributeFile(
 			SetDataValue(output,this->AttributeName,nextDataId,
 				&attributeData);
 			}
+		*/
+		
 		// closing file
 		attributeInFile.close();
 		return 1;
 		}
-	return 0;
-	*/
 	// TODO: remove
 	return 1;
+	// TODO: add back in
+	// return 0;
 }
 
 //----------------------------------------------------------------------------
