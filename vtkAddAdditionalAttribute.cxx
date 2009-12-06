@@ -93,7 +93,7 @@ int vtkAddAdditionalAttribute::ReadAdditionalAttributeFile(
 		double attributeData;
 		//always skip the header, which is the total number of bodies
 		attributeInFile >> attributeData;
-		unsigned long formerGlobalId = 0;
+		unsigned long formerGlobalId = -1;
 		for(unsigned long localId=0; 
 			localId < globalIdArray->GetNumberOfTuples(); 
 			localId++)
