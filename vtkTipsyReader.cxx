@@ -418,7 +418,8 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 		exec->SetUpdateExtent(exec->GetOutputInformation(0), piece, numPieces, 1); 
 		*/
 		// TODO: trying some things with ghost levels
-	 	d3->GetOutputPortInformation(0)->Set(UPDATE_NUMBER_OF_GHOST_LEVELS, 1);
+	 	d3->GetOutputPortInformation(0)->Set(
+			vtkDataObject::UPDATE_NUMBER_OF_GHOST_LEVELS, 1);
 		d3->Update();
 		// Changing output to output of d3
 	 	output->ShallowCopy(d3->GetOutput()); 
