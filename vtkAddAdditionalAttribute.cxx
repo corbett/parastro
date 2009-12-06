@@ -99,11 +99,11 @@ int vtkAddAdditionalAttribute::ReadAdditionalAttributeFile(
 			localId++)
 			{
 			vtkIdType globalId = globalIdArray->GetComponent(localId,0);
-			cout << "next localId = " << localId << "\n";			
+			cout << "(next localId = " << localId << ",";			
 			// seeking to next data id
 			attributeData = SeekInAsciiAttributeFile(attributeInFile,
 				globalId-formerGlobalId);
-			cout << "datavalue = " << attributeData << "\n";
+			cout << "datavalue = " << attributeData << ") ";
 			formerGlobalId=globalId;
 			// place attribute data in output
 			SetDataValue(output,this->AttributeName,localId,
