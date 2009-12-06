@@ -90,17 +90,19 @@ int vtkAddAdditionalAttribute::ReadAdditionalAttributeFile(
 		double attributeData;
 		// TODO: remove this; should be the number of bodies...
 		attributeInFile >> attributeData;
-		// TODO: add back in
+		cout << "total ids on this process " \
+			<< globalIdArray->GetNumberOfTuples() << "\n";
 		for(unsigned long i=0; i < globalIdArray->GetNumberOfTuples(); i++)
 			{
 			vtkIdType nextDataId = globalIdArray->GetComponent(i,0);
-			cout << "next id " << nextDataId << "\n";
+
 			// seeking to next data id
-			// TODO: add back in
-			/*
 			SeekInAsciiAdditionalAttributeFile(attributeInFile,nextDataId);
 			// reading in, TODO: change
+			// TODO: add back in
+			/*
 			attributeInFile >> attributeData;
+			
 			// place attribute data in output
 			SetDataValue(output,this->AttributeName,nextDataId,
 				&attributeData);
