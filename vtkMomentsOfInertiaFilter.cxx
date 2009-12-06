@@ -145,8 +145,7 @@ void vtkMomentsOfInertiaFilter::DisplayVectorsAsLines(vtkPointSet* input,
 	double scale=ComputeMaxR(input,centerPoint);
 	for(int i = 0; i < 3; ++i)
 		{
-		eigenvectors->SetTuple(i,vectors[i]);
-		VecMultConstant(vectors[i],scale);
+		VecMultConstant(vectors[i],scale);	
 		points->InsertNextPoint(vectors[i]);
 		// creating the lines
 		vtkSmartPointer<vtkLine> nextLine = vtkSmartPointer<vtkLine>::New();
@@ -158,6 +157,7 @@ void vtkMomentsOfInertiaFilter::DisplayVectorsAsLines(vtkPointSet* input,
 		lines->InsertNextCell(nextLine);
 		// saving the moment number so the lines can be colored by this
 		momentNumber->SetValue(i,i+1); // i+1 as want to index array by 1
+		eigenvectors->SetTuple(i,vectors[i]);
 		}
 	// ready to update the output
 	output->SetPoints(points);
