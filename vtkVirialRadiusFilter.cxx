@@ -19,6 +19,8 @@
 #include "vtkPointSet.h" 
 #include "vtkPointLocator.h"
 #include "vtkMultiProcessController.h"
+#include "vtkUnstructuredGrid.h"
+#include "vtkPolyData.h"
 #include <cmath>
 using vtkstd::string;
 
@@ -78,7 +80,7 @@ int vtkVirialRadiusFilter::FillOutputPortInformation(
   int vtkNotUsed(port), vtkInformation* info)
 {
   // now add our info
-  info->Set(vtkDataObject::DATA_TYPE_NAME(), "vtkPointSet");
+  info->Set(vtkDataObject::DATA_TYPE_NAME(), "vtkUnstructuredGrid");
   return 1;
 }
 
@@ -92,7 +94,7 @@ int vtkVirialRadiusFilter::RequestData(vtkInformation *request,
 	// Setting the center based upon the selection in the GUI
 	vtkDataSet* pointInfo = vtkDataSet::GetData(inputVector[1]);
 	// Output
-	vtkPointSet* output = vtkPointSet::GetData(outputVector);
+	vtkUnstructuredGrid* output = vtkUnstructuredGrid::GetData(outputVector);
  	output->ShallowCopy(input);
 	// Get name of data array containing mass
 	vtkDataArray* massArray = this->GetInputArrayToProcess(0, inputVector);
@@ -120,7 +122,7 @@ int vtkVirialRadiusFilter::RequestData(vtkInformation *request,
 		{
 		// This is causing problems, segfault
 		//setting the dataSet to this newInput
-		vtkPointSet* newDataSet = \
+		vtkPolyData* newDataSet = \
 			GetDatasetWithinVirialRadius(virialRadiusInfo);	
 		// resetting output, then copying into it the new data set
 		output->Initialize();

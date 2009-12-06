@@ -549,7 +549,7 @@ template <class T> void shiftLeftUpdate(T* array,int size, T updateValue)
 	array[size-1]=updateValue;
 }
 //----------------------------------------------------------------------------
-vtkPointSet* CopyPointsAndData(vtkPointSet* dataSet, vtkIdList*
+vtkPolyData* CopyPointsAndData(vtkPointSet* dataSet, vtkIdList*
  	pointsInRadius)
 {
 	// TODO: I was using CopyCells method of vtkPolyData
@@ -599,7 +599,7 @@ vtkPointSet* CopyPointsAndData(vtkPointSet* dataSet, vtkIdList*
 
 
 //----------------------------------------------------------------------------
-vtkPointSet* GetDatasetWithinVirialRadius(VirialRadiusInfo virialRadiusInfo)
+vtkPolyData* GetDatasetWithinVirialRadius(VirialRadiusInfo virialRadiusInfo)
 {
 
 	vtkIdList* pointsInRadius = \
@@ -609,7 +609,7 @@ vtkPointSet* GetDatasetWithinVirialRadius(VirialRadiusInfo virialRadiusInfo)
 		vtkPointSet::SafeDownCast(virialRadiusInfo.locator->GetDataSet());	
 	// Creating a new dataset
 	// first allocating
-	vtkPointSet* newDataSet = \
+	vtkPolyData* newDataSet = \
 		CopyPointsAndData(dataSet,pointsInRadius);
 	// Managing memory
 	pointsInRadius->Delete();

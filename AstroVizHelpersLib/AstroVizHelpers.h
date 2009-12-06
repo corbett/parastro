@@ -274,14 +274,14 @@ template <class T> void shiftLeftUpdate(T* array,int size, T updateValue);
 // and corresponding  data arrays (empty) with identical names, and number of 
 // components to dataSet. Then copys, if listed in the vtkIdList,
 // from the old data set to the new data set the points and their cell data.
-vtkPointSet* CopyPointsAndData(vtkPointSet* dataSet, vtkIdList*
+vtkPolyData* CopyPointsAndData(vtkPointSet* dataSet, vtkIdList*
  	pointsInRadius);
 
 // Description:
 // Given a populated virialradiusinfo struct, returns a dataset corresponding
 // to only those points within the virial radius.
 // This method only works if input was vtkPolyData...
-vtkPointSet* GetDatasetWithinVirialRadius(VirialRadiusInfo virialRadiusInfo);
+vtkPolyData* GetDatasetWithinVirialRadius(VirialRadiusInfo virialRadiusInfo);
 
 // Description:
 // helper function to calculate the center based upon the source.

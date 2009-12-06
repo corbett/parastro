@@ -16,7 +16,7 @@
 
 #ifndef __vtkVirialRadiusFilter_h
 #define __vtkVirialRadiusFilter_h
-#include "vtkPointSetAlgorithm.h"
+#include "vtkUnstructuredGridAlgorithm.h"
 #include "vtkStringArray.h" // some class variables are vtkStringArrays
 
 class vtkPointSet;
@@ -39,11 +39,11 @@ enum ColumnType
 
 
 //----------------------------------------------------------------------------
-class VTK_EXPORT vtkVirialRadiusFilter : public vtkPointSetAlgorithm
+class VTK_EXPORT vtkVirialRadiusFilter : public vtkUnstructuredGridAlgorithm
 {
 public:
   static vtkVirialRadiusFilter* New();
-  vtkTypeRevisionMacro(vtkVirialRadiusFilter, vtkPointSetAlgorithm);
+  vtkTypeRevisionMacro(vtkVirialRadiusFilter, vtkUnstructuredGridAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent);
   // Description:
   // Get/Set the softening parameter
