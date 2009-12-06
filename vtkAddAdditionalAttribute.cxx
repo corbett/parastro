@@ -86,6 +86,8 @@ int vtkAddAdditionalAttribute::ReadAdditionalAttributeFile(
 		AllocateDataArray(output,this->AttributeName,1,
 			output->GetPoints()->GetNumberOfPoints());		
 		double attributeData;
+		// TODO: remove this; should be the number of bodies...
+		attributeInFile >> attributeData;
 		for(unsigned long i=0; i < globalIdArray->GetNumberOfTuples(); i++)
 			{
 			vtkIdType nextDataId = globalIdArray->GetComponent(i,0);
@@ -123,11 +125,14 @@ int vtkAddAdditionalAttribute::RequestData(vtkInformation*,
 	output->ShallowCopy(input);
 	// Make sure we are not running in parallel, this filter does not work in 
 	// parallel
+	// Gradually starting to make this work in parallel; removing this for now
+	/*
 	if(RunInParallel(vtkMultiProcessController::GetGlobalController()))
 		{
 		vtkErrorMacro("This filter is not supported in parallel.");
 		return 0;
 		}
+	*/
 	// Make sure we have a file to read.
   if(!this->AttributeFile)
 	  {
