@@ -429,6 +429,7 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 		}
 	else
 		{
+		cout << "NOT PARALLEL\n";
 		// TODO: do I need both of these?
 		output->ShallowCopy(tipsyReadInitialOutput);
 		// output->CopyStructure(tipsyReadInitialOutput);
