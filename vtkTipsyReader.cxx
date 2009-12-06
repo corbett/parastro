@@ -406,7 +406,6 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 	if(this->GetDistributeDataOn() && \
 	 	RunInParallel(vtkMultiProcessController::GetGlobalController()))
 		{
-		cout << "IN PARALLEL\n";
 		vtkSmartPointer<vtkDistributedDataFilter> d3 = \
 		    vtkSmartPointer<vtkDistributedDataFilter>::New();
 		d3->AddInput(tipsyReadInitialOutput);
@@ -429,9 +428,9 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 		}
 	else
 		{
-		cout << "NOT PARALLEL\n";
 		// TODO: do I need both of these?
 		output->ShallowCopy(tipsyReadInitialOutput);
+		output->SetCells(VTK_VERTEX,tipsyReadInitialOutput->GetVerts());
 		// output->CopyStructure(tipsyReadInitialOutput);
 		}
 	// Read Successfully
