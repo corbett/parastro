@@ -16,6 +16,7 @@
 #include "vtkPoints.h"
 #include "vtkLine.h"
 #include "vtkUnsignedCharArray.h"
+#include "vtkSortDataArray.h"
 #include "vtkMultiProcessController.h"
 #include <vtkstd/string>
 #include "vtkMath.h"
