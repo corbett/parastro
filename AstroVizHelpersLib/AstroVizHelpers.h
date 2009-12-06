@@ -381,9 +381,10 @@ double* ComputeMidpoint(double pointOne[], double pointTwo[]);
 // float attribute
 // ...
 // float attribute
-// Seeks to a given attribute in the file
-void SeekInAsciiAdditionalAttributeFile(
-	ifstream& asciiFile,const int positionId);
+// Given an offset seeks to a given attribute in the file from the current
+// position in the file. 
+double SeekInAsciiAttributeFile(
+	ifstream& asciiFile,const int offset);
 
 
 

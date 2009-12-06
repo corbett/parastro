@@ -747,10 +747,16 @@ void VecMultConstant(double vector[],double constant)
 }
 
 //----------------------------------------------------------------------------
-void SeekInAsciiAdditionalAttributeFile(
-	ifstream& asciiFile,const int positionId)
+double SeekInAsciiAttributeFile(
+	ifstream& asciiFile,const int offset)
 {
-	// TODO: implement
+	int start = 0;
+	double attribute = 0;
+	while(start < offset && asciiFile >> attribute)
+		{
+		start++;
+		}
+	return attribute;
 }
 
 
