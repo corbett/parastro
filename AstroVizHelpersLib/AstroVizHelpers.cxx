@@ -84,7 +84,7 @@ float* DoublePointToFloat(double point[])
 void CreateSphere(vtkPolyData* output,double radius,double center[])
 {
 	vtkSmartPointer<vtkSphereSource> sphere = \
-	 															vtkSmartPointer<vtkSphereSource>::New();
+		vtkSmartPointer<vtkSphereSource>::New();
 	sphere->SetRadius(radius);
 	sphere->SetCenter(center);
 	sphere->Update();
@@ -100,17 +100,10 @@ void CreateSphere(vtkPolyData* output,double radius,double center[])
 *
 *---------------------------------------------------------------------------*/
 //----------------------------------------------------------------------------
-vtkIdType SetPointValue(vtkPointSet* output,float pos[])
-{
-	vtkIdType id=output->GetPoints()->InsertNextPoint(pos);
-	return id;
-}
-
-//----------------------------------------------------------------------------
 void AllocateDataArray(vtkPointSet* output, const char* arrayName,
 	int numComponents, unsigned long numTuples)
 {
-	vtkSmartPointer<vtkFloatArray> dataArray=\
+	vtkSmartPointer<vtkFloatArray> dataArray = \
 		vtkSmartPointer<vtkFloatArray>::New();
 	InitializeDataArray(dataArray,arrayName,numComponents,numTuples);
   output->GetPointData()->AddArray(dataArray);
@@ -120,7 +113,7 @@ void AllocateDataArray(vtkPointSet* output, const char* arrayName,
 void AllocateDoubleDataArray(vtkPointSet* output, const char* arrayName,
  	int numComponents, unsigned long numTuples)
 {
-	vtkSmartPointer<vtkDoubleArray> dataArray=\
+	vtkSmartPointer<vtkDoubleArray> dataArray = \
 		vtkSmartPointer<vtkDoubleArray>::New();
 	InitializeDataArray(dataArray,arrayName,numComponents,numTuples);
   output->GetPointData()->AddArray(dataArray);
@@ -564,7 +557,7 @@ vtkPointSet* CopyPointsAndData(vtkPointSet* dataSet, vtkIdList*
 	// go back to finding the way using the VTK api to do this
 	unsigned long numNewPoints=pointsInRadius->GetNumberOfIds();
 	// Initilizing
-	vtkPointSet* newDataSet = vtkPolyData::New(); // this memory must be managed
+	vtkPolyData* newDataSet = vtkPolyData::New(); // this memory must be managed
 		// Initializing points and verts
 	  newDataSet->SetPoints(vtkSmartPointer<vtkPoints>::New());
 	  // Initializing data

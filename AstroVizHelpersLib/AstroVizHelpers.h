@@ -48,10 +48,6 @@ void CreateSphere(vtkPolyData* output,double radius,double center[]);
 /*
 * The following methods take and modify vtkPointSet data
 */
-// Description:
-// sets the point vertices in the output vector, assigning the point 
-// a unique. 
-vtkIdType SetPointValue(vtkPointSet* output,float pos[]);
 
 // Description:
 // sets the data value in the output vector in array arrayName at 
