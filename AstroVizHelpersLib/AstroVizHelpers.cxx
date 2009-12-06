@@ -746,9 +746,25 @@ void VecMultConstant(double vector[],double constant)
 	}
 }
 
-
 //----------------------------------------------------------------------------
-	
-	
+void SeekInAsciiAdditionalAttributeFile(
+	ifstream& asciiFile,const int positionId)
+{
+	// TODO: implement
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

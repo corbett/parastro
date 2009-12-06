@@ -374,6 +374,17 @@ double* ComputeDensity(vtkVariant cumulativeMass,
 // Helper function to compute the midpoint between two points
 double* ComputeMidpoint(double pointOne[], double pointTwo[]);
 
+// Description:
+// Given an AdditionalAttributeFile of the format
+// int numBodies
+// float attribute
+// float attribute
+// ...
+// float attribute
+// Seeks to a given attribute in the file
+void SeekInAsciiAdditionalAttributeFile(
+	ifstream& asciiFile,const int positionId);
+
 
 
 

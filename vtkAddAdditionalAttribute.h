@@ -21,7 +21,6 @@
 #ifndef __vtkAddAdditionalAttribute_h
 #define __vtkAddAdditionalAttribute_h
 #include "vtkPointSetAlgorithm.h"
-#include <vtkstd/vector>
 
 class VTK_GRAPHICS_EXPORT vtkAddAdditionalAttribute : public vtkPointSetAlgorithm
 {
@@ -61,7 +60,7 @@ private:
  //  If a marked file was specified, it reads in 
 	// only the particles at indices which were marked
 	int ReadAdditionalAttributeFile(
-		vtkstd::vector<unsigned long>& markedParticleIndices, 
+		vtkDataArray* globalIdArray, 
 		vtkPointSet* output);
 //ETX
 };

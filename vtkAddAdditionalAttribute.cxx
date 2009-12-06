@@ -26,6 +26,12 @@ vtkStandardNewMacro(vtkAddAdditionalAttribute);
 //----------------------------------------------------------------------------
 vtkAddAdditionalAttribute::vtkAddAdditionalAttribute()
 {
+	this->SetInputArrayToProcess(
+    0,
+    0,
+    0,
+    vtkDataObject::FIELD_ASSOCIATION_POINTS_THEN_CELLS,
+    vtkDataSetAttributes::SCALARS);
 	this->AttributeFile = 0;
 	this->AttributeName = 0; 
 }
@@ -56,9 +62,10 @@ int vtkAddAdditionalAttribute::FillInputPortInformation(int,
   return 1;
 }
 
+
 //----------------------------------------------------------------------------
 int vtkAddAdditionalAttribute::ReadAdditionalAttributeFile(
-	vtkstd::vector<unsigned long>& markedParticleIndices, vtkPointSet* output)
+	vtkDataArray* globalIdArray, vtkPointSet* output)
 {
 	// open file
 	ifstream attributeInFile(this->AttributeFile);
@@ -72,61 +79,29 @@ int vtkAddAdditionalAttribute::ReadAdditionalAttributeFile(
 		vtkErrorMacro("Please specify an attribute name.");
 		return 0;
 		}
-	unsigned long numBodies;
-	attributeInFile >> numBodies;
-	if(numBodies==output->GetPoints()->GetNumberOfPoints())
+	if(globalIdArray->GetNumberOfTuples() == \
+		output->GetPoints()->GetNumberOfPoints())
 		{
-		// ready to read in
-		unsigned long dataIndex=0;
+		// read additional attribute for all particles
+		AllocateDataArray(output,this->AttributeName,1,
+			output->GetPoints()->GetNumberOfPoints());		
 		double attributeData;
-		if(markedParticleIndices.empty())
+		for(unsigned long i=0; i < globalIdArray->GetNumberOfTuples(); i++)
 			{
-			// read additional attribute for all particles
-			AllocateDataArray(output,this->AttributeName,1,
-				output->GetPoints()->GetNumberOfPoints());
-			while(attributeInFile >> attributeData)
-				{
-				// place attribute data in output
-				SetDataValue(output,this->AttributeName,dataIndex,
-					&attributeData);
-				dataIndex++;
-				}
-			}
-		else
-			{
-			// read additional attribute only for marked particles
-			AllocateDataArray(output,this->AttributeName,1,
-				markedParticleIndices.size());
-			unsigned long nextMarkedParticleIndex=0;
-			for(vtkstd::vector<unsigned long>::iterator it = markedParticleIndices.begin();
-				it != markedParticleIndices.end(); ++it)		
-				{
-		 		nextMarkedParticleIndex=*it;
-				while(attributeInFile >> attributeData)
-					{
-					if(nextMarkedParticleIndex == dataIndex)
-						{
-						// nextMarkedParticleIndex == current particle so store
-						SetDataValue(output,this->AttributeName,
-							dataIndex,&attributeData);
-						dataIndex++;
-						// break as we are done reading current marked particle's 
-						// data and want to get the index of the next marked particle,
-						// if there are more marked particles
-						break;
-						}
-					else
-						{
-						// skipping, not marked
-						dataIndex++;
-						}
-					}
-				}
+			vtkIdType nextDataId = globalIdArray->GetComponent(i,0);
+			// seeking to next data id
+			SeekInAsciiAdditionalAttributeFile(attributeInFile,nextDataId);
+			// reading in, TODO: change
+			attributeInFile >> attributeData;
+			// place attribute data in output
+			SetDataValue(output,this->AttributeName,nextDataId,
+				&attributeData);
 			}
 		// closing file
 		attributeInFile.close();
+		return 1;
 		}
-	return 1;
+	return 0;
 }
 
 //----------------------------------------------------------------------------
@@ -136,6 +111,13 @@ int vtkAddAdditionalAttribute::RequestData(vtkInformation*,
 {
   // get input and output data
   vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
+	// Get name of data array containing mass
+	vtkDataArray* globalIdArray = this->GetInputArrayToProcess(0, inputVector);
+  if(!globalIdArray)
+    {
+    vtkErrorMacro("Failed to locate global id array");
+    return 0;
+    }
   vtkPointSet* output = vtkPointSet::GetData(outputVector);
 	output->Initialize();
 	output->ShallowCopy(input);
@@ -152,8 +134,6 @@ int vtkAddAdditionalAttribute::RequestData(vtkInformation*,
     vtkErrorMacro("An attribute file must be specified.");
     return 0;
     }
-	// For now not supporting marked particle indices. TODO: support
-	vtkstd::vector<unsigned long> markedParticleIndices;
-	ReadAdditionalAttributeFile(markedParticleIndices,output);	
+	ReadAdditionalAttributeFile(globalIdArray,output);	
 	return 1;
 }
