@@ -18,3 +18,4 @@ DataRepresentation1.SelectionColor = [0.048416876478217748, 0.63672846570534825,
 DataRepresentation1.SelectionRepresentation = 'Wireframe'
 
 Render()
+

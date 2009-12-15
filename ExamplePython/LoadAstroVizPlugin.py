@@ -1,0 +1,1 @@
+servermanager.LoadPlugin("/Users/corbett/Documents/Projects/Work/Viz/pvaddons/ParaViz/ParaViz1.3_build/libAstroVizPlugin.dylib")
