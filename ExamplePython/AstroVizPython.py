@@ -1,9 +1,27 @@
 #!/usr/bin/python
+# Import libraries
+from paraview.simple import *
+from paraview import servermanager
+# Connect to server 
+if not servermanager.ActiveConnection:
+	connection = servermanager.Connect('x01y01.zbox.physik.uzh.ch', 11111)
+# Load AstroViz plugin
+servermanager.LoadPlugin('libAstroVizPlugin.dylib')
+# Use the TipsyReader
+tipsyfile = servermanager.sources.TipsyReader(FileName='b1.00300.d0-1000.std')
+# Finding the center of mass
+com=servermanager.filters.CenterOfMass(Input=tipsyfile)
+com.SelectInputArray=['POINTS','mass']
+com.UpdatePipeline()
+# Render the result
+view=servermanager.CreateRenderView()
+rep=servermanager.CreateRepresentation(com,view)
+view.StillRender()
+
+
 #########
 # Make sure: PYTHONPATH includes the VTK/Wrapping/Python and the bin/ directories from your ParaView build:
 #export PYTHONPATH=/Users/corbett/Documents/Projects/Work/Viz/ParaView/ParaView-3.6.1-Stable/ParaView-3.6.1-Stable_build/Utilities/VTKPythonWrapping/:/Users/corbett/Documents/Projects/Work/Viz/ParaView/ParaView-3.6.1-Stable/ParaView-3.6.1-Stable_build/bin/
-from paraview.simple import *
-from paraview import servermanager
 ###############
 # Connect to Server
 #
@@ -12,15 +30,13 @@ from paraview import servermanager
 # connection = servermanager.Connect('x01y01.zbox.physik.uzh.ch', 11111)
 ###############
 if not servermanager.ActiveConnection:
- 	connection = servermanager.Connect()
+	connection = servermanager.Connect('x01y01.zbox.physik.uzh.ch', 11111)
 
 ###############
-# Load AstroViz plugin
 #
 # AstroViz data readers will be available under servermanager.sources
 # AstroViz data filters will be available under servermanager.filters
 ###############
-servermanager.LoadPlugin("/Users/corbett/Documents/Projects/Work/Viz/pvaddons/ParaViz/ParaViz1.3_build/libAstroVizPlugin.dylib")
 
 ###############
 # Get Help 
@@ -32,13 +48,7 @@ servermanager.LoadPlugin("/Users/corbett/Documents/Projects/Work/Viz/pvaddons/Pa
 # help(servermanager.sources.TipsyReader)
 ###############
 
-###############
-# Use the TipsyReader
-#
-# AaaFileName rather than simply FileName is an artifact of a ParaView bug, 
-# it must be alphabetically first for GUI to function properly.
-###############
-b1_00300_d01000_std = servermanager.sources.TipsyReader( AaaFileName='/Users/corbett/Documents/Projects/Work/Viz/pvaddons/testdata/b1.00300.d0-1000.std' )
+
 
 ###############
 # Create a Glyph
@@ -57,15 +67,4 @@ rep1.PointSize=1
 view1.ResetCamera()
 view1.StillRender()
 
-###############
-# Doing Some Analysis!
-###############
-# finding the center of mass
-com1=servermanager.filters.CenterOfMass(Input=b1_00300_d01000_std)
-com1.SelectInputArray=['POINTS','mass']
-com1.UpdatePipeline()
-view2=servermanager.CreateRenderView()
-rep2=servermanager.CreateRepresentation(com1,view2)
-rep2.PointSize=3
-view2.ResetCamera()
-view2.StillRender()
+# Doing Some Analysis
