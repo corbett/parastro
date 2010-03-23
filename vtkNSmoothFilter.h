@@ -29,9 +29,9 @@
 #ifndef __vtkNSmoothFilter_h
 #define __vtkNSmoothFilter_h
 #include "vtkPointSetAlgorithm.h"
+#include <string>
 
-
-class VTK_GRAPHICS_EXPORT vtkNSmoothFilter : public vtkPointSetAlgorithm
+class VTK_EXPORT vtkNSmoothFilter : public vtkPointSetAlgorithm
 {
 public:
   static vtkNSmoothFilter *New();

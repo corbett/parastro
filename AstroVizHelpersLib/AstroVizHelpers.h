@@ -206,7 +206,7 @@ double ComputeMaxR(vtkPointSet* input,double point[]);
 // than an overall bounding box. But if anything, the parallel version should
 // be an even better approximation to the maximum radius (as we use the
 // bounding box, not the individual points therein to compute) than the
-// serial version, and is always guarenteed to be greater than or equal
+// serial version, and is always guaranteed to be greater than or equal
 // to the true maximum (if one used the points within the data set)
 double ComputeMaxRadiusInParallel(
 	vtkMultiProcessController* controller,vtkPointSet* input,double point[]);

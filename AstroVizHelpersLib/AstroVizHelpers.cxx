@@ -24,6 +24,7 @@
 #include "vtkSmartPointer.h"
 #include "vtkMultiProcessController.h"
 #include "vtkMath.h"
+#define _USE_MATH_DEFINES
 #include <cmath>
 /*----------------------------------------------------------------------------
 *

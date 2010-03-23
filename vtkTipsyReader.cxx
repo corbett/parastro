@@ -4,8 +4,6 @@
   Module:    $RCSfile: vtkTipsyReader.cxx,v $
 =========================================================================*/
 #include "vtkTipsyReader.h"
-#include "AstroVizHelpersLib/AstroVizHelpers.h"
-#include "vtkUnstructuredGrid.h"
 #include "vtkObjectFactory.h"
 #include "vtkPointData.h"
 #include "vtkPolyData.h"
@@ -19,20 +17,53 @@
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
 #include "vtkSmartPointer.h"
+#include "vtkDataArraySelection.h"
 #include <cmath>
 #include <assert.h>
 
 vtkCxxRevisionMacro(vtkTipsyReader, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkTipsyReader);
+//----------------------------------------------------------------------------
+vtkSmartPointer<vtkFloatArray> AllocateDataArray(
+  vtkDataSet *output, const char* arrayName, int numComponents, unsigned long numTuples)
+{
+  vtkSmartPointer<vtkFloatArray> dataArray=vtkSmartPointer<vtkFloatArray>::New();
+	dataArray->SetNumberOfComponents(numComponents);
+	dataArray->SetNumberOfTuples(numTuples);
+	dataArray->SetName(arrayName);
+	// initializes everything to zero
+	for (int i=0; i < numComponents; ++i) {
+		dataArray->FillComponent(i, 0.0);
+  }
+  output->GetPointData()->AddArray(dataArray);
+  return dataArray;
+}
 
 //----------------------------------------------------------------------------
 vtkTipsyReader::vtkTipsyReader()
 {
-  this->MarkFileName = 0; // this file is optional
-  this->FileName = 0;
-	this->ReadPositionsOnly = 0;
-	this->DistributeDataOn = 1;
+  this->MarkFileName      = 0; // this file is optional
+  this->FileName          = 0;
+	this->DistributeDataOn  = 1;
+  this->UpdatePiece       = 0;
+  this->UpdateNumPieces   = 0;
   this->SetNumberOfInputPorts(0); 
+  //
+  this->PointDataArraySelection  = vtkDataArraySelection::New();
+  //
+  this->Positions     = NULL;
+  this->Vertices      = NULL;
+  this->GlobalIds     = NULL;
+  this->ParticleIndex = 0;
+  this->Potential   = NULL;
+  this->Mass        = NULL;
+  this->EPS         = NULL;
+  this->RHO         = NULL;
+  this->Hsmooth     = NULL;
+  this->Temperature = NULL;
+  this->Metals      = NULL;
+  this->Tform       = NULL;
+  this->Velocity    = NULL;
 }
 
 //----------------------------------------------------------------------------
@@ -40,8 +71,8 @@ vtkTipsyReader::~vtkTipsyReader()
 {
   this->SetFileName(0);
   this->SetMarkFileName(0);
-	this->SetReadPositionsOnly(0);
 	this->SetDistributeDataOn(0);
+  this->PointDataArraySelection->Delete();
 }
 
 //----------------------------------------------------------------------------
@@ -76,6 +107,7 @@ vtkstd::vector<unsigned long> vtkTipsyReader::ReadMarkedParticleIndices(
 									<< this->MarkFileName 
 									<< " please specify a valid mark file or none at all.\
 									 For now reading all particles.");
+		return markedParticleIndices;
  		}
 	else
 		{
@@ -118,11 +150,11 @@ vtkstd::vector<unsigned long> vtkTipsyReader::ReadMarkedParticleIndices(
 
 //----------------------------------------------------------------------------
 void vtkTipsyReader::ReadAllParticles(TipsyHeader& tipsyHeader,
-	ifTipsy& tipsyInfile,int piece,int numPieces,vtkPolyData* output)
+	ifTipsy& tipsyInfile,int piece,int numpieces,vtkPolyData* output)
 {
-	unsigned long pieceSize = floor(tipsyHeader.h_nBodies*1./numPieces);
+	unsigned long pieceSize = floor(tipsyHeader.h_nBodies*1./numpieces);
 	unsigned long beginIndex = piece*pieceSize;
-	unsigned long endIndex = (piece == numPieces - 1) ? \
+	unsigned long endIndex = (piece == numpieces - 1) ? \
 	 	tipsyHeader.h_nBodies : (piece+1)*pieceSize;
 	// Allocates vtk scalars and vector arrays to hold particle data, 
 	this->AllocateAllTipsyVariableArrays(endIndex-beginIndex,output);
@@ -186,7 +218,6 @@ tipsypos::section_type vtkTipsyReader::SeekToIndex(unsigned long index,
 		return tipsypos::invalid;
 		}
 }
-//----------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------
 //i,tipsyHeader,tipsyInfile,output)
@@ -218,23 +249,20 @@ vtkIdType vtkTipsyReader::ReadParticle(unsigned long index,
      assert(0);
      break;
     }
-	SetIdTypeValue(output,"global id",id,index);
+  this->GlobalIds->SetValue(id,index);
   return id;
 }
-
 
 //----------------------------------------------------------------------------
 vtkIdType vtkTipsyReader::ReadBaseParticle(vtkPolyData* output,
 	TipsyBaseParticle& b) 
 {
-	vtkIdType id = SetPointValue(output,b.pos);
-  if(!this->ReadPositionsOnly)
-		{
-		SetDataValue(output,"velocity",id,b.vel);
-	  SetDataValue(output,"mass",id,&b.mass);
-		SetDataValue(output,"potential",id,&b.phi);
-		}
-	return id;
+  this->Positions->SetPoint(ParticleIndex, b.pos);
+  //
+  if (this->Velocity)  this->Velocity->SetTuple(ParticleIndex, b.vel);
+  if (this->Mass)      this->Mass->SetTuple1(ParticleIndex, b.mass);
+  if (this->Potential) this->Potential->SetTuple1(ParticleIndex, b.phi);
+	return ParticleIndex++;
 }
 
 //----------------------------------------------------------------------------
@@ -242,13 +270,10 @@ vtkIdType vtkTipsyReader::ReadGasParticle(vtkPolyData* output,
  	TipsyGasParticle& g)
 {
  	vtkIdType id=ReadBaseParticle(output,g);
-  if(!this->ReadPositionsOnly)
-		{
-	  SetDataValue(output,"rho",id,&g.rho);
-	  SetDataValue(output,"temperature",id,&g.temp);
-	  SetDataValue(output,"hsmooth",id,&g.hsmooth);
-	  SetDataValue(output,"metals",id,&g.metals);	
-		}
+  if (this->RHO)         this->RHO->SetTuple(id, &g.rho);
+  if (this->Temperature) this->Temperature->SetTuple1(id, g.temp);
+  if (this->Hsmooth)     this->Hsmooth->SetTuple1(id, g.hsmooth);
+  if (this->Metals)      this->Metals->SetTuple1(id, g.metals);
 	return id;
 }
 
@@ -256,13 +281,10 @@ vtkIdType vtkTipsyReader::ReadGasParticle(vtkPolyData* output,
 vtkIdType vtkTipsyReader::ReadStarParticle(vtkPolyData* output,
  	TipsyStarParticle& s)
 {
-	vtkIdType id=ReadBaseParticle(output,s);
-	if(!this->ReadPositionsOnly)
-		{
-	  SetDataValue(output,"eps",id,&s.eps);
-	  SetDataValue(output,"metals",id,&s.metals);
-	  SetDataValue(output,"tform",id,&s.tform);
-		}
+ 	vtkIdType id=ReadBaseParticle(output,s);
+  if (this->EPS)    this->EPS->SetTuple1(id, s.eps);
+  if (this->Metals) this->Metals->SetTuple1(id, s.metals);
+  if (this->Tform)  this->Tform->SetTuple1(id, s.tform);
 	return id;
 }
 //----------------------------------------------------------------------------	
@@ -270,40 +292,74 @@ vtkIdType vtkTipsyReader::ReadDarkParticle(vtkPolyData* output,
 	TipsyDarkParticle& d)
 {
  	vtkIdType id=this->ReadBaseParticle(output,d);
-  if(!this->ReadPositionsOnly)
-		{
-	 	SetDataValue(output,"eps",id,&d.eps);
-		}
+  if (this->EPS) this->EPS->SetTuple1(id, d.eps);
 	return id;
 }
 		
 //----------------------------------------------------------------------------
-void vtkTipsyReader::AllocateAllTipsyVariableArrays(unsigned long numBodies,
+void vtkTipsyReader::AllocateAllTipsyVariableArrays(vtkIdType numBodies,
 	vtkPolyData* output)
 {
   // Allocate objects to hold points and vertex cells. 
+  this->Positions = vtkSmartPointer<vtkPoints>::New();
+  this->Positions->SetDataTypeToFloat();
+  this->Positions->SetNumberOfPoints(numBodies);
+  //
+  this->Vertices  = vtkSmartPointer<vtkCellArray>::New();
+  vtkIdType *cells = this->Vertices->WritePointer(numBodies, numBodies*2);
+  for (vtkIdType i=0; i<numBodies; ++i) {
+    cells[i*2]   = 1;
+    cells[i*2+1] = i;
+  }
+
+  //
+  this->GlobalIds = vtkSmartPointer<vtkIdTypeArray>::New();
+  this->GlobalIds->SetName("global_id");
+  this->GlobalIds->SetNumberOfTuples(numBodies);
+
 	// Storing the points and cells in the output data object.
-  output->SetPoints(vtkSmartPointer<vtkPoints>::New());
-  output->SetVerts(vtkSmartPointer<vtkCellArray>::New()); 
-  AllocateIdTypeDataArray(output,"global id",1,numBodies);
-	// Only allocate the other arrays if we are to read this data in
-	// for global ids
-  if(!this->ReadPositionsOnly)
-		{
-		// the default scalars to be displayed
-		// Only allocate if we are to read thes in
-	  AllocateDataArray(output,"potential",1,numBodies);
-		// the rest of the scalars
-	  AllocateDataArray(output,"mass",1,numBodies);
-	  AllocateDataArray(output,"eps",1,numBodies);
-	  AllocateDataArray(output,"rho",1,numBodies);
-	  AllocateDataArray(output,"hsmooth",1,numBodies);
-	  AllocateDataArray(output,"temperature",1,numBodies);
-	  AllocateDataArray(output,"metals",1,numBodies);
-	  AllocateDataArray(output,"tform",1,numBodies);
-		// the default vectors to be displayed
-	  AllocateDataArray(output,"velocity",3,numBodies);
-		}
+  output->SetPoints(this->Positions);
+  output->SetVerts(this->Vertices); 
+
+  // allocate velocity first as it uses the most memory and on my win32 machine 
+  // this helps load really big data without alloc failures.
+  if (this->GetPointArrayStatus("Velocity")) 
+    this->Velocity = AllocateDataArray(output,"velocity",3,numBodies);
+  else 
+    this->Velocity = NULL;
+  if (this->GetPointArrayStatus("Potential")) 
+    this->Potential = AllocateDataArray(output,"potential",1,numBodies);
+  else 
+    this->Potential = NULL;
+  if (this->GetPointArrayStatus("Mass"))
+    this->Mass = AllocateDataArray(output,"mass",1,numBodies);
+  else 
+    this->Mass = NULL;
+  if (this->GetPointArrayStatus("Eps")) 
+    this->EPS = AllocateDataArray(output,"eps",1,numBodies);
+  else 
+    this->EPS = NULL;
+  if (this->GetPointArrayStatus("Rho")) 
+    this->RHO = AllocateDataArray(output,"rho",1,numBodies);
+  else 
+    this->RHO = NULL;
+  if (this->GetPointArrayStatus("Hsmooth")) 
+    this->Hsmooth = AllocateDataArray(output,"hsmooth",1,numBodies);
+  else 
+    this->Hsmooth = NULL;
+  if (this->GetPointArrayStatus("Temperature"))
+    this->Temperature = AllocateDataArray(output,"temperature",1,numBodies);
+  else 
+    this->Temperature = NULL;
+
+  if (this->GetPointArrayStatus("Metals"))
+    this->Metals = AllocateDataArray(output,"metals",1,numBodies);
+  else 
+    this->Metals = NULL;
+  if (this->GetPointArrayStatus("Tform"))
+    this->Tform = AllocateDataArray(output,"tform",1,numBodies);
+  else 
+    this->Tform = NULL;
 }
 //----------------------------------------------------------------------------
 int vtkTipsyReader::RequestInformation(
@@ -315,6 +371,17 @@ int vtkTipsyReader::RequestInformation(
 	// means that the data set can be divided into an arbitrary number of pieces
 	outInfo->Set(vtkStreamingDemandDrivenPipeline::MAXIMUM_NUMBER_OF_PIECES(),
 		-1);
+
+  this->PointDataArraySelection->AddArray("Potential");
+  this->PointDataArraySelection->AddArray("Mass");
+  this->PointDataArraySelection->AddArray("Eps");
+  this->PointDataArraySelection->AddArray("Rho");
+  this->PointDataArraySelection->AddArray("Hsmooth");
+  this->PointDataArraySelection->AddArray("Temperature");
+  this->PointDataArraySelection->AddArray("Metals");
+  this->PointDataArraySelection->AddArray("Tform");
+  this->PointDataArraySelection->AddArray("Velocity");
+
 	return 1;
 }
 /*
@@ -333,12 +400,15 @@ int vtkTipsyReader::RequestInformation(
 int vtkTipsyReader::RequestData(vtkInformation*,
 	vtkInformationVector**,vtkInformationVector* outputVector)
 {
+  //
 	// Make sure we have a file to read.
+  //
   if(!this->FileName)
 	  {
     vtkErrorMacro("A FileName must be specified.");
     return 0;
     }
+
 	// Open the tipsy standard file and abort if there is an error.
 	ifTipsy tipsyInfile;
   tipsyInfile.open(this->FileName,"standard");
@@ -347,18 +417,21 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 	  vtkErrorMacro("Error opening file " << this->FileName);
 	  return 0;	
     }
-	//All helper functions will need access to this
-	vtkSmartPointer<vtkPolyData> tipsyReadInitialOutput = \
-	 	vtkSmartPointer<vtkPolyData>::New();
-	tipsyReadInitialOutput->Initialize();
-	vtkUnstructuredGrid* output = vtkUnstructuredGrid::GetData(
-		outputVector);
-	// This tells us which portion of the file to read, relevant if in parallel
+
+  // Get output information
 	vtkInformation* outInfo = outputVector->GetInformationObject(0);
-	int piece = outInfo->Get(
-		vtkStreamingDemandDrivenPipeline::UPDATE_PIECE_NUMBER());
-	int numPieces =outInfo->Get(
-		vtkStreamingDemandDrivenPipeline::UPDATE_NUMBER_OF_PIECES());
+
+  // get the output polydata
+  vtkPolyData *output = vtkPolyData::SafeDownCast(outInfo->Get(vtkDataObject::DATA_OBJECT()));
+  vtkSmartPointer<vtkPolyData> tipsyReadInitialOutput = vtkSmartPointer<vtkPolyData>::New();
+
+  // get this->UpdatePiece information
+  this->UpdatePiece = outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_PIECE_NUMBER());
+	this->UpdateNumPieces =outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_NUMBER_OF_PIECES());
+
+  // reset counter before reading
+  this->ParticleIndex = 0;
+
   // Read the header from the input
 	TipsyHeader tipsyHeader=this->ReadTipsyHeader(tipsyInfile);
 	// Next considering whether to read in a mark file, 
@@ -369,7 +442,7 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 		// Reading only marked particles
 		// Make sure we are not running in parallel, this filter does not work in 
 		// parallel
-		if(RunInParallel(vtkMultiProcessController::GetGlobalController()))
+		if(this->UpdateNumPieces>1)
 			{
 			vtkErrorMacro("Reading from a mark file is not supported in parallel.");
 			return 0;
@@ -386,25 +459,21 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 		// no marked particle file or there was an error reading the mark file, 
 		// so reading all particles
 		vtkDebugMacro("Reading all points from file " << this->FileName);
-		this->ReadAllParticles(tipsyHeader,tipsyInfile,piece,numPieces,
-			tipsyReadInitialOutput);
+		this->ReadAllParticles(tipsyHeader,tipsyInfile, this->UpdatePiece, this->UpdateNumPieces, tipsyReadInitialOutput);
 		}
 	else 
 		{
 		//reading only marked particles
-		assert(numPieces==1);
+		assert(this->UpdateNumPieces==1);
 		vtkDebugMacro("Reading only the marked points in file: " \
 				<< this->MarkFileName << " from file " << this->FileName);
-		this->ReadMarkedParticles(markedParticleIndices,
-			tipsyHeader,tipsyInfile,
-			tipsyReadInitialOutput);	
+		this->ReadMarkedParticles(markedParticleIndices, tipsyHeader,tipsyInfile, tipsyReadInitialOutput);	
 		}
   // Close the tipsy in file.
 	tipsyInfile.close();
 	// If we need to, run D3 on the tipsyReadInitialOutput
 	// producing one level of ghost cells
-	if(this->GetDistributeDataOn() && \
-	 	RunInParallel(vtkMultiProcessController::GetGlobalController()))
+	if (this->GetDistributeDataOn() && this->UpdateNumPieces>1)
 		{
 		vtkSmartPointer<vtkDistributedDataFilter> d3 = \
 		    vtkSmartPointer<vtkDistributedDataFilter>::New();
@@ -413,14 +482,88 @@ int vtkTipsyReader::RequestData(vtkInformation*,
 		d3->Update();
 		// Changing output to output of d3
 	 	output->ShallowCopy(d3->GetOutput()); 
+
+    // create new vertices because the D3 outputs UnstructuredGrid
+    vtkIdType N = output->GetNumberOfPoints();
+    this->Vertices  = vtkSmartPointer<vtkCellArray>::New();
+    vtkIdType *cells = this->Vertices->WritePointer(N, N*2);
+    for (vtkIdType i=0; i<N; ++i) {
+      cells[i*2]   = 1;
+      cells[i*2+1] = i;
+    }
+    output->SetVerts(this->Vertices);
 		}
 	else
 		{
 		output->ShallowCopy(tipsyReadInitialOutput);
-		output->SetCells(VTK_VERTEX,tipsyReadInitialOutput->GetVerts());
 		}
 	// Read Successfully
 	vtkDebugMacro("Read " << output->GetPoints()->GetNumberOfPoints() \
 		<< " points.");
+  //
+  // release memory smartpointers - just to play safe.
+  this->Vertices    = NULL;
+  this->GlobalIds   = NULL;
+  this->Positions   = NULL;
+  this->Potential   = NULL;
+  this->Mass        = NULL;
+  this->EPS         = NULL;
+  this->RHO         = NULL;
+  this->Hsmooth     = NULL;
+  this->Temperature = NULL;
+  this->Metals      = NULL;
+  this->Tform       = NULL;
+  this->Velocity    = NULL;
+  //
  	return 1;
+}
+//----------------------------------------------------------------------------
+// Below : Boiler plate code to handle selection of point arrays
+//----------------------------------------------------------------------------
+const char* vtkTipsyReader::GetPointArrayName(int index)
+{
+  return this->PointDataArraySelection->GetArrayName(index);
+}
+//----------------------------------------------------------------------------
+int vtkTipsyReader::GetPointArrayStatus(const char* name)
+{
+  return this->PointDataArraySelection->ArrayIsEnabled(name);
+}
+//----------------------------------------------------------------------------
+void vtkTipsyReader::SetPointArrayStatus(const char* name, int status)
+{
+  if (status!=this->GetPointArrayStatus(name)) {
+    if (status) {
+      this->PointDataArraySelection->EnableArray(name);
+    }
+    else {
+      this->PointDataArraySelection->DisableArray(name);
+    }
+    this->Modified();
+  }
+}
+//----------------------------------------------------------------------------
+void vtkTipsyReader::Enable(const char* name)
+{
+  this->SetPointArrayStatus(name, 1);
+}
+//----------------------------------------------------------------------------
+void vtkTipsyReader::Disable(const char* name)
+{
+  this->SetPointArrayStatus(name, 0);
+}
+//----------------------------------------------------------------------------
+void vtkTipsyReader::EnableAll()
+{
+  this->PointDataArraySelection->EnableAllArrays();
+}
+//----------------------------------------------------------------------------
+void vtkTipsyReader::DisableAll()
+{
+  this->PointDataArraySelection->DisableAllArrays();
+}
+//----------------------------------------------------------------------------
+int vtkTipsyReader::GetNumberOfPointArrays()
+{
+  return this->PointDataArraySelection->GetNumberOfArrays();
 }

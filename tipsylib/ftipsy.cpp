@@ -8,7 +8,11 @@
 #include <cstring>
 #include <assert.h>
 #include <iostream>
-#include <netinet/in.h> // ntohl
+#ifdef _WIN32 // ntohl
+ #include <winsock2.h>
+#else
+ #include <netinet/in.h>
+#endif
 #include "ftipsy.hpp"
 #include "native.h"
 #include "standard.h"

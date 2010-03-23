@@ -36,7 +36,7 @@ enum FriendsOfFriendsMPIData
 	GHOST_POINTS_AND_LOCAL_HALO_IDS,
 	GHOST_POINTS_AND_LOCAL_HALO_IDS_TO_GLOBAL,
 };
-class VTK_GRAPHICS_EXPORT vtkFriendsOfFriendsHaloFinder : public vtkPointSetAlgorithm
+class VTK_EXPORT vtkFriendsOfFriendsHaloFinder : public vtkPointSetAlgorithm
 {
 public:
   static vtkFriendsOfFriendsHaloFinder *New();

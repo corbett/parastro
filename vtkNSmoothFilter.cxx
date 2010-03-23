@@ -3,6 +3,7 @@
   Program:   AstroViz plugin for ParaView
   Module:    $RCSfile: vtkNSmoothFilter.cxx,v $
 =========================================================================*/
+#define _USE_MATH_DEFINES
 #include "vtkNSmoothFilter.h"
 #include "AstroVizHelpersLib/AstroVizHelpers.h"
 #include "vtkMultiProcessController.h"

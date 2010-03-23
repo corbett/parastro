@@ -4,7 +4,7 @@
   Module:    $RCSfile: vtkMomentsOfInertiaFilter.cxx,v $
 =========================================================================*/
 #include "vtkMomentsOfInertiaFilter.h"
-#include "AstroVizHelpersLib/AstroVizHelpers.h"
+#include "AstroVizHelpers.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
 #include "vtkObjectFactory.h"
@@ -29,6 +29,8 @@ vtkCxxSetObjectMacro(vtkMomentsOfInertiaFilter,Controller, vtkMultiProcessContro
 //----------------------------------------------------------------------------
 vtkMomentsOfInertiaFilter::vtkMomentsOfInertiaFilter()
 {
+  this->UpdatePiece      = 0;
+  this->UpdateNumPieces  = 0;
 	this->SetInputArrayToProcess(
     0,
     0,
@@ -185,20 +187,32 @@ int vtkMomentsOfInertiaFilter::RequestData(vtkInformation*,
     }
   vtkPolyData* output = vtkPolyData::GetData(outputVector);
 	output->Initialize();
+
+  //
+  // Check parallel operation
+  //
+  if (this->Controller) {
+    this->UpdatePiece = this->Controller->GetLocalProcessId();
+    this->UpdateNumPieces = this->Controller->GetNumberOfProcesses();
+  }
+  else {
+    this->UpdateNumPieces = 1;
+    this->UpdatePiece = 0;
+  }
+
 	// computing the center of mass, works in parallel if necessary
 	vtkSmartPointer<vtkCenterOfMassFilter> centerOfMassFilter = \
 		vtkSmartPointer<vtkCenterOfMassFilter>::New();
 	centerOfMassFilter->SetController(this->Controller);
 	// will be != null only for root process or serial
-	double* calcCenterOfMass = \
-		centerOfMassFilter->ComputeCenterOfMass(input,massArray->GetName()); 
+  double calcCenterOfMass[3];
+  centerOfMassFilter->ComputeCenterOfMass(input->GetPoints(), massArray, calcCenterOfMass); 
 	// finally calculation
 	double inertiaTensor[3][3];
 	double eigenvalues[3];
 	double eigenvectors[3][3];
-	if(!RunInParallel(this->Controller))
+	if(this->UpdateNumPieces<=1)
 		{
-		assert(calcCenterOfMass!=NULL);
 		// computing the moment of inertia tensor 3x3 matrix, and its
 		// eigenvalues and eigenvectors
 		this->ComputeInertiaTensor(input,massArray->GetName(),
@@ -207,21 +221,14 @@ int vtkMomentsOfInertiaFilter::RequestData(vtkInformation*,
 		vtkMath::Diagonalize3x3(inertiaTensor,eigenvalues,eigenvectors);
 		// displaying eigenvectors
 		this->DisplayVectorsAsLines(input,output,eigenvectors,calcCenterOfMass);
-		delete [] calcCenterOfMass;
 		return 1;
 		}
 	else
 		{
-		int procId=this->Controller->GetLocalProcessId();
-		int numProc=this->Controller->GetNumberOfProcesses();
 		double syncedCenterOfMass[3];
-		if(calcCenterOfMass!=NULL)
+		for(int i = 0; i < 3; ++i)
 			{
-				for(int i = 0; i < 3; ++i)
-					{
-					syncedCenterOfMass[i]=calcCenterOfMass[i];
-					}
-				delete [] calcCenterOfMass;
+			syncedCenterOfMass[i]=calcCenterOfMass[i];
 			}
 		// syncs the value of centerOfMass from root to rest of all processes
 		this->Controller->Broadcast(syncedCenterOfMass,3,0);
@@ -229,7 +236,7 @@ int vtkMomentsOfInertiaFilter::RequestData(vtkInformation*,
 		this->UpdateInertiaTensor(input,massArray->GetName(), 
 			syncedCenterOfMass,inertiaTensor);
 		// TODO: can send this as one array instead of 3
-		if(procId!=0)
+		if(this->UpdatePiece!=0)
 			{
 			// send result to root
 			this->Controller->Send(inertiaTensor[0],3,0,INERTIA_TENSOR_COLUMN_ZERO);
@@ -240,7 +247,7 @@ int vtkMomentsOfInertiaFilter::RequestData(vtkInformation*,
 		else
 			{
 			// we are at proc 0, the last proc, we recieve data from all procs > 0
-			for(int proc = 1; proc < numProc; ++proc)
+			for (int proc = 1; proc < this->UpdateNumPieces; ++proc)
 				{
 				double recInertiaTensorColumnZero[3];
 				double recInertiaTensorColumnOne[3];

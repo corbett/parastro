@@ -18,18 +18,25 @@
 #ifndef __vtkTipsyReader_h
 #define __vtkTipsyReader_h
 
-#include "vtkUnstructuredGridReader.h" // superclass
+#include "vtkPolyDataAlgorithm.h" // superclass
+
+#include "vtkSmartPointer.h"
 #include "tipsylib/ftipsy.hpp" // functions take tipsy particle objects
 #include <vtkstd/vector>
 
 class vtkPolyData;
 class vtkCharArray;
+class vtkIdTypeArray;
+class vtkFloatArray;
+class vtkPoints;
+class vtkCellArray;
+class vtkDataArraySelection;
 
-class VTK_IO_EXPORT vtkTipsyReader : public vtkUnstructuredGridReader
+class VTK_EXPORT vtkTipsyReader : public vtkPolyDataAlgorithm
 {
 public:
   static vtkTipsyReader* New();
-  vtkTypeRevisionMacro(vtkTipsyReader,vtkUnstructuredGridReader);
+  vtkTypeRevisionMacro(vtkTipsyReader,vtkPolyDataAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent);
   // Description:
   // Set/Get the name of the file from which to read the marked points.
@@ -40,16 +47,33 @@ public:
 	vtkSetStringMacro(FileName);
  	vtkGetStringMacro(FileName);
 
-
-  // Description:
-  // Get/Set whether only the particles positions should be read in.
-	vtkSetMacro(ReadPositionsOnly,int);
-	vtkGetMacro(ReadPositionsOnly,int);
-
   // Description:
   // Get/Set whether to distribute data
 	vtkSetMacro(DistributeDataOn,int);
 	vtkGetMacro(DistributeDataOn,int);
+
+  // Description:
+  // An H5Part file may contain multiple arrays
+  // a GUI (eg Paraview) can provide a mechanism for selecting which data arrays
+  // are to be read from the file. The PointArray variables and members can
+  // be used to query the names and number of arrays available
+  // and set the status (on/off) for each array, thereby controlling which
+  // should be read from the file. Paraview queries these point arrays after
+  // the (update) information part of the pipeline has been updated, and before the
+  // (update) data part is updated.
+  int         GetNumberOfPointArrays();
+  const char* GetPointArrayName(int index);
+  int         GetPointArrayStatus(const char* name);
+  void        SetPointArrayStatus(const char* name, int status);
+  void        DisableAll();
+  void        EnableAll();
+  void        Disable(const char* name);
+  void        Enable(const char* name);
+  //
+  int         GetNumberOfPointArrayStatusArrays() { return GetNumberOfPointArrays(); }
+  const char* GetPointArrayStatusArrayName(int index) { return GetPointArrayName(index); }
+  int         GetPointArrayStatusArrayStatus(const char* name) { return GetPointArrayStatus(name); }
+  void        SetPointArrayStatusArrayStatus(const char* name, int status) { SetPointArrayStatus(name, status); }
 
 // The BTX, ETX comments bracket the portion of the code which should not be
 // attempted to wrap for use by python, specifically the code which uses
@@ -60,13 +84,34 @@ protected:
   ~vtkTipsyReader();
 	char* MarkFileName;
 	char* FileName;
-	int ReadPositionsOnly;
 	int DistributeDataOn;
 	int RequestInformation(vtkInformation*,	vtkInformationVector**,
 		vtkInformationVector*);
 
   int RequestData(vtkInformation*,vtkInformationVector**,
     vtkInformationVector*);
+
+  vtkIdType                       ParticleIndex;
+  vtkSmartPointer<vtkIdTypeArray> GlobalIds;
+  vtkSmartPointer<vtkPoints>      Positions;
+  vtkSmartPointer<vtkCellArray>   Vertices;
+
+  vtkSmartPointer<vtkFloatArray>   Potential;
+  vtkSmartPointer<vtkFloatArray>   Mass;
+  vtkSmartPointer<vtkFloatArray>   EPS;
+  vtkSmartPointer<vtkFloatArray>   RHO;
+  vtkSmartPointer<vtkFloatArray>   Hsmooth;
+  vtkSmartPointer<vtkFloatArray>   Temperature;
+  vtkSmartPointer<vtkFloatArray>   Metals;
+  vtkSmartPointer<vtkFloatArray>   Tform;
+  vtkSmartPointer<vtkFloatArray>   Velocity;
+
+  //
+  int           UpdatePiece;
+  int           UpdateNumPieces;
+
+  // To allow paraview gui to enable/disable scalar reading
+  vtkDataArraySelection* PointDataArraySelection;
 
 private:
   vtkTipsyReader(const vtkTipsyReader&);  // Not implemented.
@@ -116,7 +161,7 @@ private:
 	// Description:
 	// allocates all vtk arrays for Tipsy variables and places them 
 	// in the output vector
-	void AllocateAllTipsyVariableArrays(unsigned long numBodies,
+	void AllocateAllTipsyVariableArrays(vtkIdType numBodies,
 		vtkPolyData* output);
 //ETX
 

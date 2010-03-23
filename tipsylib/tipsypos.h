@@ -7,7 +7,15 @@
 #ifndef TIPSYPOS_H
 #define TIPSYPOS_H
 
-#include <stdint.h>
+// I need a 64-bit integer
+#ifdef _WIN32
+   typedef __int64 int64_t;	// Define it from MSVC's internal type
+   typedef unsigned __int64 uint64_t;
+   typedef unsigned __int32 uint32_t;
+   typedef unsigned    char uint8_t;
+#else
+   #include <stdint.h>		// Use the C99 official header
+#endif
 
 /** @brief A position in a Tipsy file
  */

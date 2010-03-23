@@ -15,6 +15,8 @@ INCLUDE(${PARAVIEW_USE_FILE})
 # Author: Christine Corbett Moran
 ###
 
+INCLUDE_DIRECTORIES(AstroVizHelpersLib)
+
 #Defines the AstroViz plugin
 ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.0"
 	SERVER_MANAGER_SOURCES vtkTipsyReader.cxx 
@@ -37,8 +39,13 @@ SET_TARGET_PROPERTIES(AstroVizHelpers PROPERTIES COMPILE_FLAGS "-fPIC")
 TARGET_LINK_LIBRARIES(AstroVizPlugin AstroVizHelpers) 
 
 # For the Tipsy reader plugin I use some of Doug Potter's Tipsy lib.
-ADD_LIBRARY(TipsyHelpers SHARED tipsylib/adapter.cpp tipsylib/binner.cpp 
+ADD_LIBRARY(TipsyHelpers STATIC tipsylib/adapter.cpp tipsylib/binner.cpp 
 	tipsylib/ftipsy.cpp tipsylib/native.cpp 
 	tipsylib/standard.cpp
 	tipsylib/vtipsy.cpp)
+# add the winsock2 library for net lookup names
+IF (WIN32)
+  TARGET_LINK_LIBRARIES(TipsyHelpers ws2_32)  
+ENDIF (WIN32)
+
 TARGET_LINK_LIBRARIES(AstroVizPlugin TipsyHelpers)

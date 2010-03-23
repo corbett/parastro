@@ -22,7 +22,7 @@
 #define __vtkAddAdditionalAttribute_h
 #include "vtkPointSetAlgorithm.h"
 
-class VTK_GRAPHICS_EXPORT vtkAddAdditionalAttribute : public vtkPointSetAlgorithm
+class VTK_EXPORT vtkAddAdditionalAttribute : public vtkPointSetAlgorithm
 {
 public:
   static vtkAddAdditionalAttribute *New();

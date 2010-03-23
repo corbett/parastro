@@ -29,7 +29,7 @@ enum MomentsMPIData
 };
 
 class vtkMultiProcessController;
-class VTK_GRAPHICS_EXPORT vtkMomentsOfInertiaFilter : public vtkPointSetAlgorithm
+class VTK_EXPORT vtkMomentsOfInertiaFilter : public vtkPointSetAlgorithm
 {
 public:
   static vtkMomentsOfInertiaFilter *New();
@@ -54,7 +54,12 @@ protected:
   // Main implementation.
   virtual int RequestData(vtkInformation*,
    	vtkInformationVector**, vtkInformationVector*);
+
   vtkMultiProcessController *Controller;
+  //
+  int           UpdatePiece;
+  int           UpdateNumPieces;
+
 private:
   vtkMomentsOfInertiaFilter(const vtkMomentsOfInertiaFilter&);  // Not implemented.
   void operator=(const vtkMomentsOfInertiaFilter&);  // Not implemented.

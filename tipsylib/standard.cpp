@@ -5,7 +5,11 @@
  */
 
 #include <iostream> // for debugging
-#include <netinet/in.h> // ntohl
+#ifdef _WIN32 // ntohl
+ #include <winsock2.h>
+#else
+ #include <netinet/in.h> 
+#endif
 #include <assert.h>
 #include "standard.h"
 
