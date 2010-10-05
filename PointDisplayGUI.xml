@@ -1,0 +1,6 @@
+<ParaViewReaders>
+	<Reader name="PointDisplay"
+			extensions="db"
+			file_description="Halo DB">
+	</Reader>
+</ParaViewReaders>

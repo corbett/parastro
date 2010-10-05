@@ -23,15 +23,20 @@ ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.0"
 	vtkNSmoothFilter.cxx vtkCenterOfMassFilter.cxx 
 	vtkProfileFilter.cxx vtkMomentsOfInertiaFilter.cxx
 	vtkVirialRadiusFilter.cxx vtkAddAdditionalAttribute.cxx 
-	vtkFriendsOfFriendsHaloFinder.cxx #<-- for server
+	vtkFriendsOfFriendsHaloFinder.cxx 
+	vtkPointDisplay.cxx
+	vtkSQLiteReader.cxx #<-- for server
 	SERVER_MANAGER_XML  TipsyReaderSM.xml 
 	NSmoothFilterSM.xml  CenterOfMassFilter.xml
 	ProfileFilter.xml MomentsOfInertiaFilter.xml 
 	VirialRadiusFilter.xml AddAdditionalAttribute.xml 
-	FriendsOfFriendsHaloFinder.xml  #<-- for server
-	GUI_RESOURCES TipsyReader.qrc  #<-- for client
+	FriendsOfFriendsHaloFinder.xml	
+	PointDisplaySM.xml
+	SQLiteReaderSM.xml #<-- for server
+	GUI_RESOURCES TipsyReader.qrc PointDisplay.qrc SQLiteReader.qrc #<-- for client
 	GUI_RESOURCE_FILES AstroVizFilterMenu.xml) #<-- for client
 
+	
 # For helper functions often used, will later include these in a single
 # VTK class.
 ADD_LIBRARY(AstroVizHelpers AstroVizHelpersLib/AstroVizHelpers.cxx)
@@ -48,4 +53,7 @@ IF (WIN32)
   TARGET_LINK_LIBRARIES(TipsyHelpers ws2_32)  
 ENDIF (WIN32)
 
-TARGET_LINK_LIBRARIES(AstroVizPlugin TipsyHelpers)
+# For SQLiteReader Plugin, SQLite lib
+ADD_LIBRARY(SQLitelib STATIC sqlitelib/sqlite3.c)
+
+TARGET_LINK_LIBRARIES(AstroVizPlugin TipsyHelpers SQLitelib)

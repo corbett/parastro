@@ -1,0 +1,6 @@
+<ParaViewReaders>
+	<Reader name="SQLiteReader"
+			extensions="db3"
+			file_description="SQLite3 Database">
+	</Reader>
+</ParaViewReaders>

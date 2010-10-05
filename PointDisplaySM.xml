@@ -1,0 +1,25 @@
+<ServerManagerConfiguration>
+  <ProxyGroup name="sources">
+    <SourceProxy name="PointDisplay"
+					 class="vtkPointDisplay">
+
+
+      <!--named Aaa as currently ParaView decides which file is the
+		      main data file by that file with the name which is alphabetically
+		      first -->
+
+      <StringVectorProperty
+        name="AaaFileName"
+        command="SetFileName"
+        number_of_elements="1">
+        <FileListDomain name="files"/>
+        <Documentation>
+          Reads in points from a tipsy binary file.
+        </Documentation>
+      </StringVectorProperty>
+
+
+    </SourceProxy>
+  </ProxyGroup>
+</ServerManagerConfiguration>
+
