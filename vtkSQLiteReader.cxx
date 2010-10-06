@@ -13,7 +13,7 @@
 #include "vtkSmartPointer.h"
 //#include "sqlitelib/sqlite3.h"
 
-vtkCxxRevisionMacro(vtkSQLiteReader, "$Revision: 1.0 $");
+vtkCxxRevisionMacro(vtkSQLiteReader, "$Revision: 1.0.1 $");
 vtkStandardNewMacro(vtkSQLiteReader);
 
 //----------------------------------------------------------------------------
@@ -54,7 +54,13 @@ int vtkSQLiteReader::RequestData(vtkInformation*,
 {
 
 //init vars
-	sqlite3 *db; //handle for db
+	// set up the sql stuff
+	sqlite3			*db;		// handle for db
+	char			sql_query;	// sql query
+	sqlite3_stmt    *res;		// result of sql query
+	int				sql_count;	// no of columns from the query
+	const char      *tail;		// ???
+	int				sql_error;	// return value of sql query
 
 	// sets up output
 	vtkPolyData* output = vtkPolyData::GetData(outputVector);
@@ -82,27 +88,49 @@ int vtkSQLiteReader::RequestData(vtkInformation*,
 	}
 	//vtkErrorMacro("opened successfully: " << this->FileName)
 
-/* -----
-	Here comes the loop to read in and store the points
-   ----- */
+// Prepare the query
+	sql_query = ' ';
 
-// Create the to be displayed points
-	double dbCenterOfMass[3] = {0,0,0};
-	double dbCenterOfMass2[3] = {1,0,0};
+// Query the db
+	sql_error = sqlite3_prepare_v2(db,
+        "SELECT * FROM stat WHERE gid=1",
+        1000, &res, &tail);
 
-// Store the points
-	newPoints->SetNumberOfPoints(2);
-	newPoints->SetPoint(0, dbCenterOfMass);
-	newPoints->SetPoint(1, dbCenterOfMass2);
+	if (sql_error != SQLITE_OK){
+		vtkErrorMacro("Error with sql query! Error: " << sql_error);
+		return 0;
+	}
+
+	sql_count = sqlite3_column_count(res); //doesnt deliver the right no, but is >= than actual no
+			// TODO: it it really?? only a assumption. need to check that!
+	vtkErrorMacro("sql_count = " << sql_count);
+
+// Create the points to be displayed 
+	// alloc mem, is bit too much, but exact no isn't known yet, and souldn't make a big diff.
+	newPoints->SetNumberOfPoints(sql_count);
+
+	int i=0; //counts throu
+	while (sqlite3_step(res) == SQLITE_ROW) {
+		newPoints->SetPoint(i,
+			sqlite3_column_double(res, 4),
+			sqlite3_column_double(res, 5),
+			sqlite3_column_double(res, 6));
+		i++;
+	}
+
+	// set no of point to real value
+	newPoints->SetNumberOfPoints(i);
+	newPoints->Squeeze();
 	
-	// Cells are needed for direct display of the points in paraview, otherwise a glyphfilter is needed.
-	
-	vtkErrorMacro(vertices->Print)
-
-	vtkIdType *cells = vertices->WritePointer(1, 2);
-	cells[0] = 1;
-	cells[1] = 2;
-	cells[2] = 0;
+// Create the vertices (one point per vertex, for easy display)
+	//vtkErrorMacro(vertices->Print);
+	vtkIdType N = newPoints->GetNumberOfPoints();
+	vtkErrorMacro("No of Points: " << N);
+    vtkIdType *cells = vertices->WritePointer(N, N*2);
+    for (vtkIdType i=0; i<N; ++i) {
+      cells[i*2]   = 1;
+      cells[i*2+1] = i;
+    }
 
  	return 1;
 }
