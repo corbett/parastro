@@ -56,9 +56,9 @@ int vtkSQLiteReader::RequestData(vtkInformation*,
 //init vars
 	// set up the sql stuff
 	sqlite3			*db;		// handle for db
-	char			sql_query;	// sql query
+	vtkStdString	sql_query;	// sql query
 	sqlite3_stmt    *res;		// result of sql query
-	int				sql_count;	// no of columns from the query
+	//int				sql_count;	// no of columns from the query
 	const char      *tail;		// ???
 	int				sql_error;	// return value of sql query
 
@@ -89,48 +89,134 @@ int vtkSQLiteReader::RequestData(vtkInformation*,
 	//vtkErrorMacro("opened successfully: " << this->FileName)
 
 // Prepare the query
-	sql_query = ' ';
+	sql_query = "SELECT * FROM stat WHERE gid=1";
 
 // Query the db
 	sql_error = sqlite3_prepare_v2(db,
-        "SELECT * FROM stat WHERE gid=1",
+        sql_query,
         1000, &res, &tail);
 
-	if (sql_error != SQLITE_OK){
+	if (sql_error != SQLITE_OK)
+	{
 		vtkErrorMacro("Error with sql query! Error: " << sql_error);
 		return 0;
 	}
 
-	sql_count = sqlite3_column_count(res); //doesnt deliver the right no, but is >= than actual no
-			// TODO: it it really?? only a assumption. need to check that!
-	vtkErrorMacro("sql_count = " << sql_count);
-
-// Create the points to be displayed 
-	// alloc mem, is bit too much, but exact no isn't known yet, and souldn't make a big diff.
-	newPoints->SetNumberOfPoints(sql_count);
-
-	int i=0; //counts throu
-	while (sqlite3_step(res) == SQLITE_ROW) {
-		newPoints->SetPoint(i,
+// --------------------------
+	// version 1:
+	/* uses insertpoint, possibly slow because everytime range check */
+/*
+	int i = 0;
+	while (sqlite3_step(res) == SQLITE_ROW)
+	{
+		newPoints->InsertPoint(i,
 			sqlite3_column_double(res, 4),
 			sqlite3_column_double(res, 5),
 			sqlite3_column_double(res, 6));
+		/*vtkErrorMacro("coords: "
+			<< sqlite3_column_double(res, 4) << ";"
+			<< sqlite3_column_double(res, 5) << ";"
+			<< sqlite3_column_double(res, 6) << ";");
 		i++;
 	}
 
-	// set no of point to real value
-	newPoints->SetNumberOfPoints(i);
 	newPoints->Squeeze();
+
+*/
+// --------------------------
+	// version 2:
+	/* saves data first in simple datastructre
+	check for speed differences with version 1.. possibly this is
+	easier to implent parallelly. already set sqlite3 to use multiply
+	threads (check sqlite3.c: SQLITE_THREADSAFE 2), see doc here:
+	(http://www.sqlite.org/threadsafe.html) and possibly this disc:
+	(http://osdir.com/ml/sqlite-users/2010-03/msg00209.html) for help
+	later on.
+	*/
+
+	//vtkErrorMacro("threadsafe: " << sqlite3_threadsafe()); // display threading mode
+
+	// create temp data storage structre (simple list)
+	//vtkErrorMacro("structdefs");
+	struct tmp_pnt //elements of the list
+	{
+		double data[3]; //data array
+		tmp_pnt* pnext; //pointer to next point in list
+		//int count;
+	};
+
+	/* should first store the list itself, but i use 2 pointers and a counter directly instead.. could be deleted..
+	struct tmp_list //the list itself
+	{
+		tmp_pnt * pfirst; //pointer to first element of list
+		tmp_pnt * plast; //pointer to last element of list
+		int count;
+	};
+
+	vtkErrorMacro("init mytmplist");
+	tmp_list my_tmp_list = {NULL,NULL,0};*/
+
+	//statt struct einfach direkt 2 pointer brauchen...
+	tmp_pnt * pfirst; //pointer to first element of list
+	tmp_pnt * plast; //pointer to last element of list
+	int count = 0;
+
+	// add a first dummy point
+	tmp_pnt * firstpnt = new tmp_pnt;
+	pfirst = firstpnt; 
+	plast = firstpnt; 
+
+	//vtkErrorMacro("add entry to list");
+
+	while (sqlite3_step(res) == SQLITE_ROW)
+	{
+		tmp_pnt * pnt = new tmp_pnt;
+		//double (*data)[3] = new double;
+		double data[3] = {sqlite3_column_double(res, 4),
+			sqlite3_column_double(res, 5),
+			sqlite3_column_double(res, 6)};
+		pnt->data[0] = data[0];
+		pnt->data[1] = data[1];
+		pnt->data[2] = data[2];
+		pnt->pnext = NULL;
+
+		plast->pnext = pnt;
+		plast = pnt;
+		//vtkErrorMacro("read index: " << count << " cords: " << (pnt->data)[0]);
+		count++;
+	}
+	//vtkErrorMacro("count tot: " << count);
+
+	newPoints->SetNumberOfPoints(count);
+	tmp_pnt * actpnt = pfirst->pnext;
 	
+	for (int n = 0; n < count; n++)
+	{
+		newPoints->SetPoint(n,(actpnt->data));
+		
+		// for debugging
+		//double (* pnt1)[3] = &(actpnt->data);
+		//vtkErrorMacro("index: " << n << " cords: " << **pnt1 <<" "<<  *(*(pnt1)+1) <<" "<< *(*(pnt1)+2));
+
+		actpnt = actpnt->pnext;
+	}
+
+	newPoints->Squeeze();
+
+// --------------------------
+
 // Create the vertices (one point per vertex, for easy display)
-	//vtkErrorMacro(vertices->Print);
 	vtkIdType N = newPoints->GetNumberOfPoints();
-	vtkErrorMacro("No of Points: " << N);
+	//vtkErrorMacro("No of Points: " << N);
     vtkIdType *cells = vertices->WritePointer(N, N*2);
     for (vtkIdType i=0; i<N; ++i) {
       cells[i*2]   = 1;
       cells[i*2+1] = i;
     }
+
+// cleaning up mem
+	//TODO Clean up everything...
+	sqlite3_close(db); //closing db handle (maybe do this earlier??)
 
  	return 1;
 }

@@ -1,3 +1,8 @@
+/*
+Remarks: my changes are commented with //rafik: (to find them easy)
+*/
+
+
 /******************************************************************************
 ** This file is an amalgamation of many separate C source files from SQLite
 ** version 3.7.0.  By combining all the individual C code files into this 
@@ -361,7 +366,7 @@
 #if defined(THREADSAFE)
 # define SQLITE_THREADSAFE THREADSAFE
 #else
-# define SQLITE_THREADSAFE 1
+# define SQLITE_THREADSAFE 2  //Rafik: enable multithreading
 #endif
 #endif
 
