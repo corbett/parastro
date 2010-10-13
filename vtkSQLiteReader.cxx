@@ -90,6 +90,7 @@ int vtkSQLiteReader::RequestData(vtkInformation*,
 
 // Prepare the query
 	sql_query = "SELECT * FROM stat WHERE gid=1";
+	//sql_query = this->GetSqlQuery();
 
 // Query the db
 	sql_error = sqlite3_prepare_v2(db,
@@ -119,30 +120,27 @@ int vtkSQLiteReader::RequestData(vtkInformation*,
 			<< sqlite3_column_double(res, 6) << ";");
 		i++;
 	}
-
 	newPoints->Squeeze();
-
 */
-// --------------------------
-	// version 2:
-	/* saves data first in simple datastructre
+
+/*	--------------------------
+	version 2:
+	saves data first in simple datastructre
 	check for speed differences with version 1.. possibly this is
 	easier to implent parallelly. already set sqlite3 to use multiply
 	threads (check sqlite3.c: SQLITE_THREADSAFE 2), see doc here:
 	(http://www.sqlite.org/threadsafe.html) and possibly this disc:
 	(http://osdir.com/ml/sqlite-users/2010-03/msg00209.html) for help
 	later on.
-	*/
+	-------------------------- */
 
 	//vtkErrorMacro("threadsafe: " << sqlite3_threadsafe()); // display threading mode
 
 	// create temp data storage structre (simple list)
-	//vtkErrorMacro("structdefs");
 	struct tmp_pnt //elements of the list
 	{
 		double data[3]; //data array
 		tmp_pnt* pnext; //pointer to next point in list
-		//int count;
 	};
 
 	/* should first store the list itself, but i use 2 pointers and a counter directly instead.. could be deleted..
@@ -152,9 +150,7 @@ int vtkSQLiteReader::RequestData(vtkInformation*,
 		tmp_pnt * plast; //pointer to last element of list
 		int count;
 	};
-
-	vtkErrorMacro("init mytmplist");
-	tmp_list my_tmp_list = {NULL,NULL,0};*/
+	*/
 
 	//statt struct einfach direkt 2 pointer brauchen...
 	tmp_pnt * pfirst; //pointer to first element of list
@@ -165,8 +161,6 @@ int vtkSQLiteReader::RequestData(vtkInformation*,
 	tmp_pnt * firstpnt = new tmp_pnt;
 	pfirst = firstpnt; 
 	plast = firstpnt; 
-
-	//vtkErrorMacro("add entry to list");
 
 	while (sqlite3_step(res) == SQLITE_ROW)
 	{
@@ -219,4 +213,18 @@ int vtkSQLiteReader::RequestData(vtkInformation*,
 	sqlite3_close(db); //closing db handle (maybe do this earlier??)
 
  	return 1;
+}
+
+
+void vtkSQLiteReader::SetSqlQuery(const char* name)
+{
+
+
+}
+
+char* vtkSQLiteReader::GetSqlQuery()
+{
+
+
+	return "";
 }

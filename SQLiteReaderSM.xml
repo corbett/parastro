@@ -1,24 +1,34 @@
 <ServerManagerConfiguration>
-  <ProxyGroup name="sources">
-    <SourceProxy name="SQLiteReader"
-					 class="vtkSQLiteReader">
+	<ProxyGroup name="sources">
+		<SourceProxy
+			name="SQLiteReader"
+			class="vtkSQLiteReader">
 
+		<!--named Aaa as currently ParaView decides which file is the
+			main data file by that file with the name which is alphabetically
+			first -->
 
-      <!--named Aaa as currently ParaView decides which file is the
-		      main data file by that file with the name which is alphabetically
-		      first -->
+		<StringVectorProperty
+			name="AaaFileName"
+			command="SetFileName"
+			number_of_elements="1">
+			
+			<FileListDomain name="files"/>
+			<Documentation>
+				Reads in points from SQLite3 database
+			</Documentation>
+		</StringVectorProperty>
 
-      <StringVectorProperty
-        name="AaaFileName"
-        command="SetFileName"
-        number_of_elements="1">
-        <FileListDomain name="files"/>
-        <Documentation>
-          Reads in points from SQLite3 database
-        </Documentation>
-      </StringVectorProperty>
+		<StringVectorProperty
+			name="sqlQuery"
+			command="SetSqlQuery"
+			number_of_elements="1"
+			default_values="SELECT * FROM stat WHERE gid=1">
+			<Documentation>
+				Sets the Querz for the db
+			</Documentation>
+		</StringVectorProperty>
 
-
-    </SourceProxy>
-  </ProxyGroup>
+		</SourceProxy>
+	</ProxyGroup>
 </ServerManagerConfiguration>

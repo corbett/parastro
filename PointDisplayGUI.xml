@@ -1,6 +1,6 @@
 <ParaViewReaders>
 	<Reader name="PointDisplay"
-			extensions="db"
-			file_description="Halo DB">
+			extensions="dummy"
+			file_description="Dummy File (SQLite db)">
 	</Reader>
 </ParaViewReaders>

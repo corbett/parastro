@@ -35,10 +35,18 @@ public:
 	vtkSetStringMacro(FileName);
  	vtkGetStringMacro(FileName);
 
+	// set/get the db query
+	//vtkSetStringMacro(SqlQuery);
+	//vtkGetStringMacro(SqlQuery);
+
+	char*	GetSqlQuery();
+	void	SetSqlQuery(const char* name);
+
 protected:
 	vtkSQLiteReader();
 	~vtkSQLiteReader();
 	char* FileName;
+	char* SqlQuery;
 
 	int RequestInformation(vtkInformation*,	vtkInformationVector**,
 		vtkInformationVector*);
