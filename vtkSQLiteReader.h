@@ -21,10 +21,34 @@
 #include "vtkPolyDataAlgorithm.h" // superclass
 #include "sqlitelib/sqlite3.h" // sqlite headerfile
 
-//#include "vtkSmartPointer.h"
-//#include "tipsylib/ftipsy.hpp" // functions take tipsy particle objects
-//#include <vtkstd/vector>
-//#include "vtkFloatArray.h"
+#include "vtkObjectFactory.h"
+#include "vtkSmartPointer.h"
+#include "vtkPolyData.h"
+#include "vtkPoints.h"
+#include "vtkCellArray.h"
+#include "vtkInformation.h"
+#include "vtkInformationVector.h"
+#include <vtkstd/vector>
+
+// probably there better ways than list...
+//TODO check this...
+//#include <list>
+//using namespace std;
+
+class vtkPolyData;
+class vtkCharArray;
+class vtkIdTypeArray;
+class vtkFloatArray;
+class vtkPoints;
+class vtkCellArray;
+class vtkDataArraySelection;
+
+//BTX
+//struct halo {
+//	int id;
+//	vtkPoints coordinates;
+//};
+//ETX
 
 class VTK_EXPORT vtkSQLiteReader : public vtkPolyDataAlgorithm
 {
@@ -39,9 +63,10 @@ public:
 	//vtkSetStringMacro(SqlQuery);
 	//vtkGetStringMacro(SqlQuery);
 
-	char*	GetSqlQuery();
-	void	SetSqlQuery(const char* name);
+	//char*	GetSqlQuery();
+	//void	SetSqlQuery(const char* name);
 
+//BTX
 protected:
 	vtkSQLiteReader();
 	~vtkSQLiteReader();
@@ -54,9 +79,64 @@ protected:
 	int RequestData(vtkInformation*,vtkInformationVector**,
 		vtkInformationVector*);
 
+	
+
+// functions
+
+// structs
+	struct snapinfo {
+		int snapshotnr;
+		double redshift;
+		double time;
+	} snapinfo;
+
+// variables
+	// for halos
+	vtkIdType							ParticleIndex;
+	vtkSmartPointer<vtkIdTypeArray>		ParticleId;
+	vtkSmartPointer<vtkPoints>			Position;
+	vtkSmartPointer<vtkCellArray>		Cells;
+	vtkSmartPointer<vtkFloatArray>		Velocity;
+	vtkSmartPointer<vtkFloatArray>		nParticles;
+
+	vtkSmartPointer<vtkFloatArray>		mVir;
+	vtkSmartPointer<vtkFloatArray>		rVir;
+	vtkSmartPointer<vtkFloatArray>		RHO;
+
+	// for snapshots
+	vtkSmartPointer<vtkIdTypeArray>		SnapId;
+	vtkSmartPointer<vtkFloatArray>		Redshift;
+	vtkSmartPointer<vtkFloatArray>		Time;
+	vtkSmartPointer<vtkDataArray>		Halos;
+
+	// for tracks
+	vtkSmartPointer<vtkIdTypeArray>		TrackId;
+	vtkSmartPointer<vtkPolyData>		Lines;
+
+// constants
+
+
 private:
-  vtkSQLiteReader(const vtkSQLiteReader&);  // Not implemented.
-  void operator=(const vtkSQLiteReader&);  // Not implemented.
+	vtkSQLiteReader(const vtkSQLiteReader&);  // Not implemented.
+	void operator=(const vtkSQLiteReader&);  // Not implemented.
+
+	//functions
+	int openDB(char*);
+	int vtkSQLiteReader::readSnapshots(
+		std::vector<vtkSmartPointer<vtkPolyData>> * output,
+		const int numSnap);
+	int RequestDataDemo(vtkInformationVector*);
+
+	// helpers
+	vtkStdString vtkSQLiteReader::Int2Str(int);
+
+	//variables
+	sqlite3 * db;
+
+	//constants
+
+
+//ETX
 };
 
 #endif
