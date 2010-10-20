@@ -59,19 +59,14 @@ public:
 	vtkSetStringMacro(FileName);
  	vtkGetStringMacro(FileName);
 
-	// set/get the db query
-	//vtkSetStringMacro(SqlQuery);
-	//vtkGetStringMacro(SqlQuery);
-
-	//char*	GetSqlQuery();
-	//void	SetSqlQuery(const char* name);
+	vtkSetMacro(DisplaySnapshot,int);
+	vtkGetMacro(DisplaySnapshot,int);
 
 //BTX
 protected:
 	vtkSQLiteReader();
 	~vtkSQLiteReader();
 	char* FileName;
-	char* SqlQuery;
 
 	int RequestInformation(vtkInformation*,	vtkInformationVector**,
 		vtkInformationVector*);
@@ -91,6 +86,11 @@ protected:
 	} snapinfo;
 
 // variables
+	int numSnaps;
+	int DisplaySnapshot;
+	std::vector<vtkSmartPointer<vtkPolyData>> data;
+
+	/* not used
 	// for halos
 	vtkIdType							ParticleIndex;
 	vtkSmartPointer<vtkIdTypeArray>		ParticleId;
@@ -112,6 +112,8 @@ protected:
 	// for tracks
 	vtkSmartPointer<vtkIdTypeArray>		TrackId;
 	vtkSmartPointer<vtkPolyData>		Lines;
+*/
+
 
 // constants
 
@@ -123,15 +125,17 @@ private:
 	//functions
 	int openDB(char*);
 	int vtkSQLiteReader::readSnapshots(
-		std::vector<vtkSmartPointer<vtkPolyData>> * output,
-		const int numSnap);
+		std::vector<vtkSmartPointer<vtkPolyData>> *);
+	int vtkSQLiteReader::ReadHeader(vtkInformationVector*);
 	int RequestDataDemo(vtkInformationVector*);
 
 	// helpers
 	vtkStdString vtkSQLiteReader::Int2Str(int);
+	int vtkSQLiteReader::SQLQuery(vtkStdString, sqlite3_stmt*);
 
 	//variables
 	sqlite3 * db;
+	bool dataIsRead;
 
 	//constants
 

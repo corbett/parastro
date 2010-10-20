@@ -30,6 +30,7 @@ vtkSQLiteReader::vtkSQLiteReader()
 	this->SetNumberOfInputPorts(0);   // set no of input files (0 is just fine)
 
 	this->db	= NULL;
+	this->dataIsRead = false;
 
 }
 
@@ -56,15 +57,15 @@ int vtkSQLiteReader::RequestInformation(
 
 
 // opening database
-	if(!this->openDB(this->FileName))
-	{
-		return 0;
-	}
+	if(!this->openDB(this->FileName)){return 0;}
 
-	return 1;
 
 // check for right format
 
+// read in database header
+	if(!this->ReadHeader(outputVector)){return 0;}
+
+	return 1;
 }
 
 /*----------------------------------------------------------------------------
@@ -74,23 +75,28 @@ int vtkSQLiteReader::RequestData(vtkInformation*,
 	vtkInformationVector**,vtkInformationVector* outputVector)
 {
 	//DEBUG implement this into gui later, for coding it's hardcoded..
-	int displayid = 30;
- 	
-	//DEBUG this should later be read out from header (in requestInformation)
-	int numSnap = 32;
-
-	//Set up output
-	std::vector<vtkSmartPointer<vtkPolyData>> data(numSnap); //big fat nasty vetor containing all data..
+	int displayid = (this->DisplaySnapshot);
+	
 	vtkPolyData * out = vtkPolyData::GetData(outputVector);
 
-	//read in all the data (do this only once)
-	vtkSQLiteReader::readSnapshots(&data,numSnap);
+	if(!this->dataIsRead){
+		//Set up output
+		std::vector<vtkSmartPointer<vtkPolyData>> data(this->numSnaps); //big fat nasty vetor containing all data..
+		
+		this->data = data;
+			
+		//read in all the data (do this only once)
+		readSnapshots(&(this->data));
+	}
+
+	//read in snap infos
+
 	//generate tracks (do this only once)
 	//TODO
 
 	// set witch data to display
-	out->SetPoints(data[displayid]->GetPoints());
-	out->SetVerts(data[displayid]->GetVerts());
+	out->SetPoints(this->data.at(displayid)->GetPoints());
+	out->SetVerts(this->data.at(displayid)->GetVerts());
 
 	return 1;
 }
@@ -132,7 +138,7 @@ reads the snapshots in
 	returns:
 		int	errorcode (1 = ok)
 */
-int vtkSQLiteReader::readSnapshots(std::vector<vtkSmartPointer<vtkPolyData>> * output, const int numSnap)
+int vtkSQLiteReader::readSnapshots(std::vector<vtkSmartPointer<vtkPolyData>> * output)
 {
 //init vars
 
@@ -145,7 +151,6 @@ int vtkSQLiteReader::readSnapshots(std::vector<vtkSmartPointer<vtkPolyData>> * o
 	// set up the sql stuff
 	vtkStdString	sql_query;	// sql query
 	sqlite3_stmt    *res;		// result of sql query
-	//int				sql_count;	// no of columns from the query
 	const char      *tail;		// ???
 	int				sql_error;	// return value of sql query
 
@@ -171,7 +176,7 @@ int vtkSQLiteReader::readSnapshots(std::vector<vtkSmartPointer<vtkPolyData>> * o
 	int count;
 	//int snap = 1;
 
-	for (int snap = 1; snap<=numSnap; snap++) //loop over all snapshots
+	for (int snap = 1; snap<=this->numSnaps; snap++) //loop over all snapshots
 	{
 
 		//init datastructre
@@ -181,9 +186,9 @@ int vtkSQLiteReader::readSnapshots(std::vector<vtkSmartPointer<vtkPolyData>> * o
 		count = 0;
 
 		// Prepare the query
-		sql_query = "SELECT * FROM stat WHERE snap_id=" + Int2Str(snap); //TODO check this
+		sql_query = "SELECT * FROM stat WHERE snap_id=" + Int2Str(snap);
 
-		vtkErrorMacro("SQL query: " + sql_query);
+		//vtkErrorMacro("SQL query: " + sql_query);
 
 		sql_error = sqlite3_prepare_v2(db,
 			sql_query,
@@ -276,6 +281,7 @@ int vtkSQLiteReader::readSnapshots(std::vector<vtkSmartPointer<vtkPolyData>> * o
 		//snap++;
 	}
 
+	this->dataIsRead = true;
 	return 1;
 }
 
@@ -444,4 +450,68 @@ vtkStdString vtkSQLiteReader::Int2Str(int number)
 	std::stringstream ss;//create a stringstream
 	ss << number;//add number to the stream
 	return ss.str();//return a string with the contents of the stream
+}
+
+/*----------------------------------------------------------------------------
+Reads the header data from db
+	assumes:
+		opened database, db set
+	arguments:
+		vtkInformationVector Output information
+	returns:
+		int	errorcode (1 =ok)
+	sets:
+		numSnap		Number of snapshots
+
+*/
+int vtkSQLiteReader::ReadHeader(vtkInformationVector* outputVector)
+{
+	// set up the sql stuff
+	sqlite3_stmt    *res;		// result of sql query
+	const char      *tail;		// ???
+	int				sql_error;	// return value of sql query
+
+	vtkStdString sql_query = "SELECT * FROM header";
+	
+	sql_error = sqlite3_prepare_v2(db,sql_query,1000, &res, &tail);
+
+	if (sql_error != SQLITE_OK)
+	{
+		vtkErrorMacro("Error with sql query! Error: " << sql_error);
+		return 0;
+	}
+
+	if (sqlite3_step(res) == SQLITE_ROW) //there should be only one row..
+	{
+		this->numSnaps = sqlite3_column_int(res, 9);
+	}
+
+	return 1;
+}
+
+/*----------------------------------------------------------------------------
+-- NOT USED --
+Sets up an SQL Query
+	assumes:
+		opened database, db set
+	arguments:
+		vtkStdString sql_query the query command
+		sqlite3_stmt *res pointer to result
+	returns:
+		int	errorcode (1 =ok)
+*/
+int vtkSQLiteReader::SQLQuery(vtkStdString sql_query, sqlite3_stmt * res)
+{
+	const char      *tail;		// ???
+	int				sql_error;	// return value of sql query
+
+	sql_error = sqlite3_prepare_v2(this->db, sql_query, 1000, &res, &tail);
+
+	if (sql_error != SQLITE_OK)
+	{
+		vtkErrorMacro("Error with sql query! Error: " << sql_error);
+		return 0;
+	}
+
+	return 1;
 }
