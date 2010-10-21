@@ -79,6 +79,22 @@ protected:
 // functions
 
 // structs
+	struct velocity {
+		double vx;
+		double vy;
+		double vz;
+	};
+
+	struct snapshot {
+		vtkSmartPointer<vtkPoints> coord;
+		vtkSmartPointer<vtkCellArray> cells;
+		std::vector<velocity> velo;
+		// std::vector<int> npart;
+		// std::vector<int> Mvir;
+		// std::vector<int> Rvir;
+		// ...
+	};
+
 	struct snapinfo {
 		int snap_id;
 		double redshift;
@@ -102,6 +118,8 @@ protected:
 	int numTracks;
 	int DisplaySnapshot;
 	std::vector<vtkSmartPointer<vtkPolyData>> data;
+	
+	std::vector<snapshot> data2;
 	std::vector<snapinfo> snapinfoVector;
 	std::vector<track> trackVector;
 
@@ -144,10 +162,11 @@ private:
 	int openDB(char*);
 	int vtkSQLiteReader::readSnapshots(
 		std::vector<vtkSmartPointer<vtkPolyData>> *);
+	int vtkSQLiteReader::readSnapshots2();
 	int vtkSQLiteReader::ReadHeader(vtkInformationVector*);
 	int vtkSQLiteReader::ReadTracks();
 	int vtkSQLiteReader::GenerateTracks();
-	int vtkSQLiteReader::CollectLines(vtkSmartPointer<vtkCellArray> *);
+	int vtkSQLiteReader::CollectLines(vtkSmartPointer<vtkCellArray>*);
 
 	int RequestDataDemo(vtkInformationVector*);
 	int vtkSQLiteReader::ReadSnapshotInfo();
