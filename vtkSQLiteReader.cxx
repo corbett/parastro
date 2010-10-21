@@ -6,12 +6,15 @@
 #include "vtkSQLiteReader.h"
 #include "vtkObjectFactory.h"
 #include "vtkPolyData.h"
+#include "vtkPointData.h"
 #include "vtkPoints.h"
 #include "vtkCellArray.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
 #include "vtkSmartPointer.h"
 #include "vtkFloatArray.h"
+#include "vtkLine.h"
+#include "vtkPolyLine.h"
 #include <vector>
 #include <sstream>
 
@@ -60,7 +63,8 @@ int vtkSQLiteReader::RequestInformation(
 	if(!this->openDB(this->FileName)){return 0;}
 
 
-// check for right format
+// TODO check for right format
+	/* implement this, so i can check for right database format in the beginning and omit all the errorhandling code with database queries.. should give some speed..*/
 
 // read in database header
 	if(!this->ReadHeader(outputVector)){return 0;}
@@ -87,16 +91,27 @@ int vtkSQLiteReader::RequestData(vtkInformation*,
 			
 		//read in all the data (do this only once)
 		readSnapshots(&(this->data));
+		
+		//read in snap infos
+		ReadSnapshotInfo();
+
+		//read in the track info
+		ReadTracks();
 	}
 
-	//read in snap infos
-
+	
 	//generate tracks (do this only once)
+	GenerateTracks();
 	//TODO
-
+	
+	//generate all the lines
+	vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
+	CollectLines(&lines);
+	
 	// set witch data to display
 	out->SetPoints(this->data.at(displayid)->GetPoints());
 	out->SetVerts(this->data.at(displayid)->GetVerts());
+	out->SetLines(lines);
 
 	return 1;
 }
@@ -154,6 +169,7 @@ int vtkSQLiteReader::readSnapshots(std::vector<vtkSmartPointer<vtkPolyData>> * o
 	const char      *tail;		// ???
 	int				sql_error;	// return value of sql query
 
+	//TODO maybee i've to put this in header, otherwise theyre destroyed
 	vtkSmartPointer<vtkPoints> Position; // stores the coordinates of the points
 	vtkSmartPointer<vtkCellArray> Vertices;
 	vtkSmartPointer<vtkFloatArray> Velocity;
@@ -262,23 +278,26 @@ int vtkSQLiteReader::readSnapshots(std::vector<vtkSmartPointer<vtkPolyData>> * o
 			actdata = actdata->pnext;
 		}
 		
+		//vtkSmartPointer<vtkPolyData> tmp = vtkSmartPointer<vtkPolyData>::New();
+
+		
 		output->push_back(vtkSmartPointer<vtkPolyData>::New());
-		(*output)[snap-1]->SetPoints(Position);
-		(*output)[snap-1]->SetVerts(Vertices);
+		output->at(snap-1)->SetPoints(Position);
+		output->at(snap-1)->SetVerts(Vertices);
 
-		//output[snap]->GetPointData()->AddArray(Velocity);
-		//output[snap]->GetPointData()->AddArray(qid);
-		//output[snap]->GetPointData()->AddArray(npart);
+		//(vtkSmartPointer<vtkPolyData>)output[snap]->GetPointData()->AddArray(Velocity);
+		output->at(snap-1)->GetPointData()->AddArray(qid);
+		output->at(snap-1)->GetPointData()->AddArray(npart);
+		output->at(snap-1)->GetPointData()->AddArray(Velocity);
 
+		//tmp->GetPointData()->AddArray(Velocity);
+	
 		//vtkSmartPointer<vtkPolyData> tmp = vtkSmartPointer<vtkPolyData>::New();
 		//tmp->SetPoints(Position);
 		//tmp->SetVerts(Vertices);
 
 
-		//*pvect = output->insert(pvect,tmp);
-		//pvect++;
 
-		//snap++;
 	}
 
 	this->dataIsRead = true;
@@ -515,3 +534,194 @@ int vtkSQLiteReader::SQLQuery(vtkStdString sql_query, sqlite3_stmt * res)
 
 	return 1;
 }
+/*----------------------------------------------------------------------------
+Reads in the infos for the snapshots
+	assumes:
+		opened database, db set
+	sets:
+		this->snapinfo	information aout snapshots
+	arguments:
+		none
+	returns:
+		int	errorcode (1 =ok)
+*/
+int vtkSQLiteReader::ReadSnapshotInfo()
+{
+	this->snapinfoVector.clear();
+
+	// set up the sql stuff
+	vtkStdString	sql_query;	// sql query
+	sqlite3_stmt    *res;		// result of sql query
+	const char      *tail;		// ???
+	int				sql_error;	// return value of sql query
+
+	// Prepare the query
+	sql_query = "SELECT * FROM snapinfo";
+
+	//vtkErrorMacro("SQL query: " + sql_query);
+
+	sql_error = sqlite3_prepare_v2(db,
+		sql_query,
+		1000, &res, &tail);
+
+	if (sql_error != SQLITE_OK)
+	{
+		vtkErrorMacro("Error with sql query! Error: " << sql_error);
+		return 0;
+	}
+	
+	while (sqlite3_step(res) == SQLITE_ROW)
+	{
+		snapinfo tmp = {
+			sqlite3_column_int(res, 0), //snap_id
+			sqlite3_column_double(res, 2), //redshift
+			sqlite3_column_double(res, 3), //time
+			sqlite3_column_int(res, 5)}; //npart
+			
+		this->snapinfoVector.push_back(tmp);
+	}
+	return 1;
+}
+/*----------------------------------------------------------------------------
+Reads in the track information
+	assumes:
+		opened database, db set
+	sets:
+		std::vector<track> this->trackVector	information about tracks
+		int this->numTracks		tot count of tracks
+	arguments:
+		none
+	returns:
+		int	errorcode (1 =ok)
+*/
+int vtkSQLiteReader::ReadTracks()
+{
+	//TODO all this...
+	this->trackVector.clear();
+
+	// set up the sql stuff
+	vtkStdString	sql_query;	// sql query
+	sqlite3_stmt    *res;		// result of sql query
+	const char      *tail;		// ???
+	int				sql_error;	// return value of sql query
+
+	bool goOn = true;
+	int tracksCount = 0;
+	int pointCount;
+
+	while (goOn)
+	{
+		sql_query = "SELECT * FROM tracks WHERE id=" + Int2Str(tracksCount+1);
+		sql_error = sqlite3_prepare_v2(db, sql_query, 1000, &res, &tail);
+
+		if (sql_error != SQLITE_OK)
+		{
+			vtkErrorMacro("Error with sql query! Error: " << sql_error);
+			return 0;
+		}
+		//bool doIt = true;
+		track tmpTrack;
+		pointCount = 0;
+		
+		while (sqlite3_step(res) == SQLITE_ROW)
+		{
+			pointCount++;
+			
+			trackPoint tmpTrackPoint = {
+				sqlite3_column_int(res, 1), //snap_id
+				sqlite3_column_int(res, 2)}; //qid
+					
+			tmpTrack.point.push_back(tmpTrackPoint);
+		}
+		if (pointCount>0)
+		{
+			tmpTrack.noOfPoints = pointCount;
+			this->trackVector.push_back(tmpTrack);
+		}
+		else
+		{
+			goOn = false;
+		}
+		
+		tracksCount++;
+	}
+
+	this->numTracks = tracksCount-1;
+	return 1;
+}
+/*----------------------------------------------------------------------------
+Generates the tracks
+	assumes:
+		opened database, db set
+	sets:
+		this->trackinfo	information about tracks
+	arguments:
+		none
+	returns:
+		int	errorcode (1 =ok)
+*/
+int vtkSQLiteReader::GenerateTracks()
+{
+/* DEMO for doing the lines
+	vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
+	
+	
+	for (int i = 0;i<3;i++){
+		vtkSmartPointer<vtkPolyLine> nextLine = vtkSmartPointer<vtkPolyLine>::New();
+		nextLine->GetPointIds()->SetNumberOfIds(3);
+		nextLine->GetPointIds()->SetId(0,i*3+0);
+		nextLine->GetPointIds()->SetId(1,i*3+1);
+		nextLine->GetPointIds()->SetId(2,i*3+2);
+
+		lines->InsertNextCell(nextLine);
+	}
+
+	//and then outside
+	out->SetLines(lines);
+*/
+
+	track * actTrack;
+	vtkSmartPointer<vtkPolyLine> actLine;
+	vtkSmartPointer<vtkDataArray> actQid;
+
+	int qid;
+	int snap_id;
+
+	for (int trackno = 0; trackno < this->numTracks; trackno++)
+	{
+		actTrack = &(this->trackVector.at(trackno));
+		actLine = vtkSmartPointer<vtkPolyLine>::New();
+		
+		
+		for(int i = 0; i<this->numSnaps;i++){
+			
+			qid = actTrack->point.at(i).qid;
+			snap_id = actTrack->point.at(i).snap_id;
+			actQid = this->data.at(snap_id)->GetPointData()->GetArray("qid");
+			
+			//find the point 
+			//add it to actLine
+		}
+		actTrack->line = actLine;
+	}
+
+	return 1;
+}
+
+/*----------------------------------------------------------------------------
+Collects all the tracks in trackVector and generates one vtkCellArray to display them
+	assumes:
+		trackVector filled up
+	sets:
+		this->trackinfo	information about tracks
+	arguments:
+		vtkSmartPointer<vtkCellArray> * Pointer to cell array to fill in the collected lines
+	returns:
+		int	errorcode (1 =ok)
+*/
+int vtkSQLiteReader::CollectLines(vtkSmartPointer<vtkCellArray> * lines)
+{
+	return 1;
+}
+
+

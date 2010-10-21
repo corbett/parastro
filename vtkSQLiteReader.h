@@ -80,17 +80,35 @@ protected:
 
 // structs
 	struct snapinfo {
-		int snapshotnr;
+		int snap_id;
 		double redshift;
 		double time;
-	} snapinfo;
+		int npart;
+	};
+
+	struct trackPoint {
+		int snap_id;
+		int qid;
+	};
+
+	struct track {
+		std::vector<trackPoint> point;
+		int noOfPoints;
+		vtkSmartPointer<vtkPolyLine> line;
+	};
 
 // variables
 	int numSnaps;
+	int numTracks;
 	int DisplaySnapshot;
 	std::vector<vtkSmartPointer<vtkPolyData>> data;
+	std::vector<snapinfo> snapinfoVector;
+	std::vector<track> trackVector;
 
-	/* not used
+
+
+
+/* not used
 	// for halos
 	vtkIdType							ParticleIndex;
 	vtkSmartPointer<vtkIdTypeArray>		ParticleId;
@@ -127,7 +145,12 @@ private:
 	int vtkSQLiteReader::readSnapshots(
 		std::vector<vtkSmartPointer<vtkPolyData>> *);
 	int vtkSQLiteReader::ReadHeader(vtkInformationVector*);
+	int vtkSQLiteReader::ReadTracks();
+	int vtkSQLiteReader::GenerateTracks();
+	int vtkSQLiteReader::CollectLines(vtkSmartPointer<vtkCellArray> *);
+
 	int RequestDataDemo(vtkInformationVector*);
+	int vtkSQLiteReader::ReadSnapshotInfo();
 
 	// helpers
 	vtkStdString vtkSQLiteReader::Int2Str(int);

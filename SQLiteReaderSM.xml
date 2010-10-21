@@ -29,7 +29,7 @@
 			<IntRangeDomain
 				name="range"
 				min="1"
-				max="20"/>
+				max="32"/>
 				
 			<Documentation>
 				Sets the snapshot id to display
