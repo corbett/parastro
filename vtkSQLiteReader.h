@@ -116,6 +116,7 @@ protected:
 // variables
 	int numSnaps;
 	int numTracks;
+	int totNumPoints;
 	int DisplaySnapshot;
 	std::vector<vtkSmartPointer<vtkPolyData>> data;
 	
@@ -167,6 +168,7 @@ private:
 	int vtkSQLiteReader::ReadTracks();
 	int vtkSQLiteReader::GenerateTracks();
 	int vtkSQLiteReader::CollectLines(vtkSmartPointer<vtkCellArray>*);
+	int vtkSQLiteReader::GenerateOutput(vtkPolyData *);
 
 	int RequestDataDemo(vtkInformationVector*);
 	int vtkSQLiteReader::ReadSnapshotInfo();

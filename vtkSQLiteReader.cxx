@@ -115,12 +115,12 @@ int vtkSQLiteReader::RequestData(vtkInformation*,
 	}
 	
 	//generate tracks (do this only once)
-	GenerateTracks();
+	//GenerateTracks();
 	//TODO
 	
 	//generate all the lines
-	vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
-	CollectLines(&lines);
+	//vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
+	//CollectLines(&lines);
 	
 	// set witch data to display
 	/* old stuff again..
@@ -130,7 +130,9 @@ int vtkSQLiteReader::RequestData(vtkInformation*,
 	*/
 	out->SetPoints(this->data2.at(displayid).coord);
 	out->SetVerts(this->data2.at(displayid).cells);
-	out->SetLines(lines);
+	//out->SetLines(lines);
+
+	//vtkSQLiteReader::GenerateOutput(out);
 
 	return 1;
 }
@@ -346,6 +348,7 @@ int vtkSQLiteReader::readSnapshots2()
 	vtkSmartPointer<vtkCellArray> tmp_cells;
 
 	this->data2.clear();
+	this->totNumPoints = 0;
 
 	for (int snap = 1; snap<=this->numSnaps; snap++) //loop over all snapshots
 	{
@@ -406,6 +409,7 @@ int vtkSQLiteReader::readSnapshots2()
 		actSnapshot.cells = tmp_cells;
 		actSnapshot.velo = tmp_velo;
 
+		this->totNumPoints = this->totNumPoints + count;
 		this->data2.push_back(actSnapshot);
 	}
 
@@ -760,6 +764,7 @@ int vtkSQLiteReader::ReadTracks()
 	return 1;
 }
 /*----------------------------------------------------------------------------
+OUTDATED, NOT USED ANYMORE
 Generates the tracks
 	assumes:
 		opened database, db set
@@ -828,6 +833,7 @@ int vtkSQLiteReader::GenerateTracks()
 }
 
 /*----------------------------------------------------------------------------
+OUTDATED, NOT USED ANYMORE
 Collects all the tracks in trackVector and generates one vtkCellArray to display them
 	assumes:
 		trackVector filled up
@@ -849,3 +855,64 @@ int vtkSQLiteReader::CollectLines(vtkSmartPointer<vtkCellArray> * lines)
 }
 
 
+/*----------------------------------------------------------------------------
+Collects all the tracks in trackVector and generates one vtkCellArray to display them
+Collects all Points
+	assumes:
+		data2 filled with points
+		trackVector filled up
+	sets:
+		this->trackinfo	information about tracks
+	arguments:
+		vtkPolyData * out pointer to outputdata
+	returns:
+		int	errorcode (1 =ok)
+*/
+int vtkSQLiteReader::GenerateOutput(vtkPolyData * out)
+{
+
+
+
+	// START OVER, THIS SUCKS...
+
+	// prepare datastructre
+
+	// loop over all elements in data2 and put pointers to 
+
+
+	vtkSmartPointer<vtkPoints> tmp_points = vtkSmartPointer<vtkPoints>::New();
+
+	tmp_points->SetNumberOfPoints(this->totNumPoints);
+
+
+	vtkSmartPointer<vtkCellArray> tmp_cells;
+	//vtkSmartPointer<vtkDataArray> tmp_pointdata = vtkSmartPointer<vtkDataArray>::New();
+	vtkSmartPointer<vtkCellArray> tmp_lines;
+
+	//tmp_pointdata->SetNumberOfComponents(3);
+
+	// collect all points
+	int totPoints = 0;
+	int numPoints = 0;
+
+	for (int i = 0; i<this->numSnaps;i++){
+		numPoints = data2.at(i).coord->GetNumberOfPoints();
+		//totPoints =+ numPoints;
+		//out->GetPointData()->SetNumberOfTuples(totPoints);   //->Resize(totPoints);
+		for (int j = 0; j<numPoints; j++){
+			double tmpdata[3];
+			data2.at(i).coord->GetPoint(j,tmpdata);
+			//out->GetPoints()->GetData()->SetTuple(i,ptr);
+			////tmp_pointdata->SetTuple(i,data2.at(i).coord->GetData()->GetTuple3(j));
+			//tmp_points->InsertNextPoint(*ptr);
+			out->GetPoints()->InsertNextPoint(tmpdata);
+		}
+	}
+
+	//out->GetPoints()->SetData(tmp_pointdata);
+
+	//out->SetPoints(tmp_points);
+	//out->SetVerts(tmp_cells);
+	//out->SetLines(tmp_lines);
+	return 1;
+}
