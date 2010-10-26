@@ -1,0 +1,5 @@
+<RCC>
+	<qresource prefix="/ParaViewResources">
+		<file>RamsesReaderGUI.xml</file>
+	</qresource>
+</RCC>

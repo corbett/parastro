@@ -1,0 +1,6 @@
+<ParaViewReaders>
+	<Reader name="RamsesReader"
+			extensions="ram"
+			file_description="Ramses Binary">
+	</Reader>
+</ParaViewReaders>
