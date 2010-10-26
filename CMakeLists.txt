@@ -19,21 +19,23 @@ INCLUDE_DIRECTORIES(AstroVizHelpersLib)
 
 #Defines the AstroViz plugin
 ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.0"
-	SERVER_MANAGER_SOURCES vtkTipsyReader.cxx 
+	SERVER_MANAGER_SOURCES 
+	vtkTipsyReader.cxx
 	vtkNSmoothFilter.cxx vtkCenterOfMassFilter.cxx 
 	vtkProfileFilter.cxx vtkMomentsOfInertiaFilter.cxx
 	vtkVirialRadiusFilter.cxx vtkAddAdditionalAttribute.cxx 
 	vtkFriendsOfFriendsHaloFinder.cxx 
 	vtkPointDisplay.cxx
 	vtkSQLiteReader.cxx #<-- for server
-	SERVER_MANAGER_XML  TipsyReaderSM.xml 
+	SERVER_MANAGER_XML  TipsyReaderSM.xml
 	NSmoothFilterSM.xml  CenterOfMassFilter.xml
 	ProfileFilter.xml MomentsOfInertiaFilter.xml 
 	VirialRadiusFilter.xml AddAdditionalAttribute.xml 
 	FriendsOfFriendsHaloFinder.xml	
 	PointDisplaySM.xml
 	SQLiteReaderSM.xml #<-- for server
-	GUI_RESOURCES TipsyReader.qrc PointDisplay.qrc SQLiteReader.qrc #<-- for client
+	GUI_RESOURCES TipsyReader.qrc 
+	PointDisplay.qrc SQLiteReader.qrc #<-- for client
 	GUI_RESOURCE_FILES AstroVizFilterMenu.xml) #<-- for client
 
 	
@@ -48,6 +50,7 @@ ADD_LIBRARY(TipsyHelpers STATIC tipsylib/adapter.cpp tipsylib/binner.cpp
 	tipsylib/ftipsy.cpp tipsylib/native.cpp 
 	tipsylib/standard.cpp
 	tipsylib/vtipsy.cpp)
+	
 # add the winsock2 library for net lookup names
 IF (WIN32)
   TARGET_LINK_LIBRARIES(TipsyHelpers ws2_32)  

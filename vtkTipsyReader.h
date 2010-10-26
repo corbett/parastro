@@ -21,7 +21,7 @@
 #include "vtkPolyDataAlgorithm.h" // superclass
 
 #include "vtkSmartPointer.h"
-#include "tipsylib/ftipsy.hpp" // functions take tipsy particle objects
+#include "tipsylib/ftipsy.hpp" // functions take Tipsy particle objects
 #include <vtkstd/vector>
 
 class vtkPolyData;
@@ -104,6 +104,7 @@ protected:
   vtkSmartPointer<vtkFloatArray>   Temperature;
   vtkSmartPointer<vtkFloatArray>   Metals;
   vtkSmartPointer<vtkFloatArray>   Tform;
+	vtkSmartPointer<vtkFloatArray>		 Type;
   vtkSmartPointer<vtkFloatArray>   Velocity;
 
   //
@@ -118,10 +119,10 @@ private:
   void operator=(const vtkTipsyReader&);  // Not implemented.
 	/* Help functions for reading */
 	// Description:
-	// Reads the tipsy header. 
+	// Reads the Tipsy header. 
 	TipsyHeader ReadTipsyHeader(ifTipsy& tipsyInfile);
 	// Description:
-	// Reads all particles of this piece from the tipsy file
+	// Reads all particles of this piece from the Tipsy file
 	void ReadAllParticles(TipsyHeader& tipsyHeader,
 		ifTipsy& tipsyInfile,int piece,int numPieces,vtkPolyData* output);
 	// Description:

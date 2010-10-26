@@ -274,6 +274,7 @@ vtkIdType vtkTipsyReader::ReadGasParticle(vtkPolyData* output,
   if (this->Temperature) this->Temperature->SetTuple1(id, g.temp);
   if (this->Hsmooth)     this->Hsmooth->SetTuple1(id, g.hsmooth);
   if (this->Metals)      this->Metals->SetTuple1(id, g.metals);
+	if (this->Type)      this->Type->SetTuple1(id, 0.0);
 	return id;
 }
 
@@ -285,14 +286,17 @@ vtkIdType vtkTipsyReader::ReadStarParticle(vtkPolyData* output,
   if (this->EPS)    this->EPS->SetTuple1(id, s.eps);
   if (this->Metals) this->Metals->SetTuple1(id, s.metals);
   if (this->Tform)  this->Tform->SetTuple1(id, s.tform);
+	if (this->Type)      this->Type->SetTuple1(id, 2.0);
 	return id;
 }
+
 //----------------------------------------------------------------------------	
 vtkIdType vtkTipsyReader::ReadDarkParticle(vtkPolyData* output,
 	TipsyDarkParticle& d)
 {
  	vtkIdType id=this->ReadBaseParticle(output,d);
   if (this->EPS) this->EPS->SetTuple1(id, d.eps);
+	if (this->Type)      this->Type->SetTuple1(id, 1.0);
 	return id;
 }
 		
@@ -360,6 +364,10 @@ void vtkTipsyReader::AllocateAllTipsyVariableArrays(vtkIdType numBodies,
     this->Tform = AllocateDataArray(output,"tform",1,numBodies);
   else 
     this->Tform = NULL;
+	if (this->GetPointArrayStatus("Type"))
+    this->Type = AllocateDataArray(output,"type",1,numBodies);
+  else 
+    this->Type = NULL;
 }
 //----------------------------------------------------------------------------
 int vtkTipsyReader::RequestInformation(
@@ -380,6 +388,7 @@ int vtkTipsyReader::RequestInformation(
   this->PointDataArraySelection->AddArray("Temperature");
   this->PointDataArraySelection->AddArray("Metals");
   this->PointDataArraySelection->AddArray("Tform");
+	this->PointDataArraySelection->AddArray("Type");
   this->PointDataArraySelection->AddArray("Velocity");
 
 	return 1;
@@ -513,6 +522,7 @@ int vtkTipsyReader::RequestData(vtkInformation*,
   this->Temperature = NULL;
   this->Metals      = NULL;
   this->Tform       = NULL;
+	this->Type       = NULL;
   this->Velocity    = NULL;
   //
  	return 1;
