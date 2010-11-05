@@ -26,16 +26,16 @@ ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.0"
 	vtkVirialRadiusFilter.cxx vtkAddAdditionalAttribute.cxx 
 	vtkFriendsOfFriendsHaloFinder.cxx 
 	vtkPointDisplay.cxx
-	vtkSQLiteReader.cxx #<-- for server
+#	vtkSQLiteReader.cxx #<-- for server
 	SERVER_MANAGER_XML  TipsyReaderSM.xml
 	NSmoothFilterSM.xml  CenterOfMassFilter.xml
 	ProfileFilter.xml MomentsOfInertiaFilter.xml 
 	VirialRadiusFilter.xml AddAdditionalAttribute.xml 
 	FriendsOfFriendsHaloFinder.xml	
 	PointDisplaySM.xml
-	SQLiteReaderSM.xml #<-- for server
+#	SQLiteReaderSM.xml #<-- for server
 	GUI_RESOURCES TipsyReader.qrc 
-	PointDisplay.qrc SQLiteReader.qrc #<-- for client
+	PointDisplay.qrc #SQLiteReader.qrc #<-- for client
 	GUI_RESOURCE_FILES AstroVizFilterMenu.xml) #<-- for client
 
 	
@@ -50,13 +50,13 @@ ADD_LIBRARY(TipsyHelpers STATIC tipsylib/adapter.cpp tipsylib/binner.cpp
 	tipsylib/ftipsy.cpp tipsylib/native.cpp 
 	tipsylib/standard.cpp
 	tipsylib/vtipsy.cpp)
-	
+SET_TARGET_PROPERTIES(TipsyHelpers PROPERTIES COMPILE_FLAGS "-fPIC")	
 # add the winsock2 library for net lookup names
 IF (WIN32)
   TARGET_LINK_LIBRARIES(TipsyHelpers ws2_32)  
 ENDIF (WIN32)
 
 # For SQLiteReader Plugin, SQLite lib
-ADD_LIBRARY(SQLitelib STATIC sqlitelib/sqlite3.c)
+#ADD_LIBRARY(SQLitelib STATIC sqlitelib/sqlite3.c)
 
-TARGET_LINK_LIBRARIES(AstroVizPlugin TipsyHelpers SQLitelib)
+TARGET_LINK_LIBRARIES(AstroVizPlugin TipsyHelpers)# SQLitelib)
