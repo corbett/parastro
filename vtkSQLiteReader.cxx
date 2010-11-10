@@ -143,6 +143,7 @@ int vtkSQLiteReader::RequestData(vtkInformation*,
 	readSnapshots3();
 	readSnapshotInfo3();
 	readTracks3();
+	generateColors();
 
 	out->SetPoints(this->Position);
 	out->SetVerts(this->Cells);
@@ -151,12 +152,18 @@ int vtkSQLiteReader::RequestData(vtkInformation*,
 	out->GetPointData()->AddArray(this->Qid);
 	out->GetPointData()->AddArray(this->SnapId);
 	out->GetPointData()->AddArray(this->RVir);
+	out->GetPointData()->AddArray(this->TrackId);
+
+
+	//out->GetPointData()->AddArray(this->colors);
+	out->GetPointData()->SetScalars(this->colors);
+
 	
-	vtkSmartPointer<vtkLookupTable> LuT = vtkSmartPointer<vtkLookupTable>::New();
-	LuT->SetTableRange(1,100);
-	double alpha [] = {0,1,0};
-	LuT->SetAlphaRange(alpha);
-	LuT->Build();
+	//vtkSmartPointer<vtkLookupTable> LuT = vtkSmartPointer<vtkLookupTable>::New();
+	//LuT->SetTableRange(1,100);
+	//double alpha [] = {0,1,0};
+	//LuT->SetAlphaRange(alpha);
+	//LuT->Build();
 
 	return 1;
 }
@@ -1063,6 +1070,17 @@ int vtkSQLiteReader::readTracks3(){
 
 	this->Tracks = vtkSmartPointer<vtkCellArray>::New();
 
+	this->TrackId = vtkSmartPointer<vtkIdTypeArray>::New();
+	this->TrackId->SetName("TrackId");
+	this->TrackId->SetNumberOfComponents(1);
+	this->TrackId->SetNumberOfTuples(this->nParticles3);
+
+	//init everything to 0 (0: halo belongs to no track)
+	for (int i = 0; i<this->nParticles3;i++)
+	{
+		this->TrackId->InsertTuple1(i,0);
+	}
+
 	vtkStdString	sql_query;	// sql query
 	sqlite3_stmt    *res;		// result of sql query
 	const char      *tail;		// ???
@@ -1090,10 +1108,14 @@ int vtkSQLiteReader::readTracks3(){
 			snap_id = sqlite3_column_int(res, 1);
 			qid = sqlite3_column_int(res, 2);
 
+			//generate the lines
 			if (qid<1) {continue;} //check for empty fields
 			offset = this->SnapInfo3.at(snap_id-1).Offset + qid;
 
 			nextLine->GetPointIds()->InsertNextId(offset-1);
+
+			//fill the TrackId vector
+			this->TrackId->InsertTuple1(offset-1,TrackNo+1);
 		}
 
 		this->Tracks->InsertNextCell(nextLine);
@@ -1143,5 +1165,76 @@ int vtkSQLiteReader::readSnapshotInfo3()
 		this->SnapInfo3.at(snap_id-1).time = sqlite3_column_double(res, 3);
 		this->SnapInfo3.at(snap_id-1).npart = sqlite3_column_int(res, 5);
 	}
+	return 1;
+}
+
+/*----------------------------------------------------------------------------
+Generates the colorvector for the data
+
+at the moment, it just generates the color depending on snapid, but
+this can later be made interactive..
+	assumes:
+		all data read in
+	sets:
+		this->color		color vector
+	arguments:
+		none
+	returns:
+		int	errorcode (1 =ok)
+*/
+int vtkSQLiteReader::generateColors()
+{
+
+	this->colors = vtkSmartPointer<vtkUnsignedCharArray>::New();
+	this->colors->SetName("Colors");
+	this->colors->SetNumberOfComponents(3);
+	this->colors->SetNumberOfTuples(this->nParticles3);
+
+	//int color, index;
+	//int n;
+
+	//int offset = 0;
+	//for (int i = 0; i<this->numSnaps; i++)
+	//{
+	//	int l = this->SnapInfo3.at(i).lenght;
+	//	for (n = 0; n<l;n++)
+	//	{
+	//		color = 255*i/(this->numSnaps-1);
+	//		index = offset+n;
+
+	//		this->colors->InsertTuple3(index,
+	//			color,
+	//			0,
+	//			0);
+	//	}
+	//	offset =+ n;
+	//}
+
+	int snapid, trackid;
+	int red, green, blue;
+
+	for (int i = 0; i<this->nParticles3;i++)
+	{
+		snapid = this->SnapId->GetTuple1(i);
+		trackid = this->TrackId->GetTuple1(i);
+
+		red = 255 * (snapid-1) / (this->numSnaps-1);
+
+		if (trackid == 2)
+		{
+			green =255;
+		} else
+		{
+			green = 0;
+		}
+
+		blue = 0;
+
+		this->colors->InsertTuple3(i,
+				red,
+				green,
+				blue);
+	}
+
 	return 1;
 }

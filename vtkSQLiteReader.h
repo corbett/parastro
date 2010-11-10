@@ -129,9 +129,11 @@ protected:
 	vtkSmartPointer<vtkFloatArray>		Velocity;
 	vtkSmartPointer<vtkCellArray>		Cells;
 	vtkSmartPointer<vtkCellArray>		Tracks;
+	vtkSmartPointer<vtkIdTypeArray>		TrackId;
 	vtkSmartPointer<vtkIdTypeArray>		Qid;
 	vtkSmartPointer<vtkIdTypeArray>		SnapId;
 	vtkSmartPointer<vtkFloatArray>		RVir;
+	vtkSmartPointer<vtkUnsignedCharArray> colors;
 
 	int nParticles3;
 	int nTracks3;
@@ -181,11 +183,13 @@ private:
 	//functions
 	int openDB(char*);
 
+	// used in v3
 	int vtkSQLiteReader::readSnapshots3();
 	int vtkSQLiteReader::readSnapshotInfo3();
 	int vtkSQLiteReader::readTracks3();
+	int vtkSQLiteReader::generateColors();
 
-
+	// old stuff
 	int vtkSQLiteReader::readSnapshots(
 		std::vector<vtkSmartPointer<vtkPolyData>> *);
 	int vtkSQLiteReader::readSnapshots2();
