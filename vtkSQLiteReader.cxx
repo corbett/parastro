@@ -15,6 +15,9 @@
 #include "vtkFloatArray.h"
 #include "vtkLine.h"
 #include "vtkPolyLine.h"
+#include "vtkArrayData.h"
+#include "vtkLookupTable.h"
+
 #include <vector>
 #include <sstream>
 
@@ -83,56 +86,77 @@ int vtkSQLiteReader::RequestData(vtkInformation*,
 	
 	vtkPolyData * out = vtkPolyData::GetData(outputVector);
 
-	/* OLD STUFF, USED WITH readSnapshot(..)
-	if(!this->dataIsRead){
-		//Set up output
-		std::vector<vtkSmartPointer<vtkPolyData>> data(this->numSnaps); //big fat nasty vetor containing all data..
-		
-		this->data = data;
-			
-		//read in all the data (do this only once)
-		readSnapshots(&(this->data));
-		
-		//read in snap infos
-		ReadSnapshotInfo();
+	///* OLD STUFF, USED WITH readSnapshot(..)
+	//if(!this->dataIsRead){
+	//	//Set up output
+	//	std::vector<vtkSmartPointer<vtkPolyData>> data(this->numSnaps); //big fat nasty vetor containing all data..
+	//	
+	//	this->data = data;
+	//		
+	//	//read in all the data (do this only once)
+	//	readSnapshots(&(this->data));
+	//	
+	//	//read in snap infos
+	//	ReadSnapshotInfo();
 
-		//read in the track info
-		ReadTracks();
-	}
-	// --END OLD STUFF --- */
-	
-	//new stuff here:
+	//	//read in the track info
+	//	ReadTracks();
+	//}
+	//// --END OLD STUFF --- */
+	//
+	////new stuff here:
 
-	if(!this->dataIsRead){
-		//read in all the data (do this only once)
-		readSnapshots2();
-		
-		//read in snap infos
-		ReadSnapshotInfo();
+	//if(!this->dataIsRead){
+	//	//read in all the data (do this only once)
+	//	readSnapshots2();
+	//	
+	//	//read in snap infos
+	//	ReadSnapshotInfo();
 
-		//read in the track info
-		ReadTracks();
-	}
-	
-	//generate tracks (do this only once)
-	//GenerateTracks();
-	//TODO
-	
-	//generate all the lines
-	//vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
-	//CollectLines(&lines);
-	
-	// set witch data to display
-	/* old stuff again..
-	out->SetPoints(this->data.at(displayid)->GetPoints());
-	out->SetVerts(this->data.at(displayid)->GetVerts());
-	out->SetLines(lines);
-	*/
-	out->SetPoints(this->data2.at(displayid).coord);
-	out->SetVerts(this->data2.at(displayid).cells);
+	//	//read in the track info
+	//	ReadTracks();
+	//}
+	//
+	////generate tracks (do this only once)
+	////GenerateTracks();
+	////TODO
+	//
+	////generate all the lines
+	////vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
+	////CollectLines(&lines);
+	//
+	//// set witch data to display
+	///* old stuff again..
+	//out->SetPoints(this->data.at(displayid)->GetPoints());
+	//out->SetVerts(this->data.at(displayid)->GetVerts());
 	//out->SetLines(lines);
+	//*/
+	//out->SetPoints(this->data2.at(displayid).coord);
+	//out->SetVerts(this->data2.at(displayid).cells);
+	////out->SetLines(lines);
 
-	//vtkSQLiteReader::GenerateOutput(out);
+	////vtkSQLiteReader::GenerateOutput(out);
+
+
+	// --- v3 here ---
+
+	readSnapshots3();
+	readSnapshotInfo3();
+	readTracks3();
+
+	out->SetPoints(this->Position);
+	out->SetVerts(this->Cells);
+	out->SetLines(this->Tracks);
+	out->GetPointData()->AddArray(this->Velocity);
+	out->GetPointData()->AddArray(this->Qid);
+	out->GetPointData()->AddArray(this->SnapId);
+	out->GetPointData()->AddArray(this->RVir);
+	
+	vtkSmartPointer<vtkLookupTable> LuT = vtkSmartPointer<vtkLookupTable>::New();
+	LuT->SetTableRange(1,100);
+	double alpha [] = {0,1,0};
+	LuT->SetAlphaRange(alpha);
+	LuT->Build();
 
 	return 1;
 }
@@ -326,6 +350,7 @@ int vtkSQLiteReader::readSnapshots(std::vector<vtkSmartPointer<vtkPolyData>> * o
 	return 1;
 }
 /*----------------------------------------------------------------------------
+OUTDATED
 reads the snapshots in
 	assumes:
 		db set and openend
@@ -697,6 +722,7 @@ int vtkSQLiteReader::ReadSnapshotInfo()
 	return 1;
 }
 /*----------------------------------------------------------------------------
+OUTDATED
 Reads in the track information
 	assumes:
 		opened database, db set
@@ -871,7 +897,7 @@ Collects all Points
 int vtkSQLiteReader::GenerateOutput(vtkPolyData * out)
 {
 
-
+/*
 
 	// START OVER, THIS SUCKS...
 
@@ -879,6 +905,11 @@ int vtkSQLiteReader::GenerateOutput(vtkPolyData * out)
 
 	// loop over all elements in data2 and put pointers to 
 
+	
+	vtkSmartPointer<vtkArrayData> arrayData0 = vtkSmartPointer<vtkArrayData>::New();
+	arrayData0->AddArray(data2.at(0).coord->Data);
+	arrayData0->Update();
+	arrayData0->
 
 	vtkSmartPointer<vtkPoints> tmp_points = vtkSmartPointer<vtkPoints>::New();
 
@@ -914,5 +945,203 @@ int vtkSQLiteReader::GenerateOutput(vtkPolyData * out)
 	//out->SetPoints(tmp_points);
 	//out->SetVerts(tmp_cells);
 	//out->SetLines(tmp_lines);
+	*/
+	return 1;
+}
+
+/*----------------------------------------------------------------------------
+reads the snapshots in, next try
+	assumes:
+		db set and openend
+	arguments:
+		none
+	sets:
+		
+	returns:
+		int	errorcode (1 = ok)
+*/
+int vtkSQLiteReader::readSnapshots3()
+{
+// prepare the variables
+
+	this->Position = vtkSmartPointer<vtkPoints>::New();
+	this->Velocity = vtkSmartPointer<vtkFloatArray>::New();
+	this->Cells = vtkSmartPointer<vtkCellArray>::New();
+
+	this->Qid = vtkSmartPointer<vtkIdTypeArray>::New();
+	this->SnapId = vtkSmartPointer<vtkIdTypeArray>::New();
+	this->RVir = vtkSmartPointer<vtkFloatArray>::New();
+
+	this->Velocity->SetNumberOfComponents(3);
+	this->Qid->SetNumberOfComponents(1);
+	this->SnapId->SetNumberOfComponents(1);
+	this->RVir->SetNumberOfComponents(1);
+
+	this->Velocity->SetName("Velocity");
+	this->Qid->SetName("QId");
+	this->SnapId->SetName("SnapId");
+	this->RVir->SetName("RVir");
+
+	this->SnapInfo3.clear();
+
+// sql stuff
+	vtkStdString	sql_query;	// sql query
+	sqlite3_stmt    *res;		// result of sql query
+	const char      *tail;		// ???
+	int				sql_error;	// return value of sql query
+
+// Prepare the query
+	sql_query = "SELECT * FROM stat";
+
+// Query the db
+	sql_error = sqlite3_prepare_v2(db, sql_query, 1000, &res, &tail);
+
+	if (sql_error != SQLITE_OK)
+	{
+		vtkErrorMacro("Error with sql query! Error: " << sql_error);
+		return 0;
+	}
+
+	int count = 0;
+	int snap_id=1;
+	int old_snap_id = 1;
+	int qid = 0;
+
+	while (sqlite3_step(res) == SQLITE_ROW)
+	{
+		old_snap_id = snap_id;
+		snap_id = sqlite3_column_double(res, 0);
+
+		if (snap_id != old_snap_id)
+		{
+			SnapshotInfo3 tmp;
+			tmp.Offset = count-qid;
+			tmp.lenght = qid;
+			this->SnapInfo3.push_back(tmp);
+		}
+
+		qid = sqlite3_column_double(res, 1);
+
+		this->Position->InsertNextPoint(
+			sqlite3_column_double(res, 4),
+			sqlite3_column_double(res, 5),
+			sqlite3_column_double(res, 6));
+		this->Velocity->InsertNextTuple3(
+			sqlite3_column_double(res, 7),
+			sqlite3_column_double(res, 8),
+			sqlite3_column_double(res, 9));
+		this->Qid->InsertNextTuple1(qid);
+		this->SnapId->InsertNextTuple1(snap_id);
+		this->RVir->InsertNextTuple1(sqlite3_column_double(res, 11));
+
+		count++;
+	}
+
+	SnapshotInfo3 tmp;
+	tmp.Offset = count-qid;
+	tmp.lenght = qid;
+	this->SnapInfo3.push_back(tmp);
+
+	this->nTracks3 = (int)this->SnapInfo3.size();
+
+	this->nParticles3 = count;
+
+	// Create the vertices (one point per vertex, for easy display)
+	vtkIdType N = this->Position->GetNumberOfPoints();
+	//vtkErrorMacro("No of Points: " << N);
+	vtkIdType *cells = this->Cells->WritePointer(N, N*2);
+    for (vtkIdType i=0; i<N; ++i) {
+      cells[i*2]   = 1;
+      cells[i*2+1] = i;
+    }
+
+	this->dataIsRead = true;
+	return 1;
+}
+
+int vtkSQLiteReader::readTracks3(){
+
+	this->Tracks = vtkSmartPointer<vtkCellArray>::New();
+
+	vtkStdString	sql_query;	// sql query
+	sqlite3_stmt    *res;		// result of sql query
+	const char      *tail;		// ???
+	int				sql_error;	// return value of sql query
+
+	int snap_id;
+	int qid;
+	int offset;
+
+	for (int TrackNo = 0; TrackNo < this->nTracks3; TrackNo++) //
+	{
+		sql_query = "SELECT * FROM tracks WHERE id=" + Int2Str(TrackNo+1);
+		sql_error = sqlite3_prepare_v2(db, sql_query, 1000, &res, &tail);
+
+		if (sql_error != SQLITE_OK)
+		{
+			vtkErrorMacro("Error with sql query! Error: " << sql_error);
+			return 0;
+		}
+		
+		vtkSmartPointer<vtkPolyLine> nextLine = vtkSmartPointer<vtkPolyLine>::New();
+		
+		while (sqlite3_step(res) == SQLITE_ROW)
+		{
+			snap_id = sqlite3_column_int(res, 1);
+			qid = sqlite3_column_int(res, 2);
+
+			if (qid<1) {continue;} //check for empty fields
+			offset = this->SnapInfo3.at(snap_id-1).Offset + qid;
+
+			nextLine->GetPointIds()->InsertNextId(offset-1);
+		}
+
+		this->Tracks->InsertNextCell(nextLine);
+	}
+
+	return 1;
+
+}
+/*----------------------------------------------------------------------------
+Reads in the infos for the snapshots
+	assumes:
+		opened database, db set
+	sets:
+		this->snapinfo	information aout snapshots
+	arguments:
+		none
+	returns:
+		int	errorcode (1 =ok)
+*/
+int vtkSQLiteReader::readSnapshotInfo3()
+{
+	// set up the sql stuff
+	vtkStdString	sql_query;	// sql query
+	sqlite3_stmt    *res;		// result of sql query
+	const char      *tail;		// ???
+	int				sql_error;	// return value of sql query
+
+	// Prepare the query
+	sql_query = "SELECT * FROM snapinfo";
+
+	//vtkErrorMacro("SQL query: " + sql_query);
+
+	sql_error = sqlite3_prepare_v2(db,sql_query,1000, &res, &tail);
+
+	if (sql_error != SQLITE_OK)
+	{
+		vtkErrorMacro("Error with sql query! Error: " << sql_error);
+		return 0;
+	}
+
+	int snap_id;
+	
+	while (sqlite3_step(res) == SQLITE_ROW)
+	{
+		snap_id = sqlite3_column_int(res, 0);
+		this->SnapInfo3.at(snap_id-1).redshift = sqlite3_column_double(res, 2);
+		this->SnapInfo3.at(snap_id-1).time = sqlite3_column_double(res, 3);
+		this->SnapInfo3.at(snap_id-1).npart = sqlite3_column_int(res, 5);
+	}
 	return 1;
 }

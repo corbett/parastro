@@ -124,8 +124,27 @@ protected:
 	std::vector<snapinfo> snapinfoVector;
 	std::vector<track> trackVector;
 
+// --- v3 ------
+	vtkSmartPointer<vtkPoints>			Position;
+	vtkSmartPointer<vtkFloatArray>		Velocity;
+	vtkSmartPointer<vtkCellArray>		Cells;
+	vtkSmartPointer<vtkCellArray>		Tracks;
+	vtkSmartPointer<vtkIdTypeArray>		Qid;
+	vtkSmartPointer<vtkIdTypeArray>		SnapId;
+	vtkSmartPointer<vtkFloatArray>		RVir;
 
+	int nParticles3;
+	int nTracks3;
 
+	struct SnapshotInfo3 {
+		vtkIdType Offset; //stores the id where this snapshot starts
+		int lenght; // stores the amount of halos in this snapshot
+		double redshift;
+		double time;
+		int npart;
+	};
+
+	std::vector<SnapshotInfo3> SnapInfo3;
 
 /* not used
 	// for halos
@@ -161,6 +180,12 @@ private:
 
 	//functions
 	int openDB(char*);
+
+	int vtkSQLiteReader::readSnapshots3();
+	int vtkSQLiteReader::readSnapshotInfo3();
+	int vtkSQLiteReader::readTracks3();
+
+
 	int vtkSQLiteReader::readSnapshots(
 		std::vector<vtkSmartPointer<vtkPolyData>> *);
 	int vtkSQLiteReader::readSnapshots2();
