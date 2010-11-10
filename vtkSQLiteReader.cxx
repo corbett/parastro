@@ -140,10 +140,15 @@ int vtkSQLiteReader::RequestData(vtkInformation*,
 
 	// --- v3 here ---
 
-	readSnapshots3();
-	readSnapshotInfo3();
-	readTracks3();
-	generateColors();
+	if (!this->dataIsRead)
+		// only read if it's not been read bevore
+	{
+		readSnapshots3();
+		readSnapshotInfo3();
+		readTracks3();
+
+		this->dataIsRead = true;
+	}
 
 	out->SetPoints(this->Position);
 	out->SetVerts(this->Cells);
@@ -154,10 +159,9 @@ int vtkSQLiteReader::RequestData(vtkInformation*,
 	out->GetPointData()->AddArray(this->RVir);
 	out->GetPointData()->AddArray(this->TrackId);
 
-
-	//out->GetPointData()->AddArray(this->colors);
+	// update the colors anyways
+	generateColors();
 	out->GetPointData()->SetScalars(this->colors);
-
 	
 	//vtkSmartPointer<vtkLookupTable> LuT = vtkSmartPointer<vtkLookupTable>::New();
 	//LuT->SetTableRange(1,100);
@@ -957,13 +961,19 @@ int vtkSQLiteReader::GenerateOutput(vtkPolyData * out)
 }
 
 /*----------------------------------------------------------------------------
-reads the snapshots in, next try
+reads the snapshots in (reads all the points, and the according data, generates the cells)
 	assumes:
 		db set and openend
 	arguments:
 		none
 	sets:
-		
+		this->Position
+		this->Velocity
+		this->Cells
+		this->Qid
+		this->SnapId
+		this->RVir
+		this->SnapInfo3		stores information about the snapshots
 	returns:
 		int	errorcode (1 = ok)
 */
@@ -1065,7 +1075,18 @@ int vtkSQLiteReader::readSnapshots3()
 	this->dataIsRead = true;
 	return 1;
 }
-
+/*----------------------------------------------------------------------------
+reads the tracks, generates the lines
+	assumes:
+		db set and openend
+	arguments:
+		none
+	sets:
+		this->Tracks
+		this->TrackId
+	returns:
+		int	errorcode (1 = ok)
+*/
 int vtkSQLiteReader::readTracks3(){
 
 	this->Tracks = vtkSmartPointer<vtkCellArray>::New();
@@ -1125,11 +1146,11 @@ int vtkSQLiteReader::readTracks3(){
 
 }
 /*----------------------------------------------------------------------------
-Reads in the infos for the snapshots
+Reads in addidtional infos for the snapshots (redshift, time, npart)
 	assumes:
 		opened database, db set
 	sets:
-		this->snapinfo	information aout snapshots
+		this->snapinfo	information about snapshots
 	arguments:
 		none
 	returns:
@@ -1190,26 +1211,6 @@ int vtkSQLiteReader::generateColors()
 	this->colors->SetNumberOfComponents(3);
 	this->colors->SetNumberOfTuples(this->nParticles3);
 
-	//int color, index;
-	//int n;
-
-	//int offset = 0;
-	//for (int i = 0; i<this->numSnaps; i++)
-	//{
-	//	int l = this->SnapInfo3.at(i).lenght;
-	//	for (n = 0; n<l;n++)
-	//	{
-	//		color = 255*i/(this->numSnaps-1);
-	//		index = offset+n;
-
-	//		this->colors->InsertTuple3(index,
-	//			color,
-	//			0,
-	//			0);
-	//	}
-	//	offset =+ n;
-	//}
-
 	int snapid, trackid;
 	int red, green, blue;
 
@@ -1220,7 +1221,7 @@ int vtkSQLiteReader::generateColors()
 
 		red = 255 * (snapid-1) / (this->numSnaps-1);
 
-		if (trackid == 2)
+		if (trackid == this->HighlightTrack)
 		{
 			green =255;
 		} else

@@ -19,10 +19,10 @@
 			</Documentation>
 		</StringVectorProperty>
 
-		<!-- Sets the snapshot to display -->
+		<!-- Sets the snapshot to highlight -->
 		<IntVectorProperty
-			name="DisplaySnapshot"
-			command="SetDisplaySnapshot"
+			name="HighlightSnapshot"
+			command="SetHighlightSnapshot"
 			number_of_elements="1"
 			default_values="1">
 			
@@ -32,9 +32,27 @@
 				max="32"/>
 				
 			<Documentation>
-				Sets the snapshot id to display
+				Sets the snapshot id to highlight
 			</Documentation>
 		</IntVectorProperty>
+
+		<!-- Sets the track to highlight -->
+		<IntVectorProperty
+			name="HighlightTrack"
+			command="SetHighlightTrack"
+			number_of_elements="1"
+			default_values="1">
+			
+			<IntRangeDomain
+				name="range"
+				min="1"
+				max="32"/>
+				
+			<Documentation>
+				Sets the snapshot id to highlight
+			</Documentation>
+		</IntVectorProperty>
+
 
 		<!--
 		<StringVectorProperty
