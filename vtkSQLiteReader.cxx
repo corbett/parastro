@@ -1212,29 +1212,54 @@ int vtkSQLiteReader::generateColors()
 	this->colors->SetNumberOfTuples(this->nParticles3);
 
 	int snapid, trackid;
-	int red, green, blue;
+	unsigned char red, green, blue, alpha;
+
+	vtkSmartPointer<vtkLookupTable> LuT = vtkSmartPointer<vtkLookupTable>::New();
+	LuT->SetTableRange(1,this->numSnaps);
+	double value [] = {0.75,0.25};
+	LuT->SetValueRange(value);
+	LuT->Build();
 
 	for (int i = 0; i<this->nParticles3;i++)
 	{
 		snapid = this->SnapId->GetTuple1(i);
 		trackid = this->TrackId->GetTuple1(i);
 
-		red = 255 * (snapid-1) / (this->numSnaps-1);
+		red = 190*(float)(snapid-1) / (float)(this->numSnaps-1);
 
 		if (trackid == this->HighlightTrack)
 		{
-			green =255;
+			green = 255;
 		} else
 		{
 			green = 0;
 		}
+		
+		if (snapid == this->HighlightSnapshot)
+		{
+			red = 255;
+			green = 255;
+		} else
+		{
+		}
 
 		blue = 0;
+		alpha = 1;
 
 		this->colors->InsertTuple3(i,
 				red,
 				green,
 				blue);
+				//alpha);
+		
+		// Above code would work, i'm trying to do this with a lookup table instead
+		//maybe this will be easier.
+		// LuT works so far, but next problem: how to get the colors displayed?
+		// i probably need an actor or something (for opicaty and such...)
+		
+		//double rgb [4] = {0,0,0,0};
+		//LuT->GetColor(snapid,rgb);
+		//this->colors->InsertTuple(i,rgb);
 	}
 
 	return 1;
