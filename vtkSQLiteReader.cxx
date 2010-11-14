@@ -154,7 +154,7 @@ int vtkSQLiteReader::RequestData(vtkInformation*,
 	out->SetVerts(this->Cells);
 	out->SetLines(this->Tracks);
 	out->GetPointData()->AddArray(this->Velocity);
-	out->GetPointData()->AddArray(this->Qid);
+	out->GetPointData()->AddArray(this->GId);
 	out->GetPointData()->AddArray(this->SnapId);
 	out->GetPointData()->AddArray(this->RVir);
 	out->GetPointData()->AddArray(this->TrackId);
@@ -230,7 +230,7 @@ int vtkSQLiteReader::readSnapshots(std::vector<vtkSmartPointer<vtkPolyData>> * o
 	vtkSmartPointer<vtkPoints> Position; // stores the coordinates of the points
 	vtkSmartPointer<vtkCellArray> Vertices;
 	vtkSmartPointer<vtkFloatArray> Velocity;
-	vtkSmartPointer<vtkIntArray> qid;
+	vtkSmartPointer<vtkIntArray> GId;
 	vtkSmartPointer<vtkIntArray> npart;
 
 
@@ -985,17 +985,17 @@ int vtkSQLiteReader::readSnapshots3()
 	this->Velocity = vtkSmartPointer<vtkFloatArray>::New();
 	this->Cells = vtkSmartPointer<vtkCellArray>::New();
 
-	this->Qid = vtkSmartPointer<vtkIdTypeArray>::New();
+	this->GId = vtkSmartPointer<vtkIdTypeArray>::New();
 	this->SnapId = vtkSmartPointer<vtkIdTypeArray>::New();
 	this->RVir = vtkSmartPointer<vtkFloatArray>::New();
 
 	this->Velocity->SetNumberOfComponents(3);
-	this->Qid->SetNumberOfComponents(1);
+	this->GId->SetNumberOfComponents(1);
 	this->SnapId->SetNumberOfComponents(1);
 	this->RVir->SetNumberOfComponents(1);
 
 	this->Velocity->SetName("Velocity");
-	this->Qid->SetName("QId");
+	this->GId->SetName("GId");
 	this->SnapId->SetName("SnapId");
 	this->RVir->SetName("RVir");
 
@@ -1008,7 +1008,7 @@ int vtkSQLiteReader::readSnapshots3()
 	int				sql_error;	// return value of sql query
 
 // Prepare the query
-	sql_query = "SELECT * FROM stat";
+	sql_query = "SELECT * FROM stat ORDER BY snap_id";
 
 // Query the db
 	sql_error = sqlite3_prepare_v2(db, sql_query, 1000, &res, &tail);
@@ -1022,7 +1022,7 @@ int vtkSQLiteReader::readSnapshots3()
 	int count = 0;
 	int snap_id=1;
 	int old_snap_id = 1;
-	int qid = 0;
+	int GId = 0;
 
 	while (sqlite3_step(res) == SQLITE_ROW)
 	{
@@ -1032,12 +1032,12 @@ int vtkSQLiteReader::readSnapshots3()
 		if (snap_id != old_snap_id)
 		{
 			SnapshotInfo3 tmp;
-			tmp.Offset = count-qid;
-			tmp.lenght = qid;
+			tmp.Offset = count-GId;
+			tmp.lenght = GId;
 			this->SnapInfo3.push_back(tmp);
 		}
 
-		qid = sqlite3_column_double(res, 1);
+		GId = sqlite3_column_double(res, 1);
 
 		this->Position->InsertNextPoint(
 			sqlite3_column_double(res, 4),
@@ -1047,7 +1047,7 @@ int vtkSQLiteReader::readSnapshots3()
 			sqlite3_column_double(res, 7),
 			sqlite3_column_double(res, 8),
 			sqlite3_column_double(res, 9));
-		this->Qid->InsertNextTuple1(qid);
+		this->GId->InsertNextTuple1(GId);
 		this->SnapId->InsertNextTuple1(snap_id);
 		this->RVir->InsertNextTuple1(sqlite3_column_double(res, 11));
 
@@ -1055,8 +1055,8 @@ int vtkSQLiteReader::readSnapshots3()
 	}
 
 	SnapshotInfo3 tmp;
-	tmp.Offset = count-qid;
-	tmp.lenght = qid;
+	tmp.Offset = count-GId;
+	tmp.lenght = GId;
 	this->SnapInfo3.push_back(tmp);
 
 	this->nTracks3 = (int)this->SnapInfo3.size();
@@ -1108,17 +1108,17 @@ int vtkSQLiteReader::readTracks3(){
 	int				sql_error;	// return value of sql query
 
 	int snap_id;
-	int qid;
+	int GId;
 	int offset;
 
 	for (int TrackNo = 0; TrackNo < this->nTracks3; TrackNo++) //
 	{
-		sql_query = "SELECT * FROM tracks WHERE id=" + Int2Str(TrackNo+1);
+		sql_query = "SELECT * FROM tracks WHERE id=" + Int2Str(TrackNo+1) + " ORDER BY snap_id";
 		sql_error = sqlite3_prepare_v2(db, sql_query, 1000, &res, &tail);
 
 		if (sql_error != SQLITE_OK)
 		{
-			vtkErrorMacro("Error with sql query! Error: " << sql_error);
+			vtkErrorMacro("Error with sql query! Error: " << sql_error + sql_query);
 			return 0;
 		}
 		
@@ -1127,11 +1127,11 @@ int vtkSQLiteReader::readTracks3(){
 		while (sqlite3_step(res) == SQLITE_ROW)
 		{
 			snap_id = sqlite3_column_int(res, 1);
-			qid = sqlite3_column_int(res, 2);
+			GId = sqlite3_column_int(res, 2);
 
 			//generate the lines
-			if (qid<1) {continue;} //check for empty fields
-			offset = this->SnapInfo3.at(snap_id-1).Offset + qid;
+			if (GId<1) {continue;} //check for empty fields
+			offset = this->SnapInfo3.at(snap_id-1).Offset + GId;
 
 			nextLine->GetPointIds()->InsertNextId(offset-1);
 
@@ -1178,13 +1178,19 @@ int vtkSQLiteReader::readSnapshotInfo3()
 	}
 
 	int snap_id;
-	
+	int i = 0;
+
 	while (sqlite3_step(res) == SQLITE_ROW)
 	{
+		i++;
 		snap_id = sqlite3_column_int(res, 0);
-		this->SnapInfo3.at(snap_id-1).redshift = sqlite3_column_double(res, 2);
-		this->SnapInfo3.at(snap_id-1).time = sqlite3_column_double(res, 3);
-		this->SnapInfo3.at(snap_id-1).npart = sqlite3_column_int(res, 5);
+		if (snap_id<1){
+			snap_id = i;
+		}
+		snap_id = sqlite3_column_int(res, 0);
+		//this->SnapInfo3.at(snap_id-1).redshift = sqlite3_column_double(res, 2);
+		//this->SnapInfo3.at(snap_id-1).time = sqlite3_column_double(res, 3);
+		//this->SnapInfo3.at(snap_id-1).npart = sqlite3_column_int(res, 5);
 	}
 	return 1;
 }

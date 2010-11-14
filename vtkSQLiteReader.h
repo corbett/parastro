@@ -132,7 +132,7 @@ protected:
 	vtkSmartPointer<vtkCellArray>		Cells;
 	vtkSmartPointer<vtkCellArray>		Tracks;
 	vtkSmartPointer<vtkIdTypeArray>		TrackId;
-	vtkSmartPointer<vtkIdTypeArray>		Qid;
+	vtkSmartPointer<vtkIdTypeArray>		GId;
 	vtkSmartPointer<vtkIdTypeArray>		SnapId;
 	vtkSmartPointer<vtkFloatArray>		RVir;
 	vtkSmartPointer<vtkUnsignedCharArray> colors;
