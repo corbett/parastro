@@ -55,70 +55,19 @@ public:
 
 //BTX
 protected:
+
+	//functions
+
 	vtkSQLiteReader();
 	~vtkSQLiteReader();
 
 	int RequestInformation(vtkInformation*,	vtkInformationVector**,
 		vtkInformationVector*);
-
 	int RequestData(vtkInformation*,vtkInformationVector**,
 		vtkInformationVector*);
 
-	
-// old stuff - can be deleted (with caution!!)
-	// functions
-
-	// structs
-	struct velocity {
-		double vx;
-		double vy;
-		double vz;
-	};
-
-	struct snapshot {
-		vtkSmartPointer<vtkPoints> coord;
-		vtkSmartPointer<vtkCellArray> cells;
-		std::vector<velocity> velo;
-		// std::vector<int> npart;
-		// std::vector<int> Mvir;
-		// std::vector<int> Rvir;
-		// ...
-	};
-
-	struct snapinfo {
-		int snap_id;
-		double redshift;
-		double time;
-		int npart;
-	};
-
-	struct trackPoint {
-		int snap_id;
-		int qid;
-	};
-
-	struct track {
-		std::vector<trackPoint> point;
-		int noOfPoints;
-		vtkSmartPointer<vtkPolyLine> line;
-	};
-
-	// variables
-	int numSnaps;
-	int numTracks;
-	int totNumPoints;
-	int DisplaySnapshot;
-	std::vector<vtkSmartPointer<vtkPolyData>> data;
-	
-	std::vector<snapshot> data2;
-	std::vector<snapinfo> snapinfoVector;
-	std::vector<track> trackVector;
-
-// --- v3 ------
-	//functions
-
 	//structs
-	struct SnapshotInfo3 {
+	struct SnapshotInfo {
 		vtkIdType Offset; //stores the id where this snapshot starts
 		int lenght; // stores the amount of halos in this snapshot
 		double redshift;
@@ -139,39 +88,15 @@ protected:
 
 	int nParticles3;
 	int nTracks3;
+	int nSnapshots;
 
-	std::vector<SnapshotInfo3> SnapInfo3;
-
-	char* FileName;
+	std::vector<SnapshotInfo> SnapInfo3;
 
 	//gui variables
+	char* FileName;
 	int HighlightSnapshot;
 	int HighlightTrack;
 
-
-/* not used
-	// for halos
-	vtkIdType							ParticleIndex;
-	vtkSmartPointer<vtkIdTypeArray>		ParticleId;
-	vtkSmartPointer<vtkPoints>			Position;
-	vtkSmartPointer<vtkCellArray>		Cells;
-	vtkSmartPointer<vtkFloatArray>		Velocity;
-	vtkSmartPointer<vtkFloatArray>		nParticles;
-
-	vtkSmartPointer<vtkFloatArray>		mVir;
-	vtkSmartPointer<vtkFloatArray>		rVir;
-	vtkSmartPointer<vtkFloatArray>		RHO;
-
-	// for snapshots
-	vtkSmartPointer<vtkIdTypeArray>		SnapId;
-	vtkSmartPointer<vtkFloatArray>		Redshift;
-	vtkSmartPointer<vtkFloatArray>		Time;
-	vtkSmartPointer<vtkDataArray>		Halos;
-
-	// for tracks
-	vtkSmartPointer<vtkIdTypeArray>		TrackId;
-	vtkSmartPointer<vtkPolyData>		Lines;
-*/
 
 private:
 	vtkSQLiteReader(const vtkSQLiteReader&);  // Not implemented.
@@ -184,28 +109,19 @@ private:
 	bool dataIsRead;
 
 	//functions
-	int vtkSQLiteReader::ReadHeader(vtkInformationVector*); // reads the database header information
+	int vtkSQLiteReader::ReadHeader(); // reads the database header information
 
-	int vtkSQLiteReader::readSnapshots3(); // reads the snapshots
-	int vtkSQLiteReader::readSnapshotInfo3(); 
-	int vtkSQLiteReader::readTracks3();
+	int vtkSQLiteReader::readSnapshots(); // reads the snapshots
+	int vtkSQLiteReader::readSnapshotInfo(); 
+	int vtkSQLiteReader::readTracks();
 	int vtkSQLiteReader::generateColors();
 
 	int openDB(char*);
 	vtkStdString vtkSQLiteReader::Int2Str(int);
 
-// old stuff - can be deleted with caution
-	int vtkSQLiteReader::readSnapshots(
-		std::vector<vtkSmartPointer<vtkPolyData>> *);
-	int vtkSQLiteReader::readSnapshots2();
-	int vtkSQLiteReader::ReadTracks();
-	int vtkSQLiteReader::GenerateTracks();
-	int vtkSQLiteReader::CollectLines(vtkSmartPointer<vtkCellArray>*);
-	int vtkSQLiteReader::GenerateOutput(vtkPolyData *);
+// old stuff - not yet, or not anymore needed
 
 	int RequestDataDemo(vtkInformationVector*);
-	int vtkSQLiteReader::ReadSnapshotInfo();
-
 	int vtkSQLiteReader::SQLQuery(vtkStdString, sqlite3_stmt*);
 
 
