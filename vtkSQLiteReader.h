@@ -85,6 +85,7 @@ protected:
 	vtkSmartPointer<vtkIdTypeArray>		SnapId;
 	vtkSmartPointer<vtkFloatArray>		RVir;
 	vtkSmartPointer<vtkUnsignedCharArray> colors;
+	vtkSmartPointer<vtkUnsignedCharArray> opacity;
 
 	int nParticles3;
 	int nTracks3;

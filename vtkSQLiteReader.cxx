@@ -17,6 +17,7 @@
 #include "vtkPolyLine.h"
 #include "vtkArrayData.h"
 #include "vtkLookupTable.h"
+#include "vtkPolyDataMapper.h"
 
 #include <vector>
 #include <sstream>
@@ -81,7 +82,7 @@ is called after clicking apply, reads the actual, selected data
 int vtkSQLiteReader::RequestData(vtkInformation*,
 	vtkInformationVector**,vtkInformationVector* outputVector)
 {
-	
+
 	vtkPolyData * out = vtkPolyData::GetData(outputVector);
 
 
@@ -437,8 +438,8 @@ int vtkSQLiteReader::readSnapshots()
 	}
 
 	int count = 0;
-	int snap_id=1;
-	int old_snap_id = 1;
+	int snap_id=0;
+	int old_snap_id = 0;
 	int GId = 0;
 
 	while (sqlite3_step(res) == SQLITE_ROW)
@@ -449,8 +450,8 @@ int vtkSQLiteReader::readSnapshots()
 		if (snap_id != old_snap_id)
 		{
 			SnapshotInfo tmp;
-			tmp.Offset = count-GId;
-			tmp.lenght = GId;
+			tmp.Offset = count-GId-1;
+			tmp.lenght = GId+1;
 			this->SnapInfo3.push_back(tmp);
 		}
 
@@ -472,13 +473,18 @@ int vtkSQLiteReader::readSnapshots()
 	}
 
 	SnapshotInfo tmp;
-	tmp.Offset = count-GId;
-	tmp.lenght = GId;
+	tmp.Offset = count-GId-1;
+	tmp.lenght = GId+1;
 	this->SnapInfo3.push_back(tmp);
 
-	this->nTracks3 = (int)this->SnapInfo3.size();
+	//this->nTracks3 = (int)10;
+	//vtkErrorMacro("No of tracks: " << this->nTracks3);
+
+	this->nSnapshots = 	(int)this->SnapInfo3.size();
+	vtkErrorMacro("No of snapshots: " << this->nSnapshots);
 
 	this->nParticles3 = count;
+	vtkErrorMacro("No of particles: " << this->nParticles3);
 
 	// Create the vertices (one point per vertex, for easy display)
 	vtkIdType N = this->Position->GetNumberOfPoints();
@@ -527,10 +533,15 @@ int vtkSQLiteReader::readTracks(){
 	int snap_id;
 	int GId;
 	int offset;
+	bool goOn = true;
+	bool validtrack = false;
+	int TrackNo = 0;
+	this->nTracks3 = 0;
 
-	for (int TrackNo = 0; TrackNo < this->nTracks3; TrackNo++) //
+	while (goOn)
+	//for (int TrackNo = 0; TrackNo < this->nTracks3; TrackNo++) //
 	{
-		sql_query = "SELECT * FROM tracks WHERE id=" + Int2Str(TrackNo+1) + " ORDER BY snap_id";
+		sql_query = "SELECT * FROM tracks WHERE id=" + Int2Str(TrackNo) + " ORDER BY snap_id";
 		sql_error = sqlite3_prepare_v2(db, sql_query, 1000, &res, &tail);
 
 		if (sql_error != SQLITE_OK)
@@ -543,22 +554,44 @@ int vtkSQLiteReader::readTracks(){
 		
 		while (sqlite3_step(res) == SQLITE_ROW)
 		{
+			validtrack = true;
 			snap_id = sqlite3_column_int(res, 1);
 			GId = sqlite3_column_int(res, 2);
 
 			//generate the lines
-			if (GId<1) {continue;} //check for empty fields
-			offset = this->SnapInfo3.at(snap_id-1).Offset + GId;
+			//if (GId<1) {continue;} //check for empty fields TODO ADAPT THIS
+			
 
-			nextLine->GetPointIds()->InsertNextId(offset-1);
+			offset = this->SnapInfo3.at(snap_id).Offset + GId;
+
+			// check for exact 0 coordinates, then it's no real point
+			// just a temp solution
+			if (this->Position->GetData()->GetComponent(offset,0) == 0 && 
+				this->Position->GetData()->GetComponent(offset,1) == 0 &&
+				this->Position->GetData()->GetComponent(offset,2) == 0)
+			{
+				continue;
+			}
+
+			nextLine->GetPointIds()->InsertNextId(offset);
 
 			//fill the TrackId vector
-			this->TrackId->InsertTuple1(offset-1,TrackNo+1);
+			this->TrackId->InsertTuple1(offset,TrackNo);
 		}
-
-		this->Tracks->InsertNextCell(nextLine);
+		
+		if (validtrack)
+		{
+			this->Tracks->InsertNextCell(nextLine);
+			TrackNo++;
+			validtrack = false;
+		}
+		else
+		{
+			if (this->nTracks3<TrackNo) {this->nTracks3 = TrackNo;}
+			goOn = false;
+		}
 	}
-
+	vtkErrorMacro("track count: " << this->nTracks3);
 	return 1;
 
 }
@@ -615,8 +648,7 @@ int vtkSQLiteReader::readSnapshotInfo()
 /*----------------------------------------------------------------------------
 Generates the colorvector for the data
 
-at the moment, it just generates the color depending on snapid, but
-this can later be made interactive..
+
 	assumes:
 		all data read in
 	sets:
@@ -634,21 +666,26 @@ int vtkSQLiteReader::generateColors()
 	this->colors->SetNumberOfComponents(3);
 	this->colors->SetNumberOfTuples(this->nParticles3);
 
+	//this->opacity = vtkSmartPointer<vtkUnsignedCharArray>::New();
+	//this->opacity->SetName("Opacity");
+	//this->opacity->SetNumberOfComponents(1);
+	//this->opacity->SetNumberOfTuples(this->nParticles3);
+
 	int snapid, trackid;
 	unsigned char red, green, blue, alpha;
 
-	vtkSmartPointer<vtkLookupTable> LuT = vtkSmartPointer<vtkLookupTable>::New();
-	LuT->SetTableRange(1,this->nSnapshots);
-	double value [] = {0.75,0.25};
-	LuT->SetValueRange(value);
-	LuT->Build();
+	//vtkSmartPointer<vtkLookupTable> LuT = vtkSmartPointer<vtkLookupTable>::New();
+	//LuT->SetTableRange(1,this->nSnapshots);
+	//double value [] = {0.75,0.25};
+	//LuT->SetValueRange(value);
+	//LuT->Build();
 
 	for (int i = 0; i<this->nParticles3;i++)
 	{
 		snapid = this->SnapId->GetTuple1(i);
 		trackid = this->TrackId->GetTuple1(i);
 
-		red = 190*(float)(snapid-1) / (float)(this->nSnapshots-1);
+		red = 190*(float)(snapid) / (float)(this->nSnapshots-1);
 
 		if (trackid == this->HighlightTrack)
 		{
@@ -667,13 +704,14 @@ int vtkSQLiteReader::generateColors()
 		}
 
 		blue = 0;
-		alpha = 1;
+		alpha = 0;
 
 		this->colors->InsertTuple3(i,
 				red,
 				green,
 				blue);
-				//alpha);
+		//this->opacity->InsertTuple1(i,alpha);
+		
 		
 		// Above code would work, i'm trying to do this with a lookup table instead
 		//maybe this will be easier.
