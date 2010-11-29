@@ -47,11 +47,25 @@ public:
 	vtkSetStringMacro(FileName);
  	vtkGetStringMacro(FileName);
 
-	vtkSetMacro(HighlightSnapshot,int);
-	vtkGetMacro(HighlightSnapshot,int);
+	vtkSetMacro(DisplayOnlySelectedData,bool);
+	vtkGetMacro(DisplayOnlySelectedData,bool);
 
-	vtkSetMacro(HighlightTrack,int);
-	vtkGetMacro(HighlightTrack,int);
+	vtkSetMacro(DisplaySelected,bool);
+	vtkGetMacro(DisplaySelected,bool);
+
+		vtkSetMacro(DisplaySelectedSnapshot,bool);
+		vtkGetMacro(DisplaySelectedSnapshot,bool);
+		vtkSetMacro(DisplaySelectedSnapshotNr,int);
+		vtkGetMacro(DisplaySelectedSnapshotNr,int);
+		vtkSetMacro(DisplaySelectedTrack,bool);
+		vtkGetMacro(DisplaySelectedTrack,bool);
+		vtkSetMacro(DisplaySelectedTrackNr,int);
+		vtkGetMacro(DisplaySelectedTrackNr,int);
+
+
+	vtkSetMacro(DisplayCalculated,bool);
+	vtkGetMacro(DisplayCalculated,bool);
+
 
 //BTX
 protected:
@@ -75,6 +89,24 @@ protected:
 		int npart;
 	};
 
+	struct DataInformation {
+		int * nParticles;
+		int * nTracks;
+		int * nSnapshots;
+		int nSelectedParticles; //-1 means all
+		int nSelectedTracks; // -1 means all
+	};
+
+	struct GUISettings {
+		bool * DisplayOnlySelectedData;
+		bool * DisplaySelected;
+		bool * DisplaySelectedSnapshot;
+		int * DisplaySelectedSnapshotNr;
+		bool * DisplaySelectedTrack;
+		int * DisplaySelectedTrackNr;
+		bool * DisplayCalculated;
+	};
+
 	//variables
 	vtkSmartPointer<vtkPoints>			Position;
 	vtkSmartPointer<vtkFloatArray>		Velocity;
@@ -87,6 +119,9 @@ protected:
 	vtkSmartPointer<vtkUnsignedCharArray> colors;
 	vtkSmartPointer<vtkUnsignedCharArray> opacity;
 
+	DataInformation dataInfo;
+	GUISettings Gui;
+	
 	int nParticles3;
 	int nTracks3;
 	int nSnapshots;
@@ -95,8 +130,16 @@ protected:
 
 	//gui variables
 	char* FileName;
-	int HighlightSnapshot;
-	int HighlightTrack;
+
+	bool DisplayOnlySelectedData;
+
+	bool DisplaySelected;
+		bool DisplaySelectedSnapshot;
+		int DisplaySelectedSnapshotNr;
+		bool DisplaySelectedTrack;
+		int DisplaySelectedTrackNr;
+
+	bool DisplayCalculated;
 
 
 private:
@@ -115,6 +158,7 @@ private:
 	int vtkSQLiteReader::readSnapshots(); // reads the snapshots
 	int vtkSQLiteReader::readSnapshotInfo(); 
 	int vtkSQLiteReader::readTracks();
+	//int vtkSQLiteReader::selectPoints();
 	int vtkSQLiteReader::generateColors();
 
 	int openDB(char*);

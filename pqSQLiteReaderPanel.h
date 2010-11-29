@@ -11,6 +11,9 @@ class pqSQLiteReaderPanel : public pqLoadedFormObjectPanel
 public:
   pqSQLiteReaderPanel(pqProxy* proxy, QWidget* p);
   ~pqSQLiteReaderPanel();
+
+	bool DisplayMode;
+	bool DisplayAllData1;
 };
 
 #endif

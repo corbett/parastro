@@ -7,7 +7,9 @@
 		<!--named Aaa as currently ParaView decides which file is the
 			main data file by that file with the name which is alphabetically
 			first -->
+			
 
+		
 		<StringVectorProperty
 			name="AaaFileName"
 			command="SetFileName"
@@ -19,39 +21,103 @@
 			</Documentation>
 		</StringVectorProperty>
 
+		<!--  -->
+		<IntVectorProperty
+			name="DisplayOnlySelectedData"
+			command="SetDisplayOnlySelectedData"
+			number_of_elements="1"
+			default_values="0">
+			<BooleanDomain name="bool" />
+			<Documentation>
+				
+			</Documentation>
+		</IntVectorProperty>
+
+		<!--  -->
+		<IntVectorProperty
+			name="DisplaySelected"
+			command="SetDisplaySelected"
+			number_of_elements="1"
+			default_values="1">
+			<BooleanDomain name="bool" />
+			<Documentation>
+				
+			</Documentation>
+		</IntVectorProperty>
+
+		<!--  -->
+		<IntVectorProperty
+			name="DisplaySelectedSnapshot"
+			command="SetDisplaySelectedSnapshot"
+			number_of_elements="1"
+			default_values="0">
+			<BooleanDomain name="bool" />
+			<Documentation>
+				
+			</Documentation>
+		</IntVectorProperty>		
+
 		<!-- Sets the snapshot to highlight -->
 		<IntVectorProperty
-			name="HighlightSnapshot"
-			command="SetHighlightSnapshot"
+			name="DisplaySelectedSnapshotNr"
+			command="SetDisplaySelectedSnapshotNr"
 			number_of_elements="1"
 			default_values="1">
 			
 			<IntRangeDomain
 				name="range"
 				min="1"
-				max="32"/>
+				max="1000"/>
 				
 			<Documentation>
 				Sets the snapshot id to highlight
 			</Documentation>
 		</IntVectorProperty>
 
+
+		<!--  -->
+		<IntVectorProperty
+			name="DisplaySelectedTrack"
+			command="SetDisplaySelectedTrack"
+			number_of_elements="1"
+			default_values="0">
+			<BooleanDomain name="bool" />
+			<Documentation>
+				
+			</Documentation>
+		</IntVectorProperty>		
+		
 		<!-- Sets the track to highlight -->
 		<IntVectorProperty
-			name="HighlightTrack"
-			command="SetHighlightTrack"
+			name="DisplaySelectedTrackNr"
+			command="SetDisplaySelectedTrackNr"
 			number_of_elements="1"
 			default_values="1">
 			
 			<IntRangeDomain
 				name="range"
 				min="1"
-				max="32"/>
+				max="1000"/>
 				
 			<Documentation>
 				Sets the snapshot id to highlight
 			</Documentation>
 		</IntVectorProperty>
+
+		<!--  -->
+		<IntVectorProperty
+			name="DisplayCalculated"
+			command="SetDisplayCalculated"
+			number_of_elements="1"
+			default_values="0">
+			<BooleanDomain name="bool" />
+			<Documentation>
+				
+			</Documentation>
+		</IntVectorProperty>
+		
+
+		
 
 
 		<!--

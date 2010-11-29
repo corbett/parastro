@@ -18,6 +18,10 @@
 #include "vtkArrayData.h"
 #include "vtkLookupTable.h"
 #include "vtkPolyDataMapper.h"
+#include "vtkSMProxy.h"
+#include "vtkSMProxyProperty.h"
+
+
 
 #include <vector>
 #include <sstream>
@@ -38,6 +42,22 @@ vtkSQLiteReader::vtkSQLiteReader()
 
 	this->db	= NULL;
 	this->dataIsRead = false;
+
+	//fasse freie vars in structs zusammen
+	Gui.DisplayOnlySelectedData = &(this->DisplayOnlySelectedData); 
+	Gui.DisplaySelected = &(this->DisplaySelected); 
+	Gui.DisplaySelectedSnapshot = &(this->DisplaySelectedSnapshot); 
+	Gui.DisplaySelectedSnapshotNr = &(this->DisplaySelectedSnapshotNr); 
+	Gui.DisplaySelectedTrack = &(this->DisplaySelectedTrack); 
+	Gui.DisplaySelectedTrackNr = &(this->DisplaySelectedTrackNr); 
+	Gui.DisplayCalculated = &(this->DisplayCalculated);
+
+	// use this only temp, later delete the free variables, only use struct
+	dataInfo.nParticles = &(this->nParticles3);
+	dataInfo.nSnapshots = &(this->nSnapshots);
+	dataInfo.nTracks = &(this->nTracks3);
+	dataInfo.nSelectedParticles = -1;
+	dataInfo.nSelectedTracks = -1;
 
 }
 
@@ -96,17 +116,39 @@ int vtkSQLiteReader::RequestData(vtkInformation*,
 		this->dataIsRead = true;
 	}
 
-	out->SetPoints(this->Position);
-	out->SetVerts(this->Cells);
-	out->SetLines(this->Tracks);
-	out->GetPointData()->AddArray(this->Velocity);
-	out->GetPointData()->AddArray(this->GId);
-	out->GetPointData()->AddArray(this->SnapId);
-	out->GetPointData()->AddArray(this->RVir);
-	out->GetPointData()->AddArray(this->TrackId);
+	vtkSmartPointer<vtkIdTypeArray> PointsSelection;
+	vtkSmartPointer<vtkIdTypeArray> TracksSelection;
+	PointsSelection->SetNumberOfComponents(1);
+	TracksSelection->SetNumberOfComponents(1);
+
+	if(this->DisplayOnlySelectedData)
+	{
+		if(this->DisplaySelected)
+		{
+			
+		}
+		else if (this->DisplayCalculated)
+		{
+
+		}
+		//selectPoints();
+	}
+	else
+	{
+
+		out->SetPoints(this->Position);
+		out->SetVerts(this->Cells);
+		out->SetLines(this->Tracks);
+		out->GetPointData()->AddArray(this->Velocity);
+		out->GetPointData()->AddArray(this->GId);
+		out->GetPointData()->AddArray(this->SnapId);
+		out->GetPointData()->AddArray(this->RVir);
+		out->GetPointData()->AddArray(this->TrackId);
+		generateColors();
+	}
 
 	// update the colors anyways
-	generateColors();
+
 	out->GetPointData()->SetScalars(this->colors);
 	
 	//vtkSmartPointer<vtkLookupTable> LuT = vtkSmartPointer<vtkLookupTable>::New();
@@ -687,7 +729,7 @@ int vtkSQLiteReader::generateColors()
 
 		red = 190*(float)(snapid) / (float)(this->nSnapshots-1);
 
-		if (trackid == this->HighlightTrack)
+		if (trackid == this->DisplaySelectedTrackNr)
 		{
 			green = 255;
 		} else
@@ -695,7 +737,7 @@ int vtkSQLiteReader::generateColors()
 			green = 0;
 		}
 		
-		if (snapid == this->HighlightSnapshot)
+		if (snapid == this->DisplaySelectedSnapshotNr)
 		{
 			red = 255;
 			green = 255;
