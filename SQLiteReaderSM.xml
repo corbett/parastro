@@ -118,7 +118,15 @@
 		
 
 		
-
+		<DoubleVectorProperty
+			name="CalculationImpactParameter"
+			command="SetCalculationImpactParameter"
+			number_of_elements="1"
+			default_values="0.01">
+			<Documentation>
+				
+			</Documentation>
+		</DoubleVectorProperty>
 
 		<!--
 		<StringVectorProperty

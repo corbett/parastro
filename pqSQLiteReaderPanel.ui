@@ -33,7 +33,7 @@
     <item>
      <widget class="QRadioButton" name="DisplaySelected">
       <property name="text">
-       <string>manually select data to display</string>
+       <string>manually select data to display / highlight</string>
       </property>
      </widget>
     </item>
@@ -139,7 +139,7 @@
     <item>
      <widget class="QRadioButton" name="DisplayCalculated">
       <property name="text">
-       <string>Display calculated data</string>
+       <string>Display / highlight calculated data</string>
       </property>
      </widget>
     </item>
@@ -175,12 +175,9 @@
           <item row="0" column="0">
            <widget class="QLabel" name="label_9">
             <property name="text">
-             <string>TextLabel</string>
+             <string>ImpactParameter</string>
             </property>
            </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="lineEdit_3"/>
           </item>
           <item row="1" column="0">
            <widget class="QLabel" name="label_10">
@@ -191,6 +188,9 @@
           </item>
           <item row="1" column="1">
            <widget class="QLineEdit" name="lineEdit_4"/>
+          </item>
+          <item row="0" column="1">
+           <widget class="QDoubleSpinBox" name="CalculationImpactParameter"/>
           </item>
          </layout>
         </item>

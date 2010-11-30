@@ -2,6 +2,15 @@
 
   Program:   AstroViz plugin for ParaView
   Module:    $RCSfile: vtkSQLiteReader.cxx,v $
+
+  
+	todo:
+	- crashes when changing parameters... 1. run works  
+	- check with big data
+	- pointselection for display
+	- optimizing of collision detection..
+  
+  
 =========================================================================*/
 #include "vtkSQLiteReader.h"
 #include "vtkObjectFactory.h"
@@ -24,6 +33,7 @@
 
 
 #include <vector>
+#include <list>
 #include <sstream>
 
 
@@ -51,6 +61,7 @@ vtkSQLiteReader::vtkSQLiteReader()
 	Gui.DisplaySelectedTrack = &(this->DisplaySelectedTrack); 
 	Gui.DisplaySelectedTrackNr = &(this->DisplaySelectedTrackNr); 
 	Gui.DisplayCalculated = &(this->DisplayCalculated);
+	Gui.CalculationImpactParameter = &(this->CalculationImpactParameter);
 
 	// use this only temp, later delete the free variables, only use struct
 	dataInfo.nParticles = &(this->nParticles3);
@@ -58,6 +69,13 @@ vtkSQLiteReader::vtkSQLiteReader()
 	dataInfo.nTracks = &(this->nTracks3);
 	dataInfo.nSelectedParticles = -1;
 	dataInfo.nSelectedTracks = -1;
+	dataInfo.selectedPoints = vtkSmartPointer<vtkIdTypeArray>::New();
+	dataInfo.selectedSnapshots = vtkSmartPointer<vtkIdTypeArray>::New();
+	dataInfo.selectedTracks = vtkSmartPointer<vtkIdTypeArray>::New();
+	dataInfo.selectedPoints->SetNumberOfComponents(1);
+	dataInfo.selectedSnapshots->SetNumberOfComponents(1);
+	dataInfo.selectedTracks->SetNumberOfComponents(1);
+
 
 }
 
@@ -115,40 +133,48 @@ int vtkSQLiteReader::RequestData(vtkInformation*,
 
 		this->dataIsRead = true;
 	}
-
-	vtkSmartPointer<vtkIdTypeArray> PointsSelection;
-	vtkSmartPointer<vtkIdTypeArray> TracksSelection;
-	PointsSelection->SetNumberOfComponents(1);
-	TracksSelection->SetNumberOfComponents(1);
-
-	if(this->DisplayOnlySelectedData)
+	
+	if(*this->Gui.DisplaySelected)
 	{
-		if(this->DisplaySelected)
-		{
-			
+		if(*this->Gui.DisplaySelectedSnapshot){
+			dataInfo.selectedSnapshots->InsertNextTuple1(*Gui.DisplaySelectedSnapshotNr);
 		}
-		else if (this->DisplayCalculated)
-		{
-
+		if(*this->Gui.DisplaySelectedTrack){
+			dataInfo.selectedTracks->InsertNextTuple1(*Gui.DisplaySelectedTrackNr);
 		}
-		//selectPoints();
 	}
-	else
+	else if (*this->Gui.DisplayCalculated)
 	{
+		doCalculations(); //fills dataInfo.selected* fields
+	}
 
-		out->SetPoints(this->Position);
-		out->SetVerts(this->Cells);
-		out->SetLines(this->Tracks);
-		out->GetPointData()->AddArray(this->Velocity);
-		out->GetPointData()->AddArray(this->GId);
-		out->GetPointData()->AddArray(this->SnapId);
-		out->GetPointData()->AddArray(this->RVir);
-		out->GetPointData()->AddArray(this->TrackId);
-		generateColors();
+	if (*this->Gui.DisplayOnlySelectedData)
+	{
+		selectPoints();
+	}
+	else 
+	{
+		DataSelection.Position = this->Position;
+		DataSelection.Cells = this->Cells;
+		DataSelection.Tracks = this->Tracks;
+		DataSelection.Velocity = this->Velocity;
+		DataSelection.GId = this->GId;
+		DataSelection.SnapId = this->SnapId;
+		DataSelection.RVir = this->RVir;
+		DataSelection.TrackId = this->TrackId;
 	}
 
 	// update the colors anyways
 
+	out->SetPoints(DataSelection.Position);
+	out->SetVerts(DataSelection.Cells);
+	out->SetLines(DataSelection.Tracks);
+	out->GetPointData()->AddArray(DataSelection.Velocity);
+	out->GetPointData()->AddArray(DataSelection.GId);
+	out->GetPointData()->AddArray(DataSelection.SnapId);
+	out->GetPointData()->AddArray(DataSelection.RVir);
+	out->GetPointData()->AddArray(DataSelection.TrackId);
+	generateColors();
 	out->GetPointData()->SetScalars(this->colors);
 	
 	//vtkSmartPointer<vtkLookupTable> LuT = vtkSmartPointer<vtkLookupTable>::New();
@@ -766,4 +792,111 @@ int vtkSQLiteReader::generateColors()
 	}
 
 	return 1;
+}
+
+
+/*----------------------------------------------------------------------------
+Selects a subset of points to display
+
+
+	assumes:
+		
+	sets:
+		
+	arguments:
+		none
+	returns:
+		int	errorcode (1 =ok)
+*/
+int vtkSQLiteReader::selectPoints()
+{
+std::vector<int> idlist;
+
+	if(*dataInfo.nSnapshots >-1)
+	{
+		for (int i =0; i<*dataInfo.nSnapshots; i++){
+			for (int j = 0 ; j<*dataInfo.nParticles;j++){
+				if(this->SnapId->GetTuple1(j)==dataInfo.selectedSnapshots->GetTuple1(i)){
+					idlist.push_back(j);
+				}
+			}
+		}
+	}
+	return 1;
+}
+
+/*----------------------------------------------------------------------------
+Does some calculations
+
+	assumes:
+		
+	sets:
+		
+	arguments:
+		none
+	returns:
+		int	errorcode (1 =ok)
+*/
+int vtkSQLiteReader::doCalculations(){
+
+	int startId;
+	int endId;
+	
+	std::list<int> keeptracks;
+
+	double parameter = *Gui.CalculationImpactParameter;
+
+	for (int snapId = 0; snapId<*dataInfo.nSnapshots;snapId++)
+	{
+		startId = SnapInfo3.at(snapId).Offset;
+		endId = SnapInfo3.at(snapId).Offset+SnapInfo3.at(snapId).lenght;
+
+		for (int gid1 = startId; gid1<endId; gid1++)
+		{
+			for (int gid2 = startId; gid2<endId; gid2++)
+			{
+				if (gid1 == gid2) {continue;}
+				if (distance(gid1,gid2)<parameter){
+					vtkErrorMacro("   dist: "<<distance(gid1,gid2));
+					keeptracks.push_back(gid1);
+					keeptracks.push_back(gid2);
+				}
+			}
+		}
+	}
+	keeptracks.sort();
+	keeptracks.unique();
+	vtkErrorMacro("gefunden: anzahl pkt: "<<keeptracks.size());
+
+	//insert the gids to the dataInfo, selected particles.
+
+	return 1;
+}
+
+/*----------------------------------------------------------------------------
+calculates the distance between the points with gid1 and 2
+
+	assumes:
+		
+	sets:
+		
+	arguments:
+		ids of two points
+	returns:
+		the distance
+*/
+double vtkSQLiteReader::distance(int gid1, int gid2){
+
+	double x1[3];
+	double x2[3];
+
+	this->Position->GetPoint(gid1, x1);
+	this->Position->GetPoint(gid2, x2);
+
+	double r1 = (x1[0]-x2[0])*(x1[0]-x2[0]);
+	double r2 = (x1[1]-x2[1])*(x1[1]-x2[1]);
+	double r3 = (x1[2]-x2[2])*(x1[2]-x2[2]);
+	double tmp = sqrt( r1 + r2 +r3);
+	
+	return tmp;
 }

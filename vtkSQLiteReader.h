@@ -66,6 +66,9 @@ public:
 	vtkSetMacro(DisplayCalculated,bool);
 	vtkGetMacro(DisplayCalculated,bool);
 
+		vtkSetMacro(CalculationImpactParameter,double);
+		vtkGetMacro(CalculationImpactParameter,double);
+
 
 //BTX
 protected:
@@ -95,6 +98,9 @@ protected:
 		int * nSnapshots;
 		int nSelectedParticles; //-1 means all
 		int nSelectedTracks; // -1 means all
+		vtkSmartPointer<vtkIdTypeArray>	selectedPoints; // holds globalids from points to display
+		vtkSmartPointer<vtkIdTypeArray>	selectedSnapshots; //holds snapids of points from snapshot to display
+		vtkSmartPointer<vtkIdTypeArray>	selectedTracks; //holds trackid from points to display
 	};
 
 	struct GUISettings {
@@ -105,7 +111,22 @@ protected:
 		bool * DisplaySelectedTrack;
 		int * DisplaySelectedTrackNr;
 		bool * DisplayCalculated;
+		double * CalculationImpactParameter;
 	};
+
+	struct selectedData {
+		vtkSmartPointer<vtkPoints>			Position;
+		vtkSmartPointer<vtkFloatArray>		Velocity;
+		vtkSmartPointer<vtkCellArray>		Cells;
+		vtkSmartPointer<vtkCellArray>		Tracks;
+		vtkSmartPointer<vtkIdTypeArray>		TrackId;
+		vtkSmartPointer<vtkIdTypeArray>		GId;
+		vtkSmartPointer<vtkIdTypeArray>		SnapId;
+		vtkSmartPointer<vtkFloatArray>		RVir;
+		vtkSmartPointer<vtkUnsignedCharArray> colors;
+		vtkSmartPointer<vtkUnsignedCharArray> opacity;
+	};
+
 
 	//variables
 	vtkSmartPointer<vtkPoints>			Position;
@@ -121,6 +142,7 @@ protected:
 
 	DataInformation dataInfo;
 	GUISettings Gui;
+	selectedData DataSelection;
 	
 	int nParticles3;
 	int nTracks3;
@@ -140,6 +162,7 @@ protected:
 		int DisplaySelectedTrackNr;
 
 	bool DisplayCalculated;
+		double CalculationImpactParameter;
 
 
 private:
@@ -158,11 +181,14 @@ private:
 	int vtkSQLiteReader::readSnapshots(); // reads the snapshots
 	int vtkSQLiteReader::readSnapshotInfo(); 
 	int vtkSQLiteReader::readTracks();
-	//int vtkSQLiteReader::selectPoints();
+	int vtkSQLiteReader::selectPoints();
 	int vtkSQLiteReader::generateColors();
+
+	int vtkSQLiteReader::doCalculations();
 
 	int openDB(char*);
 	vtkStdString vtkSQLiteReader::Int2Str(int);
+	double distance(int, int);
 
 // old stuff - not yet, or not anymore needed
 
