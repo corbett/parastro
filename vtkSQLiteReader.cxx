@@ -5,8 +5,10 @@
 
   
 	todo:
-	- crashes when changing parameters... 1. run works  
-	- pointselection for display
+	- debug for wrong input of nsnapshot, resp. input from display snapshot nr is > nsnapshot
+	- check for tracksdisplay
+	- add tracksgeneration for selected data
+	- change/update generatecolor()
   
   
 =========================================================================*/
@@ -48,7 +50,7 @@ vtkSQLiteReader::vtkSQLiteReader()
 	this->db	= NULL;
 	this->dataIsRead = false;
 
-	//fasse freie vars in structs zusammen
+	//collect free gui variables into struct, and init
 	Gui.DisplayOnlySelectedData = &(this->DisplayOnlySelectedData); 
 	Gui.DisplaySelected = &(this->DisplaySelected); 
 	Gui.DisplaySelectedSnapshot = &(this->DisplaySelectedSnapshot); 
@@ -58,21 +60,75 @@ vtkSQLiteReader::vtkSQLiteReader()
 	Gui.DisplayCalculated = &(this->DisplayCalculated);
 	Gui.CalculationImpactParameter = &(this->CalculationImpactParameter);
 
-	// use this only temp, later delete the free variables, only use struct
-	//dataInfo.nParticles = &(this->nParticles3);
-	//dataInfo.nSnapshots = &(this->nSnapshots);
-	//dataInfo.nTracks = &(this->nTracks3);
+	*Gui.DisplayOnlySelectedData = false; 
+	*Gui.DisplaySelected = false; 
+	*Gui.DisplaySelectedSnapshot = false; 
+	*Gui.DisplaySelectedSnapshotNr = -1; 
+	*Gui.DisplaySelectedTrack = false; 
+	*Gui.DisplaySelectedTrackNr = -1; 
+	*Gui.DisplayCalculated = false;
+	*Gui.CalculationImpactParameter = 0;
+
+	// init dataInfo
+	dataInfo.nPoints = 0;
+	dataInfo.nSnapshots = 0;
+	dataInfo.nTracks = 0;
 	dataInfo.nSelectedPoints = -1;
 	dataInfo.nSelectedTracks = -1;
 	dataInfo.nSelectedSnapshots = -1;
-	/* not used anymore, these are now vectors inseat of smartpointers
-	dataInfo.selectedPoints = vtkSmartPointer<vtkIdTypeArray>::New();
-	dataInfo.selectedSnapshots = vtkSmartPointer<vtkIdTypeArray>::New();
-	dataInfo.selectedTracks = vtkSmartPointer<vtkIdTypeArray>::New();
-	dataInfo.selectedPoints->SetNumberOfComponents(1);
-	dataInfo.selectedSnapshots->SetNumberOfComponents(1);
-	dataInfo.selectedTracks->SetNumberOfComponents(1);
-	*/
+	dataInfo.selectedPoints.clear();
+	dataInfo.selectedSnapshots.clear();
+	dataInfo.selectedTracks.clear();
+
+	//init data stuff
+	this->allData.Position = vtkSmartPointer<vtkPoints>::New();
+	this->allData.Velocity = vtkSmartPointer<vtkFloatArray>::New();
+	this->allData.Cells = vtkSmartPointer<vtkCellArray>::New();
+	this->allData.Tracks = vtkSmartPointer<vtkCellArray>::New();
+	this->allData.TrackId = vtkSmartPointer<vtkIdTypeArray>::New();
+	this->allData.GId = vtkSmartPointer<vtkIdTypeArray>::New();
+	this->allData.SnapId = vtkSmartPointer<vtkIdTypeArray>::New();
+	this->allData.RVir = vtkSmartPointer<vtkFloatArray>::New();
+	this->allData.Colors = vtkSmartPointer<vtkUnsignedCharArray>::New();
+
+	this->allData.Velocity->SetNumberOfComponents(3);
+	this->allData.TrackId->SetNumberOfComponents(1);
+	this->allData.GId->SetNumberOfComponents(1);
+	this->allData.SnapId->SetNumberOfComponents(1);
+	this->allData.RVir->SetNumberOfComponents(1);
+	this->allData.Colors->SetNumberOfComponents(3);
+
+
+	this->allData.Velocity->SetName("Velocity");
+	this->allData.TrackId->SetName("TrackId");
+	this->allData.GId->SetName("GId");
+	this->allData.SnapId->SetName("SnapId");
+	this->allData.RVir->SetName("RVir");
+	this->allData.Colors->SetName("Colors");
+
+	this->selectedData.Position = vtkSmartPointer<vtkPoints>::New();
+	this->selectedData.Velocity =vtkSmartPointer<vtkFloatArray>::New();
+	this->selectedData.Cells = vtkSmartPointer<vtkCellArray>::New();
+	this->selectedData.Tracks = vtkSmartPointer<vtkCellArray>::New();
+	this->selectedData.TrackId = vtkSmartPointer<vtkIdTypeArray>::New();
+	this->selectedData.GId = vtkSmartPointer<vtkIdTypeArray>::New();
+	this->selectedData.SnapId = vtkSmartPointer<vtkIdTypeArray>::New();
+	this->selectedData.RVir = vtkSmartPointer<vtkFloatArray>::New();
+	this->selectedData.Colors = vtkSmartPointer<vtkUnsignedCharArray>::New();
+
+	this->selectedData.Velocity->SetNumberOfComponents(3);
+	this->selectedData.TrackId->SetNumberOfComponents(1);
+	this->selectedData.GId->SetNumberOfComponents(1);
+	this->selectedData.SnapId->SetNumberOfComponents(1);
+	this->selectedData.RVir->SetNumberOfComponents(1);
+	this->allData.Colors->SetNumberOfComponents(3);
+
+	this->selectedData.Velocity->SetName("Velocity");
+	this->selectedData.TrackId->SetName("TrackId");
+	this->selectedData.GId->SetName("GId");
+	this->selectedData.SnapId->SetName("SnapId");
+	this->selectedData.RVir->SetName("RVir");
+	this->allData.Colors->SetName("Colors");
 
 }
 
@@ -130,6 +186,8 @@ int vtkSQLiteReader::RequestData(vtkInformation*,
 		this->dataIsRead = true;
 	}
 	
+
+
 	if(*this->Gui.DisplaySelected)
 	{
 		this->dataInfo.nSelectedPoints = -1;
@@ -151,6 +209,7 @@ int vtkSQLiteReader::RequestData(vtkInformation*,
 	}
 	else if (*this->Gui.DisplayCalculated)
 	{
+		
 		doCalculations(0.01,3); //fills dataInfo.selected* fields
 
 /*     used this for approximation of parameter...
@@ -205,40 +264,37 @@ int vtkSQLiteReader::RequestData(vtkInformation*,
 */
 	}
 
+	
 	if (*this->Gui.DisplayOnlySelectedData)
 	{
-		selectPoints();
+		this->generateIdMap();
+		this->generatePoints();
+		this->generateColors();
+
+		out->SetPoints(this->selectedData.Position);
+		out->SetVerts(this->selectedData.Cells);
+		out->SetLines(this->selectedData.Tracks);
+		out->GetPointData()->AddArray(this->selectedData.Velocity);
+		out->GetPointData()->AddArray(this->selectedData.GId);
+		out->GetPointData()->AddArray(this->selectedData.SnapId);
+		out->GetPointData()->AddArray(this->selectedData.RVir);
+		out->GetPointData()->AddArray(this->selectedData.TrackId);
+		out->GetPointData()->SetScalars(this->selectedData.Colors);
 	}
 	else 
 	{
-		DataSelection.Position = this->Position;
-		DataSelection.Cells = this->Cells;
-		DataSelection.Tracks = this->Tracks;
-		DataSelection.Velocity = this->Velocity;
-		DataSelection.GId = this->GId;
-		DataSelection.SnapId = this->SnapId;
-		DataSelection.RVir = this->RVir;
-		DataSelection.TrackId = this->TrackId;
+		this->generateColors();
+
+		out->SetPoints(this->allData.Position);
+		out->SetVerts(this->allData.Cells);
+		out->SetLines(this->allData.Tracks);
+		out->GetPointData()->AddArray(this->allData.Velocity);
+		out->GetPointData()->AddArray(this->allData.GId);
+		out->GetPointData()->AddArray(this->allData.SnapId);
+		out->GetPointData()->AddArray(this->allData.RVir);
+		out->GetPointData()->AddArray(this->allData.TrackId);
+		out->GetPointData()->SetScalars(this->allData.Colors);
 	}
-
-	// update the colors anyways
-
-	out->SetPoints(DataSelection.Position);
-	out->SetVerts(DataSelection.Cells);
-	out->SetLines(DataSelection.Tracks);
-	out->GetPointData()->AddArray(DataSelection.Velocity);
-	out->GetPointData()->AddArray(DataSelection.GId);
-	out->GetPointData()->AddArray(DataSelection.SnapId);
-	out->GetPointData()->AddArray(DataSelection.RVir);
-	out->GetPointData()->AddArray(DataSelection.TrackId);
-	generateColors();
-	out->GetPointData()->SetScalars(this->colors);
-	
-	//vtkSmartPointer<vtkLookupTable> LuT = vtkSmartPointer<vtkLookupTable>::New();
-	//LuT->SetTableRange(1,100);
-	//double alpha [] = {0,1,0};
-	//LuT->SetAlphaRange(alpha);
-	//LuT->Build();
 
 	return 1;
 }
@@ -468,7 +524,8 @@ int vtkSQLiteReader::ReadHeader()
 
 	if (sqlite3_step(res) == SQLITE_ROW) //there should be only one row..
 	{
-		this->dataInfo.nSnapshots = sqlite3_column_int(res, 9);
+		//this->dataInfo.nSnapshots = sqlite3_column_int(res, 9);
+		// TODO here more data can be read in..
 	}
 
 	return 1;
@@ -524,6 +581,7 @@ int vtkSQLiteReader::readSnapshots()
 {
 // prepare the variables
 
+/*
 	this->Position = vtkSmartPointer<vtkPoints>::New();
 	this->Velocity = vtkSmartPointer<vtkFloatArray>::New();
 	this->Cells = vtkSmartPointer<vtkCellArray>::New();
@@ -541,6 +599,7 @@ int vtkSQLiteReader::readSnapshots()
 	this->GId->SetName("GId");
 	this->SnapId->SetName("SnapId");
 	this->RVir->SetName("RVir");
+*/
 
 	this->SnapInfo.clear();
 
@@ -582,17 +641,17 @@ int vtkSQLiteReader::readSnapshots()
 
 		GId = sqlite3_column_double(res, 1);
 
-		this->Position->InsertNextPoint(
+		this->allData.Position->InsertNextPoint(
 			sqlite3_column_double(res, 4),
 			sqlite3_column_double(res, 5),
 			sqlite3_column_double(res, 6));
-		this->Velocity->InsertNextTuple3(
+		this->allData.Velocity->InsertNextTuple3(
 			sqlite3_column_double(res, 7),
 			sqlite3_column_double(res, 8),
 			sqlite3_column_double(res, 9));
-		this->GId->InsertNextTuple1(GId);
-		this->SnapId->InsertNextTuple1(snap_id);
-		this->RVir->InsertNextTuple1(sqlite3_column_double(res, 11));
+		this->allData.GId->InsertNextTuple1(GId);
+		this->allData.SnapId->InsertNextTuple1(snap_id);
+		this->allData.RVir->InsertNextTuple1(sqlite3_column_double(res, 11));
 
 		count++;
 	}
@@ -611,15 +670,17 @@ int vtkSQLiteReader::readSnapshots()
 	this->dataInfo.nPoints = count;
 	vtkErrorMacro("No of particles: " << this->dataInfo.nPoints);
 
-	// Create the vertices (one point per vertex, for easy display)
-	vtkIdType N = this->Position->GetNumberOfPoints();
-	//vtkErrorMacro("No of Points: " << N);
-	vtkIdType *cells = this->Cells->WritePointer(N, N*2);
-    for (vtkIdType i=0; i<N; ++i) {
-      cells[i*2]   = 1;
-      cells[i*2+1] = i;
-    }
 
+	// Create the vertices (one point per vertex, for easy display)
+	vtkIdType N = this->allData.Position->GetNumberOfPoints();
+	vtkIdType *cells = this->allData.Cells->WritePointer(N, N*2);
+    
+	for (vtkIdType i=0; i<N; ++i)
+	{
+		cells[i*2]   = 1;
+		cells[i*2+1] = i;
+    }
+	
 	this->dataIsRead = true;
 	return 1;
 }
@@ -637,17 +698,18 @@ reads the tracks, generates the lines
 */
 int vtkSQLiteReader::readTracks(){
 
-	this->Tracks = vtkSmartPointer<vtkCellArray>::New();
+	//this->Tracks = vtkSmartPointer<vtkCellArray>::New();
 
-	this->TrackId = vtkSmartPointer<vtkIdTypeArray>::New();
-	this->TrackId->SetName("TrackId");
-	this->TrackId->SetNumberOfComponents(1);
-	this->TrackId->SetNumberOfTuples(this->dataInfo.nPoints);
+	//this->TrackId = vtkSmartPointer<vtkIdTypeArray>::New();
+	//this->TrackId->SetName("TrackId");
+	//this->TrackId->SetNumberOfComponents(1);
+	
+	this->allData.TrackId->SetNumberOfTuples(this->dataInfo.nPoints);
 
-	//init everything to 0 (0: halo belongs to no track)
+	//init everything to 0 (-1: halo belongs to no track)
 	for (int i = 0; i<this->dataInfo.nPoints; i++)
 	{
-		this->TrackId->InsertTuple1(i,0);
+		this->allData.TrackId->InsertTuple1(i,-1);
 	}
 
 	vtkStdString	sql_query;	// sql query
@@ -696,9 +758,9 @@ int vtkSQLiteReader::readTracks(){
 			// check for exact 0 coordinates, then it's no real point
 			// just a temp solution
 			// TODO fix this..
-			if (this->Position->GetData()->GetComponent(offset,0) == 0 && 
-				this->Position->GetData()->GetComponent(offset,1) == 0 &&
-				this->Position->GetData()->GetComponent(offset,2) == 0)
+			if (this->allData.Position->GetData()->GetComponent(offset,0) == 0 && 
+				this->allData.Position->GetData()->GetComponent(offset,1) == 0 &&
+				this->allData.Position->GetData()->GetComponent(offset,2) == 0)
 			{
 				continue;
 			}
@@ -706,7 +768,7 @@ int vtkSQLiteReader::readTracks(){
 			nextLine->GetPointIds()->InsertNextId(offset);
 
 			//fill the TrackId vector (associates points to tracks)
-			this->TrackId->InsertTuple1(offset,TrackNo);
+			this->allData.TrackId->InsertTuple1(offset,TrackNo);
 
 			// fill in the data for trackinfo vector (for association track to point)
 			tmpTrack.PointsIds.at(snap_id) = offset;
@@ -715,7 +777,7 @@ int vtkSQLiteReader::readTracks(){
 		
 		if (validtrack)
 		{
-			this->Tracks->InsertNextCell(nextLine);
+			this->allData.Tracks->InsertNextCell(nextLine);
 
 			this->TracksInfo.push_back(tmpTrack);
 			TrackNo++;
@@ -797,10 +859,8 @@ Generates the colorvector for the data
 int vtkSQLiteReader::generateColors()
 {
 
-	this->colors = vtkSmartPointer<vtkUnsignedCharArray>::New();
-	this->colors->SetName("Colors");
-	this->colors->SetNumberOfComponents(3);
-	this->colors->SetNumberOfTuples(this->dataInfo.nPoints);
+
+	this->allData.Colors->SetNumberOfTuples(this->dataInfo.nPoints);
 
 	//this->opacity = vtkSmartPointer<vtkUnsignedCharArray>::New();
 	//this->opacity->SetName("Opacity");
@@ -818,8 +878,8 @@ int vtkSQLiteReader::generateColors()
 
 	for (int i = 0; i<this->dataInfo.nPoints; i++)
 	{
-		snapid = this->SnapId->GetTuple1(i);
-		trackid = this->TrackId->GetTuple1(i);
+		snapid = this->allData.SnapId->GetTuple1(i);
+		trackid = this->allData.TrackId->GetTuple1(i);
 
 		red = 190*(float)(snapid) / (float)(this->dataInfo.nSnapshots-1);
 
@@ -842,7 +902,7 @@ int vtkSQLiteReader::generateColors()
 		blue = 0;
 		alpha = 0;
 
-		this->colors->InsertTuple3(i,
+		this->allData.Colors->InsertTuple3(i,
 				red,
 				green,
 				blue);
@@ -1033,7 +1093,7 @@ int vtkSQLiteReader::doCalculations(double iParameter, int mode){
 			// the copying could possibly done faster, with getdata from offset to offset+length and use this as data for points, but didnt get this to work..
 			for (int i = 0; i < length; i++)
 			{
-				points->InsertPoint(i,this->Position->GetData()->GetTuple3(i+offset));
+				points->InsertPoint(i,this->allData.Position->GetData()->GetTuple3(i+offset));
 			}
 			vtkErrorMacro(" copied points: "<<points->GetNumberOfPoints()<<" for snapid: "<<SnapId);
 
@@ -1093,7 +1153,7 @@ int vtkSQLiteReader::doCalculations(double iParameter, int mode){
 			
 			for (int i = 0; i < length; i++)
 			{
-				points->InsertPoint(i,this->Position->GetData()->GetTuple3(i+offset));
+				points->InsertPoint(i,this->allData.Position->GetData()->GetTuple3(i+offset));
 			}
 			// vtkErrorMacro(" copied points: "<<points->GetNumberOfPoints()<<" for snapid: "<<SnapId);
 
@@ -1108,7 +1168,7 @@ int vtkSQLiteReader::doCalculations(double iParameter, int mode){
 				if(collisionTracks.at(TrackId)==2){continue;} // go on if theres already a collision on this track, but then you only get the first point on a track wheres a collision
 				PointId = this->TracksInfo.at(TrackId).PointsIds.at(SnapId);
 				if(PointId == -1){continue;}
-				this->Position->GetPoint(PointId, candidate);
+				this->allData.Position->GetPoint(PointId, candidate);
 				
 				kDTree->FindClosestNPoints(2,candidate,IdList);
 				
@@ -1183,10 +1243,139 @@ double vtkSQLiteReader::distance(int gid1, int gid2){
 	double x1[3];
 	double x2[3];
 
-	this->Position->GetPoint(gid1, x1);
-	this->Position->GetPoint(gid2, x2);
+	this->allData.Position->GetPoint(gid1, x1);
+	this->allData.Position->GetPoint(gid2, x2);
 
 	return (x1[0]-x2[0])*(x1[0]-x2[0])+
 		(x1[1]-x2[1])*(x1[1]-x2[1])+
 		(x1[2]-x2[2])*(x1[2]-x2[2]);
 }
+
+/*----------------------------------------------------------------------------
+generates the id map from alldata ids to only selected points ids
+	assumes:
+		
+	sets:
+		
+	arguments:
+		
+	returns:
+		int errorcode
+*/
+int vtkSQLiteReader::generateIdMap()
+{
+	int counter = 0;
+	std::vector<int> * idMap1 = &this->dataInfo.idMap1;
+	std::vector<int> * idMap2 = &this->dataInfo.idMap2;
+	int offset = 0;
+	int length = 0;
+	int pid = 0;
+	int trackid = 0;
+		
+	idMap1->resize(this->dataInfo.nPoints,-1);
+	idMap2->resize(this->dataInfo.nPoints,-1);
+
+	
+	for (int i = 0; i<this->dataInfo.nSelectedPoints; i++)
+	{
+		idMap1->at(this->dataInfo.selectedPoints.at(i)) = counter;
+		idMap2->at(counter) = this->dataInfo.selectedPoints.at(i);
+		counter++;
+	}
+	
+
+	for (int i = 0; i<this->dataInfo.nSelectedSnapshots; i++)
+	{
+		if (i>=this->dataInfo.nSnapshots) {continue;} //overflow protection
+		offset = this->SnapInfo.at(this->dataInfo.selectedSnapshots.at(i)).Offset;
+		length = this->SnapInfo.at(this->dataInfo.selectedSnapshots.at(i)).lenght;
+
+		for (int j = offset; j < offset+length; j++)
+		{
+			if(idMap1->at(j) < 0) //only if not already point assigned
+			{
+				idMap1->at(j) = counter;
+				idMap2->at(counter) = j;
+				counter++;
+			}
+		}
+	}
+
+	for (int i = 0; i < this->dataInfo.nSelectedTracks; i++)
+	{
+		trackid = this->dataInfo.selectedTracks.at(i);
+		length =  this->TracksInfo.at(trackid).nPoints;
+
+		for (int j = 0; j<length; j++)
+		{
+			pid = this->TracksInfo.at(trackid).PointsIds.at(j);
+
+			if (pid<0 && idMap1->at(pid)<0)
+			{
+				idMap1->at(pid) = counter;
+				idMap2->at(counter) = pid;
+				counter++;
+			}
+		}
+
+	}
+
+	this->dataInfo.nAllSelectedPoints = counter;
+	idMap2->resize(counter);
+
+	return 1;
+}
+
+/*----------------------------------------------------------------------------
+generates points in the output vector
+	assumes:
+		
+	sets:
+		
+	arguments:
+		
+	returns:
+		int errorcode
+*/
+int vtkSQLiteReader::generatePoints()
+{
+	std::vector<int> * idMap2 = &this->dataInfo.idMap2;
+	
+	this->selectedData.Position->SetNumberOfPoints(this->dataInfo.nAllSelectedPoints);
+	this->selectedData.Velocity->SetNumberOfTuples(this->dataInfo.nAllSelectedPoints);
+	this->selectedData.TrackId->SetNumberOfTuples(this->dataInfo.nAllSelectedPoints);
+	this->selectedData.GId->SetNumberOfTuples(this->dataInfo.nAllSelectedPoints);
+	this->selectedData.SnapId->SetNumberOfTuples(this->dataInfo.nAllSelectedPoints);
+	this->selectedData.RVir->SetNumberOfTuples(this->dataInfo.nAllSelectedPoints);
+
+	for (int i = 0; i<this->dataInfo.nAllSelectedPoints; i++)
+	{
+		this->selectedData.Position->InsertPoint(i,
+			this->allData.Position->GetPoint(idMap2->at(i)));
+		this->selectedData.Velocity->InsertTuple(i,
+			this->allData.Velocity->GetTuple(idMap2->at(i)));
+		this->selectedData.TrackId->InsertTuple(i,
+			this->allData.TrackId->GetTuple(idMap2->at(i)));
+		this->selectedData.GId->InsertTuple(i,
+			this->allData.GId->GetTuple(idMap2->at(i)));
+		this->selectedData.SnapId->InsertTuple(i,
+			this->allData.SnapId->GetTuple(idMap2->at(i)));
+		this->selectedData.RVir->InsertTuple(i,
+			this->allData.RVir->GetTuple(idMap2->at(i)));
+	}
+
+	// Create the vertices (one point per vertex, for easy display)
+	vtkIdType N = this->selectedData.Position->GetNumberOfPoints();
+	vtkIdType *cells = this->selectedData.Cells->WritePointer(N, N*2);
+    
+	for (vtkIdType i=0; i<N; ++i)
+	{
+		cells[i*2]   = 1;
+		cells[i*2+1] = i;
+    }
+
+	return 1;
+}
+
+
+

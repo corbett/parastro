@@ -103,12 +103,15 @@ protected:
 		int nPoints;
 		int nTracks;
 		int nSnapshots;
-		int nSelectedPoints; //-1 means all
+		int nSelectedPoints; //-1 means all, single points selected to display
 		int nSelectedTracks; // -1 means all
 		int nSelectedSnapshots; 
+		int nAllSelectedPoints; // # of all points (inkl tracks, snaps) to display
 		std::vector<int>	selectedPoints; // holds globalids from points to display
 		std::vector<int>	selectedSnapshots; //holds snapids of points from snapshot to display
 		std::vector<int>	selectedTracks; //holds trackid from points to display
+		std::vector<int>	idMap1; //mapps ids from read in data to displayed data
+		std::vector<int>	idMap2; //mapps ids from displayed data to read in data
 	};
 
 	struct GUISettings {
@@ -122,7 +125,7 @@ protected:
 		double * CalculationImpactParameter;
 	};
 
-	struct selectedData {
+	struct Data {
 		vtkSmartPointer<vtkPoints>			Position;
 		vtkSmartPointer<vtkFloatArray>		Velocity;
 		vtkSmartPointer<vtkCellArray>		Cells;
@@ -131,12 +134,13 @@ protected:
 		vtkSmartPointer<vtkIdTypeArray>		GId;
 		vtkSmartPointer<vtkIdTypeArray>		SnapId;
 		vtkSmartPointer<vtkFloatArray>		RVir;
-		vtkSmartPointer<vtkUnsignedCharArray> colors;
+		vtkSmartPointer<vtkUnsignedCharArray> Colors;
 		//vtkSmartPointer<vtkUnsignedCharArray> opacity;
 	};
 
 
-	//variables
+	//variables (not used!)
+	/*
 	vtkSmartPointer<vtkPoints>			Position;
 	vtkSmartPointer<vtkFloatArray>		Velocity;
 	vtkSmartPointer<vtkCellArray>		Cells;
@@ -146,11 +150,12 @@ protected:
 	vtkSmartPointer<vtkIdTypeArray>		SnapId;
 	vtkSmartPointer<vtkFloatArray>		RVir;
 	vtkSmartPointer<vtkUnsignedCharArray> colors;
+	*/
 	//vtkSmartPointer<vtkUnsignedCharArray> opacity;
 
 	DataInformation dataInfo;
 	GUISettings Gui;
-	selectedData DataSelection;
+	Data allData, selectedData;
 	
 	std::vector<SnapshotInfo> SnapInfo;
 	std::vector<Track> TracksInfo;
@@ -191,12 +196,16 @@ private:
 
 	int vtkSQLiteReader::doCalculations(double,int);
 
+	int vtkSQLiteReader::generateIdMap();
+	int vtkSQLiteReader::generatePoints();
+
+
+	// helper
 	int openDB(char*);
 	vtkStdString vtkSQLiteReader::Int2Str(int);
 	double distance(int, int);
 
-// old stuff - not yet, or not anymore needed
-
+	// old stuff - not yet, or not anymore needed
 	int RequestDataDemo(vtkInformationVector*);
 	int vtkSQLiteReader::SQLQuery(vtkStdString, sqlite3_stmt*);
 
