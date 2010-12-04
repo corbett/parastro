@@ -92,15 +92,23 @@ protected:
 		int npart;
 	};
 
+	struct Track {
+		int nPoints;
+		//int StartSnap;
+		//int EndSnap;
+		std::vector<vtkIdType> PointsIds; //v of length nSnaps, -1 if this track doesnt have a point in this snap
+	};
+
 	struct DataInformation {
-		int * nParticles;
-		int * nTracks;
-		int * nSnapshots;
-		int nSelectedParticles; //-1 means all
+		int nPoints;
+		int nTracks;
+		int nSnapshots;
+		int nSelectedPoints; //-1 means all
 		int nSelectedTracks; // -1 means all
-		vtkSmartPointer<vtkIdTypeArray>	selectedPoints; // holds globalids from points to display
-		vtkSmartPointer<vtkIdTypeArray>	selectedSnapshots; //holds snapids of points from snapshot to display
-		vtkSmartPointer<vtkIdTypeArray>	selectedTracks; //holds trackid from points to display
+		int nSelectedSnapshots; 
+		std::vector<int>	selectedPoints; // holds globalids from points to display
+		std::vector<int>	selectedSnapshots; //holds snapids of points from snapshot to display
+		std::vector<int>	selectedTracks; //holds trackid from points to display
 	};
 
 	struct GUISettings {
@@ -124,7 +132,7 @@ protected:
 		vtkSmartPointer<vtkIdTypeArray>		SnapId;
 		vtkSmartPointer<vtkFloatArray>		RVir;
 		vtkSmartPointer<vtkUnsignedCharArray> colors;
-		vtkSmartPointer<vtkUnsignedCharArray> opacity;
+		//vtkSmartPointer<vtkUnsignedCharArray> opacity;
 	};
 
 
@@ -138,17 +146,14 @@ protected:
 	vtkSmartPointer<vtkIdTypeArray>		SnapId;
 	vtkSmartPointer<vtkFloatArray>		RVir;
 	vtkSmartPointer<vtkUnsignedCharArray> colors;
-	vtkSmartPointer<vtkUnsignedCharArray> opacity;
+	//vtkSmartPointer<vtkUnsignedCharArray> opacity;
 
 	DataInformation dataInfo;
 	GUISettings Gui;
 	selectedData DataSelection;
 	
-	int nParticles3;
-	int nTracks3;
-	int nSnapshots;
-
-	std::vector<SnapshotInfo> SnapInfo3;
+	std::vector<SnapshotInfo> SnapInfo;
+	std::vector<Track> TracksInfo;
 
 	//gui variables
 	char* FileName;
@@ -184,7 +189,7 @@ private:
 	int vtkSQLiteReader::selectPoints();
 	int vtkSQLiteReader::generateColors();
 
-	int vtkSQLiteReader::doCalculations();
+	int vtkSQLiteReader::doCalculations(double,int);
 
 	int openDB(char*);
 	vtkStdString vtkSQLiteReader::Int2Str(int);
