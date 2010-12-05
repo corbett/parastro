@@ -66,8 +66,8 @@
 			
 			<IntRangeDomain
 				name="range"
-				min="1"
-				max="1000"/>
+				min="0"
+				max="100"/>
 				
 			<Documentation>
 				Sets the snapshot id to highlight
@@ -96,7 +96,7 @@
 			
 			<IntRangeDomain
 				name="range"
-				min="1"
+				min="0"
 				max="1000"/>
 				
 			<Documentation>
@@ -122,7 +122,7 @@
 			name="CalculationImpactParameter"
 			command="SetCalculationImpactParameter"
 			number_of_elements="1"
-			default_values="0.01">
+			default_values="0.00000001">
 			<Documentation>
 				
 			</Documentation>

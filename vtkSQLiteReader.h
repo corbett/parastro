@@ -138,6 +138,12 @@ protected:
 		//vtkSmartPointer<vtkUnsignedCharArray> opacity;
 	};
 
+	struct CalculationSettings {
+		bool calcDone;
+		double oldTolerance;
+		int nCollisions;
+	};
+
 
 	//variables (not used!)
 	/*
@@ -156,6 +162,7 @@ protected:
 	DataInformation dataInfo;
 	GUISettings Gui;
 	Data allData, selectedData;
+	CalculationSettings calcInfo;
 	
 	std::vector<SnapshotInfo> SnapInfo;
 	std::vector<Track> TracksInfo;
@@ -179,8 +186,6 @@ private:
 	vtkSQLiteReader(const vtkSQLiteReader&);  // Not implemented.
 	void operator=(const vtkSQLiteReader&);  // Not implemented.
 
-
-// used in v3
 	//variables
 	sqlite3 * db;
 	bool dataIsRead;
@@ -198,7 +203,8 @@ private:
 
 	int vtkSQLiteReader::generateIdMap();
 	int vtkSQLiteReader::generatePoints();
-
+	int vtkSQLiteReader::generateTracks();
+	int vtkSQLiteReader::reset();
 
 	// helper
 	int openDB(char*);
