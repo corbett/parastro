@@ -69,6 +69,10 @@ public:
 		vtkSetMacro(CalculationImpactParameter,double);
 		vtkGetMacro(CalculationImpactParameter,double);
 
+	vtkSetMacro(DisplayEstimateTolerance,bool);
+	vtkGetMacro(DisplayEstimateTolerance,bool);
+
+
 
 //BTX
 protected:
@@ -90,6 +94,7 @@ protected:
 		double redshift;
 		double time;
 		int npart;
+		std::vector<int> PointId; //allocates gid to new id (PointId.at(gid) = id+offset) maybee save here some mem, by using smaller datatype..
 	};
 
 	struct Track {
@@ -123,6 +128,7 @@ protected:
 		int * DisplaySelectedTrackNr;
 		bool * DisplayCalculated;
 		double * CalculationImpactParameter;
+		bool * DisplayEstimateTolerance;
 	};
 
 	struct Data {
@@ -144,6 +150,11 @@ protected:
 		int nCollisions;
 	};
 
+	struct ResultOfEsimationOfTolerance {
+		int goal;
+		double parameter;
+		int nCollisions;
+	};
 
 	//variables (not used!)
 	/*
@@ -163,6 +174,8 @@ protected:
 	GUISettings Gui;
 	Data allData, selectedData;
 	CalculationSettings calcInfo;
+	std::vector<ResultOfEsimationOfTolerance> calcEstTol;
+	vtkSmartPointer<vtkFloatArray> calcEstTol2;
 	
 	std::vector<SnapshotInfo> SnapInfo;
 	std::vector<Track> TracksInfo;
@@ -180,6 +193,8 @@ protected:
 
 	bool DisplayCalculated;
 		double CalculationImpactParameter;
+
+	bool DisplayEstimateTolerance;
 
 
 private:
@@ -200,6 +215,7 @@ private:
 	int vtkSQLiteReader::generateColors();
 
 	int vtkSQLiteReader::doCalculations(double,int);
+	int vtkSQLiteReader::calcTolerance();
 
 	int vtkSQLiteReader::generateIdMap();
 	int vtkSQLiteReader::generatePoints();

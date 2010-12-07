@@ -7,9 +7,11 @@
 	todo:
 	- debug for wrong input of nsnapshot, resp. input from display snapshot nr is > nsnapshot
 	- check for tracksdisplay
-	- add tracksgeneration for selected data
-	- change/update generatecolor()
-  
+	- maybe more computationonal stuff
+	- option for estimation good tolerance parameter
+	bugfixing:
+	- lost color bug
+	- check resetting of variables, whats needed, what not..  
   
 =========================================================================*/
 #include "vtkSQLiteReader.h"
@@ -30,6 +32,7 @@
 #include "vtkSMProxy.h"
 #include "vtkSMProxyProperty.h"
 #include "vtkKdTree.h"
+#include "vtkTable.h"
 
 
 #include <vector>
@@ -59,6 +62,8 @@ vtkSQLiteReader::vtkSQLiteReader()
 	Gui.DisplaySelectedTrackNr = &(this->DisplaySelectedTrackNr); 
 	Gui.DisplayCalculated = &(this->DisplayCalculated);
 	Gui.CalculationImpactParameter = &(this->CalculationImpactParameter);
+	Gui.DisplayEstimateTolerance = &(this->DisplayEstimateTolerance);
+
 
 	*Gui.DisplayOnlySelectedData = false; 
 	*Gui.DisplaySelected = false; 
@@ -68,6 +73,7 @@ vtkSQLiteReader::vtkSQLiteReader()
 	*Gui.DisplaySelectedTrackNr = -1; 
 	*Gui.DisplayCalculated = false;
 	*Gui.CalculationImpactParameter = 0.0000001;
+	*Gui.DisplayEstimateTolerance = false;
 
 	// init dataInfo (maybee just call this->reset!??)
 	dataInfo.nPoints = 0;
@@ -130,10 +136,15 @@ vtkSQLiteReader::vtkSQLiteReader()
 	this->selectedData.RVir->SetName("RVir");
 	this->selectedData.Colors->SetName("Colors");
 
+	//init calc struct
 	this->calcInfo.calcDone = false;
 	this->calcInfo.nCollisions = -1;
 	this->calcInfo.oldTolerance = 0;
 
+	// inti calcesttol2
+	this->calcEstTol2 = vtkSmartPointer<vtkFloatArray>::New();
+	this->calcEstTol2->SetNumberOfComponents(4);
+	this->calcEstTol2->SetName("CalculationOfTolerance");
 }
 
 //----------------------------------------------------------------------------
@@ -179,6 +190,10 @@ int vtkSQLiteReader::RequestData(vtkInformation*,
 {
 
 	vtkPolyData * out = vtkPolyData::GetData(outputVector);
+	//vtkTable * table = vtkTable::GetData(outputVector);
+	//table->Initialize();
+
+	vtkDebugMacro("test");
 
 	if (!this->dataIsRead)
 		// only read if it's not been read before
@@ -225,57 +240,15 @@ int vtkSQLiteReader::RequestData(vtkInformation*,
 		{
 			vtkErrorMacro("Skipping recalculation...");
 		}
+	}
+	else if (*this->Gui.DisplayEstimateTolerance)
+	{
 
-/*     used this for approximation of parameter...
-		struct res {
-			int goal;
-			double parameter;
-			int nCollisions;
-		};
+		//used this for approximation of parameter...
+		this->calcTolerance();
+		out->GetPointData()->AddArray(this->calcEstTol2);
 
-		std::vector<res> result; 
-		
-		bool done = false;
-		double parameter = 0.01;
-		int nCollisions;
-		double acc;
-		int counter;
 
-		for (double goal = 1000; goal >= 10; goal = goal/10)
-		{
-			counter = 0;
-			vtkErrorMacro("goal: "<<goal);
-			done = false;
-
-			while(!done){
-				counter++;
-				nCollisions = this->doCalculations(parameter,1);
-				acc = (double)nCollisions / (double)goal;
-				vtkErrorMacro("  calc: goal: " << goal <<" parameter: " << parameter << " ncoll: "<< nCollisions<<" acc: "<<acc<<" counter: "<<counter );
-				
-				res tmpres;
-				tmpres.goal = goal;
-				tmpres.parameter = parameter;
-				tmpres.nCollisions = nCollisions;
-				result.push_back(tmpres);
-
-				if(counter == 5){
-				//continue
-				}
-				else if (acc < 0.1){
-					parameter = parameter / (acc*2);
-					continue;
-				}
-				else if (acc > 10){
-					parameter = parameter / (acc*.5);
-					continue;
-				}
-				vtkErrorMacro("RESULT: goal: " << goal <<" parameter: " << parameter << " ncoll: "<< nCollisions<<" counter: "<<counter );
-				done = true;
-
-			}
-		}
-*/
 	}
 
 	
@@ -637,9 +610,13 @@ int vtkSQLiteReader::readSnapshots()
 	}
 
 	int count = 0;
+	int snapcount = 0;
 	int snap_id=0;
 	int old_snap_id = 0;
 	int GId = 0;
+	int offset = 0;
+	double x,y,z;
+	std::vector<int> pid;
 
 	while (sqlite3_step(res) == SQLITE_ROW)
 	{
@@ -649,17 +626,30 @@ int vtkSQLiteReader::readSnapshots()
 		if (snap_id != old_snap_id)
 		{
 			SnapshotInfo tmp;
-			tmp.Offset = count-GId-1;
-			tmp.lenght = GId+1;
+			tmp.Offset = offset;//count-GId-1;
+			tmp.lenght = snapcount;
+			tmp.PointId = pid;
 			this->SnapInfo.push_back(tmp);
+
+			pid.clear();
+			snapcount = 0;
+			offset = count;
 		}
 
 		GId = sqlite3_column_double(res, 1);
 
-		this->allData.Position->InsertNextPoint(
-			sqlite3_column_double(res, 4),
-			sqlite3_column_double(res, 5),
-			sqlite3_column_double(res, 6));
+		//filter out any points with coordinates = 0
+		x = sqlite3_column_double(res, 4);
+		y = sqlite3_column_double(res, 5);
+		z = sqlite3_column_double(res, 6);
+
+		if(x==0&&y==0&&z==0)
+		{
+			pid.push_back(-1);
+			continue;
+		}
+
+		this->allData.Position->InsertNextPoint(x,y,z);
 		this->allData.Velocity->InsertNextTuple3(
 			sqlite3_column_double(res, 7),
 			sqlite3_column_double(res, 8),
@@ -668,12 +658,16 @@ int vtkSQLiteReader::readSnapshots()
 		this->allData.SnapId->InsertNextTuple1(snap_id);
 		this->allData.RVir->InsertNextTuple1(sqlite3_column_double(res, 11));
 
+		pid.push_back(snapcount);
+
+		snapcount++;
 		count++;
 	}
 
 	SnapshotInfo tmp;
-	tmp.Offset = count-GId-1;
-	tmp.lenght = GId+1;
+	tmp.Offset = offset;
+	tmp.lenght = snapcount;
+	tmp.PointId = pid;
 	this->SnapInfo.push_back(tmp);
 
 	//this->nTracks3 = (int)10;
@@ -721,7 +715,7 @@ int vtkSQLiteReader::readTracks(){
 	
 	this->allData.TrackId->SetNumberOfTuples(this->dataInfo.nPoints);
 
-	//init everything to 0 (-1: halo belongs to no track)
+	//init everything to -1 (-1: halo belongs to no track)
 	for (int i = 0; i<this->dataInfo.nPoints; i++)
 	{
 		this->allData.TrackId->InsertTuple1(i,-1);
@@ -733,7 +727,7 @@ int vtkSQLiteReader::readTracks(){
 	int				sql_error;	// return value of sql query
 
 	int snap_id;
-	int GId;
+	int GId, pid;
 	int offset;
 	bool goOn = true;
 	bool validtrack = false;
@@ -767,18 +761,20 @@ int vtkSQLiteReader::readTracks(){
 			//generate the lines
 			//if (GId<1) {continue;} //check for empty fields TODO ADAPT THIS
 			
+			pid = this->SnapInfo.at(snap_id).PointId.at(GId);
+			if(pid<0){continue;}
 
-			offset = this->SnapInfo.at(snap_id).Offset + GId;
+			offset = this->SnapInfo.at(snap_id).Offset + pid;
 
 			// check for exact 0 coordinates, then it's no real point
 			// just a temp solution
 			// TODO fix this..
-			if (this->allData.Position->GetData()->GetComponent(offset,0) == 0 && 
+			/*if (this->allData.Position->GetData()->GetComponent(offset,0) == 0 && 
 				this->allData.Position->GetData()->GetComponent(offset,1) == 0 &&
 				this->allData.Position->GetData()->GetComponent(offset,2) == 0)
 			{
 				continue;
-			}
+			}*/
 
 			nextLine->GetPointIds()->InsertNextId(offset);
 
@@ -981,6 +977,10 @@ int vtkSQLiteReader::generateColors()
 		for (int j = 0; j<this->dataInfo.nSelectedTracks; j++)
 		{
 			trackid = this->dataInfo.selectedTracks.at(j);
+			
+			//overflowprotection
+			if (trackid>=this->dataInfo.nTracks){trackid=this->dataInfo.nTracks-1;}
+
 			length = this->TracksInfo.at(trackid).nPoints;
 			for (int i = 0; i<length; i++)
 			{
@@ -998,6 +998,10 @@ int vtkSQLiteReader::generateColors()
 		for (int j = 0; j<this->dataInfo.nSelectedSnapshots; j++)
 		{
 			snapid = this->dataInfo.selectedSnapshots.at(j);
+
+			//overflowprotection
+			if (snapid>=this->dataInfo.nSnapshots){snapid=this->dataInfo.nSnapshots-1;}
+
 			offset = this->SnapInfo.at(snapid).Offset;
 			length = this->SnapInfo.at(snapid).lenght;
 			
@@ -1257,11 +1261,17 @@ int vtkSQLiteReader::doCalculations(double tolerance, int mode){
 			points->SetNumberOfPoints(length);
 			
 			// the copying could possibly done faster, with getdata from offset to offset+length and use this as data for points, but didnt get this to work..
-			
+			vtkErrorMacro(" points length: "<<points->GetData()->GetSize()<<" offset: "<<offset);
+			/*
 			for (int i = 0; i < length; i++)
 			{
 				points->InsertPoint(i,this->allData.Position->GetData()->GetTuple3(i+offset));
 			}
+			*/
+			
+			//this->Position->GetData()->GetTuples(startid, endid, subsetofpoints->GetData());
+			this->allData.Position->GetData()->GetTuples(offset, offset+length-1, points->GetData());
+
 			// vtkErrorMacro(" copied points: "<<points->GetNumberOfPoints()<<" for snapid: "<<SnapId);
 
 			//build kd tree
@@ -1278,7 +1288,7 @@ int vtkSQLiteReader::doCalculations(double tolerance, int mode){
 				this->allData.Position->GetPoint(PointId, candidate);
 				
 				kDTree->FindClosestNPoints(2,candidate,IdList);
-				
+				if(IdList->GetNumberOfIds()<2){continue;}
 				dist = distance(PointId,IdList->GetId(1)+offset);
 				//vtkErrorMacro(" for track: "<<TrackId<<", got point ids: "<<IdList->GetId(0)<<", "<<IdList->GetId(1)<<" with dist: "<< dist);
 				if(dist<tolerance)
@@ -1330,7 +1340,7 @@ int vtkSQLiteReader::doCalculations(double tolerance, int mode){
 
 	}
 	
-	// uses kd tree, returns all collision points
+	// uses kd tree, returns all collision points  NOT UP TO DATE, copy code from 3 and modify it
 	if (mode==4)
 	{
 		//double dist;
@@ -1435,6 +1445,7 @@ int vtkSQLiteReader::doCalculations(double tolerance, int mode){
 	// uses kd tree, only returns nCollisions, fast..
 	if (mode==5)
 	{
+		//double dist;
 		double candidate[3];
 		double dist;
 
@@ -1446,6 +1457,10 @@ int vtkSQLiteReader::doCalculations(double tolerance, int mode){
 		vtkSmartPointer<vtkKdTree> kDTree;
 		vtkSmartPointer<vtkIdList> IdList;
 
+		// vectores to store the points/tracks / snaps of interesst (indexed by id)
+		std::vector<char> collisionTracks;
+		collisionTracks.resize(this->dataInfo.nTracks,0);
+
 		for (int SnapId=0; SnapId < this->dataInfo.nSnapshots; SnapId++)
 		{
 			// get all points from current snapshot
@@ -1453,11 +1468,8 @@ int vtkSQLiteReader::doCalculations(double tolerance, int mode){
 			length = this->SnapInfo.at(SnapId).lenght;
 			points = vtkSmartPointer<vtkPoints>::New();
 			points->SetNumberOfPoints(length);
-			
-			for (int i = 0; i < length; i++)
-			{
-				points->InsertPoint(i,this->allData.Position->GetData()->GetTuple3(i+offset));
-			}
+
+			this->allData.Position->GetData()->GetTuples(offset, offset+length-1, points->GetData());
 
 			//build kd tree
 			kDTree = vtkSmartPointer<vtkKdTree>::New();
@@ -1467,26 +1479,133 @@ int vtkSQLiteReader::doCalculations(double tolerance, int mode){
 
 			for (int TrackId = 0; TrackId < this->dataInfo.nTracks; TrackId++) //
 			{
+				if(collisionTracks.at(TrackId)==2){continue;}
 				PointId = this->TracksInfo.at(TrackId).PointsIds.at(SnapId);
 				if(PointId == -1){continue;}
 				this->allData.Position->GetPoint(PointId, candidate);
 				
 				kDTree->FindClosestNPoints(2,candidate,IdList);
-				
+				if(IdList->GetNumberOfIds()<2){break;}
 				dist = distance(PointId,IdList->GetId(1)+offset);
+
 				if(dist<tolerance)
 				{
 					nCollisions++;
+					collisionTracks.at(TrackId) = 2;
 				}
 			}
 		}
-		
 	}
 
 	this->calcInfo.nCollisions = nCollisions;
 	vtkErrorMacro("gefunden: anzahl pkt: "<<nCollisions);
 	return 1;
 }
+
+/*----------------------------------------------------------------------------
+tries to get an estimate for wich tolerance parameter yields to how many colliding tracks.
+prints the endresult with vtkErrorMacro
+
+	assumes:
+		
+	sets:
+		int	nCollisions: Number of collisions
+	arguments:
+	returns:
+		int errorcode
+*/
+int vtkSQLiteReader::calcTolerance()
+{
+	// settings:
+	double accFactor = 2; // to witch factor should the desired nCollision be reached
+	int nTries = 5; //how many max tires to reach a goal
+	double startFactor = 0.000001; // factor for the starting parameter
+
+	bool done = false;
+	double parameter;// = 0.0000001;
+	int nCollisions;
+	double acc;
+	int counter;
+	calcEstTol.clear();
+	
+	double minmaxx [2];
+	this->allData.Position->GetData()->GetRange(minmaxx,0);
+	double minmaxy [2];
+	this->allData.Position->GetData()->GetRange(minmaxy,1);
+	double minmaxz [2];
+	this->allData.Position->GetData()->GetRange(minmaxz,2);
+
+	double rangex = minmaxx[1]-minmaxx[0];
+	double rangey = minmaxy[1]-minmaxy[0];
+	double rangez = minmaxz[1]-minmaxz[0];
+
+	double range = std::max(std::max(rangex,rangey),rangez);
+
+	//estimate a good starting parameter based on the range of the points and their number
+	parameter = range / pow(this->dataInfo.nTracks,0.333333) * startFactor;
+
+	vtkErrorMacro("range: "<<range<<
+		"; npoints: "<<this->dataInfo.nPoints<<
+		"; starting parameter: "<<parameter);
+
+	for (double goal = 1000; goal >= 10; goal = goal/10)
+	//for (double goal = 10; goal >= 1; goal--)
+	{
+		counter = 0;
+		vtkErrorMacro("goal: "<<goal);
+		done = false;
+
+		while(!done){
+			counter++;
+			this->doCalculations(parameter,5);
+			nCollisions = this->calcInfo.nCollisions;
+			acc = (double)nCollisions / (double)goal;
+			//vtkErrorMacro("  calc: goal: " << goal <<" parameter: " << parameter << " ncoll: "<< nCollisions<<" acc: "<<acc<<" counter: "<<counter );
+			
+			ResultOfEsimationOfTolerance tmpres;
+			tmpres.goal = goal;
+			tmpres.parameter = parameter;
+			tmpres.nCollisions = nCollisions;
+			calcEstTol.push_back(tmpres);
+
+			this->calcEstTol2->InsertNextTuple4(parameter,nCollisions,goal,counter);
+
+			if(counter == nTries)
+			{
+				done = true;
+			}
+			else if (acc == 0)
+			{
+				parameter = parameter * 10;
+				continue;
+			}
+			else if (acc < (1.0 / accFactor))
+			{
+				parameter = parameter / (acc);
+				continue;
+			}
+			else if (acc > accFactor)
+			{
+				parameter = parameter / (acc);
+				continue;
+			}
+			vtkErrorMacro("RESULT: goal: " << goal <<" parameter: " << parameter << " ncoll: "<< nCollisions<<" counter: "<<counter );
+			done = true;
+
+		}
+	}
+
+	// filling up this array with nonsense data so it maches the others
+	int n = this->calcEstTol2->GetNumberOfTuples(); //just making enough space
+	this->calcEstTol2->Resize(this->dataInfo.nPoints);
+	for (int i = n; i<this->dataInfo.nPoints;i++)
+	{
+		this->calcEstTol2->InsertTuple4(i,0,0,0,0);
+	}
+
+	return 1;
+}
+
 
 /*----------------------------------------------------------------------------
 calculates the distance squared between the points with gid1 and 2
@@ -1691,6 +1810,7 @@ resets all settings (not data)
 */
 int vtkSQLiteReader::reset()
 {
+	/*
 	this->dataInfo.nSelectedPoints = -1;
 	this->dataInfo.selectedPoints.clear();
 
@@ -1704,6 +1824,7 @@ int vtkSQLiteReader::reset()
 
 	this->dataInfo.idMap1.clear();
 	this->dataInfo.idMap2.clear();
+	*/
 
 	/*this->selectedData.Position->Delete();
 	this->selectedData.Velocity->Delete();

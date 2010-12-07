@@ -116,8 +116,7 @@
 			</Documentation>
 		</IntVectorProperty>
 		
-
-		
+		<!-- -->
 		<DoubleVectorProperty
 			name="CalculationImpactParameter"
 			command="SetCalculationImpactParameter"
@@ -128,6 +127,17 @@
 			</Documentation>
 		</DoubleVectorProperty>
 
+		<!--  -->
+		<IntVectorProperty
+			name="DisplayEstimateTolerance"
+			command="SetDisplayEstimateTolerance"
+			number_of_elements="1"
+			default_values="0">
+			<BooleanDomain name="bool" />
+			<Documentation>
+				
+			</Documentation>
+		</IntVectorProperty>
 		<!--
 		<StringVectorProperty
 			name="SelectInputArray" 
