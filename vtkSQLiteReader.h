@@ -108,6 +108,7 @@ protected:
 	struct SnapshotInfo {
 		vtkIdType Offset; //stores the id where this snapshot starts
 		int lenght; // stores the amount of halos in this snapshot
+		int snapshotNr; // snapshot Nr from simulation (this is not the id!)
 		double redshift;
 		double time;
 		int npart;
@@ -165,7 +166,11 @@ protected:
 		vtkSmartPointer<vtkIdTypeArray>		TrackId;
 		vtkSmartPointer<vtkIdTypeArray>		GId;
 		vtkSmartPointer<vtkIdTypeArray>		SnapId;
-		vtkSmartPointer<vtkFloatArray>		RVir;
+		vtkSmartPointer<vtkFloatArray>		Mvir;
+		vtkSmartPointer<vtkFloatArray>		Rvir;
+		vtkSmartPointer<vtkFloatArray>		Vmax;
+		vtkSmartPointer<vtkFloatArray>		Rmax;
+		vtkSmartPointer<vtkFloatArray>		Redshift;
 		vtkSmartPointer<vtkUnsignedCharArray> Colors;
 		//vtkSmartPointer<vtkUnsignedCharArray> opacity;
 	};

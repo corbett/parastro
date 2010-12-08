@@ -94,6 +94,56 @@ vtkSQLiteReader::vtkSQLiteReader()
 	dataInfo.selectedTracks.clear();
 
 	//init data stuff
+
+	for (int i = 0; i<2; i++)
+	{
+		Data * actData;
+		if (i==0){actData = &this->allData;}
+		if (i==1){actData = &this->selectedData;}
+
+		actData->Position = vtkSmartPointer<vtkPoints>::New();
+		actData->Velocity = vtkSmartPointer<vtkFloatArray>::New();
+		actData->Cells = vtkSmartPointer<vtkCellArray>::New();
+		actData->Tracks = vtkSmartPointer<vtkCellArray>::New();
+		actData->TrackId = vtkSmartPointer<vtkIdTypeArray>::New();
+		actData->GId = vtkSmartPointer<vtkIdTypeArray>::New();
+		actData->SnapId = vtkSmartPointer<vtkIdTypeArray>::New();
+		actData->Mvir = vtkSmartPointer<vtkFloatArray>::New();
+		actData->Rvir = vtkSmartPointer<vtkFloatArray>::New();
+		actData->Vmax = vtkSmartPointer<vtkFloatArray>::New();
+		actData->Rmax = vtkSmartPointer<vtkFloatArray>::New();
+		actData->Redshift = vtkSmartPointer<vtkFloatArray>::New();
+		actData->Colors = vtkSmartPointer<vtkUnsignedCharArray>::New();
+
+		actData->Velocity->SetNumberOfComponents(3);
+		actData->TrackId->SetNumberOfComponents(1);
+		actData->GId->SetNumberOfComponents(1);
+		actData->SnapId->SetNumberOfComponents(1);
+		actData->Mvir->SetNumberOfComponents(1);
+		actData->Rvir->SetNumberOfComponents(1);
+		actData->Vmax->SetNumberOfComponents(1);
+		actData->Rmax->SetNumberOfComponents(1);
+		actData->Redshift->SetNumberOfComponents(1);
+		actData->Colors->SetNumberOfComponents(3);
+
+		actData->Velocity->SetName("Velocity");
+		actData->TrackId->SetName("TrackId");
+		actData->GId->SetName("GId");
+		actData->SnapId->SetName("SnapId");
+		actData->Mvir->SetName("Mvir");
+		actData->Rvir->SetName("Rvir");
+		actData->Vmax->SetName("Vmax");
+		actData->Rmax->SetName("Rmax");
+		actData->Redshift->SetName("Redshift");
+		actData->Colors->SetName("Colors");
+
+	}
+
+	/*
+			
+			
+			
+			
 	this->allData.Position = vtkSmartPointer<vtkPoints>::New();
 	this->allData.Velocity = vtkSmartPointer<vtkFloatArray>::New();
 	this->allData.Cells = vtkSmartPointer<vtkCellArray>::New();
@@ -102,6 +152,9 @@ vtkSQLiteReader::vtkSQLiteReader()
 	this->allData.GId = vtkSmartPointer<vtkIdTypeArray>::New();
 	this->allData.SnapId = vtkSmartPointer<vtkIdTypeArray>::New();
 	this->allData.RVir = vtkSmartPointer<vtkFloatArray>::New();
+	this->allData.RVir = vtkSmartPointer<vtkFloatArray>::New();
+	this->allData.RVir = vtkSmartPointer<vtkFloatArray>::New();
+	this->allData.RVir = vtkSmartPointer<vtkFloatArray>::New();
 	this->allData.Colors = vtkSmartPointer<vtkUnsignedCharArray>::New();
 
 	this->allData.Velocity->SetNumberOfComponents(3);
@@ -109,8 +162,10 @@ vtkSQLiteReader::vtkSQLiteReader()
 	this->allData.GId->SetNumberOfComponents(1);
 	this->allData.SnapId->SetNumberOfComponents(1);
 	this->allData.RVir->SetNumberOfComponents(1);
+	this->allData.RVir->SetNumberOfComponents(1);
+	this->allData.RVir->SetNumberOfComponents(1);
+	this->allData.RVir->SetNumberOfComponents(1);
 	this->allData.Colors->SetNumberOfComponents(3);
-
 
 	this->allData.Velocity->SetName("Velocity");
 	this->allData.TrackId->SetName("TrackId");
@@ -141,7 +196,7 @@ vtkSQLiteReader::vtkSQLiteReader()
 	this->selectedData.GId->SetName("GId");
 	this->selectedData.SnapId->SetName("SnapId");
 	this->selectedData.RVir->SetName("RVir");
-	this->selectedData.Colors->SetName("Colors");
+	this->selectedData.Colors->SetName("Colors");*/
 
 	//init calc struct
 	this->calcInfo.calcDone = false;
@@ -205,8 +260,8 @@ int vtkSQLiteReader::RequestData(vtkInformation*,
 	if (!this->dataIsRead)
 		// only read if it's not been read before
 	{
-		readSnapshots();
 		readSnapshotInfo();
+		readSnapshots();
 		readTracks();
 
 		this->dataIsRead = true;
@@ -270,7 +325,8 @@ int vtkSQLiteReader::RequestData(vtkInformation*,
 
 	}
 
-	
+	Data * actData;
+
 	if (*this->Gui.DisplayOnlySelectedData)
 	{
 		if (*this->Gui.DisplaySelected && !*this->Gui.DisplaySelectedSnapshot && !*this->Gui.DisplaySelectedTrack)
@@ -288,20 +344,27 @@ int vtkSQLiteReader::RequestData(vtkInformation*,
 		this->generateTracks();
 		this->generateColors();
 
-		out->SetPoints(this->selectedData.Position);
+		actData = &this->selectedData;
+
+		/*out->SetPoints(this->selectedData.Position);
 		out->SetVerts(this->selectedData.Cells);
 		out->SetLines(this->selectedData.Tracks);
 		out->GetPointData()->AddArray(this->selectedData.Velocity);
 		out->GetPointData()->AddArray(this->selectedData.GId);
 		out->GetPointData()->AddArray(this->selectedData.SnapId);
-		out->GetPointData()->AddArray(this->selectedData.RVir);
+		out->GetPointData()->AddArray(this->selectedData.Rvir);
 		out->GetPointData()->AddArray(this->selectedData.TrackId);
-		out->GetPointData()->SetScalars(this->selectedData.Colors);
+		out->GetPointData()->SetScalars(this->selectedData.Colors);*/
+
+
 	}
 	else 
 	{
 		this->generateColors();
 
+		actData = &this->allData;
+
+		/*
 		out->SetPoints(this->allData.Position);
 		out->SetVerts(this->allData.Cells);
 		out->SetLines(this->allData.Tracks);
@@ -310,8 +373,67 @@ int vtkSQLiteReader::RequestData(vtkInformation*,
 		out->GetPointData()->AddArray(this->allData.SnapId);
 		out->GetPointData()->AddArray(this->allData.RVir);
 		out->GetPointData()->AddArray(this->allData.TrackId);
-		out->GetPointData()->SetScalars(this->allData.Colors);
+		out->GetPointData()->SetScalars(this->allData.Colors);*/
 	}
+
+	// trying with luts, but ddoesnt work as expected...
+	vtkSmartPointer<vtkLookupTable> lut = vtkSmartPointer<vtkLookupTable>::New();
+	lut->SetValueRange(0,1);
+	lut->Build();
+	double r [] = {0.0, 9.0};
+	lut->SetTableRange(r);
+	//lut->SetNumberOfTableValues(9);
+	//lut->Build();
+	//lut->SetTableValue(2,1,0,0,1);
+	//lut->SetNumberOfColors(24);
+	//lut->SetHueRange(0,1.5);
+	//lut->SetSaturationRange(1,1);
+	//lut->SetValueRange(0,3.14);
+	//lut->SetScale(24);
+	//lut->Build();
+
+	//double col[3];
+	//lut->GetColor(2,col);
+	//vtkErrorMacro(":" << col[1]);
+
+	actData->Rvir->SetLookupTable(lut);
+
+	vtkSmartPointer<vtkLookupTable> lut2 = vtkSmartPointer<vtkLookupTable>::New();
+	//lut2->SetTableRange(0.5,1);
+	//lut2->SetSaturationRange(1,1);
+	//lut2->SetHueRange(0.5,0.75);
+	//lut2->SetValueRange(0,3.14);
+	//lut2->SetAlphaRange(1,1);
+	//lut2->SetNumberOfTableValues(60);
+
+	//lut2->Build();
+	lut2->SetTableRange(0,3);
+	lut2->SetNumberOfTableValues(4);
+	lut2->SetTableValue(0,1,0,0);
+	lut2->SetTableValue(1,1,1,0);
+	lut2->SetTableValue(2,1,1,1);
+	lut2->SetTableValue(3,0,0,1);
+
+	actData->SnapId->SetLookupTable(lut2);
+
+	//lut2->PrintSelf(cerr, vtkIndent(0)) ;
+
+
+	out->SetPoints(actData->Position);
+	out->SetVerts(actData->Cells);
+	out->SetLines(actData->Tracks);
+	out->GetPointData()->AddArray(actData->Velocity);
+	out->GetPointData()->AddArray(actData->GId);
+	out->GetPointData()->AddArray(actData->SnapId);
+	out->GetPointData()->AddArray(actData->Mvir);
+	out->GetPointData()->AddArray(actData->Rvir);
+	out->GetPointData()->AddArray(actData->Vmax);
+	out->GetPointData()->AddArray(actData->Rmax);
+	out->GetPointData()->AddArray(actData->Redshift);
+	out->GetPointData()->AddArray(actData->TrackId);
+	//out->GetPointData()->SetScalars(actData->Colors);
+
+	//out->GetPointData()->GetArray("SnapId")->SetLookupTable(lut2);
 
 	return 1;
 }
@@ -618,7 +740,7 @@ int vtkSQLiteReader::readSnapshots()
 	this->RVir->SetName("RVir");
 */
 
-	this->SnapInfo.clear();
+	//this->SnapInfo.clear();
 
 // sql stuff
 	vtkStdString	sql_query;	// sql query
@@ -646,6 +768,8 @@ int vtkSQLiteReader::readSnapshots()
 	int offset = 0;
 	double x,y,z;
 	std::vector<int> pid;
+	SnapshotInfo *actSnap;
+	double redshift = this->SnapInfo.at(snap_id).redshift;
 
 	while (sqlite3_step(res) == SQLITE_ROW)
 	{
@@ -654,15 +778,22 @@ int vtkSQLiteReader::readSnapshots()
 
 		if (snap_id != old_snap_id)
 		{
+			/*
 			SnapshotInfo tmp;
 			tmp.Offset = offset;//count-GId-1;
 			tmp.lenght = snapcount;
 			tmp.PointId = pid;
 			this->SnapInfo.push_back(tmp);
+			*/
+			actSnap = &this->SnapInfo.at(old_snap_id);
+			actSnap->Offset = offset;
+			actSnap->lenght = snapcount;
+			actSnap->PointId = pid;
 
 			pid.clear();
 			snapcount = 0;
 			offset = count;
+			redshift = this->SnapInfo.at(snap_id).redshift;
 		}
 
 		GId = sqlite3_column_double(res, 1);
@@ -685,7 +816,13 @@ int vtkSQLiteReader::readSnapshots()
 			sqlite3_column_double(res, 9));
 		this->allData.GId->InsertNextTuple1(GId);
 		this->allData.SnapId->InsertNextTuple1(snap_id);
-		this->allData.RVir->InsertNextTuple1(sqlite3_column_double(res, 11));
+
+		this->allData.Mvir->InsertNextTuple1(sqlite3_column_double(res, 10));
+		this->allData.Rvir->InsertNextTuple1(sqlite3_column_double(res, 11));
+		this->allData.Vmax->InsertNextTuple1(sqlite3_column_double(res, 12));
+		this->allData.Rmax->InsertNextTuple1(sqlite3_column_double(res, 13));
+		//this->allData.Redshift->InsertNextTuple1(this->SnapInfo.at(snap_id).redshift);
+		this->allData.Redshift->InsertNextTuple1(redshift);
 
 		pid.push_back(snapcount);
 
@@ -693,16 +830,24 @@ int vtkSQLiteReader::readSnapshots()
 		count++;
 	}
 
+	/*
 	SnapshotInfo tmp;
 	tmp.Offset = offset;
 	tmp.lenght = snapcount;
 	tmp.PointId = pid;
 	this->SnapInfo.push_back(tmp);
+	*/
+	
+	actSnap = &this->SnapInfo.at(snap_id);
+	actSnap->Offset = offset;
+	actSnap->lenght = snapcount;
+	actSnap->PointId = pid;
+
 
 	//this->nTracks3 = (int)10;
 	//vtkErrorMacro("No of tracks: " << this->nTracks3);
 
-	this->dataInfo.nSnapshots = 	(int)this->SnapInfo.size();
+	this->dataInfo.nSnapshots = (int)this->SnapInfo.size();
 	vtkErrorMacro("No of snapshots: " << this->dataInfo.nSnapshots);
 
 	this->dataInfo.nPoints = count;
@@ -853,7 +998,7 @@ int vtkSQLiteReader::readSnapshotInfo()
 	int				sql_error;	// return value of sql query
 
 	// Prepare the query
-	sql_query = "SELECT * FROM snapinfo";
+	sql_query = "SELECT * FROM snapinfo ORDER BY snap_id, redshift, time";
 
 	//vtkErrorMacro("SQL query: " + sql_query);
 
@@ -867,18 +1012,33 @@ int vtkSQLiteReader::readSnapshotInfo()
 
 	int snap_id;
 	int i = 0;
+	SnapshotInfo tmpSnap;
+
+	this->SnapInfo.clear();
 
 	while (sqlite3_step(res) == SQLITE_ROW)
 	{
-		i++;
 		snap_id = sqlite3_column_int(res, 0);
-		if (snap_id<1){
+		
+		// actually there should be numbers in the snap_id column, but
+		// in the converted vl2 data there aren't any, so just assume its
+		// ordered... check this here:
+		if (snap_id<1)
+		{
 			snap_id = i;
 		}
-		snap_id = sqlite3_column_int(res, 0);
-		//this->SnapInfo.at(snap_id-1).redshift = sqlite3_column_double(res, 2);
-		//this->SnapInfo.at(snap_id-1).time = sqlite3_column_double(res, 3);
-		//this->SnapInfo.at(snap_id-1).npart = sqlite3_column_int(res, 5);
+		/*this->SnapInfo.at(i).snapshotNr = sqlite3_column_double(res, 1);
+		this->SnapInfo.at(i).redshift = sqlite3_column_double(res, 2);
+		this->SnapInfo.at(i).time = sqlite3_column_double(res, 3);
+		this->SnapInfo.at(i).npart = sqlite3_column_int(res, 5);
+		*/
+		tmpSnap.snapshotNr = sqlite3_column_double(res, 1);
+		tmpSnap.redshift = sqlite3_column_double(res, 2);
+		tmpSnap.time = sqlite3_column_double(res, 3);
+		tmpSnap.npart = sqlite3_column_int(res, 5);
+		
+		this->SnapInfo.push_back(tmpSnap);
+		i++;
 	}
 	return 1;
 }
@@ -1244,6 +1404,8 @@ int vtkSQLiteReader::doCalculations(double tolerance, int mode){
 		int length;
 		int PointId;
 
+		int nIdentical=0;
+
 		vtkSmartPointer<vtkPoints> points;
 		vtkSmartPointer<vtkKdTree> kDTree;
 		vtkSmartPointer<vtkIdList> IdList;
@@ -1269,16 +1431,8 @@ int vtkSQLiteReader::doCalculations(double tolerance, int mode){
 			points = vtkSmartPointer<vtkPoints>::New();
 			points->SetNumberOfPoints(length);
 			
-			// the copying could possibly done faster, with getdata from offset to offset+length and use this as data for points, but didnt get this to work..
-			vtkErrorMacro(" points length: "<<points->GetData()->GetSize()<<" offset: "<<offset);
-			/*
-			for (int i = 0; i < length; i++)
-			{
-				points->InsertPoint(i,this->allData.Position->GetData()->GetTuple3(i+offset));
-			}
-			*/
-			
-			//this->Position->GetData()->GetTuples(startid, endid, subsetofpoints->GetData());
+			//vtkErrorMacro(" points length: "<<points->GetData()->GetSize()<<" offset: "<<offset);
+
 			this->allData.Position->GetData()->GetTuples(offset, offset+length-1, points->GetData());
 
 			// vtkErrorMacro(" copied points: "<<points->GetNumberOfPoints()<<" for snapid: "<<SnapId);
@@ -1291,7 +1445,10 @@ int vtkSQLiteReader::doCalculations(double tolerance, int mode){
 
 			for (int TrackId = 0; TrackId < this->dataInfo.nTracks; TrackId++) //
 			{
-				if(collisionTracks.at(TrackId)==2){continue;} // go on if theres already a collision on this track, but then you only get the first point on a track wheres a collision
+				// go on if theres already a collision on this track, but then you only get the
+				// first point on a track wheres a collision..
+				if(collisionTracks.at(TrackId)==2){continue;} 
+
 				PointId = this->TracksInfo.at(TrackId).PointsIds.at(SnapId);
 				if(PointId == -1){continue;}
 				this->allData.Position->GetPoint(PointId, candidate);
@@ -1303,16 +1460,33 @@ int vtkSQLiteReader::doCalculations(double tolerance, int mode){
 				if(dist<tolerance)
 				{
 					//vtkErrorMacro("COLLISION: for track: "<<TrackId<<" in snap: "<<SnapId<<", got point ids: "<<IdList->GetId(1)<<" with dist: "<< dist);
-					nCollisions++;
+					double p1 [3], p2[3];
+					this->allData.Position->GetPoint(PointId,p1);
+					this->allData.Position->GetPoint(IdList->GetId(1)+offset,p2);
 
-					collisionTracks.at(TrackId) = 2;
-					collisionPoints.at(PointId) = 2;
-					collisionSnapshots.at(SnapId) = 2;
+					if(p1[0]==p2[0] && p1[1]==p2[1] && p1[3]==p2[3])
+					{
+						nIdentical++;
+						double m1 = this->allData.Mvir->GetTuple1(PointId);
+						double m2 = this->allData.Mvir->GetTuple1(IdList->GetId(1)+offset);
+						double m3 = this->allData.Mvir->GetTuple1(IdList->GetId(0)+offset);
+						vtkErrorMacro("id. point: m1="<<m1<<"; m2="<<m2<<" (m3="<<m3
+							<<", ids: "<<PointId
+							<<", idlist[1]: "<<IdList->GetId(1)+offset
+							<<", idlist[0]"<<IdList->GetId(1)+offset<<")");
+
+					} else {
+						nCollisions++;
+
+						collisionTracks.at(TrackId) = 2;
+						collisionPoints.at(PointId) = 2;
+						collisionSnapshots.at(SnapId) = 2;
+					}
 					
 				}
 			}
 			
-
+			vtkErrorMacro(" identical Points: "<<nIdentical);
 		}
 
 		this->calcInfo.nSelectedTracks = 0;
@@ -1744,7 +1918,10 @@ int vtkSQLiteReader::generatePoints()
 	this->selectedData.TrackId->SetNumberOfTuples(this->dataInfo.nAllSelectedPoints);
 	this->selectedData.GId->SetNumberOfTuples(this->dataInfo.nAllSelectedPoints);
 	this->selectedData.SnapId->SetNumberOfTuples(this->dataInfo.nAllSelectedPoints);
-	this->selectedData.RVir->SetNumberOfTuples(this->dataInfo.nAllSelectedPoints);
+	this->selectedData.Mvir->SetNumberOfTuples(this->dataInfo.nAllSelectedPoints);
+	this->selectedData.Rvir->SetNumberOfTuples(this->dataInfo.nAllSelectedPoints);
+	this->selectedData.Vmax->SetNumberOfTuples(this->dataInfo.nAllSelectedPoints);
+	this->selectedData.Rmax->SetNumberOfTuples(this->dataInfo.nAllSelectedPoints);
 
 	for (int i = 0; i<this->dataInfo.nAllSelectedPoints; i++)
 	{
@@ -1758,8 +1935,14 @@ int vtkSQLiteReader::generatePoints()
 			this->allData.GId->GetTuple(idMap2->at(i)));
 		this->selectedData.SnapId->InsertTuple(i,
 			this->allData.SnapId->GetTuple(idMap2->at(i)));
-		this->selectedData.RVir->InsertTuple(i,
-			this->allData.RVir->GetTuple(idMap2->at(i)));
+		this->selectedData.Mvir->InsertTuple(i,
+			this->allData.Mvir->GetTuple(idMap2->at(i)));
+		this->selectedData.Rvir->InsertTuple(i,
+			this->allData.Rvir->GetTuple(idMap2->at(i)));
+		this->selectedData.Vmax->InsertTuple(i,
+			this->allData.Vmax->GetTuple(idMap2->at(i)));
+		this->selectedData.Rmax->InsertTuple(i,
+			this->allData.Rmax->GetTuple(idMap2->at(i)));
 	}
 
 	// Create the vertices (one point per vertex, for easy display)
@@ -1858,7 +2041,7 @@ int vtkSQLiteReader::reset()
 	this->selectedData.TrackId = vtkSmartPointer<vtkIdTypeArray>::New();
 	this->selectedData.GId = vtkSmartPointer<vtkIdTypeArray>::New();
 	this->selectedData.SnapId = vtkSmartPointer<vtkIdTypeArray>::New();
-	this->selectedData.RVir = vtkSmartPointer<vtkFloatArray>::New();
+	this->selectedData.Rvir = vtkSmartPointer<vtkFloatArray>::New();
 	this->selectedData.Colors = vtkSmartPointer<vtkUnsignedCharArray>::New();
 
 
@@ -1866,14 +2049,14 @@ int vtkSQLiteReader::reset()
 	this->selectedData.TrackId->SetNumberOfComponents(1);
 	this->selectedData.GId->SetNumberOfComponents(1);
 	this->selectedData.SnapId->SetNumberOfComponents(1);
-	this->selectedData.RVir->SetNumberOfComponents(1);
+	this->selectedData.Rvir->SetNumberOfComponents(1);
 	this->selectedData.Colors->SetNumberOfComponents(3);
 
 	this->selectedData.Velocity->SetName("Velocity");
 	this->selectedData.TrackId->SetName("TrackId");
 	this->selectedData.GId->SetName("GId");
 	this->selectedData.SnapId->SetName("SnapId");
-	this->selectedData.RVir->SetName("RVir");
+	this->selectedData.Rvir->SetName("RVir");
 	this->selectedData.Colors->SetName("Colors");
 
 	return 1;
