@@ -64,6 +64,13 @@ vtkSQLiteReader::vtkSQLiteReader()
 	Gui.CalculationImpactParameter = &(this->CalculationImpactParameter);
 	Gui.DisplayEstimateTolerance = &(this->DisplayEstimateTolerance);
 
+	Gui.calcHighlightCollisionPoints = &(this->calcHighlightCollisionPoints);
+	Gui.calcHighlightTrack = &(this->calcHighlightTrack);
+	Gui.calcHighlightSnapshot = &(this->calcHighlightSnapshot);
+	Gui.calcHighlightPoint = &(this->calcHighlightPoint);
+	Gui.calcHighlightTrackNr = &(this->calcHighlightTrackNr);
+	Gui.calcHighlightSnapshotNr = &(this->calcHighlightSnapshotNr);
+	Gui.calcHighlightPointNr = &(this->calcHighlightPointNr);
 
 	*Gui.DisplayOnlySelectedData = false; 
 	*Gui.DisplaySelected = false; 
@@ -139,7 +146,7 @@ vtkSQLiteReader::vtkSQLiteReader()
 	//init calc struct
 	this->calcInfo.calcDone = false;
 	this->calcInfo.nCollisions = -1;
-	this->calcInfo.oldTolerance = 0;
+	this->calcInfo.tolerance = 0;
 
 	// inti calcesttol2
 	this->calcEstTol2 = vtkSmartPointer<vtkFloatArray>::New();
@@ -205,12 +212,14 @@ int vtkSQLiteReader::RequestData(vtkInformation*,
 		this->dataIsRead = true;
 	}
 
-	this->reset();
+	//this->reset();
 	
 	if(*this->Gui.DisplaySelected)
 	{
-		this->calcInfo.calcDone = false;
-		//TODO : evtl resulat der berechnung besser speichern, dass er hier ned verlohren geht
+		this->dataInfo.selectedSnapshots.clear();
+		this->dataInfo.nSelectedSnapshots = -1;
+		this->dataInfo.selectedTracks.clear();
+		this->dataInfo.nSelectedTracks = -1;
 
 		if(*this->Gui.DisplaySelectedSnapshot)
 		{
@@ -226,20 +235,31 @@ int vtkSQLiteReader::RequestData(vtkInformation*,
 	}
 	else if (*this->Gui.DisplayCalculated)
 	{
-		if (this->calcInfo.oldTolerance != *this->Gui.CalculationImpactParameter)
+		if (this->calcInfo.tolerance != *this->Gui.CalculationImpactParameter * *this->Gui.CalculationImpactParameter)
 		{
 			this->calcInfo.calcDone = false;
 		}
+
 		if(!this->calcInfo.calcDone)
 		{
-			doCalculations(*this->Gui.CalculationImpactParameter,3); //fills dataInfo.selected* fields
+			doCalculations(*this->Gui.CalculationImpactParameter * *this->Gui.CalculationImpactParameter,3); //fills dataInfo.selected* fields
 			this->calcInfo.calcDone = true;
-			this->calcInfo.oldTolerance = *this->Gui.CalculationImpactParameter;
+			this->calcInfo.tolerance = *this->Gui.CalculationImpactParameter * *this->Gui.CalculationImpactParameter;
 		}
-		else
-		{
-			vtkErrorMacro("Skipping recalculation...");
-		}
+		//else{vtkErrorMacro("Skipping recalculation...");}
+		
+		this->dataInfo.nSelectedPoints = this->calcInfo.nSelectedPoints;
+		this->dataInfo.nSelectedTracks = this->calcInfo.nSelectedTracks;
+		this->dataInfo.nSelectedSnapshots = -1;
+
+		this->dataInfo.selectedPoints.clear();
+		this->dataInfo.selectedPoints = this->calcInfo.selectedPoints;
+
+		this->dataInfo.selectedTracks.clear();
+		this->dataInfo.selectedTracks = this->calcInfo.selectedTracks;
+
+		this->dataInfo.selectedSnapshots.clear();
+
 	}
 	else if (*this->Gui.DisplayEstimateTolerance)
 	{
@@ -248,12 +268,21 @@ int vtkSQLiteReader::RequestData(vtkInformation*,
 		this->calcTolerance();
 		out->GetPointData()->AddArray(this->calcEstTol2);
 
-
 	}
 
 	
 	if (*this->Gui.DisplayOnlySelectedData)
 	{
+		if (*this->Gui.DisplaySelected && !*this->Gui.DisplaySelectedSnapshot && !*this->Gui.DisplaySelectedTrack)
+		{
+			vtkErrorMacro("Please select at least one track or Snapshot to be displayed.\nI'm settig snapshot 0 to be displayed for you..");
+			this->dataInfo.selectedSnapshots.clear();
+			this->dataInfo.nSelectedSnapshots = 1;
+			this->dataInfo.selectedSnapshots.push_back(0);
+			this->dataInfo.selectedTracks.clear();
+			this->dataInfo.nSelectedTracks = -1;
+		}
+
 		this->generateIdMap();
 		this->generatePoints();
 		this->generateTracks();
@@ -869,70 +898,8 @@ Generates the colorvector for the data
 */
 int vtkSQLiteReader::generateColors()
 {
-
-/*
-	this->allData.Colors->SetNumberOfTuples(this->dataInfo.nPoints);
-
-	//this->opacity = vtkSmartPointer<vtkUnsignedCharArray>::New();
-	//this->opacity->SetName("Opacity");
-	//this->opacity->SetNumberOfComponents(1);
-	//this->opacity->SetNumberOfTuples(this->nParticles3);
-
-	int snapid, trackid;
-	unsigned char red, green, blue, alpha;
-
-	//vtkSmartPointer<vtkLookupTable> LuT = vtkSmartPointer<vtkLookupTable>::New();
-	//LuT->SetTableRange(1,this->nSnapshots);
-	//double value [] = {0.75,0.25};
-	//LuT->SetValueRange(value);
-	//LuT->Build();
-
-	for (int i = 0; i<this->dataInfo.nPoints; i++)
-	{
-		snapid = this->allData.SnapId->GetTuple1(i);
-		trackid = this->allData.TrackId->GetTuple1(i);
-
-		red = 190*(float)(snapid) / (float)(this->dataInfo.nSnapshots-1);
-
-		if (trackid == this->DisplaySelectedTrackNr)
-		{
-			green = 255;
-		} else
-		{
-			green = 0;
-		}
-		
-		if (snapid == this->DisplaySelectedSnapshotNr)
-		{
-			red = 255;
-			green = 255;
-		} else
-		{
-		}
-
-		blue = 0;
-		alpha = 0;
-
-		this->allData.Colors->InsertTuple3(i,
-				red,
-				green,
-				blue);
-		//this->opacity->InsertTuple1(i,alpha);
-		
-		
-		// Above code would work, i'm trying to do this with a lookup table instead
-		//maybe this will be easier.
-		// LuT works so far, but next problem: how to get the colors displayed?
-		// i probably need an actor or something (for opicaty and such...)
-		
-		//double rgb [4] = {0,0,0,0};
-		//LuT->GetColor(snapid,rgb);
-		//this->colors->InsertTuple(i,rgb);
-	}
-*/
-
 	unsigned char red, green, blue;
-	int snapid;
+	int snapid, pid_old, pid_new;
 
 	int nPoints;
 	Data * data;
@@ -1023,6 +990,48 @@ int vtkSQLiteReader::generateColors()
 			data->Colors->InsertTuple3(pid,red,green,blue);
 		}
 
+	}
+
+	if (*this->Gui.DisplayOnlySelectedData && ! (*this->Gui.DisplaySelected))
+	{
+		if(*this->Gui.calcHighlightCollisionPoints)
+		{
+			;
+		}
+		if (*this->Gui.calcHighlightTrack)
+		{
+			//COLORSETTING
+			red = 0;
+			green = 255;
+			blue = 0;
+
+			int trackid;
+
+			if (*this->Gui.calcHighlightTrackNr < this->calcInfo.nSelectedTracks)
+			{
+				trackid = this->dataInfo.selectedTracks.at(*this->Gui.calcHighlightTrackNr);
+			} 
+			else
+			{
+				trackid = this->dataInfo.selectedTracks.at(this->calcInfo.nSelectedTracks - 1);
+			}
+
+			for (int i = 0; i<this->TracksInfo.at(trackid).nPoints; i++)
+			{
+				pid_old = this->TracksInfo.at(trackid).PointsIds.at(i);
+				pid_new = this->dataInfo.idMap1.at(pid_old);
+				data->Colors->InsertTuple3(pid_new,red,green,blue);
+			}
+
+		}
+		if (*this->Gui.calcHighlightSnapshot)
+		{
+			;
+		}
+		if (*this->Gui.calcHighlightPoint)
+		{
+			;
+		}
 	}
 
 
@@ -1306,23 +1315,25 @@ int vtkSQLiteReader::doCalculations(double tolerance, int mode){
 
 		}
 
-		this->dataInfo.nSelectedTracks = 0;
+		this->calcInfo.nSelectedTracks = 0;
+		this->calcInfo.selectedTracks.clear();
 		for (int i=0; i < this->dataInfo.nTracks; i++)
 		{
 			if (collisionTracks.at(i)==2)
 			{
-				this->dataInfo.nSelectedTracks++;
-				this->dataInfo.selectedTracks.push_back(i);
+				this->calcInfo.nSelectedTracks++;
+				this->calcInfo.selectedTracks.push_back(i);
 			}
 		}
 
-		this->dataInfo.nSelectedPoints = 0;
+		this->calcInfo.nSelectedPoints = 0;
+		this->calcInfo.selectedPoints.clear();
 		for (int i=0;i<this->dataInfo.nPoints;i++)
 		{
 			if (collisionPoints.at(i)==2)
 			{
-				this->dataInfo.nSelectedPoints++;
-				this->dataInfo.selectedPoints.push_back(i);
+				this->calcInfo.nSelectedPoints++;
+				this->calcInfo.selectedPoints.push_back(i);
 			}
 		}
 		
@@ -1652,6 +1663,9 @@ int vtkSQLiteReader::generateIdMap()
 	int length = 0;
 	int pid = 0;
 	int trackid = 0;
+
+	idMap1->clear();
+	idMap2->clear();
 		
 	idMap1->resize(this->dataInfo.nPoints,-1);
 	idMap2->resize(this->dataInfo.nPoints,-1);

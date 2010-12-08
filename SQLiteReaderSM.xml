@@ -62,7 +62,7 @@
 			name="DisplaySelectedSnapshotNr"
 			command="SetDisplaySelectedSnapshotNr"
 			number_of_elements="1"
-			default_values="1">
+			default_values="0">
 			
 			<IntRangeDomain
 				name="range"
@@ -92,7 +92,7 @@
 			name="DisplaySelectedTrackNr"
 			command="SetDisplaySelectedTrackNr"
 			number_of_elements="1"
-			default_values="1">
+			default_values="0">
 			
 			<IntRangeDomain
 				name="range"
@@ -126,6 +126,108 @@
 				
 			</Documentation>
 		</DoubleVectorProperty>
+		
+		<!--  -->
+		<IntVectorProperty
+			name="calcHighlightCollisionPoints"
+			command="SetcalcHighlightCollisionPoints"
+			number_of_elements="1"
+			default_values="0">
+			<BooleanDomain name="bool" />
+			<Documentation>
+				
+			</Documentation>
+		</IntVectorProperty>
+		
+		<!--  -->
+		<IntVectorProperty
+			name="calcHighlightTrack"
+			command="SetcalcHighlightTrack"
+			number_of_elements="1"
+			default_values="0">
+			<BooleanDomain name="bool" />
+			<Documentation>
+				
+			</Documentation>
+		</IntVectorProperty>
+		
+		<!--  -->
+		<IntVectorProperty
+			name="calcHighlightSnapshot"
+			command="SetcalcHighlightSnapshot"
+			number_of_elements="1"
+			default_values="0">
+			<BooleanDomain name="bool" />
+			<Documentation>
+				
+			</Documentation>
+		</IntVectorProperty>
+		
+		<!--  -->
+		<IntVectorProperty
+			name="calcHighlightPoint"
+			command="SetcalcHighlightPoint"
+			number_of_elements="1"
+			default_values="0">
+			<BooleanDomain name="bool" />
+			<Documentation>
+				
+			</Documentation>
+		</IntVectorProperty>
+		
+		<IntVectorProperty
+			name="calcHighlightSnapshotNr"
+			command="SetcalcHighlightSnapshotNr"
+			number_of_elements="1"
+			default_values="0">
+			
+			<IntRangeDomain
+				name="range"
+				min="0"
+				max="1000"/>
+				
+			<Documentation>
+				
+			</Documentation>
+		</IntVectorProperty>
+
+		
+		<IntVectorProperty
+			name="calccalcHighlightPointNr"
+			command="SetcalcHighlightPointNr"
+			number_of_elements="1"
+			default_values="0">
+			
+			<IntRangeDomain
+				name="range"
+				min="0"
+				max="1000"/>
+				
+			<Documentation>
+				
+			</Documentation>
+		</IntVectorProperty>
+
+
+		<IntVectorProperty
+			name="calcHighlightTrackNr"
+			command="SetcalcHighlightTrackNr"
+			number_of_elements="1"
+			default_values="0">
+			
+			<IntRangeDomain
+				name="range"
+				min="0"
+				max="1000"/>
+				
+			<Documentation>
+				Sets the snapshot id to highlight
+			</Documentation>
+		</IntVectorProperty>
+
+
+		
+		
 
 		<!--  -->
 		<IntVectorProperty

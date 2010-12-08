@@ -69,6 +69,23 @@ public:
 		vtkSetMacro(CalculationImpactParameter,double);
 		vtkGetMacro(CalculationImpactParameter,double);
 
+		vtkSetMacro(calcHighlightCollisionPoints,bool);
+		vtkGetMacro(calcHighlightCollisionPoints,bool);
+
+		vtkSetMacro(calcHighlightTrack,bool);
+		vtkGetMacro(calcHighlightTrack,bool);
+		vtkSetMacro(calcHighlightSnapshot,bool);
+		vtkGetMacro(calcHighlightSnapshot,bool);
+		vtkSetMacro(calcHighlightPoint,bool);
+		vtkGetMacro(calcHighlightPoint,bool);
+		vtkSetMacro(calcHighlightTrackNr,int);
+		vtkGetMacro(calcHighlightTrackNr,int);
+		vtkSetMacro(calcHighlightSnapshotNr,int);
+		vtkGetMacro(calcHighlightSnapshotNr,int);
+		vtkSetMacro(calcHighlightPointNr,int);
+		vtkGetMacro(calcHighlightPointNr,int);
+
+
 	vtkSetMacro(DisplayEstimateTolerance,bool);
 	vtkGetMacro(DisplayEstimateTolerance,bool);
 
@@ -128,6 +145,15 @@ protected:
 		int * DisplaySelectedTrackNr;
 		bool * DisplayCalculated;
 		double * CalculationImpactParameter;
+
+		bool * calcHighlightCollisionPoints;
+		bool * calcHighlightTrack;
+		bool * calcHighlightSnapshot;
+		bool * calcHighlightPoint;
+		int * calcHighlightTrackNr;
+		int * calcHighlightSnapshotNr;
+		int * calcHighlightPointNr;
+
 		bool * DisplayEstimateTolerance;
 	};
 
@@ -146,8 +172,13 @@ protected:
 
 	struct CalculationSettings {
 		bool calcDone;
-		double oldTolerance;
+		double tolerance;
 		int nCollisions;
+		int nSelectedPoints; //-1 means all, single points selected to display
+		int nSelectedTracks; // -1 means all
+		int nAllSelectedPoints; // # of all points (inkl tracks, snaps) to display
+		std::vector<int>	selectedPoints; // holds globalids from points to display
+		std::vector<int>	selectedTracks; //holds trackid from points to display
 	};
 
 	struct ResultOfEsimationOfTolerance {
@@ -193,6 +224,15 @@ protected:
 
 	bool DisplayCalculated;
 		double CalculationImpactParameter;
+
+		bool calcHighlightCollisionPoints;
+		bool calcHighlightTrack;
+		bool calcHighlightSnapshot;
+		bool calcHighlightPoint;
+		int calcHighlightTrackNr;
+		int calcHighlightSnapshotNr;
+		int calcHighlightPointNr;
+
 
 	bool DisplayEstimateTolerance;
 
