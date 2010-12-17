@@ -41,10 +41,11 @@ ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.0"
 	#PointDisplaySM.xml
 	SQLiteReaderSM.xml #<-- for server
 	GUI_RESOURCES TipsyReader.qrc 
-	PointDisplay.qrc #SQLiteReader.qrc #<-- for client
+	#PointDisplay.qrc #SQLiteReader.qrc #<-- for client
 	GUI_RESOURCE_FILES AstroVizFilterMenu.xml
-	GUI_INTERFACES ${IFACES} 
-		SOURCES pqSQLiteReaderPanel.cxx ${MOC_SRCS} ${RCS_SRCS} ${IFACE_SRCS}) #<-- for client
+	#GUI_INTERFACES ${IFACES} 
+	#	SOURCES pqSQLiteReaderPanel.cxx ${MOC_SRCS} ${RCS_SRCS} ${IFACE_SRCS}
+	) #<-- for client
 
 	
 # For helper functions often used, will later include these in a single

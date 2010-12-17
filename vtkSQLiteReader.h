@@ -38,6 +38,7 @@ class vtkPoints;
 class vtkCellArray;
 class vtkDataArraySelection;
 
+
 class VTK_EXPORT vtkSQLiteReader : public vtkPolyDataAlgorithm
 {
 public:
@@ -47,6 +48,23 @@ public:
 	vtkSetStringMacro(FileName);
  	vtkGetStringMacro(FileName);
 
+	vtkSetMacro(DisplayColliding,bool);
+	vtkGetMacro(DisplayColliding,bool);
+
+	vtkSetMacro(DisplayMerging,bool);
+	vtkGetMacro(DisplayMerging,bool);
+
+	vtkSetMacro(DisplayInverted,bool);
+	vtkGetMacro(DisplayInverted,bool);
+
+	vtkSetMacro(UpperLimit,double);
+	vtkGetMacro(UpperLimit,double);
+
+	vtkSetMacro(LowerLimit,double);
+	vtkGetMacro(LowerLimit,double);
+
+
+/*
 	vtkSetMacro(DisplayOnlySelectedData,bool);
 	vtkGetMacro(DisplayOnlySelectedData,bool);
 
@@ -88,6 +106,7 @@ public:
 
 	vtkSetMacro(DisplayEstimateTolerance,bool);
 	vtkGetMacro(DisplayEstimateTolerance,bool);
+	*/
 
 
 
@@ -119,13 +138,16 @@ protected:
 		int nPoints;
 		//int StartSnap;
 		//int EndSnap;
-		std::vector<vtkIdType> PointsIds; //v of length nSnaps, -1 if this track doesnt have a point in this snap
+		std::vector<vtkIdType> PointsIds; //v of length nSnaps, entry of -1 if this track doesnt have a point in this snap
 	};
 
 	struct DataInformation {
+		bool dataIsRead;
 		int nPoints;
 		int nTracks;
 		int nSnapshots;
+		double hubble;
+		/*
 		int nSelectedPoints; //-1 means all, single points selected to display
 		int nSelectedTracks; // -1 means all
 		int nSelectedSnapshots; 
@@ -135,9 +157,19 @@ protected:
 		std::vector<int>	selectedTracks; //holds trackid from points to display
 		std::vector<int>	idMap1; //mapps ids from read in data to displayed data
 		std::vector<int>	idMap2; //mapps ids from displayed data to read in data
+		*/
 	};
 
-	struct GUISettings {
+	struct GuiStruct {
+		bool * DisplayColliding;
+		bool * DisplayMerging;
+		bool * DisplayInverted;
+
+		double * LowerLimit;
+		double * UpperLimit;
+
+		/*
+
 		bool * DisplayOnlySelectedData;
 		bool * DisplaySelected;
 		bool * DisplaySelectedSnapshot;
@@ -156,6 +188,7 @@ protected:
 		int * calcHighlightPointNr;
 
 		bool * DisplayEstimateTolerance;
+		*/
 	};
 
 	struct Data {
@@ -163,27 +196,58 @@ protected:
 		vtkSmartPointer<vtkFloatArray>		Velocity;
 		vtkSmartPointer<vtkCellArray>		Cells;
 		vtkSmartPointer<vtkCellArray>		Tracks;
-		vtkSmartPointer<vtkIdTypeArray>		TrackId;
-		vtkSmartPointer<vtkIdTypeArray>		GId;
-		vtkSmartPointer<vtkIdTypeArray>		SnapId;
+		vtkSmartPointer<vtkIntArray>		TrackId;
+		vtkSmartPointer<vtkIntArray>		GId;
+		vtkSmartPointer<vtkIntArray>		SnapId;
 		vtkSmartPointer<vtkFloatArray>		Mvir;
 		vtkSmartPointer<vtkFloatArray>		Rvir;
 		vtkSmartPointer<vtkFloatArray>		Vmax;
 		vtkSmartPointer<vtkFloatArray>		Rmax;
 		vtkSmartPointer<vtkFloatArray>		Redshift;
-		vtkSmartPointer<vtkUnsignedCharArray> Colors;
+		vtkSmartPointer<vtkFloatArray>		Time;
+		vtkSmartPointer<vtkFloatArray>		Cv;
+		//vtkSmartPointer<vtkUnsignedCharArray> Colors;
 		//vtkSmartPointer<vtkUnsignedCharArray> opacity;
 	};
 
 	struct CalculationSettings {
+		// OLD dont use this
 		bool calcDone;
 		double tolerance;
 		int nCollisions;
 		int nSelectedPoints; //-1 means all, single points selected to display
 		int nSelectedTracks; // -1 means all
 		int nAllSelectedPoints; // # of all points (inkl tracks, snaps) to display
-		std::vector<int>	selectedPoints; // holds globalids from points to display
-		std::vector<int>	selectedTracks; //holds trackid from points to display
+		std::vector<int>	selectedPoints; // stores globalids from points to display
+		std::vector<int>	selectedTracks; //stores trackid from points to display
+	};
+
+	struct CollisionResultStruct{
+		int nEvents;
+		int nPoints;
+		std::vector<int> vPointIds;
+		int nTracks;
+		std::vector<int> vTrackIds;
+	};
+
+	struct CollisionCalculationStruct{
+		bool isDone;
+		double upperTolerance;
+		double lowerTolerance;
+		CollisionResultStruct Colliding;
+		CollisionResultStruct Merging;
+	};
+
+	struct SelectionStruct{
+		int nSelectedPoints;
+		int nSelectedTracks;
+		int nSelectedSnapshots;
+		std::vector<int> vPointIds;
+		std::vector<int> vTrackIds;
+		std::vector<int> vSnapshotIds;
+		std::vector<int> vPointIdMap;
+		std::vector<int> vPointIdMapReverse;
+
 	};
 
 	struct ResultOfEsimationOfTolerance {
@@ -207,9 +271,13 @@ protected:
 	//vtkSmartPointer<vtkUnsignedCharArray> opacity;
 
 	DataInformation dataInfo;
-	GUISettings Gui;
-	Data allData, selectedData;
+	GuiStruct Gui;
+	Data allData, selectedData, emptyData;
 	CalculationSettings calcInfo;
+	SelectionStruct	selection;
+	
+	CollisionCalculationStruct collisionCalc;
+
 	std::vector<ResultOfEsimationOfTolerance> calcEstTol;
 	vtkSmartPointer<vtkFloatArray> calcEstTol2;
 	
@@ -219,6 +287,13 @@ protected:
 	//gui variables
 	char* FileName;
 
+	bool DisplayColliding;
+	bool DisplayMerging;
+	bool DisplayInverted;
+	double LowerLimit;
+	double UpperLimit;
+	
+	/*
 	bool DisplayOnlySelectedData;
 
 	bool DisplaySelected;
@@ -240,6 +315,7 @@ protected:
 
 
 	bool DisplayEstimateTolerance;
+	*/
 
 
 private:
@@ -256,21 +332,23 @@ private:
 	int vtkSQLiteReader::readSnapshots(); // reads the snapshots
 	int vtkSQLiteReader::readSnapshotInfo(); 
 	int vtkSQLiteReader::readTracks();
-	int vtkSQLiteReader::selectPoints();
 	int vtkSQLiteReader::generateColors();
 
-	int vtkSQLiteReader::doCalculations(double,int);
+	int vtkSQLiteReader::findCollisions(CollisionCalculationStruct*);
+	//int vtkSQLiteReader::doCalculations(double,int);
 	int vtkSQLiteReader::calcTolerance();
 
+	int vtkSQLiteReader::generateSelection(CollisionCalculationStruct*, SelectionStruct*);
+	int vtkSQLiteReader::fillIdList(std::vector<int>*, CollisionResultStruct*, int*);
 	int vtkSQLiteReader::generateIdMap();
-	int vtkSQLiteReader::generatePoints();
-	int vtkSQLiteReader::generateTracks();
+	int vtkSQLiteReader::generatePoints(SelectionStruct*, Data*);
+	int vtkSQLiteReader::generateTracks(SelectionStruct*, Data*);
 	int vtkSQLiteReader::reset();
 
 	// helper
 	int openDB(char*);
 	vtkStdString vtkSQLiteReader::Int2Str(int);
-	double distance(int, int);
+	double getDistance2(int, int);
 
 	// old stuff - not yet, or not anymore needed
 	int RequestDataDemo(vtkInformationVector*);
