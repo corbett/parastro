@@ -140,7 +140,8 @@ vtkSQLiteReader::vtkSQLiteReader()
 		actData->Redshift = vtkSmartPointer<vtkFloatArray>::New();
 		actData->Time = vtkSmartPointer<vtkFloatArray>::New();
 		actData->Cv = vtkSmartPointer<vtkFloatArray>::New();
-		//actData->Colors = vtkSmartPointer<vtkUnsignedCharArray>::New();
+		actData->CollisionTypePoint = vtkSmartPointer<vtkUnsignedCharArray>::New();
+		actData->CollisionTypeTrack = vtkSmartPointer<vtkUnsignedCharArray>::New();
 
 		actData->Velocity->SetNumberOfComponents(3);
 		actData->TrackId->SetNumberOfComponents(1);
@@ -153,7 +154,8 @@ vtkSQLiteReader::vtkSQLiteReader()
 		actData->Redshift->SetNumberOfComponents(1);
 		actData->Time->SetNumberOfComponents(1);
 		actData->Cv->SetNumberOfComponents(1);
-		//actData->Colors->SetNumberOfComponents(3);
+		actData->CollisionTypePoint->SetNumberOfComponents(1);
+		actData->CollisionTypeTrack->SetNumberOfComponents(1);
 
 		actData->Velocity->SetName("Velocity");
 		actData->TrackId->SetName("TrackId");
@@ -166,10 +168,13 @@ vtkSQLiteReader::vtkSQLiteReader()
 		actData->Redshift->SetName("Redshift");
 		actData->Time->SetName("Time");
 		actData->Cv->SetName("Cv");
-		//actData->Colors->SetName("Colors");
+		actData->CollisionTypePoint->SetName("CollisionType of Point");
+		actData->CollisionTypeTrack->SetName("CollisionType of Track");
 
 	}
 
+	this->collisionCalc.lowerTolerance = *this->Gui.LowerLimit * *this->Gui.LowerLimit;
+	this->collisionCalc.upperTolerance = *this->Gui.UpperLimit * *this->Gui.UpperLimit;
 	this->collisionCalc.isDone = false;
 
 	/*
@@ -300,7 +305,15 @@ int vtkSQLiteReader::RequestData(vtkInformation*,
 		this->dataInfo.dataIsRead = true;
 	}
 
-	if(!this->collisionCalc.isDone)
+	if (this->collisionCalc.lowerTolerance != *this->Gui.LowerLimit * *this->Gui.LowerLimit ||
+		this->collisionCalc.upperTolerance != *this->Gui.UpperLimit * *this->Gui.UpperLimit)
+	{
+		this->collisionCalc.lowerTolerance = *this->Gui.LowerLimit * *this->Gui.LowerLimit;
+		this->collisionCalc.upperTolerance = *this->Gui.UpperLimit * *this->Gui.UpperLimit;
+		this->collisionCalc.isDone = false;
+	}
+
+	if(!this->collisionCalc.isDone && (*Gui.DisplayColliding || *Gui.DisplayMerging))
 	{
 		this->collisionCalc.lowerTolerance = *this->Gui.LowerLimit * *this->Gui.LowerLimit;
 		this->collisionCalc.upperTolerance = *this->Gui.UpperLimit * *this->Gui.UpperLimit;
@@ -342,6 +355,8 @@ int vtkSQLiteReader::RequestData(vtkInformation*,
 	out->GetPointData()->AddArray(actData->Redshift);
 	out->GetPointData()->AddArray(actData->Time);
 	out->GetPointData()->AddArray(actData->Cv);
+	out->GetPointData()->AddArray(actData->CollisionTypePoint);
+	out->GetPointData()->AddArray(actData->CollisionTypeTrack);
 	//out->GetPointData()->SetScalars(actData->Colors);
 
 
@@ -852,7 +867,7 @@ int vtkSQLiteReader::readSnapshots()
 	std::vector<int> pid;
 	SnapshotInfo *actSnap;
 	double redshift = this->SnapInfo.at(snap_id).redshift;
-	double hubble = this->dataInfo.hubble;
+	double hubble = 70.4;//this->dataInfo.hubble;
 
 	while (sqlite3_step(res) == SQLITE_ROW)
 	{
@@ -935,6 +950,14 @@ int vtkSQLiteReader::readSnapshots()
 		cells[i*2]   = 1;
 		cells[i*2+1] = i;
     }
+
+	// init other field data
+	this->allData.CollisionTypePoint->SetNumberOfTuples(this->dataInfo.nPoints);
+	this->allData.CollisionTypePoint->FillComponent(0,0);
+
+	this->allData.CollisionTypeTrack->SetNumberOfTuples(this->dataInfo.nPoints);
+	this->allData.CollisionTypeTrack->FillComponent(0,0);
+
 	
 	this->dataIsRead = true;
 	return 1;
@@ -1088,6 +1111,7 @@ int vtkSQLiteReader::readSnapshotInfo()
 		// actually there should be numbers in the snap_id column, but
 		// in the converted vl2 data there aren't any, so just assume its
 		// ordered... check this here:
+		// TODO really check for empty field, because id can be 0 for first snapshot...
 		if (snap_id<1)
 		{
 			snap_id = i;
@@ -1102,6 +1126,45 @@ int vtkSQLiteReader::readSnapshotInfo()
 	}
 	return 1;
 }
+
+
+/*----------------------------------------------------------------------------
+Generates additional data
+
+
+	assumes:
+		all data read in
+	sets:
+		this->color		color vector
+	arguments:
+		none
+	returns:
+		int	errorcode (1 =ok)
+*/
+int vtkSQLiteReader::calculateAdditionalData()
+{
+
+	// calc average cv in one snapshot
+	for (int i = 0; i<this->dataInfo.nSnapshots;i++)
+	{
+		int length = this->SnapInfo.at(i).lenght;
+		int offset = this->SnapInfo.at(i).Offset;
+		int count = 0;
+		double sum = 0;
+		double ave = 0;
+		for (j=0; j<length;j++)
+		{
+			sum =+ this->allData.Cv->GetTuple1(j+offset);
+			count ++;
+		}
+		ave = sum / (double)count;
+		//TODO insert data into points
+
+
+	}
+	return 1;
+}
+
 
 /*----------------------------------------------------------------------------
 Generates the colorvector for the data
@@ -1487,8 +1550,12 @@ generates points in the output vector
 int vtkSQLiteReader::generatePoints(SelectionStruct* selection, Data* actData)
 {
 	std::vector<int> * idMap2 = &selection->vPointIdMapReverse;
+
+	actData->Position->Reset();
+	actData->Cells->Reset();
 	
 	actData->Position->SetNumberOfPoints(selection->nSelectedPoints);
+	actData->Cells->SetNumberOfCells(selection->nSelectedPoints);
 	actData->Velocity->SetNumberOfTuples(selection->nSelectedPoints);
 	actData->TrackId->SetNumberOfTuples(selection->nSelectedPoints);
 	actData->GId->SetNumberOfTuples(selection->nSelectedPoints);
@@ -1497,6 +1564,11 @@ int vtkSQLiteReader::generatePoints(SelectionStruct* selection, Data* actData)
 	actData->Rvir->SetNumberOfTuples(selection->nSelectedPoints);
 	actData->Vmax->SetNumberOfTuples(selection->nSelectedPoints);
 	actData->Rmax->SetNumberOfTuples(selection->nSelectedPoints);
+	actData->Redshift->SetNumberOfTuples(selection->nSelectedPoints);
+	actData->Time->SetNumberOfTuples(selection->nSelectedPoints);
+	actData->Cv->SetNumberOfTuples(selection->nSelectedPoints);
+	actData->CollisionTypePoint->SetNumberOfTuples(selection->nSelectedPoints);
+	actData->CollisionTypeTrack->SetNumberOfTuples(selection->nSelectedPoints);
 
 	for (int i = 0; i<selection->nSelectedPoints; i++)
 	{
@@ -1518,6 +1590,16 @@ int vtkSQLiteReader::generatePoints(SelectionStruct* selection, Data* actData)
 			this->allData.Vmax->GetTuple(idMap2->at(i)));
 		actData->Rmax->InsertTuple(i,
 			this->allData.Rmax->GetTuple(idMap2->at(i)));
+		actData->Redshift->InsertTuple(i,
+			this->allData.Redshift->GetTuple(idMap2->at(i)));
+		actData->Time->InsertTuple(i,
+			this->allData.Time->GetTuple(idMap2->at(i)));
+		actData->Cv->InsertTuple(i,
+			this->allData.Cv->GetTuple(idMap2->at(i)));
+		actData->CollisionTypePoint->InsertTuple(i,
+			this->allData.CollisionTypePoint->GetTuple(idMap2->at(i)));
+		actData->CollisionTypeTrack->InsertTuple(i,
+			this->allData.CollisionTypeTrack->GetTuple(idMap2->at(i)));
 	}
 
 	// Create the vertices (one point per vertex, for easy display)
@@ -1548,25 +1630,25 @@ generates tracks in the output vector
 */
 int vtkSQLiteReader::generateTracks(SelectionStruct* selection, Data* actData)
 {
-	/*
-	this->selectedData.Tracks->Reset();
-	int trackId;
-	int oldId, newId;
+	int trackId, oldId, newId;
+	vtkSmartPointer<vtkPolyLine> nextLine;
 
-	for (int i = 0; i<this->dataInfo.nSelectedTracks; i++)
+	actData->Tracks->Reset();
+
+	for (int i = 0; i<selection->nSelectedTracks; i++)
 	{
-		vtkSmartPointer<vtkPolyLine> nextLine = vtkSmartPointer<vtkPolyLine>::New();
-		trackId = this->dataInfo.selectedTracks.at(i);
+		nextLine = vtkSmartPointer<vtkPolyLine>::New();
+		trackId = selection->vTrackIds.at(i);
 
 		for (int j = 0; j<this->TracksInfo.at(trackId).nPoints; j++)
 		{
 			oldId = this->TracksInfo.at(trackId).PointsIds.at(j);
-			newId = this->dataInfo.idMap1.at(oldId);
+			newId = selection->vPointIdMap.at(oldId);
 			nextLine->GetPointIds()->InsertNextId(newId);
 		}
-		this->selectedData.Tracks->InsertNextCell(nextLine);
+		actData->Tracks->InsertNextCell(nextLine);
 	}
-*/
+
 	return 1;
 }
 
@@ -1659,7 +1741,7 @@ int vtkSQLiteReader::findCollisions(CollisionCalculationStruct* pCollCalc){
 	double lowTol = pCollCalc->lowerTolerance;
 
 	int offset, length;
-	int PointId, SnapId, TrackId;
+	int PointId, SnapId, TrackId, useid;
 
 	int nMerging = 0;
 	int nColliding = 0;
@@ -1715,7 +1797,22 @@ int vtkSQLiteReader::findCollisions(CollisionCalculationStruct* pCollCalc){
 			
 			if(IdList->GetNumberOfIds()<2){continue;}
 			
-			dist = getDistance2(PointId,IdList->GetId(1)+offset);
+			// check for identical points, select the other point
+			// TODO make this better, check for identical coordinates too..
+			if (this->allData.Mvir->GetTuple1(PointId) != this->allData.Mvir->GetTuple1(IdList->GetId(1)))
+			{
+				useid = 1;
+			}
+			else if (this->allData.Mvir->GetTuple1(PointId) != this->allData.Mvir->GetTuple1(IdList->GetId(0)))
+			{
+				useid = 0;
+			}
+			else // this shouln't happen
+			{
+				continue;
+			}
+
+			dist = getDistance2(PointId,IdList->GetId(useid)+offset);
 			
 			//vtkErrorMacro(" for track: " << TrackId
 			//	<< ", got point ids: " << IdList->GetId(0) << ", " << IdList->GetId(1)
@@ -1734,15 +1831,14 @@ int vtkSQLiteReader::findCollisions(CollisionCalculationStruct* pCollCalc){
 
 					Tracks.at(TrackId) = 2;
 					Points.at(PointId) = 2;
-					Snapshots.at(SnapId) = 2;
+					//Snapshots.at(SnapId) = 2;
 				}
 				else
 				{
 					nColliding++;
-
-					Tracks.at(TrackId) = 1;
+					if (Tracks.at(TrackId)!=2){Tracks.at(TrackId) = 1;}
 					Points.at(PointId) = 1;
-					Snapshots.at(SnapId) = 1;
+					//Snapshots.at(SnapId) = 1;
 				}
 			}
 		}
@@ -1776,6 +1872,10 @@ int vtkSQLiteReader::findCollisions(CollisionCalculationStruct* pCollCalc){
 			{
 				result->nTracks ++;
 				result->vTrackIds.push_back(j);
+				for (int l = 0; l<this->TracksInfo.at(j).nPoints; l++)
+				{
+					this->allData.CollisionTypeTrack->InsertTuple1(this->TracksInfo.at(j).PointsIds.at(l),state);
+				}
 			}
 		}
 
@@ -1785,6 +1885,7 @@ int vtkSQLiteReader::findCollisions(CollisionCalculationStruct* pCollCalc){
 			{
 				result->nPoints ++;
 				result->vPointIds.push_back(j);
+				this->allData.CollisionTypePoint->InsertTuple1(j,state);
 			}
 		}
 	}
@@ -1808,45 +1909,127 @@ int vtkSQLiteReader::generateSelection(CollisionCalculationStruct * collCalc, Se
 {
 	std::vector<int> * idMap1 = &select->vPointIdMap;
 	std::vector<int> * idMap2 = &select->vPointIdMapReverse;
+	std::vector<int> * trackIdMap = &select->vTrackIdMap;
 
-	int counter = 0;
+	int p_counter = 0;
+	int t_counter = 0;
+	int trackCount = 0;
 	int offset = 0;
 	int length = 0;
 	int pid = 0;
 	int trackid = 0;
 
+	std::vector<int> * v1, * v2, * v3;
+	std::vector<int>::iterator it1, it2;
+	v1 = &collCalc->Colliding.vTrackIds;
+	v2 = &collCalc->Merging.vTrackIds;
+	v3 = &select->vTrackIds;
+
+
 	idMap1->clear();
 	idMap2->clear();
+	trackIdMap->clear();
 		
 	idMap1->resize(this->dataInfo.nPoints,-1);
 	idMap2->resize(this->dataInfo.nPoints,-1);
+	trackIdMap->resize(this->dataInfo.nTracks,-1);
 
-	//generate forwardmap
+
+	//generate forwardmaps
 	if(*this->Gui.DisplayColliding)
 	{
-		fillIdList(idMap1,&collCalc->Colliding,&counter);
+		fillIdList(idMap1,&p_counter,trackIdMap,&t_counter,&collCalc->Colliding,1);
 	}
+	
 	if(*this->Gui.DisplayMerging)
 	{
-		fillIdList(idMap1,&collCalc->Merging,&counter);
+		fillIdList(idMap1,&p_counter,trackIdMap,&t_counter,&collCalc->Merging,2);
 	}
+	
+	if(*this->Gui.DisplayMerging && *this->Gui.DisplayColliding)
+	{
+		//generate track ids (merge two vectors, expect sorted!)
+		v3->clear();
+
+		it1 = v1->begin();
+		it2 = v2->begin();
+		bool goon = true;
+
+		while (goon)
+		{
+			if (it1 == v1->end()){break;}
+			if (it2 == v2->end()){it2 = it1; v2 = v1; break;}
+
+			if(*it1 < *it2)	{v3->push_back(*it1); it1++; continue;}
+			if(*it1 > *it2)	{v3->push_back(*it2); it2++; continue;}
+			if(*it1 ==*it2)	{v3->push_back(*it1); it1++; it2++; continue;}
+		}
+		while (it2<v2->end()){v3->push_back(*it2); it2++;}
+	}
+	else if(*this->Gui.DisplayMerging)
+	{
+		v3->assign(v2->begin(),v2->end());
+	}
+	else if(*this->Gui.DisplayColliding)
+	{
+		v3->assign(v1->begin(),v1->end());
+	}
+	
 	if(*this->Gui.DisplayInverted)
 	{
 		//invertIdList(idMap1,&counter);
+		p_counter = 0;
+
+		for (int i = 0; i<idMap1->size();i++)
+		{
+			if (idMap1->at(i) == -1)
+			{
+				idMap1->at(i) = p_counter;
+				p_counter++;
+			}
+			else
+			{
+				idMap1->at(i) = -1;
+			}
+		}
+	
+		//invert tracks
+		t_counter = 0;
+		v3->clear();
+		for (int i = 0; i<trackIdMap->size();i++)
+		{
+			if (trackIdMap->at(i) == -1)
+			{
+				trackIdMap->at(i) = t_counter;
+				v3->push_back(i);
+				t_counter++;
+			}
+			else
+			{
+				trackIdMap->at(i) = -1;
+			}
+		}
+
 	}
 
-	//generate reverse map
-	counter = 0;
+	//generate reverse point map
+	p_counter = 0;
 	for(int i = 0; i<idMap1->size();i++)
 	{
 		pid=idMap1->at(i);
 		if(pid>-1)
 		{
 			idMap2->at(pid) = i;
-			counter++;
+			p_counter++;
 		}
 	}
-	idMap2->resize(counter);
+	idMap2->resize(p_counter);
+
+
+
+	select->nSelectedPoints = p_counter;
+	select->nSelectedTracks = t_counter;
+	select->nSelectedSnapshots = -1;
 
 	return 1;
 
@@ -1912,41 +2095,63 @@ assumes:
 	sets:
 		
 	arguments:
+		p_map
+		p_count
+		t_map
+		t_count
+		result
+		type		type of event (1 = collision, 2 = merging)
 		
 	returns:
 		int errorcode
 */
-int vtkSQLiteReader::fillIdList(std::vector<int> * map, CollisionResultStruct* result, int * counter)
+int vtkSQLiteReader::fillIdList(std::vector<int> * p_map, int * p_count,
+								std::vector<int> * t_map, int * t_count, 
+								CollisionResultStruct* result, int type)
 {
 	int i, j, pid, trackid, length;
 
-	//fill in points
-	for (i = 0; i<result->nPoints; i++)
-	{
-		map->at(result->vPointIds.at(i)) = *counter;
-		*counter = *counter + 1;
-	}
-
+	//fill in tracks
 	for (i = 0; i < result->nTracks; i++)
 	{
 		trackid = result->vTrackIds.at(i);
 		length =  this->TracksInfo.at(trackid).nPoints;
 
+		if (t_map->at(trackid)>-1){continue;}
+		
+		t_map->at(trackid) = *t_count;
+		*t_count = *t_count +1;
+
 		for (j = 0; j<length; j++)
 		{
 			pid = this->TracksInfo.at(trackid).PointsIds.at(j);
 
-			if (pid>-1) // if valid point on track
+			if (pid>-1 && p_map->at(pid)==-1) // if valid point on track AND check if point not already inserted
 			{
-				if (map->at(pid)==-1) // check if point not already inserted
-				{
-					map->at(pid) = *counter;
-					*counter = *counter + 1;
-				}
+				p_map->at(pid) = *p_count;
+				*p_count = *p_count + 1;
 			}
 		}
 
 	}
+
+
+	//fill in points
+	/*
+	for (i = 0; i<result->nPoints; i++)
+	{
+		if (p_map->at(result->vPointIds.at(i)) ==-1)
+		{
+			trackid = this->allData.TrackId->GetTuple1(result->vPointIds.at(i))
+			if(t_map->at(trackid) == type)
+			{
+				p_map->at(result->vPointIds.at(i)) = *p_count;
+				*p_count = *p_count + 1;
+			}
+		}
+	}
+	*/
+
 
 
 

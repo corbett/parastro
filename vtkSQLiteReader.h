@@ -206,8 +206,8 @@ protected:
 		vtkSmartPointer<vtkFloatArray>		Redshift;
 		vtkSmartPointer<vtkFloatArray>		Time;
 		vtkSmartPointer<vtkFloatArray>		Cv;
-		//vtkSmartPointer<vtkUnsignedCharArray> Colors;
-		//vtkSmartPointer<vtkUnsignedCharArray> opacity;
+		vtkSmartPointer<vtkUnsignedCharArray> CollisionTypePoint;
+		vtkSmartPointer<vtkUnsignedCharArray> CollisionTypeTrack;
 	};
 
 	struct CalculationSettings {
@@ -246,7 +246,8 @@ protected:
 		std::vector<int> vTrackIds;
 		std::vector<int> vSnapshotIds;
 		std::vector<int> vPointIdMap;
-		std::vector<int> vPointIdMapReverse;
+		std::vector<int> vPointIdMapReverse; // equal to vPointIds!!
+		std::vector<int> vTrackIdMap;
 
 	};
 
@@ -332,6 +333,7 @@ private:
 	int vtkSQLiteReader::readSnapshots(); // reads the snapshots
 	int vtkSQLiteReader::readSnapshotInfo(); 
 	int vtkSQLiteReader::readTracks();
+	int vtkSQLiteReader::calculateAdditionalData();
 	int vtkSQLiteReader::generateColors();
 
 	int vtkSQLiteReader::findCollisions(CollisionCalculationStruct*);
@@ -339,7 +341,9 @@ private:
 	int vtkSQLiteReader::calcTolerance();
 
 	int vtkSQLiteReader::generateSelection(CollisionCalculationStruct*, SelectionStruct*);
-	int vtkSQLiteReader::fillIdList(std::vector<int>*, CollisionResultStruct*, int*);
+	int vtkSQLiteReader::fillIdList(std::vector<int>*, int*,
+		std::vector<int>*, int*,
+		CollisionResultStruct*, int);
 	int vtkSQLiteReader::generateIdMap();
 	int vtkSQLiteReader::generatePoints(SelectionStruct*, Data*);
 	int vtkSQLiteReader::generateTracks(SelectionStruct*, Data*);
