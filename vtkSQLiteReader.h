@@ -127,11 +127,13 @@ protected:
 	struct SnapshotInfo {
 		vtkIdType Offset; //stores the id where this snapshot starts
 		int lenght; // stores the amount of halos in this snapshot
+		std::vector<int> PointId; //allocates gid to new id (PointId.at(gid) = id+offset) maybee save here some mem, by using smaller datatype..
+		
 		int snapshotNr; // snapshot Nr from simulation (this is not the id!)
 		double redshift;
 		double time;
 		int npart;
-		std::vector<int> PointId; //allocates gid to new id (PointId.at(gid) = id+offset) maybee save here some mem, by using smaller datatype..
+		double CvAverage;
 	};
 
 	struct Track {
@@ -206,6 +208,7 @@ protected:
 		vtkSmartPointer<vtkFloatArray>		Redshift;
 		vtkSmartPointer<vtkFloatArray>		Time;
 		vtkSmartPointer<vtkFloatArray>		Cv;
+		vtkSmartPointer<vtkFloatArray>		CvAverage;
 		vtkSmartPointer<vtkUnsignedCharArray> CollisionTypePoint;
 		vtkSmartPointer<vtkUnsignedCharArray> CollisionTypeTrack;
 	};

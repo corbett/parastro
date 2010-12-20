@@ -17,11 +17,11 @@ INCLUDE(${PARAVIEW_USE_FILE})
 
 INCLUDE_DIRECTORIES(AstroVizHelpersLib)
 
-QT4_WRAP_CPP(MOC_SRCS pqSQLiteReaderPanel.h)
-QT4_ADD_RESOURCES(RCS_SRCS pqSQLiteReaderPanel.qrc)
+#QT4_WRAP_CPP(MOC_SRCS pqSQLiteReaderPanel.h)
+#QT4_ADD_RESOURCES(RCS_SRCS pqSQLiteReaderPanel.qrc)
 
-ADD_PARAVIEW_OBJECT_PANEL(IFACES IFACE_SRCS CLASS_NAME pqSQLiteReaderPanel 
-                          XML_NAME SQLiteReader XML_GROUP sources)
+#ADD_PARAVIEW_OBJECT_PANEL(IFACES IFACE_SRCS CLASS_NAME pqSQLiteReaderPanel 
+ #                         XML_NAME SQLiteReader XML_GROUP sources)
 
 #Defines the AstroViz plugin
 ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.0"
@@ -33,6 +33,7 @@ ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.0"
 	vtkFriendsOfFriendsHaloFinder.cxx 
 	#vtkPointDisplay.cxx
 	vtkSQLiteReader.cxx #<-- for server
+	vtkTrackFilter.cxx
 	SERVER_MANAGER_XML  TipsyReaderSM.xml
 	NSmoothFilterSM.xml  CenterOfMassFilter.xml
 	ProfileFilter.xml MomentsOfInertiaFilter.xml 
@@ -40,6 +41,7 @@ ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.0"
 	FriendsOfFriendsHaloFinder.xml	
 	#PointDisplaySM.xml
 	SQLiteReaderSM.xml #<-- for server
+	TrackFilterSM.xml
 	GUI_RESOURCES TipsyReader.qrc 
 	#PointDisplay.qrc #SQLiteReader.qrc #<-- for client
 	GUI_RESOURCE_FILES AstroVizFilterMenu.xml

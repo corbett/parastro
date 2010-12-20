@@ -142,6 +142,7 @@ vtkSQLiteReader::vtkSQLiteReader()
 		actData->Cv = vtkSmartPointer<vtkFloatArray>::New();
 		actData->CollisionTypePoint = vtkSmartPointer<vtkUnsignedCharArray>::New();
 		actData->CollisionTypeTrack = vtkSmartPointer<vtkUnsignedCharArray>::New();
+		actData->CvAverage = vtkSmartPointer<vtkFloatArray>::New();
 
 		actData->Velocity->SetNumberOfComponents(3);
 		actData->TrackId->SetNumberOfComponents(1);
@@ -156,6 +157,7 @@ vtkSQLiteReader::vtkSQLiteReader()
 		actData->Cv->SetNumberOfComponents(1);
 		actData->CollisionTypePoint->SetNumberOfComponents(1);
 		actData->CollisionTypeTrack->SetNumberOfComponents(1);
+		actData->CvAverage->SetNumberOfComponents(1);
 
 		actData->Velocity->SetName("Velocity");
 		actData->TrackId->SetName("TrackId");
@@ -170,7 +172,7 @@ vtkSQLiteReader::vtkSQLiteReader()
 		actData->Cv->SetName("Cv");
 		actData->CollisionTypePoint->SetName("CollisionType of Point");
 		actData->CollisionTypeTrack->SetName("CollisionType of Track");
-
+		actData->CvAverage->SetName("Cv (SnapshotAverage)");
 	}
 
 	this->collisionCalc.lowerTolerance = *this->Gui.LowerLimit * *this->Gui.LowerLimit;
@@ -355,6 +357,7 @@ int vtkSQLiteReader::RequestData(vtkInformation*,
 	out->GetPointData()->AddArray(actData->Redshift);
 	out->GetPointData()->AddArray(actData->Time);
 	out->GetPointData()->AddArray(actData->Cv);
+	//out->GetPointData()->AddArray(actData->CvAverage);
 	out->GetPointData()->AddArray(actData->CollisionTypePoint);
 	out->GetPointData()->AddArray(actData->CollisionTypeTrack);
 	//out->GetPointData()->SetScalars(actData->Colors);
@@ -1143,6 +1146,7 @@ Generates additional data
 */
 int vtkSQLiteReader::calculateAdditionalData()
 {
+	this->allData.CvAverage->SetNumberOfTuples(this->dataInfo.nPoints);
 
 	// calc average cv in one snapshot
 	for (int i = 0; i<this->dataInfo.nSnapshots;i++)
@@ -1152,13 +1156,18 @@ int vtkSQLiteReader::calculateAdditionalData()
 		int count = 0;
 		double sum = 0;
 		double ave = 0;
-		for (j=0; j<length;j++)
+		for (int j=0; j<length;j++)
 		{
 			sum =+ this->allData.Cv->GetTuple1(j+offset);
 			count ++;
 		}
 		ave = sum / (double)count;
-		//TODO insert data into points
+
+		this->SnapInfo.at(i).CvAverage = ave;
+		for (int j = offset; j<offset+length;j++)
+		{
+			this->allData.CvAverage->InsertTuple1(j,ave);
+		}
 
 
 	}
@@ -1567,6 +1576,7 @@ int vtkSQLiteReader::generatePoints(SelectionStruct* selection, Data* actData)
 	actData->Redshift->SetNumberOfTuples(selection->nSelectedPoints);
 	actData->Time->SetNumberOfTuples(selection->nSelectedPoints);
 	actData->Cv->SetNumberOfTuples(selection->nSelectedPoints);
+	actData->CvAverage->SetNumberOfTuples(selection->nSelectedPoints);
 	actData->CollisionTypePoint->SetNumberOfTuples(selection->nSelectedPoints);
 	actData->CollisionTypeTrack->SetNumberOfTuples(selection->nSelectedPoints);
 
@@ -1596,6 +1606,8 @@ int vtkSQLiteReader::generatePoints(SelectionStruct* selection, Data* actData)
 			this->allData.Time->GetTuple(idMap2->at(i)));
 		actData->Cv->InsertTuple(i,
 			this->allData.Cv->GetTuple(idMap2->at(i)));
+		actData->CvAverage->InsertTuple(i,
+			this->allData.CvAverage->GetTuple(idMap2->at(i)));
 		actData->CollisionTypePoint->InsertTuple(i,
 			this->allData.CollisionTypePoint->GetTuple(idMap2->at(i)));
 		actData->CollisionTypeTrack->InsertTuple(i,
