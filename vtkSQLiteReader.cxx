@@ -143,6 +143,7 @@ vtkSQLiteReader::vtkSQLiteReader()
 		actData->CollisionTypePoint = vtkSmartPointer<vtkUnsignedCharArray>::New();
 		actData->CollisionTypeTrack = vtkSmartPointer<vtkUnsignedCharArray>::New();
 		actData->CvAverage = vtkSmartPointer<vtkFloatArray>::New();
+		actData->RGc = vtkSmartPointer<vtkFloatArray>::New();
 
 		actData->Velocity->SetNumberOfComponents(3);
 		actData->TrackId->SetNumberOfComponents(1);
@@ -158,6 +159,7 @@ vtkSQLiteReader::vtkSQLiteReader()
 		actData->CollisionTypePoint->SetNumberOfComponents(1);
 		actData->CollisionTypeTrack->SetNumberOfComponents(1);
 		actData->CvAverage->SetNumberOfComponents(1);
+		actData->RGc->SetNumberOfComponents(1);
 
 		actData->Velocity->SetName("Velocity");
 		actData->TrackId->SetName("TrackId");
@@ -173,70 +175,12 @@ vtkSQLiteReader::vtkSQLiteReader()
 		actData->CollisionTypePoint->SetName("CollisionType of Point");
 		actData->CollisionTypeTrack->SetName("CollisionType of Track");
 		actData->CvAverage->SetName("Cv (SnapshotAverage)");
+		actData->RGc->SetName("Distance from Galactic Center");
 	}
 
 	this->collisionCalc.lowerTolerance = *this->Gui.LowerLimit * *this->Gui.LowerLimit;
 	this->collisionCalc.upperTolerance = *this->Gui.UpperLimit * *this->Gui.UpperLimit;
 	this->collisionCalc.isDone = false;
-
-	/*
-			
-			
-			
-			
-	this->allData.Position = vtkSmartPointer<vtkPoints>::New();
-	this->allData.Velocity = vtkSmartPointer<vtkFloatArray>::New();
-	this->allData.Cells = vtkSmartPointer<vtkCellArray>::New();
-	this->allData.Tracks = vtkSmartPointer<vtkCellArray>::New();
-	this->allData.TrackId = vtkSmartPointer<vtkIdTypeArray>::New();
-	this->allData.GId = vtkSmartPointer<vtkIdTypeArray>::New();
-	this->allData.SnapId = vtkSmartPointer<vtkIdTypeArray>::New();
-	this->allData.RVir = vtkSmartPointer<vtkFloatArray>::New();
-	this->allData.RVir = vtkSmartPointer<vtkFloatArray>::New();
-	this->allData.RVir = vtkSmartPointer<vtkFloatArray>::New();
-	this->allData.RVir = vtkSmartPointer<vtkFloatArray>::New();
-	this->allData.Colors = vtkSmartPointer<vtkUnsignedCharArray>::New();
-
-	this->allData.Velocity->SetNumberOfComponents(3);
-	this->allData.TrackId->SetNumberOfComponents(1);
-	this->allData.GId->SetNumberOfComponents(1);
-	this->allData.SnapId->SetNumberOfComponents(1);
-	this->allData.RVir->SetNumberOfComponents(1);
-	this->allData.RVir->SetNumberOfComponents(1);
-	this->allData.RVir->SetNumberOfComponents(1);
-	this->allData.RVir->SetNumberOfComponents(1);
-	this->allData.Colors->SetNumberOfComponents(3);
-
-	this->allData.Velocity->SetName("Velocity");
-	this->allData.TrackId->SetName("TrackId");
-	this->allData.GId->SetName("GId");
-	this->allData.SnapId->SetName("SnapId");
-	this->allData.RVir->SetName("RVir");
-	this->allData.Colors->SetName("Colors");
-
-	this->selectedData.Position = vtkSmartPointer<vtkPoints>::New();
-	this->selectedData.Velocity = vtkSmartPointer<vtkFloatArray>::New();
-	this->selectedData.Cells = vtkSmartPointer<vtkCellArray>::New();
-	this->selectedData.Tracks = vtkSmartPointer<vtkCellArray>::New();
-	this->selectedData.TrackId = vtkSmartPointer<vtkIdTypeArray>::New();
-	this->selectedData.GId = vtkSmartPointer<vtkIdTypeArray>::New();
-	this->selectedData.SnapId = vtkSmartPointer<vtkIdTypeArray>::New();
-	this->selectedData.RVir = vtkSmartPointer<vtkFloatArray>::New();
-	this->selectedData.Colors = vtkSmartPointer<vtkUnsignedCharArray>::New();
-
-	this->selectedData.Velocity->SetNumberOfComponents(3);
-	this->selectedData.TrackId->SetNumberOfComponents(1);
-	this->selectedData.GId->SetNumberOfComponents(1);
-	this->selectedData.SnapId->SetNumberOfComponents(1);
-	this->selectedData.RVir->SetNumberOfComponents(1);
-	this->selectedData.Colors->SetNumberOfComponents(3);
-
-	this->selectedData.Velocity->SetName("Velocity");
-	this->selectedData.TrackId->SetName("TrackId");
-	this->selectedData.GId->SetName("GId");
-	this->selectedData.SnapId->SetName("SnapId");
-	this->selectedData.RVir->SetName("RVir");
-	this->selectedData.Colors->SetName("Colors");*/
 
 	//init calc struct
 	this->calcInfo.calcDone = false;
@@ -303,6 +247,7 @@ int vtkSQLiteReader::RequestData(vtkInformation*,
 		readSnapshotInfo();
 		readSnapshots();
 		readTracks();
+		calculateAdditionalData();
 
 		this->dataInfo.dataIsRead = true;
 	}
@@ -357,9 +302,10 @@ int vtkSQLiteReader::RequestData(vtkInformation*,
 	out->GetPointData()->AddArray(actData->Redshift);
 	out->GetPointData()->AddArray(actData->Time);
 	out->GetPointData()->AddArray(actData->Cv);
-	//out->GetPointData()->AddArray(actData->CvAverage);
+	out->GetPointData()->AddArray(actData->CvAverage);
 	out->GetPointData()->AddArray(actData->CollisionTypePoint);
 	out->GetPointData()->AddArray(actData->CollisionTypeTrack);
+	out->GetPointData()->AddArray(actData->RGc);
 	//out->GetPointData()->SetScalars(actData->Colors);
 
 
@@ -1147,6 +1093,7 @@ Generates additional data
 int vtkSQLiteReader::calculateAdditionalData()
 {
 	this->allData.CvAverage->SetNumberOfTuples(this->dataInfo.nPoints);
+	this->allData.RGc->SetNumberOfTuples(this->dataInfo.nPoints);
 
 	// calc average cv in one snapshot
 	for (int i = 0; i<this->dataInfo.nSnapshots;i++)
@@ -1170,6 +1117,17 @@ int vtkSQLiteReader::calculateAdditionalData()
 		}
 
 
+	}
+
+	double dist;
+	// calc dist from galactic center for every point
+	for (int i = 0; i<this->dataInfo.nPoints; i++)
+	{
+		//dist = getDistanceToO(i);
+		dist = sqrt(getDistance2(i,
+			this->TracksInfo.at(this->dataInfo.nTracks-2).PointsIds.at(
+			this->allData.SnapId->GetTuple1(i))));
+		this->allData.RGc->InsertTuple1(i,dist);
 	}
 	return 1;
 }
@@ -1460,7 +1418,29 @@ double vtkSQLiteReader::getDistance2(int gid1, int gid2){
 		(x1[1]-x2[1])*(x1[1]-x2[1])+
 		(x1[2]-x2[2])*(x1[2]-x2[2]);
 }
+/*----------------------------------------------------------------------------
+calculates the distance  between a point and the origin
 
+	assumes:
+		
+	sets:
+		
+	arguments:
+		ids of two points
+	returns:
+		the distance
+*/
+double vtkSQLiteReader::getDistanceToO(int gid1){
+
+	double x1[3];
+	double x2[] = {0.0,0.0,0.0};
+
+	this->allData.Position->GetPoint(gid1, x1);
+
+	return sqrt(x1[0]-x2[0])*(x1[0]-x2[0])+
+		(x1[1]-x2[1])*(x1[1]-x2[1])+
+		(x1[2]-x2[2])*(x1[2]-x2[2]);
+}
 /*----------------------------------------------------------------------------
 generates the id map from alldata ids to only selected points ids
 	assumes:
@@ -1579,6 +1559,7 @@ int vtkSQLiteReader::generatePoints(SelectionStruct* selection, Data* actData)
 	actData->CvAverage->SetNumberOfTuples(selection->nSelectedPoints);
 	actData->CollisionTypePoint->SetNumberOfTuples(selection->nSelectedPoints);
 	actData->CollisionTypeTrack->SetNumberOfTuples(selection->nSelectedPoints);
+	actData->RGc->SetNumberOfTuples(selection->nSelectedPoints);
 
 	for (int i = 0; i<selection->nSelectedPoints; i++)
 	{
@@ -1612,6 +1593,8 @@ int vtkSQLiteReader::generatePoints(SelectionStruct* selection, Data* actData)
 			this->allData.CollisionTypePoint->GetTuple(idMap2->at(i)));
 		actData->CollisionTypeTrack->InsertTuple(i,
 			this->allData.CollisionTypeTrack->GetTuple(idMap2->at(i)));
+		actData->RGc->InsertTuple(i,
+			this->allData.RGc->GetTuple(idMap2->at(i)));
 	}
 
 	// Create the vertices (one point per vertex, for easy display)

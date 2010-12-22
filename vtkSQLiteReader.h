@@ -209,6 +209,7 @@ protected:
 		vtkSmartPointer<vtkFloatArray>		Time;
 		vtkSmartPointer<vtkFloatArray>		Cv;
 		vtkSmartPointer<vtkFloatArray>		CvAverage;
+		vtkSmartPointer<vtkFloatArray>		RGc;
 		vtkSmartPointer<vtkUnsignedCharArray> CollisionTypePoint;
 		vtkSmartPointer<vtkUnsignedCharArray> CollisionTypeTrack;
 	};
@@ -356,6 +357,7 @@ private:
 	int openDB(char*);
 	vtkStdString vtkSQLiteReader::Int2Str(int);
 	double getDistance2(int, int);
+	double getDistanceToO(int);
 
 	// old stuff - not yet, or not anymore needed
 	int RequestDataDemo(vtkInformationVector*);

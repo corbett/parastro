@@ -1,7 +1,10 @@
 /*=========================================================================
 
+TODO: change output so something useful..
+
+
   Program:   
-  Module:    vtkTrackFilter.cxx
+  Module:    vtkSimpleBin.cxx
 
   Copyright (c) Rafael Küng
 
@@ -10,7 +13,7 @@
      PURPOSE.  See the above copyright notice for more information.
 
 =========================================================================*/
-#include "vtkTrackFilter.h"
+#include "vtkSimpleBin.h"
 
 #include "AstroVizHelpersLib/AstroVizHelpers.h"
 
@@ -30,21 +33,19 @@
 #include "vtkPointData.h"
 #include "vtkDataArray.h"
 #include "vtkPolyLine.h"
+#include "vtkDataArray.h"
 
 #include <vector>
 
 
-vtkCxxRevisionMacro(vtkTrackFilter, "$Revision: 0.1 $");
-vtkStandardNewMacro(vtkTrackFilter);
+vtkCxxRevisionMacro(vtkSimpleBin, "$Revision: 0.1 $");
+vtkStandardNewMacro(vtkSimpleBin);
 
 //----------------------------------------------------------------------------
-vtkTrackFilter::vtkTrackFilter()
+vtkSimpleBin::vtkSimpleBin()
 {
 	this->SetNumberOfInputPorts(1);
 	this->SetNumberOfOutputPorts(1);
-
-	this->LowPoint = 0;
-	this->HighPoint = 0;
 
 	this->SetInputArrayToProcess(
 		0,
@@ -55,25 +56,25 @@ vtkTrackFilter::vtkTrackFilter()
 }
 
 //----------------------------------------------------------------------------
-vtkTrackFilter::~vtkTrackFilter()
+vtkSimpleBin::~vtkSimpleBin()
 {
 }
 
 //----------------------------------------------------------------------------
-void vtkTrackFilter::PrintSelf(ostream& os, vtkIndent indent)
+void vtkSimpleBin::PrintSelf(ostream& os, vtkIndent indent)
 {
 	this->Superclass::PrintSelf(os,indent);
 }
 
 //----------------------------------------------------------------------------
-int vtkTrackFilter::FillInputPortInformation(int port, vtkInformation* info)
+int vtkSimpleBin::FillInputPortInformation(int port, vtkInformation* info)
 {
 	this->Superclass::FillInputPortInformation(port, info);
 	info->Set(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), "vtkPolyData");
 	return 1;
 }
 //----------------------------------------------------------------------------
-int vtkTrackFilter::FillOutputPortInformation(
+int vtkSimpleBin::FillOutputPortInformation(
 	int vtkNotUsed(port), vtkInformation* info)
 {
 	info->Set(vtkDataObject::DATA_TYPE_NAME(), "vtkPolyData");
@@ -81,7 +82,7 @@ int vtkTrackFilter::FillOutputPortInformation(
 }
 
 //----------------------------------------------------------------------------
-int vtkTrackFilter::RequestData(vtkInformation*,
+int vtkSimpleBin::RequestData(vtkInformation*,
 								vtkInformationVector** inputVector,
 								vtkInformationVector* outputVector)
 {
@@ -92,74 +93,66 @@ int vtkTrackFilter::RequestData(vtkInformation*,
 	vtkPolyData* output = vtkPolyData::GetData(outputVector);
 	vtkPolyData* input = vtkPolyData::GetData(inputVector[0]);
 
-	vtkSmartPointer<vtkCellArray> tracks = input->GetLines();
-	vtkErrorMacro(" anz lines: " << tracks->GetNumberOfCells());
-
 	vtkDataArray* filterArray = this->GetInputArrayToProcess(0, inputVector);
+	vtkPointData * pData = input->GetPointData();
 
-	vtkIdType * pts;
-	vtkIdType  npts;
-	bool savetrack;
-	vtkIdList * selectedPoints = vtkIdList::New();
-	selectedPoints->Initialize();
-	vtkSmartPointer<vtkCellArray> newTracks = vtkSmartPointer<vtkCellArray>::New();
+	double range [2];
+	filterArray->GetRange(range);
+	int nBin = range[1] - range[0] +1;
 
-	tracks->InitTraversal();
-	for (int i = 0; i<tracks->GetNumberOfCells(); i++)
+	for (int i = 0; i<pData->GetNumberOfArrays(); i++)
 	{
-		tracks->GetNextCell(npts,pts);
-
-		// one point on a track has to fullfill the condition
-		savetrack = false;
-		for (int j =0;j<npts;j++)
-		{
-			if (filterArray->GetTuple1(*(pts+j)) <= this->HighPoint &&
-				filterArray->GetTuple1(*(pts+j)) >= this->LowPoint)
-			{
-				savetrack = true;
-				break;
-			}
-			//vtkErrorMacro(" id: " << *(pts+j));
-		}
+		// erzeuge hier output arrays, mit anz tupel = anz bin
+		// fuelle alle mit 0
+		// evtl nach jeweils dazugehoeriges array mit standartabweichung
 		
-		// every point on a track has to fullfil the condition
-		/*
-		savetrack = true;
-		for (int j =0;j<npts;j++)
-		{
-			if (!(this->filterArray->GetTuple1(*(pts+j)) <= this->HighPoint &&
-				this->filterArray->GetTuple1(*(pts+j)) >= this->LowPoint))
-			{
-				savetrack = false;
-				break;
-			}
-			//vtkErrorMacro(" id: " << *(pts+j));
-		}
-		*/
+		vtkSmartPointer<vtkFloatArray> parray = vtkSmartPointer<vtkFloatArray>::New();
+		parray->DeepCopy(pData->GetArray(i));
+		parray->Initialize();
+		parray->SetNumberOfTuples(nBin);
+		parray->FillComponent(0,0);
 
-		if (savetrack)
-		{
-			//vtkErrorMacro(" this track is seleced! tid: " << i);
-
-			vtkSmartPointer<vtkPolyLine> nextLine = vtkSmartPointer<vtkPolyLine>::New();
-		
-			for (int j =0;j<npts;j++)
-			{
-				vtkIdType newId = selectedPoints->InsertNextId(*(pts+j));
-				nextLine->GetPointIds()->InsertNextId(newId);
-			}
-			newTracks->InsertNextCell(nextLine);
-		}
+		output->GetPointData()->AddArray(parray);
 	}
 
-	vtkPolyData* newDataSet = CopyPointsAndData(input,selectedPoints);
-	output->Initialize();
-	output->DeepCopy(newDataSet);
-	output->SetLines(newTracks);
-	newDataSet->Delete();
+	vtkSmartPointer<vtkPoints> pos = vtkSmartPointer<vtkPoints>::New();
+	for (int i = 0; i<nBin;i++)
+	{
+		pos->InsertNextPoint(i,i,i);
+	}
+	output->SetPoints(pos);
+
+	std::vector<int> counter;
+
+	int bin;
+
+	for (int i = 0; i<input->GetNumberOfPoints(); i++)
+	{
+		bin = range[0] + filterArray->GetTuple1(i);
+		//data.at(bin).num++;
+		// addiere werte direkt in ouput
+		for (int j = 0; i<pData->GetNumberOfArrays(); i++)
+		{
+			output->GetPointData()->GetArray(j)->SetTuple1(bin, 
+				output->GetPointData()->GetArray(j)->GetTuple1(bin) +
+				input->GetPointData()->GetArray(j)->GetTuple1(i));
+		}
+
+	}
+
+	/*
+	for (all bins)
+	{
+		for (all arrays)
+		{
+			ave_value = value / counter
+			stdderr = ...
+		}
+	}
+	*/
 
 	timer->StopTimer();
-	vtkErrorMacro(" track selection took: " << timer->GetElapsedTime() << " s");
+	vtkErrorMacro(" binning took: " << timer->GetElapsedTime() << " s");
 	
 	return 1;
 }

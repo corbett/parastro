@@ -45,6 +45,7 @@ ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.0"
 		#vtkPointDisplay.cxx
 		vtkSQLiteReader.cxx
 		vtkTrackFilter.cxx
+		vtkSimpleBin.cxx
 	SERVER_MANAGER_XML
 		TipsyReaderSM.xml
 		NSmoothFilterSM.xml
@@ -57,6 +58,7 @@ ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.0"
 		#PointDisplaySM.xml
 		SQLiteReaderSM.xml
 		TrackFilterSM.xml
+		SimpleBinSM.xml
 	GUI_RESOURCES
 		TipsyReader.qrc
 		#PointDisplay.qrc

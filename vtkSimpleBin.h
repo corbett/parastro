@@ -1,7 +1,7 @@
 /*=========================================================================
 
   Program:   
-  Module:    vtkTrackFilter.h
+  Module:    vtkSimpleBin.h
 
   Copyright (c) Rafael Küng
   All rights reserved.
@@ -10,12 +10,12 @@
      PURPOSE.  See the above copyright notice for more information.
 
 =========================================================================*/
-// .NAME vtkTrackFilter - Filter Tracks
+// .NAME vtkSimpleBin - Filter Tracks
 // .SECTION Description
-// vtkTrackFilter allows to select Lines, where a certain PointData Value meets specified condition
+// vtkSimpleBin allows to select Lines, where a certain PointData Value meets specified condition
 
-#ifndef __vtkTrackFilter_h
-#define __vtkTrackFilter_h
+#ifndef __vtkSimpleBin_h
+#define __vtkSimpleBin_h
 
 #include "vtkPolyDataAlgorithm.h" // superclass
 #include "vtkSmartPointer.h"
@@ -27,37 +27,26 @@
 #include "vtkInformationVector.h"
 #include <vtkstd/vector>
 
-class VTK_EXPORT vtkTrackFilter :  public vtkPolyDataAlgorithm
+class VTK_EXPORT vtkSimpleBin :  public vtkPolyDataAlgorithm
 {
 public:
-	static vtkTrackFilter* New();
-	//vtkTypeMacro(vtkTrackFilter, vtkPolyDataAlgorithm);
-	vtkTypeRevisionMacro(vtkTrackFilter,vtkPolyDataAlgorithm);
+	static vtkSimpleBin* New();
+	//vtkTypeMacro(vtkSimpleBin, vtkPolyDataAlgorithm);
+	vtkTypeRevisionMacro(vtkSimpleBin,vtkPolyDataAlgorithm);
 
 	void PrintSelf(ostream& os, vtkIndent indent);
 
-	vtkSetMacro(HighPoint,double);
-	vtkGetMacro(HighPoint,double);
-
-	vtkSetMacro(LowPoint,double);
-	vtkGetMacro(LowPoint,double);
-
-
 protected:
-	vtkTrackFilter();
-	~vtkTrackFilter();
+	vtkSimpleBin();
+	~vtkSimpleBin();
 
 	virtual int FillInputPortInformation(int port, vtkInformation* info);
 	virtual int FillOutputPortInformation(int vtkNotUsed(port),	vtkInformation* info);
 	virtual int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*);
 
-
 private:
-	vtkTrackFilter(const vtkTrackFilter&);  // Not implemented.
-	void operator=(const vtkTrackFilter&);  // Not implemented.
-
-	double HighPoint;
-	double LowPoint;
+	vtkSimpleBin(const vtkSimpleBin&);  // Not implemented.
+	void operator=(const vtkSimpleBin&);  // Not implemented.
 };
 
 #endif
