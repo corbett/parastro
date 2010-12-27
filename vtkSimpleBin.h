@@ -36,6 +36,10 @@ public:
 
 	void PrintSelf(ostream& os, vtkIndent indent);
 
+	vtkSetMacro(DoStdDerr,bool);
+	vtkGetMacro(DoStdDerr,bool);
+
+
 protected:
 	vtkSimpleBin();
 	~vtkSimpleBin();
@@ -47,6 +51,8 @@ protected:
 private:
 	vtkSimpleBin(const vtkSimpleBin&);  // Not implemented.
 	void operator=(const vtkSimpleBin&);  // Not implemented.
+
+	bool DoStdDerr;
 };
 
 #endif

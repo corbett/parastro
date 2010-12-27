@@ -29,11 +29,15 @@ TODO: change output so something useful..
 
 #include "vtkSmartPointer.h"
 #include "vtkCellArray.h"
+#include "vtkDoubleArray.h"
 #include "vtkIdList.h"
 #include "vtkPointData.h"
 #include "vtkDataArray.h"
 #include "vtkPolyLine.h"
 #include "vtkDataArray.h"
+#include "vtkTable.h"
+#include "vtkVariantArray.h"
+#include "vtkMultiBlockDataSet.h"
 
 #include <vector>
 
@@ -53,6 +57,8 @@ vtkSimpleBin::vtkSimpleBin()
 		0,
 		vtkDataObject::FIELD_ASSOCIATION_POINTS_THEN_CELLS,
 		vtkDataSetAttributes::SCALARS);
+
+	this->DoStdDerr = false;
 }
 
 //----------------------------------------------------------------------------
@@ -77,7 +83,7 @@ int vtkSimpleBin::FillInputPortInformation(int port, vtkInformation* info)
 int vtkSimpleBin::FillOutputPortInformation(
 	int vtkNotUsed(port), vtkInformation* info)
 {
-	info->Set(vtkDataObject::DATA_TYPE_NAME(), "vtkPolyData");
+	info->Set(vtkDataObject::DATA_TYPE_NAME(), "vtkTable");
 	return 1;
 }
 
@@ -90,69 +96,136 @@ int vtkSimpleBin::RequestData(vtkInformation*,
 	timer->StartTimer();
 
 	vtkInformation* outInfo = outputVector->GetInformationObject(0);
-	vtkPolyData* output = vtkPolyData::GetData(outputVector);
+	vtkTable* output = vtkTable::GetData(outputVector);
+	//vtkMultiBlockDataSet * multiOutput = vtkMultiBlockDataSet::GetData(outputVector);
+
 	vtkPolyData* input = vtkPolyData::GetData(inputVector[0]);
 
 	vtkDataArray* filterArray = this->GetInputArrayToProcess(0, inputVector);
 	vtkPointData * pData = input->GetPointData();
+	int nArr = pData->GetNumberOfArrays();
 
+	vtkstd::vector<int> counter; // stores, how many entries a bin has
+
+	// calculate nBin (simple, only works for int values..
 	double range [2];
 	filterArray->GetRange(range);
 	int nBin = range[1] - range[0] +1;
 
-	for (int i = 0; i<pData->GetNumberOfArrays(); i++)
-	{
-		// erzeuge hier output arrays, mit anz tupel = anz bin
-		// fuelle alle mit 0
-		// evtl nach jeweils dazugehoeriges array mit standartabweichung
-		
-		vtkSmartPointer<vtkFloatArray> parray = vtkSmartPointer<vtkFloatArray>::New();
-		parray->DeepCopy(pData->GetArray(i));
-		parray->Initialize();
-		parray->SetNumberOfTuples(nBin);
-		parray->FillComponent(0,0);
 
-		output->GetPointData()->AddArray(parray);
+
+	// create table structre
+	// mean values
+	for (int i = 0; i<nArr; i++)
+	{
+		vtkAbstractArray * inArr = pData->GetArray(i);
+		vtkAbstractArray * arr_mean = vtkAbstractArray::CreateArray(inArr->GetDataType());
+		vtkstd::string name = inArr->GetName();
+		name.append("_mean");
+		arr_mean->SetName(name.c_str());
+		output->AddColumn(arr_mean);
+		arr_mean->Delete();
+	}
+	// Standart derrivation fields
+	if (this->DoStdDerr)
+	{
+		for (int i = 0; i<nArr; i++)
+		{
+			vtkAbstractArray * inArr = pData->GetArray(i);
+			vtkAbstractArray * arr_StdDerr = vtkDoubleArray::New();
+			vtkstd::string name = inArr->GetName();
+			name.append("_StdDerr");
+			arr_StdDerr->SetName(name.c_str());
+			output->AddColumn(arr_StdDerr);
+			arr_StdDerr->Delete();
+		}
 	}
 
-	vtkSmartPointer<vtkPoints> pos = vtkSmartPointer<vtkPoints>::New();
+	// init every field to 0
+	counter.resize(nBin);
+	output->SetNumberOfRows(nBin);
 	for (int i = 0; i<nBin;i++)
 	{
-		pos->InsertNextPoint(i,i,i);
+		counter.at(i) = 0;
+		for (int j = 0; j<nArr; j++)
+		{
+			output->SetValue(i,j,0.0);
+		}
 	}
-	output->SetPoints(pos);
+	if(this->DoStdDerr)
+	{
+		for (int i = 0; i<nBin;i++)
+		{
+			for (int j = nArr; j<2*nArr;j++)
+			{
+				output->SetValue(i,j,0.0);
+			}
+		}
+	}
 
-	std::vector<int> counter;
 
-	int bin;
 
+	// sum up the values
 	for (int i = 0; i<input->GetNumberOfPoints(); i++)
 	{
-		bin = range[0] + filterArray->GetTuple1(i);
-		//data.at(bin).num++;
-		// addiere werte direkt in ouput
-		for (int j = 0; i<pData->GetNumberOfArrays(); i++)
-		{
-			output->GetPointData()->GetArray(j)->SetTuple1(bin, 
-				output->GetPointData()->GetArray(j)->GetTuple1(bin) +
-				input->GetPointData()->GetArray(j)->GetTuple1(i));
-		}
+		int bin = range[0] + *filterArray->GetTuple(i);
+		counter.at(bin)++;
 
+		for (int j = 0; j<nArr; j++)
+		{
+			double oldval = output->GetValue(bin,j).ToDouble();
+			double orgval = *pData->GetArray(j)->GetTuple(i);
+			output->SetValue(bin,j, oldval + orgval);
+		}
 	}
 
-	/*
-	for (all bins)
+	output->Update();
+
+	// get the average
+	for (int bin = 0; bin<nBin; bin++)
 	{
-		for (all arrays)
+		for (int j = 0; j<nArr; j++)
 		{
-			ave_value = value / counter
-			stdderr = ...
+			double oldval = output->GetValue(bin,j).ToDouble();
+			output->SetValue(bin,j, oldval / (double)counter.at(bin));
 		}
 	}
-	*/
+
+	output->Update();
+
+	// calculate stdderr
+	if(this->DoStdDerr)
+	{
+		for (int i = 0; i<input->GetNumberOfPoints(); i++)
+		{
+			int bin = range[0] + *filterArray->GetTuple(i);
+			for (int j = nArr; j<2*nArr; j++)
+			{
+				double oldval = output->GetValue(bin,j).ToDouble();
+				double newval = *pData->GetArray(j-nArr)->GetTuple(i);
+				double mean = output->GetValue(bin,j-nArr).ToDouble();
+				output->SetValue(bin,j, oldval + (newval - mean)*(newval - mean));
+			}
+		}
+
+		output->Update();
+
+		for (int bin = 0; bin<nBin; bin++)
+		{
+			for (int j = nArr; j<2*nArr; j++)
+			{
+				double oldval = output->GetValue(bin,j).ToDouble();
+				output->SetValue(bin,j, sqrt(oldval / (double)(counter.at(bin)-1)));
+			}
+		}
+
+		output->Update();
+	}
+
 
 	timer->StopTimer();
 	vtkErrorMacro(" binning took: " << timer->GetElapsedTime() << " s");
+
 	
 	return 1;
 }
