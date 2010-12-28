@@ -14,6 +14,7 @@
 	- check resetting of variables, whats needed, what not..  
   
 =========================================================================*/
+#include "vtkTimerLog.h"
 #include "vtkSQLiteReader.h"
 #include "vtkObjectFactory.h"
 #include "vtkPolyData.h"
@@ -35,8 +36,8 @@
 #include "vtkTable.h"
 
 
+
 #include <vector>
-#include <list>
 #include <sstream>
 
 vtkCxxRevisionMacro(vtkSQLiteReader, "$Revision: 1.0.1 $");
@@ -232,24 +233,33 @@ int vtkSQLiteReader::RequestInformation(
 is called after clicking apply, reads the actual, selected data
 */
 int vtkSQLiteReader::RequestData(vtkInformation*,
-	vtkInformationVector**,vtkInformationVector* outputVector)
+								 vtkInformationVector**,
+								 vtkInformationVector* outputVector)
 {
+
+	vtkSmartPointer<vtkTimerLog> tottimer = vtkSmartPointer<vtkTimerLog>::New();
+	tottimer->StartTimer();
 
 	vtkPolyData * out = vtkPolyData::GetData(outputVector);
 	//vtkTable * table = vtkTable::GetData(outputVector);
 	//table->Initialize();
 
-	//vtkDebugMacro("test");
 
 	if (!this->dataInfo.dataIsRead)
-		// only read if it's not been read before
+	// only read if it's not been read before
 	{
+		vtkSmartPointer<vtkTimerLog> readtimer = vtkSmartPointer<vtkTimerLog>::New();
+		readtimer->StartTimer();
+
 		readSnapshotInfo();
 		readSnapshots();
 		readTracks();
 		calculateAdditionalData();
 
 		this->dataInfo.dataIsRead = true;
+
+		readtimer->StopTimer();
+		vtkErrorMacro(" reading data took: " << readtimer->GetElapsedTime() << " s");
 	}
 
 	if (this->collisionCalc.lowerTolerance != *this->Gui.LowerLimit * *this->Gui.LowerLimit ||
@@ -260,13 +270,23 @@ int vtkSQLiteReader::RequestData(vtkInformation*,
 		this->collisionCalc.isDone = false;
 	}
 
-	if(!this->collisionCalc.isDone && (*Gui.DisplayColliding || *Gui.DisplayMerging))
+	if((!this->collisionCalc.isDone) && (*Gui.DisplayColliding || *Gui.DisplayMerging))
 	{
+		vtkSmartPointer<vtkTimerLog> calctimer = vtkSmartPointer<vtkTimerLog>::New();
+		calctimer->StartTimer();
+
 		this->collisionCalc.lowerTolerance = *this->Gui.LowerLimit * *this->Gui.LowerLimit;
 		this->collisionCalc.upperTolerance = *this->Gui.UpperLimit * *this->Gui.UpperLimit;
 		findCollisions(&this->collisionCalc);
 		this->collisionCalc.isDone = true;
+
+		calctimer->StopTimer();
+		vtkErrorMacro(" calculations took: " << calctimer->GetElapsedTime() << " s");
 	}
+
+
+	vtkSmartPointer<vtkTimerLog> refreshtimer = vtkSmartPointer<vtkTimerLog>::New();
+	refreshtimer->StartTimer();
 
 	Data * actData;
 
@@ -306,7 +326,9 @@ int vtkSQLiteReader::RequestData(vtkInformation*,
 	out->GetPointData()->AddArray(actData->CollisionTypePoint);
 	out->GetPointData()->AddArray(actData->CollisionTypeTrack);
 	out->GetPointData()->AddArray(actData->RGc);
-	//out->GetPointData()->SetScalars(actData->Colors);
+
+	refreshtimer->StopTimer();
+	vtkErrorMacro(" refreshing took: " << refreshtimer->GetElapsedTime() << " s");
 
 
 	//this->reset();
@@ -477,7 +499,8 @@ int vtkSQLiteReader::RequestData(vtkInformation*,
 	//lut2->PrintSelf(cerr, vtkIndent(0)) ;
 	*/
 
-
+	tottimer->StopTimer();
+	vtkErrorMacro("Total elapsed time: " << tottimer->GetElapsedTime() << " s");
 
 	return 1;
 }
@@ -1629,6 +1652,8 @@ int vtkSQLiteReader::generateTracks(SelectionStruct* selection, Data* actData)
 	vtkSmartPointer<vtkPolyLine> nextLine;
 
 	actData->Tracks->Reset();
+
+	//this->allData.Tracks->GetCell(
 
 	for (int i = 0; i<selection->nSelectedTracks; i++)
 	{

@@ -1,89 +1,119 @@
 <ServerManagerConfiguration>
-   <ProxyGroup name="filters">
-   <SourceProxy name="TrackFilter" class="vtkTrackFilter" label="TrackFilter">
-     <Documentation
-        long_help="Selects specific tracks"
-        short_help="Filter Track">
-          doku text here
-     </Documentation>
+	<ProxyGroup name="filters">
+		<SourceProxy name="TrackFilter" class="vtkTrackFilter" label="TrackFilter">
+			<Documentation
+				long_help="Selects specific tracks"
+				short_help="Filter Track">
+				doku text here
+			</Documentation>
 	 
-     <InputProperty
-        name="Input"
-        command="SetInputConnection">
-           <ProxyGroupDomain name="groups">
-             <Group name="sources"/>
-             <Group name="filters"/>
-           </ProxyGroupDomain>
-           <DataTypeDomain name="input_type">
-             <DataType value="vtkPolyData"/>
-           </DataTypeDomain>
-           <InputArrayDomain name="input_array">
-             <RequiredProperties>
-                <Property name="SelectInputArray" 
-                          function="FieldDataSelection"/>
-             </RequiredProperties>
-          </InputArrayDomain>
+			<InputProperty
+				name="Input"
+				command="SetInputConnection">
+				<ProxyGroupDomain name="groups">
+					<Group name="sources"/>
+					<Group name="filters"/>
+				</ProxyGroupDomain>
+				<DataTypeDomain name="input_type">
+					<DataType value="vtkPolyData"/>
+				</DataTypeDomain>
+				<InputArrayDomain name="input_array">
+					<RequiredProperties>
+						<Property name="SelectInputArray" 
+							function="FieldDataSelection"/>
+						</RequiredProperties>
+				</InputArrayDomain>
+			</InputProperty>
+			
+			<StringVectorProperty
+				name="SelectInputArray" 
+				command="SetInputArrayToProcess" 
+				label="Select all Tracks, where"
+				number_of_elements="5" 
+				element_types="0 0 0 0 2" 
+				animateable="0"> 
+				<ArrayListDomain name="array_list" 
+					attribute_type="Scalars">
+					<RequiredProperties>
+						<Property name="Input" function="Input"/>
+					</RequiredProperties>
+				</ArrayListDomain>
+				<FieldDataDomain name="field_list">
+					<RequiredProperties>
+						<Property name="Input" function="Input"/>
+					</RequiredProperties>
+				</FieldDataDomain>
+				<Documentation>
+				This property indicates which array to filter for.
+				</Documentation>
+			</StringVectorProperty>	  
 
-      </InputProperty>
-	  
-     <StringVectorProperty
-         name="SelectInputArray" 
-         command="SetInputArrayToProcess" 
-		 label="Array"
-         number_of_elements="5" 
-         element_types="0 0 0 0 2" 
-         animateable="0"> 
-          <ArrayListDomain name="array_list" 
-                           attribute_type="Scalars">
-            <RequiredProperties>
-               <Property name="Input" function="Input"/>
-            </RequiredProperties>
-          </ArrayListDomain>
-          <FieldDataDomain name="field_list">
-            <RequiredProperties>
-               <Property name="Input" function="Input"/>
-            </RequiredProperties>
-          </FieldDataDomain>
-          <Documentation>
-			This property indicates which array to filter for.
-          </Documentation>
-     </StringVectorProperty>	  
+			
+			<IntVectorProperty 
+				name="Mode" 
+				command="SetMode"
+				label="is at "
+				number_of_elements="1"
+				default_values="0" >
+				<EnumerationDomain name="enum">
+					<Entry value="0" text="some point on the track"/>
+					<Entry value="1" text="every point on the track"/>
+				</EnumerationDomain>
+			</IntVectorProperty>
+<!--
+			<IntVectorProperty
+				name="SelectMode"
+				command="SetMode"
+				label=""
+				number_of_elements="1"
+				default_values="0"
+				animateable="0">
+				<EnumerationDomain
+					name="enum">
+					<Entry value="0" text="at some point on the track"/>
+					<Entry value="1" text="at any point on the track"/>
+				</EnumerationDomain>
+				<Documentation>
+					Choose the filtering mode
+				</Documentation>
+			</IntVectorProperty>	
+			-->
 
-      <DoubleVectorProperty
-         name="LowPoint"
-         label=""
-         command="SetLowPoint"
-         number_of_elements="1"
-         animateable="1"
-         default_values="0" >
-         <BoundsDomain name="range" mode="normal" default_mode="min" >
-           <RequiredProperties>
-             <Property name="Input" function="Input" />
-           </RequiredProperties>
-         </BoundsDomain>
-         <Documentation>
-           uuuu
-         </Documentation>
-      </DoubleVectorProperty>
+			<DoubleVectorProperty
+				name="LowPoint"
+				label="between"
+				command="SetLowPoint"
+				number_of_elements="1"
+				animateable="1"
+				default_values="0" >
+				<BoundsDomain name="range" mode="normal" default_mode="min" >
+					<RequiredProperties>
+						<Property name="Input" function="Input" />
+					</RequiredProperties>
+				</BoundsDomain>
+				<Documentation>
+					uuuu
+				</Documentation>
+			</DoubleVectorProperty>
 
-      <DoubleVectorProperty
-         name="HighPoint"
-         label=""
-         command="SetHighPoint"
-         number_of_elements="1"
-         animateable="1"
-         default_values="0" >
-         <BoundsDomain name="range" mode="normal" default_mode="max" >
-           <RequiredProperties>
-             <Property name="Input" function="Input" />
-           </RequiredProperties>
-         </BoundsDomain>
-         <Documentation>
-           uuuuu
-         </Documentation>
-      </DoubleVectorProperty>
+			<DoubleVectorProperty
+				name="HighPoint"
+				label="and"
+				command="SetHighPoint"
+				number_of_elements="1"
+				animateable="1"
+				default_values="0" >
+				<BoundsDomain name="range" mode="normal" default_mode="max" >
+					<RequiredProperties>
+						<Property name="Input" function="Input" />
+					</RequiredProperties>
+				</BoundsDomain>
+				<Documentation>
+					uuuuu
+				</Documentation>
+			</DoubleVectorProperty>
 
-    </SourceProxy>
- </ProxyGroup>
+		</SourceProxy>
+	</ProxyGroup>
 </ServerManagerConfiguration>
 

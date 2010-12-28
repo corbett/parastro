@@ -36,6 +36,9 @@ public:
 
 	void PrintSelf(ostream& os, vtkIndent indent);
 
+	vtkSetMacro(Mode,int);
+	vtkGetMacro(Mode,int);
+
 	vtkSetMacro(HighPoint,double);
 	vtkGetMacro(HighPoint,double);
 
@@ -56,6 +59,7 @@ private:
 	vtkTrackFilter(const vtkTrackFilter&);  // Not implemented.
 	void operator=(const vtkTrackFilter&);  // Not implemented.
 
+	int Mode;
 	double HighPoint;
 	double LowPoint;
 };

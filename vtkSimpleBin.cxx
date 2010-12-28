@@ -1,6 +1,6 @@
 /*=========================================================================
 
-TODO: change output so something useful..
+TODO: implement better binning
 
 
   Program:   
@@ -142,7 +142,7 @@ int vtkSimpleBin::RequestData(vtkInformation*,
 	}
 
 	// init every field to 0
-	counter.resize(nBin);
+	counter.resize(nBin,0);
 	output->SetNumberOfRows(nBin);
 	for (int i = 0; i<nBin;i++)
 	{
@@ -169,6 +169,10 @@ int vtkSimpleBin::RequestData(vtkInformation*,
 	for (int i = 0; i<input->GetNumberOfPoints(); i++)
 	{
 		int bin = range[0] + *filterArray->GetTuple(i);
+
+		//check for arrays with mass = 0, dont count them
+		if(pData->GetArray("Mvir")->GetTuple1(i) == 0){continue;}
+		
 		counter.at(bin)++;
 
 		for (int j = 0; j<nArr; j++)
@@ -199,6 +203,8 @@ int vtkSimpleBin::RequestData(vtkInformation*,
 		for (int i = 0; i<input->GetNumberOfPoints(); i++)
 		{
 			int bin = range[0] + *filterArray->GetTuple(i);
+			if(pData->GetArray("Mvir")->GetTuple1(i) == 0){continue;}
+
 			for (int j = nArr; j<2*nArr; j++)
 			{
 				double oldval = output->GetValue(bin,j).ToDouble();
@@ -225,7 +231,6 @@ int vtkSimpleBin::RequestData(vtkInformation*,
 
 	timer->StopTimer();
 	vtkErrorMacro(" binning took: " << timer->GetElapsedTime() << " s");
-
 	
 	return 1;
 }

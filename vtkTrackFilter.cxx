@@ -109,33 +109,36 @@ int vtkTrackFilter::RequestData(vtkInformation*,
 	{
 		tracks->GetNextCell(npts,pts);
 
+		if (this->Mode==0)
 		// one point on a track has to fullfill the condition
-		savetrack = false;
-		for (int j =0;j<npts;j++)
 		{
-			if (filterArray->GetTuple1(*(pts+j)) <= this->HighPoint &&
-				filterArray->GetTuple1(*(pts+j)) >= this->LowPoint)
+			savetrack = false;
+			for (int j =0;j<npts;j++)
 			{
-				savetrack = true;
-				break;
+				if (filterArray->GetTuple1(*(pts+j)) <= this->HighPoint &&
+					filterArray->GetTuple1(*(pts+j)) >= this->LowPoint)
+				{
+					savetrack = true;
+					break;
+				}
+				//vtkErrorMacro(" id: " << *(pts+j));
 			}
-			//vtkErrorMacro(" id: " << *(pts+j));
 		}
-		
+		else if (this->Mode==1)
 		// every point on a track has to fullfil the condition
-		/*
-		savetrack = true;
-		for (int j =0;j<npts;j++)
 		{
-			if (!(this->filterArray->GetTuple1(*(pts+j)) <= this->HighPoint &&
-				this->filterArray->GetTuple1(*(pts+j)) >= this->LowPoint))
+			savetrack = true;
+			for (int j =0;j<npts;j++)
 			{
-				savetrack = false;
-				break;
+				if (!(filterArray->GetTuple1(*(pts+j)) <= this->HighPoint &&
+					filterArray->GetTuple1(*(pts+j)) >= this->LowPoint))
+				{
+					savetrack = false;
+					break;
+				}
+				//vtkErrorMacro(" id: " << *(pts+j));
 			}
-			//vtkErrorMacro(" id: " << *(pts+j));
 		}
-		*/
 
 		if (savetrack)
 		{
