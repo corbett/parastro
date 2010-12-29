@@ -7,7 +7,11 @@
 		<!--named Aaa as currently ParaView decides which file is the
 			main data file by that file with the name which is alphabetically
 			first -->
-			
+
+		<OutputPort name="Points / Tracks" index="0" />
+		<OutputPort name="Snapshot Info" index="1" />
+		<OutputPort name="Track Info" index="2" />
+
 
 		
 		<StringVectorProperty

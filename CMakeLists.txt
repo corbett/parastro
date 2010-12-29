@@ -58,7 +58,7 @@ ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.0"
 		FriendsOfFriendsHaloFinder.xml	
 		#PointDisplaySM.xml
 		SQLiteReaderSM.xml
-		SQLiteReaderSM2.xml
+		SQLiteReader2SM.xml
 		TrackFilterSM.xml
 		SimpleBinSM.xml
 	GUI_RESOURCES

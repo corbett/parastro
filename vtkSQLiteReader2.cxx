@@ -50,7 +50,7 @@ vtkSQLiteReader2::vtkSQLiteReader2()
 {
 	this->FileName          = 0;		// init filename
 	this->SetNumberOfInputPorts(0);   // set no of input files (0 is just fine)
-	this->SetNumberOfOutputPorts(2);
+	this->SetNumberOfOutputPorts(3);
 
 	this->db	= NULL;
 	this->dataIsRead = false;
@@ -73,37 +73,6 @@ vtkSQLiteReader2::vtkSQLiteReader2()
 
 	//init
 
-	/*
-	
-	Gui.DisplayOnlySelectedData = &(this->DisplayOnlySelectedData); 
-	Gui.DisplaySelected = &(this->DisplaySelected); 
-	Gui.DisplaySelectedSnapshot = &(this->DisplaySelectedSnapshot); 
-	Gui.DisplaySelectedSnapshotNr = &(this->DisplaySelectedSnapshotNr); 
-	Gui.DisplaySelectedTrack = &(this->DisplaySelectedTrack); 
-	Gui.DisplaySelectedTrackNr = &(this->DisplaySelectedTrackNr); 
-	Gui.DisplayCalculated = &(this->DisplayCalculated);
-	Gui.CalculationImpactParameter = &(this->CalculationImpactParameter);
-	Gui.DisplayEstimateTolerance = &(this->DisplayEstimateTolerance);
-
-	Gui.calcHighlightCollisionPoints = &(this->calcHighlightCollisionPoints);
-	Gui.calcHighlightTrack = &(this->calcHighlightTrack);
-	Gui.calcHighlightSnapshot = &(this->calcHighlightSnapshot);
-	Gui.calcHighlightPoint = &(this->calcHighlightPoint);
-	Gui.calcHighlightTrackNr = &(this->calcHighlightTrackNr);
-	Gui.calcHighlightSnapshotNr = &(this->calcHighlightSnapshotNr);
-	Gui.calcHighlightPointNr = &(this->calcHighlightPointNr);
-
-	*Gui.DisplayOnlySelectedData = false; 
-	*Gui.DisplaySelected = false; 
-	*Gui.DisplaySelectedSnapshot = false; 
-	*Gui.DisplaySelectedSnapshotNr = -1; 
-	*Gui.DisplaySelectedTrack = false; 
-	*Gui.DisplaySelectedTrackNr = -1; 
-	*Gui.DisplayCalculated = false;
-	*Gui.CalculationImpactParameter = 0.0000001;
-	*Gui.DisplayEstimateTolerance = false;
-	*/
-
 	// init dataInfo (maybee just call this->reset!??)
 	dataInfo.dataIsRead = false;
 	dataInfo.nPoints = 0;
@@ -111,13 +80,6 @@ vtkSQLiteReader2::vtkSQLiteReader2()
 	dataInfo.nTracks = 0;
 	dataInfo.nSnapshots = 0;
 	dataInfo.hubble = 0;
-
-	/*dataInfo.nSelectedPoints = -1;
-	dataInfo.nSelectedTracks = -1;
-	dataInfo.nSelectedSnapshots = -1;
-	dataInfo.selectedPoints.clear();
-	dataInfo.selectedSnapshots.clear();
-	dataInfo.selectedTracks.clear();*/
 
 	//init data stuff
 
@@ -219,6 +181,10 @@ if(port == 0)
 	info->Set(vtkDataObject::DATA_TYPE_NAME(), "vtkPolyData");
 }
 else if(port == 1)
+{
+	info->Set(vtkDataObject::DATA_TYPE_NAME(), "vtkTable");
+}
+else if(port == 2)
 {
 	info->Set(vtkDataObject::DATA_TYPE_NAME(), "vtkTable");
 }
