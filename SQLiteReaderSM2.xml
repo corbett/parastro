@@ -1,0 +1,84 @@
+<ServerManagerConfiguration>
+	<ProxyGroup name="sources">
+	<SourceProxy
+		name="SQLiteReader2"
+		class="vtkSQLiteReader2">
+
+		<!--named Aaa as currently ParaView decides which file is the
+			main data file by that file with the name which is alphabetically
+			first -->
+			
+
+		
+		<StringVectorProperty
+			name="AaaFileName"
+			command="SetFileName"
+			number_of_elements="1">
+			
+			<FileListDomain name="files"/>
+			<Documentation>
+				Reads in points from SQLite3 database
+			</Documentation>
+		</StringVectorProperty>
+		
+		<!--  -->
+		<IntVectorProperty
+			name="DisplayColliding"
+			command="SetDisplayColliding"
+			number_of_elements="1"
+			default_values="0">
+			<BooleanDomain name="bool" />
+			<Documentation>
+				
+			</Documentation>
+		</IntVectorProperty>
+		
+		<!--  -->
+		<IntVectorProperty
+			name="DisplayMerging"
+			command="SetDisplayMerging"
+			number_of_elements="1"
+			default_values="0">
+			<BooleanDomain name="bool" />
+			<Documentation>
+				
+			</Documentation>
+		</IntVectorProperty>
+
+		<!--  -->
+		<IntVectorProperty
+			name="DisplayInverted"
+			command="SetDisplayInverted"
+			number_of_elements="1"
+			default_values="0">
+			<BooleanDomain name="bool" />
+			<Documentation>
+				
+			</Documentation>
+		</IntVectorProperty>
+
+		
+		<DoubleVectorProperty
+			name="UpperLimit"
+			command="SetUpperLimit"
+			number_of_elements="1"
+			default_values="0.00000001">
+			<Documentation>
+				
+			</Documentation>
+		</DoubleVectorProperty>
+		
+		<DoubleVectorProperty
+			name="LowerLimit"
+			command="SetLowerLimit"
+			number_of_elements="1"
+			default_values="0">
+			<Documentation>
+				
+			</Documentation>
+		</DoubleVectorProperty>
+		
+		
+	</SourceProxy>
+	</ProxyGroup>
+</ServerManagerConfiguration>

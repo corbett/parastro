@@ -44,6 +44,7 @@ ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.0"
 		vtkFriendsOfFriendsHaloFinder.cxx 
 		#vtkPointDisplay.cxx
 		vtkSQLiteReader.cxx
+		vtkSQLiteReader2.cxx
 		vtkTrackFilter.cxx
 		vtkSimpleBin.cxx
 	SERVER_MANAGER_XML
@@ -57,12 +58,14 @@ ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.0"
 		FriendsOfFriendsHaloFinder.xml	
 		#PointDisplaySM.xml
 		SQLiteReaderSM.xml
+		SQLiteReaderSM2.xml
 		TrackFilterSM.xml
 		SimpleBinSM.xml
 	GUI_RESOURCES
 		TipsyReader.qrc
 		#PointDisplay.qrc
 		SQLiteReader.qrc
+		SQLiteReader2.qrc
 	GUI_RESOURCE_FILES
 		AstroVizFilterMenu.xml
 	GUI_INTERFACES ${IFACES} 

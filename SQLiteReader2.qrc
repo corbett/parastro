@@ -1,0 +1,5 @@
+<RCC>
+	<qresource prefix="/ParaViewResources">
+		<file>SQLiteReaderGUI2.xml</file>
+	</qresource>
+</RCC>
