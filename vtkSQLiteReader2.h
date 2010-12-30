@@ -89,6 +89,8 @@ protected:
 		int lenght; // stores the amount of halos in this snapshot
 		std::vector<int> PointId; //allocates gid to new id (PointId.at(gid) = id+offset) maybee save here some mem, by using smaller datatype..
 		
+
+		// dont store data in structs anymore...
 		int snapshotNr; // snapshot Nr from simulation (this is not the id!)
 		double redshift;
 		double time;
@@ -108,18 +110,21 @@ protected:
 		int nPoints;
 		int nTracks;
 		int nSnapshots;
-		double hubble;
-		/*
-		int nSelectedPoints; //-1 means all, single points selected to display
-		int nSelectedTracks; // -1 means all
-		int nSelectedSnapshots; 
-		int nAllSelectedPoints; // # of all points (inkl tracks, snaps) to display
-		std::vector<int>	selectedPoints; // holds globalids from points to display
-		std::vector<int>	selectedSnapshots; //holds snapids of points from snapshot to display
-		std::vector<int>	selectedTracks; //holds trackid from points to display
-		std::vector<int>	idMap1; //mapps ids from read in data to displayed data
-		std::vector<int>	idMap2; //mapps ids from displayed data to read in data
-		*/
+		double Omega0;
+		double OmegaLambda;
+		double Hubble;
+		
+		vtkstd::vector<int> SnapinfoDataColumns; // witch columns in db contain relevant data?
+		vtkstd::vector<int> StatDataColumns; // witch columns in db contain relevant data?
+		vtkstd::vector<int> StatCordinateColumns; // witch columns in db contain relevant data?
+		//vtkstd::vector<int> StatVelocityColumns; // NOT USED witch columns in db contain relevant data?
+
+		// these save witch column in the according table contains the vital ids
+		int StatSnapidColumn;
+		int StatGidColumn;
+		int TracksTrackidColumn;
+		int TracksSnapidColumn;
+		int TracksGidColumn;
 	};
 
 	struct GuiStruct {
@@ -289,7 +294,14 @@ private:
 
 	//variables
 	sqlite3 * db;
-	bool dataIsRead;
+
+	vtkPolyData*	AllData;
+	vtkPolyData*	SelectedData;
+	vtkPolyData*	EmptyData;
+
+	vtkPolyData*	TrackData;
+	vtkPolyData*	SnapshotData;
+
 
 	//functions
 	int vtkSQLiteReader2::ReadHeader(); // reads the database header information
@@ -319,9 +331,10 @@ private:
 	double getDistance2(int, int);
 	double getDistanceToO(int);
 
+	vtkSmartPointer<vtkFloatArray> CreateArray(vtkDataSet *output, const char* arrayName, int numComponents=1);
+	int InitAllArrays(vtkDataSet *output, unsigned long numTuples);
+
 	// old stuff - not yet, or not anymore needed
-	int RequestDataDemo(vtkInformationVector*);
-	int vtkSQLiteReader2::SQLQuery(vtkStdString, sqlite3_stmt*);
 
 
 //ETX
