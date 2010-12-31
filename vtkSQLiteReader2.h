@@ -77,11 +77,22 @@ protected:
 
 	virtual int FillOutputPortInformation(int vtkNotUsed(port),	vtkInformation* info);
 
-
 	int RequestInformation(vtkInformation*,	vtkInformationVector**,
 		vtkInformationVector*);
 	int RequestData(vtkInformation*,vtkInformationVector**,
 		vtkInformationVector*);
+
+	struct Track2{
+		int nPoints;
+		vtkstd::vector<vtkIdType> PointIds;
+	};
+
+	struct Snap2{
+		vtkstd::vector<vtkIdType> PointIds;
+	};
+
+	vtkstd::vector<Snap2> SnapInfo2;
+	vtkstd::vector<Track2> TrackInfo2;
 
 	//structs
 	struct SnapshotInfo {
@@ -106,10 +117,12 @@ protected:
 	};
 
 	struct DataInformation {
+		bool InitComplete;
 		bool dataIsRead;
 		int nPoints;
 		int nTracks;
 		int nSnapshots;
+		int gidmax;
 		double Omega0;
 		double OmegaLambda;
 		double Hubble;
@@ -119,12 +132,19 @@ protected:
 		vtkstd::vector<int> StatCordinateColumns; // witch columns in db contain relevant data?
 		//vtkstd::vector<int> StatVelocityColumns; // NOT USED witch columns in db contain relevant data?
 
-		// these save witch column in the according table contains the vital ids
+		// these save witch column in the according table in db contains the vital ids
+		int SnapinfoSnapidColumn;
 		int StatSnapidColumn;
 		int StatGidColumn;
 		int TracksTrackidColumn;
 		int TracksSnapidColumn;
 		int TracksGidColumn;
+
+		// pointer to important dataarrays
+		vtkSmartPointer<vtkIntArray> pGIdArray;
+		vtkSmartPointer<vtkIntArray> pTrackIdArray;
+		vtkSmartPointer<vtkIntArray> pSnapIdArray;
+		int dataArrayOffset;
 	};
 
 	struct GuiStruct {
@@ -295,13 +315,12 @@ private:
 	//variables
 	sqlite3 * db;
 
-	vtkPolyData*	AllData;
-	vtkPolyData*	SelectedData;
-	vtkPolyData*	EmptyData;
+	vtkSmartPointer<vtkPolyData>	AllData;
+	vtkSmartPointer<vtkPolyData>	SelectedData;
+	vtkSmartPointer<vtkPolyData>	EmptyData;
 
-	vtkPolyData*	TrackData;
-	vtkPolyData*	SnapshotData;
-
+	vtkSmartPointer<vtkPolyData>	TrackData;
+	vtkSmartPointer<vtkPolyData>	SnapshotData;
 
 	//functions
 	int vtkSQLiteReader2::ReadHeader(); // reads the database header information
@@ -332,6 +351,7 @@ private:
 	double getDistanceToO(int);
 
 	vtkSmartPointer<vtkFloatArray> CreateArray(vtkDataSet *output, const char* arrayName, int numComponents=1);
+	vtkSmartPointer<vtkIntArray> CreateIntArray(vtkDataSet *output, const char* arrayName, int numComponents=1);
 	int InitAllArrays(vtkDataSet *output, unsigned long numTuples);
 
 	// old stuff - not yet, or not anymore needed
