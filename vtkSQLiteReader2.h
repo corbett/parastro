@@ -82,6 +82,7 @@ protected:
 	int RequestData(vtkInformation*,vtkInformationVector**,
 		vtkInformationVector*);
 
+	/* OUTDATED use vtkIdList instead
 	struct Track2{
 		int nPoints;
 		vtkstd::vector<vtkIdType> PointIds;
@@ -93,6 +94,10 @@ protected:
 
 	vtkstd::vector<Snap2> SnapInfo2;
 	vtkstd::vector<Track2> TrackInfo2;
+	*/
+	vtkstd::vector<vtkSmartPointer<vtkIdList>> SnapInfo2;
+	vtkstd::vector<vtkSmartPointer<vtkIdList>> TrackInfo2;
+
 
 	//structs
 	struct SnapshotInfo {

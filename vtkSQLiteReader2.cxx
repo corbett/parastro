@@ -696,7 +696,7 @@ int vtkSQLiteReader2::readSnapshots()
 	vtkIntArray			*GIdA = this->dataInfo.pGIdArray;// pointer to GId array
 	int					offsetA = this->dataInfo.dataArrayOffset; // wich is the first of the dataarrays.
 
-	vtkstd::vector<Snap2> * snapI = &this->SnapInfo2;
+	vtkstd::vector<vtkSmartPointer<vtkIdList>> * snapI = &this->SnapInfo2;
 	vtkPointData		*pData = this->AllData->GetPointData();
 	vtkPoints			*pnts = this->AllData->GetPoints();
 
@@ -706,7 +706,10 @@ int vtkSQLiteReader2::readSnapshots()
 	snapI->resize(this->dataInfo.nSnapshots);
 	for (int i = 0; i<this->dataInfo.nSnapshots; ++i)
 	{
-		snapI->at(i).PointIds.resize(gidmax+1,-1);
+		//snapI->at(i).PointIds.resize(gidmax+1,-1);
+		snapI->at(i) = vtkSmartPointer<vtkIdList>::New();
+		snapI->at(i)->SetNumberOfIds(gidmax+1);
+		for (vtkIdType j = 0; j<gidmax+1;j++){snapI->at(i)->SetId(j,-1);}
 	}
 	pnts->SetNumberOfPoints(this->dataInfo.nPoints);
 	this->InitAllArrays(this->AllData,this->dataInfo.nPoints);
@@ -734,7 +737,8 @@ int vtkSQLiteReader2::readSnapshots()
 		SnapidA->InsertTuple1(counter,snapid);
 		GIdA->InsertTuple1(counter,gid);
 
-		snapI->at(snapid).PointIds.at(gid) = counter;
+		//snapI->at(snapid).PointIds.at(gid) = counter;
+		snapI->at(snapid)->SetId(gid, counter);
 
 		for (i=0;i<dC->size();++i)
 		{
@@ -902,20 +906,27 @@ int vtkSQLiteReader2::readTracks(){
 	int GidC = this->dataInfo.TracksGidColumn;
 
 	vtkIntArray * TracksA = this->dataInfo.pTrackIdArray;
-	vtkstd::vector<Track2> * ti = &this->TrackInfo2;
-	vtkstd::vector<Snap2> * si = &this->SnapInfo2;
+	vtkstd::vector<vtkSmartPointer<vtkIdList>> * ti = &this->TrackInfo2;
+	vtkstd::vector<vtkSmartPointer<vtkIdList>> * si = &this->SnapInfo2;
 
 	//init
 	vtkSmartPointer<vtkCellArray> Tracks = vtkSmartPointer<vtkCellArray>::New();
 	vtkSmartPointer<vtkPolyLine> nextLine;
+	//vtkstd::vector<int> nPointsOnTrack;
 
 	ti->clear();
 	ti->resize(this->dataInfo.nTracks);
+	//nPointsOnTrack.clear();
+	//nPointsOnTrack.resize(this->dataInfo.nTracks,0);
+
 	for (int i = 0; i<this->dataInfo.nTracks; ++i)
 	{
-		ti->at(i).nPoints=0;
-		ti->at(i).PointIds.clear();
-		ti->at(i).PointIds.resize(this->dataInfo.nSnapshots,-1);
+		//ti->at(i).nPoints=0;
+		//ti->at(i).PointIds.clear();
+		//ti->at(i).PointIds.resize(this->dataInfo.nSnapshots,-1);
+		ti->at(i) = vtkSmartPointer<vtkIdList>::New();
+		ti->at(i)->SetNumberOfIds(this->dataInfo.nSnapshots);
+		for (vtkIdType j = 0; j<this->dataInfo.nSnapshots;++j){ti->at(i)->SetId(j,-1);}
 	}
 
 	TracksA->SetNumberOfTuples(this->dataInfo.nPoints);
@@ -923,8 +934,8 @@ int vtkSQLiteReader2::readTracks(){
 
 	// loop vars
 	vtkIdType trackid, snapid, gid, newid;
-	vtkstd::vector<vtkIdType> * PointsOnTrack;
-	Track2 * Track;
+	//vtkIdList * PointsOnTrack;
+	//vtkIdList * Track;
 
 	//read in the data
 	while (sqlite3_step(res) == SQLITE_ROW)
@@ -933,12 +944,15 @@ int vtkSQLiteReader2::readTracks(){
 		snapid = sqlite3_column_int(res, SnapidC);
 		gid = sqlite3_column_int(res, GidC);
 
-		newid = si->at(snapid).PointIds.at(gid);
+		//newid = si->at(snapid).PointIds.at(gid);
+		newid = si->at(snapid)->GetId(gid);
 
 		if(newid>-1)
 		{
-			ti->at(trackid).PointIds.at(snapid) = newid;
-			ti->at(trackid).nPoints++;
+			//ti->at(trackid).PointIds.at(snapid) = newid;
+			//ti->at(trackid).nPoints++;
+			ti->at(trackid)->SetId(snapid,newid);
+			//++nPointsOnTrack.at(trackid);
 		}
 	}
 
@@ -947,8 +961,14 @@ int vtkSQLiteReader2::readTracks(){
 	// starting from an empty vector and just insert the values...
 	for (int i = 0; i<ti->size(); ++i)
 	{
-		PointsOnTrack = &ti->at(i).PointIds;
-		Track = &ti->at(i);
+		ti->at(i)->DeleteId(-1);
+		
+		//PointsOnTrack = &ti->at(i).PointIds;
+		/*Track = &ti->at(i);
+
+		
+
+		
 
 		vtkstd::vector<vtkIdType>::reverse_iterator rev_iter = PointsOnTrack->rbegin();
 		// note: explanation of use of reverse iterators:
@@ -973,7 +993,7 @@ int vtkSQLiteReader2::readTracks(){
 			{
 				++rev_iter;
 			}
-		}   
+		}   */
 
 		
 		/* simple way with forward iterator
@@ -997,16 +1017,18 @@ int vtkSQLiteReader2::readTracks(){
 	vtkPoints * tmpPoints = this->TrackData->GetPoints();
 	tmpPoints->SetNumberOfPoints(this->dataInfo.nTracks);
 
-	vtkSmartPointer<vtkIntArray> nPointsOnTrack = vtkSmartPointer<vtkIntArray>::New();
-	nPointsOnTrack->SetNumberOfComponents(1);
-	nPointsOnTrack->SetNumberOfTuples(this->dataInfo.nTracks);
-	nPointsOnTrack->SetName("nPointsOnTrack");
+	vtkSmartPointer<vtkIntArray> nPointsOnTrackDataArray = vtkSmartPointer<vtkIntArray>::New();
+	nPointsOnTrackDataArray->SetNumberOfComponents(1);
+	nPointsOnTrackDataArray->SetNumberOfTuples(this->dataInfo.nTracks);
+	nPointsOnTrackDataArray->SetName("nPointsOnTrack");
 
 	// you can add here more data if you want...
 
 	for (int i = 0; i<ti->size(); ++i)
 	{
-		Track = &ti->at(i);
+		/*
+		Track = ti->at(i);
+		
 		PointsOnTrack = &ti->at(i).PointIds;
 		nextLine = vtkSmartPointer<vtkPolyLine>::New();
 
@@ -1015,15 +1037,18 @@ int vtkSQLiteReader2::readTracks(){
 			nextLine->GetPointIds()->InsertNextId(Track->PointIds.at(j));
 		}
 		Tracks->InsertNextCell(nextLine);
+		*/
+		Tracks->InsertNextCell(ti->at(i));
 
 		//Fill Data Arrays here..
 		tmpPoints->InsertPoint(i,0,0,i);
-		nPointsOnTrack->InsertTuple1(i,Track->nPoints);
+		//nPointsOnTrackDataArray->InsertTuple1(i,Track->nPoints);
+		nPointsOnTrackDataArray->InsertTuple1(i,ti->at(i)->GetNumberOfIds());
 	}
 
 	this->AllData->SetLines(Tracks);
 
-	this->TrackData->GetPointData()->AddArray(nPointsOnTrack);
+	this->TrackData->GetPointData()->AddArray(nPointsOnTrackDataArray);
 
 
 
