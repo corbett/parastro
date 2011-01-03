@@ -667,13 +667,7 @@ reads the snapshots in (reads all the points, and the according data, generates 
 	arguments:
 		none
 	sets:
-		this->Position
-		this->Velocity
-		this->Cells
-		this->Qid
-		this->SnapId
-		this->RVir
-		this->SnapInfo		stores information about the snapshots
+
 	returns:
 		int	errorcode (1 = ok)
 */
@@ -698,8 +692,8 @@ int vtkSQLiteReader2::readSnapshots()
 	int					GIdC = this->dataInfo.StatGidColumn;
 	vtkstd::vector<int>	*dC = &this->dataInfo.StatDataColumns;
 
-	vtkIntArray			*SnapidA = this->dataInfo.pSnapIdArray;// pointer to snapid array?
-	vtkIntArray			*GIdA = this->dataInfo.pGIdArray;// pointer to GId array?
+	vtkIntArray			*SnapidA = this->dataInfo.pSnapIdArray;// pointer to snapid array
+	vtkIntArray			*GIdA = this->dataInfo.pGIdArray;// pointer to GId array
 	int					offsetA = this->dataInfo.dataArrayOffset; // wich is the first of the dataarrays.
 
 	vtkstd::vector<Snap2> * snapI = &this->SnapInfo2;
@@ -911,8 +905,6 @@ int vtkSQLiteReader2::readTracks(){
 	vtkstd::vector<Track2> * ti = &this->TrackInfo2;
 	vtkstd::vector<Snap2> * si = &this->SnapInfo2;
 
-
-
 	//init
 	vtkSmartPointer<vtkCellArray> Tracks = vtkSmartPointer<vtkCellArray>::New();
 	vtkSmartPointer<vtkPolyLine> nextLine;
@@ -931,9 +923,10 @@ int vtkSQLiteReader2::readTracks(){
 
 	// loop vars
 	vtkIdType trackid, snapid, gid, newid;
-	Track2 * track;
+	vtkstd::vector<vtkIdType> * PointsOnTrack;
+	Track2 * Track;
 
-
+	//read in the data
 	while (sqlite3_step(res) == SQLITE_ROW)
 	{
 		trackid = sqlite3_column_int(res, TrackidC);
@@ -949,29 +942,93 @@ int vtkSQLiteReader2::readTracks(){
 		}
 	}
 
+	//delete the fields with no values (this is necessairy, because the data read in from tracks
+	// isnt necessairy ordered.. otherwise this could be done much quicker by chaning the above loop
+	// starting from an empty vector and just insert the values...
 	for (int i = 0; i<ti->size(); ++i)
 	{
-		ti->at(i).PointIds.resize(ti->at(i).nPoints);
-	}
-	for (int i = 0; i<ti->size(); ++i)   //   NOT fehler irdengwo zw 17000 und 17002
-	{
-		//if(i>=16999){continue;}
-		track = &ti->at(i);
-		nextLine = vtkSmartPointer<vtkPolyLine>::New();
-		for (int j=0; j<track->nPoints;++j) //track->nPoints
+		PointsOnTrack = &ti->at(i).PointIds;
+		Track = &ti->at(i);
+
+		vtkstd::vector<vtkIdType>::reverse_iterator rev_iter = PointsOnTrack->rbegin();
+		// note: explanation of use of reverse iterators:
+		// http://www.drdobbs.com/cpp/184401406;jsessionid=N3YFDK53XSCRPQE1GHPCKHWATMY32JVN
+		// and sample code from here:
+		// http://stackoverflow.com/questions/404258/how-do-i-erase-a-reverse-iterator-from-an-stl-data-structure
+
+		while ( rev_iter != PointsOnTrack->rend())
 		{
-			int kid = ti->at(i).PointIds.at(j);
-			nextLine->GetPointIds()->InsertNextId(kid);
+			// Find 3 and try to erase
+			if (*rev_iter == -1)
+			{
+				//cout << "Erasing : " << *rev_iter;
+				vtkstd::vector<vtkIdType>::iterator tempIter = PointsOnTrack->erase( --rev_iter.base());
+				rev_iter = vtkstd::vector<vtkIdType>::reverse_iterator(tempIter);                        
+			}
+			else if (Track->nPoints == PointsOnTrack->size())
+			{
+				break;
+			}
+			else
+			{
+				++rev_iter;
+			}
+		}   
+
+		
+		/* simple way with forward iterator
+
+		vtkstd::vector<vtkIdType>::iterator iter = PointsOnTrack->begin();
+		while( iter != PointsOnTrack->end() )
+		{
+			if (*iter == -1)
+			{
+				iter = PointsOnTrack->erase( iter );
+			}
+			else
+			{
+				++iter;
+			}
+		}
+		*/
+	}
+
+
+	vtkPoints * tmpPoints = this->TrackData->GetPoints();
+	tmpPoints->SetNumberOfPoints(this->dataInfo.nTracks);
+
+	vtkSmartPointer<vtkIntArray> nPointsOnTrack = vtkSmartPointer<vtkIntArray>::New();
+	nPointsOnTrack->SetNumberOfComponents(1);
+	nPointsOnTrack->SetNumberOfTuples(this->dataInfo.nTracks);
+	nPointsOnTrack->SetName("nPointsOnTrack");
+
+	// you can add here more data if you want...
+
+	for (int i = 0; i<ti->size(); ++i)
+	{
+		Track = &ti->at(i);
+		PointsOnTrack = &ti->at(i).PointIds;
+		nextLine = vtkSmartPointer<vtkPolyLine>::New();
+
+		for (int j=0; j<Track->nPoints;++j)
+		{
+			nextLine->GetPointIds()->InsertNextId(Track->PointIds.at(j));
 		}
 		Tracks->InsertNextCell(nextLine);
+
+		//Fill Data Arrays here..
+		tmpPoints->InsertPoint(i,0,0,i);
+		nPointsOnTrack->InsertTuple1(i,Track->nPoints);
 	}
 
 	this->AllData->SetLines(Tracks);
 
+	this->TrackData->GetPointData()->AddArray(nPointsOnTrack);
 
 
-	/*
 
+	
+/*
 	this->allData.TrackId->SetNumberOfTuples(this->dataInfo.nPoints);
 
 	//init everything to -1 (-1: halo belongs to no track)
@@ -1058,8 +1115,8 @@ int vtkSQLiteReader2::readTracks(){
 			goOn = false;
 		}
 	}
-	*/
-
+	
+*/
 
 	vtkErrorMacro("track count: " << this->dataInfo.nTracks);
 	return 1;
