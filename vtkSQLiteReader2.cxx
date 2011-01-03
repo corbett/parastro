@@ -1158,6 +1158,7 @@ Reads in addidtional infos for the snapshots (redshift, time, npart)
 	returns:
 		int	errorcode (1 =ok)
 */
+
 int vtkSQLiteReader2::readSnapshotInfo()
 {
 	// set up the sql stuff
