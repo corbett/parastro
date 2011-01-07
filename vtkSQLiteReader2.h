@@ -146,9 +146,9 @@ protected:
 		int TracksGidColumn;
 
 		// pointer to important dataarrays
-		vtkSmartPointer<vtkIntArray> pGIdArray;
-		vtkSmartPointer<vtkIntArray> pTrackIdArray;
-		vtkSmartPointer<vtkIntArray> pSnapIdArray;
+		vtkSmartPointer<vtkIdTypeArray> pGIdArray;
+		vtkSmartPointer<vtkIdTypeArray> pTrackIdArray;
+		vtkSmartPointer<vtkIdTypeArray> pSnapIdArray;
 		int dataArrayOffset;
 	};
 
@@ -216,6 +216,7 @@ protected:
 		std::vector<int>	selectedTracks; //stores trackid from points to display
 	};
 
+	/* old
 	struct CollisionResultStruct{
 		int nEvents;
 		int nPoints;
@@ -231,8 +232,19 @@ protected:
 		CollisionResultStruct Colliding;
 		CollisionResultStruct Merging;
 	};
+	*/
 
-	struct SelectionStruct{
+	struct CollisionCalculation{
+		bool CalcIsDone;
+		double CollisionTolerance;
+		double MergingTolerance;
+		vtkSmartPointer<vtkIdList> CollisionPointIds;
+		vtkSmartPointer<vtkIdList> CollisionTrackIds;
+		vtkSmartPointer<vtkIdList> MergingPointIds;
+		vtkSmartPointer<vtkIdList> MergingTrackIds;
+	};
+
+/*	struct SelectionStruct{
 		int nSelectedPoints;
 		int nSelectedTracks;
 		int nSelectedSnapshots;
@@ -243,6 +255,11 @@ protected:
 		std::vector<int> vPointIdMapReverse; // equal to vPointIds!!
 		std::vector<int> vTrackIdMap;
 
+	};*/
+
+	struct SelectionStruct {
+		vtkSmartPointer<vtkIdList>	Points;
+		vtkSmartPointer<vtkIdList>	Tracks;
 	};
 
 	struct ResultOfEsimationOfTolerance {
@@ -271,13 +288,14 @@ protected:
 	CalculationSettings calcInfo;
 	SelectionStruct	selection;
 	
-	CollisionCalculationStruct collisionCalc;
+	CollisionCalculation collisionCalc;
+	//CollisionCalculationStruct collisionCalc;
 
-	std::vector<ResultOfEsimationOfTolerance> calcEstTol;
-	vtkSmartPointer<vtkFloatArray> calcEstTol2;
+	//std::vector<ResultOfEsimationOfTolerance> calcEstTol;
+	//vtkSmartPointer<vtkFloatArray> calcEstTol2;
 	
-	std::vector<SnapshotInfo> SnapInfo;
-	std::vector<Track> TracksInfo;
+	//std::vector<SnapshotInfo> SnapInfo;
+	//std::vector<Track> TracksInfo;
 
 	//gui variables
 	char* FileName;
@@ -333,30 +351,53 @@ private:
 	int vtkSQLiteReader2::readSnapshots(); // reads the snapshots
 	int vtkSQLiteReader2::readSnapshotInfo(); 
 	int vtkSQLiteReader2::readTracks();
-	int vtkSQLiteReader2::calculateAdditionalData();
-	int vtkSQLiteReader2::generateColors();
+	//int vtkSQLiteReader2::calculateAdditionalData();
+	//int vtkSQLiteReader2::generateColors();
 
-	int vtkSQLiteReader2::findCollisions(CollisionCalculationStruct*);
+	int vtkSQLiteReader2::findCollisions(CollisionCalculation*);
+	
 	//int vtkSQLiteReader2::doCalculations(double,int);
 	int vtkSQLiteReader2::calcTolerance();
 
-	int vtkSQLiteReader2::generateSelection(CollisionCalculationStruct*, SelectionStruct*);
-	int vtkSQLiteReader2::fillIdList(std::vector<int>*, int*,
+
+	int vtkSQLiteReader2::generateSelection(
+		CollisionCalculation*, SelectionStruct*);
+	int vtkSQLiteReader2::generateSelectedData(
+		vtkSmartPointer<vtkPolyData>, SelectionStruct*);
+	
+	/*int vtkSQLiteReader2::fillIdList(std::vector<int>*, int*,
 		std::vector<int>*, int*,
 		CollisionResultStruct*, int);
 	int vtkSQLiteReader2::generateIdMap();
 	int vtkSQLiteReader2::generatePoints(SelectionStruct*, Data*);
 	int vtkSQLiteReader2::generateTracks(SelectionStruct*, Data*);
 	int vtkSQLiteReader2::reset();
+	*/
 
 	// helper
+	vtkSmartPointer<vtkIdList> IdListUnion (
+		vtkSmartPointer<vtkIdList>, vtkSmartPointer<vtkIdList>); 
+	vtkSmartPointer<vtkIdList> IdListUnionUnique (
+		vtkSmartPointer<vtkIdList>, vtkSmartPointer<vtkIdList>); 
+	vtkSmartPointer<vtkIdList> IdListIntersect (
+		vtkSmartPointer<vtkIdList>, vtkSmartPointer<vtkIdList>); 
+	vtkSmartPointer<vtkIdList> IdListComplement (
+		vtkSmartPointer<vtkIdList>, vtkSmartPointer<vtkIdList>); 
+
+	int IdTypeArray2IdList(vtkIdList* destination, vtkIdTypeArray* source);
+
 	int openDB(char*);
 	vtkStdString vtkSQLiteReader2::Int2Str(int);
 	double getDistance2(int, int);
-	double getDistanceToO(int);
+	//double getDistanceToO(int);
 
-	vtkSmartPointer<vtkFloatArray> CreateArray(vtkDataSet *output, const char* arrayName, int numComponents=1);
-	vtkSmartPointer<vtkIntArray> CreateIntArray(vtkDataSet *output, const char* arrayName, int numComponents=1);
+	vtkSmartPointer<vtkFloatArray> CreateArray(
+		vtkDataSet *output, const char* arrayName, int numComponents=1);
+	vtkSmartPointer<vtkIntArray> CreateIntArray(
+		vtkDataSet *output, const char* arrayName, int numComponents=1);
+	vtkSmartPointer<vtkIdTypeArray> CreateIdTypeArray(
+		vtkDataSet *output, const char* arrayName, int numComponents=1);
+
 	int InitAllArrays(vtkDataSet *output, unsigned long numTuples);
 
 	// old stuff - not yet, or not anymore needed

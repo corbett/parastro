@@ -210,6 +210,9 @@ int vtkSQLiteReader::RequestInformation(
 	vtkInformationVector* outputVector)
 {
 
+	vtkSmartPointer<vtkTimerLog> inittimer = vtkSmartPointer<vtkTimerLog>::New();
+	inittimer->StartTimer();
+
 // Stuff for doing it in parallel, leave it for the moment...
 	//	vtkInformation* outInfo = outputVector->GetInformationObject(0);
 	//	// means that the data set can be divided into an arbitrary number of pieces
@@ -225,6 +228,9 @@ int vtkSQLiteReader::RequestInformation(
 
 // read in database header
 	if(!this->ReadHeader()){return 0;}
+
+	inittimer->StopTimer();
+	vtkErrorMacro("Initialisation took: " << inittimer->GetElapsedTime() << " s");
 
 	return 1;
 }
