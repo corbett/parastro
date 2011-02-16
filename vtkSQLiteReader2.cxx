@@ -182,7 +182,7 @@ vtkSQLiteReader2::~vtkSQLiteReader2()
 void vtkSQLiteReader2::PrintSelf(ostream& os, vtkIndent indent)
 {
 	this->Superclass::PrintSelf(os, indent);
-	//TODO rint out more stuff...
+	//TODO print out more stuff...
 }
 
 
@@ -245,6 +245,11 @@ int vtkSQLiteReader2::RequestInformation(
 		// read in database header
 		if(!this->ReadHeader()){return 0;}
 
+		//add aditional arrays
+		this->CreateArray(this->AllData, "Cv"); //halo concentration
+		this->CreateArray(this->AllData, "Redshift");
+		this->CreateArray(this->AllData, "a"); //scale factor = 1/(1+redshift)
+
 
 		this->SelectedData->DeepCopy(this->AllData);
 		this->EmptyData->DeepCopy(this->AllData);
@@ -281,7 +286,7 @@ int vtkSQLiteReader2::RequestData(vtkInformation*,
 		readSnapshotInfo();
 		readSnapshots();
 		readTracks();
-		//calculateAdditionalData();
+		calculatePointData();
 
 		this->dataInfo.dataIsRead = true;
 
@@ -1737,20 +1742,61 @@ int vtkSQLiteReader2::findCollisions(CollisionCalculation* pCollCalc){
 		}
 		result->Delete(); // free memory
 
-		//OUTPUT COLLIDING POINTS ONLY
-		this->IdListComplement(CollisionPoints, MergingPoints);
+	}
+		
+	//DEBUG OUTPUT
+	/*
+	vtkErrorMacro("Printing the merging track ids (before cleanup):");
+	for (int i = 0; i<MergingTracks->GetNumberOfIds(); ++i)
+	{vtkErrorMacro(" " << i << ": " << MergingTracks->GetId(i));}
+	vtkErrorMacro("Printing the merging point ids (before cleanup):");
+	for (int i = 0; i<MergingPoints->GetNumberOfIds(); ++i)
+	{vtkErrorMacro(" " << i << ": " << MergingPoints->GetId(i));}
+	vtkErrorMacro("Printing the colliding point ids (before cleanup):");
+	for (int i = 0; i<CollisionPoints->GetNumberOfIds(); ++i)
+	{vtkErrorMacro(" " << i << ": " << CollisionPoints->GetId(i));}
+	*/
 
-		// find colliding, but not merging tracks
-		for (vtkIdType i = 0; i<CollisionPoints->GetNumberOfIds(); ++i)
+
+
+	//OUTPUT COLLIDING POINTS ONLY
+	this->IdListComplement(CollisionPoints, MergingPoints);
+
+	// find colliding, but not merging tracks
+	vtkIdType trackid;
+	for (vtkIdType i = 0; i<CollisionPoints->GetNumberOfIds(); ++i)
+	{
+		trackid = this->dataInfo.pTrackIdArray->GetTuple1(CollisionPoints->GetId(i));
+		if (MergingTracks->IsId(trackid) == -1)
 		{
-			CollisionTracks->InsertUniqueId(
-				this->dataInfo.pTrackIdArray->GetTuple1(
-				CollisionPoints->GetId(i)));
+			CollisionTracks->InsertUniqueId(trackid);
 		}
+	}
+
+	// DEBUG OUTPUT
+	/*
+	vtkErrorMacro("Printing the merging track ids (after cleanup):");
+	for (int i = 0; i<MergingTracks->GetNumberOfIds(); ++i)
+	{vtkErrorMacro(" " << i << ": " << MergingTracks->GetId(i));}
+	vtkErrorMacro("Printing the Colliding track ids (after cleanup):");
+	for (int i = 0; i<CollisionTracks->GetNumberOfIds(); ++i)
+	{vtkErrorMacro(" " << i << ": " << CollisionTracks->GetId(i));}
+	
+	vtkErrorMacro("Printing the merging point ids (after cleanup):");
+	for (int i = 0; i<MergingPoints->GetNumberOfIds(); ++i)
+	{vtkErrorMacro(" " << i << ": " << MergingPoints->GetId(i));}
+	vtkErrorMacro("Printing the colliding point ids (after cleanup):");
+	for (int i = 0; i<CollisionPoints->GetNumberOfIds(); ++i)
+	{vtkErrorMacro(" " << i << ": " << CollisionPoints->GetId(i));}
+	*/
+	vtkErrorMacro("No Merging Tracks: " << MergingTracks->GetNumberOfIds());
+	vtkErrorMacro("No Collision Tracks: " << CollisionTracks->GetNumberOfIds());
+	vtkErrorMacro("No Merging Points: " << MergingPoints->GetNumberOfIds());
+	vtkErrorMacro("No Collision Points: " << CollisionPoints->GetNumberOfIds());
 
 
 
-		// DEBUG OUTPUT
+	
 		/*vtkErrorMacro("the selected points ids are: 1 :");
 		for (int i = 0; i<this->SnapInfo2.at(SnapId)->GetNumberOfIds(); ++i)
 		{
@@ -1768,7 +1814,7 @@ int vtkSQLiteReader2::findCollisions(CollisionCalculation* pCollCalc){
 		}*/
 		
 		
-	}
+	
 	pCollCalc->CollisionPointIds = CollisionPoints;
 	pCollCalc->CollisionTrackIds = CollisionTracks;
 	pCollCalc->MergingPointIds = MergingPoints;
@@ -2091,6 +2137,7 @@ int vtkSQLiteReader2::generateSelection(CollisionCalculation * collCalc, Selecti
 
 	vtkSmartPointer<vtkIdList> allTrackIds = vtkSmartPointer<vtkIdList>::New();
 	
+	// generate a list of all trackids
 	//could be done faster, by assuming ids go from 0 to nTracks... just wanna play safe..
 	/* cancel this, it's too slow...
 	this->IdTypeArray2IdList(allTrackIds, this->dataInfo.pTrackIdArray);
@@ -2123,7 +2170,7 @@ int vtkSQLiteReader2::generateSelection(CollisionCalculation * collCalc, Selecti
 
 	if(*this->Gui.DisplayMerging)
 	{
-		this->IdListUnionUnique(select->Tracks, collCalc->MergingTrackIds);
+		select->Tracks = this->IdListUnionUnique(select->Tracks, collCalc->MergingTrackIds);
 	}
 
 	if(*this->Gui.DisplayInverted)
@@ -2133,7 +2180,7 @@ int vtkSQLiteReader2::generateSelection(CollisionCalculation * collCalc, Selecti
 
 	/*vtkErrorMacro("Printing the selected track ids (after invert):");
 	for (int i = 0; i<select->Tracks->GetNumberOfIds(); ++i)
-	{vtkErrorMacro(" " << i << ": " << select->Tracks->GetId(i)<<"\n");}*/
+	{vtkErrorMacro(" " << i << ": " << select->Tracks->GetId(i));}*/
 
 
 	// collect the points, corresponding to the selected tracks
@@ -2506,8 +2553,9 @@ vtkSmartPointer<vtkIdList> vtkSQLiteReader2::IdListIntersect(
 	return list1;
 }
 /*----------------------------------------------------------------------------
-Gets the complement of two IdLists, result in list2
-( set notation: list2 \ list1, list2 - list1)
+Gets the complement of two IdLists, result in list1
+or: deletes all ids from list 2 in list 1
+( set notation: list1 \ list2, list1 - list2)
 assumes:
 		
 	sets:
@@ -2523,12 +2571,12 @@ vtkSmartPointer<vtkIdList> vtkSQLiteReader2::IdListComplement(
 	vtkSmartPointer<vtkIdList> list1,
 	vtkSmartPointer<vtkIdList> list2)
 {
-	for (vtkIdType i = 0; i<list1->GetNumberOfIds(); ++i)
+	for (vtkIdType i = 0; i<list2->GetNumberOfIds(); ++i)
 	{
-		list2->DeleteId(list1->GetId(i));
+		list1->DeleteId(list2->GetId(i));
 	}
-	list2->Squeeze();
-	return list2;
+	list1->Squeeze();
+	return list1;
 }
 
 /*----------------------------------------------------------------------------
@@ -2551,5 +2599,63 @@ int vtkSQLiteReader2::IdTypeArray2IdList(vtkIdList* destination, vtkIdTypeArray*
 	{
 		destination->InsertUniqueId(source->GetTuple1(i));
 	}
+	return 1;
+}
+
+
+/*----------------------------------------------------------------------------
+Adds/calculates aditional point data
+assumes:
+		
+	sets:
+		
+	arguments:
+		
+		
+	returns:
+		
+*/
+int vtkSQLiteReader2::calculatePointData()
+{
+	vtkDataArray * cvarr = this->AllData->GetPointData()->GetArray("Cv");
+	vtkDataArray * rsarr = this->AllData->GetPointData()->GetArray("Redshift");
+	vtkDataArray * aarr = this->AllData->GetPointData()->GetArray("a");
+
+	cvarr->SetNumberOfTuples(this->dataInfo.nPoints);
+	rsarr->SetNumberOfTuples(this->dataInfo.nPoints);
+	aarr->SetNumberOfTuples(this->dataInfo.nPoints);
+	
+	//cvarr->FillComponent(0,0);
+
+	vtkDataArray * Vmax = this->AllData->GetPointData()->GetArray("Vmax");
+	vtkDataArray * Rmax = this->AllData->GetPointData()->GetArray("Rmax");
+
+	vtkDataArray * ssdrsarr = this->SnapshotData->GetPointData()->GetArray("redshift");
+
+	float cv, rs, a;
+	int snapid;
+
+	for(vtkIdType i = 0; i<this->dataInfo.nPoints; ++i)
+	{
+		if (Rmax->GetTuple1(i) == 0)
+		{
+			cv = 0;
+		}
+		else
+		{
+			cv = 2 * ( Vmax->GetTuple1(i) / (this->dataInfo.Hubble * Rmax->GetTuple1(i))) *
+				( Vmax->GetTuple1(i) / (this->dataInfo.Hubble * Rmax->GetTuple1(i)));
+		}
+		cvarr->SetTuple1(i,cv);
+
+		snapid = this->AllData->GetPointData()->GetArray(this->dataInfo.StatSnapidColumn)->GetTuple1(i);
+		
+		rs = ssdrsarr->GetTuple1(snapid);
+		rsarr->SetTuple1(i,rs);
+		
+		a=1/(1+rs);
+		aarr->SetTuple1(i,a);
+	}
+
 	return 1;
 }

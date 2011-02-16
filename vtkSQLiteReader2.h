@@ -183,6 +183,7 @@ protected:
 		*/
 	};
 
+	// very old, dont use this
 	struct Data {
 		vtkSmartPointer<vtkPoints>			Position;
 		vtkSmartPointer<vtkFloatArray>		Velocity;
@@ -351,7 +352,7 @@ private:
 	int vtkSQLiteReader2::readSnapshots(); // reads the snapshots
 	int vtkSQLiteReader2::readSnapshotInfo(); 
 	int vtkSQLiteReader2::readTracks();
-	//int vtkSQLiteReader2::calculateAdditionalData();
+	int vtkSQLiteReader2::calculatePointData();
 	//int vtkSQLiteReader2::generateColors();
 
 	int vtkSQLiteReader2::findCollisions(CollisionCalculation*);
