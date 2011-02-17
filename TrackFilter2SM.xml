@@ -1,0 +1,31 @@
+<ServerManagerConfiguration>
+	<ProxyGroup name="filters">
+		<SourceProxy name="TrackFilter2" class="vtkTrackFilter2" label="TrackFilter2">
+			<Documentation
+				long_help="Selects specific tracks"
+				short_help="Filter Track">
+				doku text here
+			</Documentation>
+	 
+			<InputProperty
+				name="Input"
+				command="SetInputConnection">
+				<ProxyGroupDomain name="groups">
+					<Group name="sources"/>
+					<Group name="filters"/>
+				</ProxyGroupDomain>
+				<DataTypeDomain name="input_type">
+					<DataType value="vtkPolyData"/>
+				</DataTypeDomain>
+				<InputArrayDomain name="input_array">
+					<RequiredProperties>
+						<Property name="SelectInputArray" 
+							function="FieldDataSelection"/>
+						</RequiredProperties>
+				</InputArrayDomain>
+			</InputProperty>
+			
+		</SourceProxy>
+	</ProxyGroup>
+</ServerManagerConfiguration>
+
