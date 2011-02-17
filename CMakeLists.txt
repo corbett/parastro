@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 2.4)
 FIND_PACKAGE(ParaView REQUIRED)
 INCLUDE(${PARAVIEW_USE_FILE})
 
-#THIS IS A TEST OF WHERE THIS FILE IS SAVED!!!
 ###############
 # AstroViz plugin
 # INCLUDES
@@ -50,16 +49,12 @@ ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.1"
 		vtkVirialRadiusFilter.cxx
 		vtkAddAdditionalAttribute.cxx 
 		vtkFriendsOfFriendsHaloFinder.cxx 
-<<<<<<< .mine
 		vtkRamsesReader.cxx
-=======
-		#vtkPointDisplay.cxx
-		vtkSQLiteReader.cxx
-		vtkSQLiteReader2.cxx
-		vtkTrackFilter.cxx
-		vtkTrackFilter2.cxx
-		vtkSimpleBin.cxx
->>>>>>> .r1279
+		#vtkSQLiteReader.cxx
+		#vtkSQLiteReader2.cxx
+		#vtkTrackFilter.cxx
+		#vtkTrackFilter2.cxx
+		#vtkSimpleBin.cxx
 	SERVER_MANAGER_XML
 		TipsyReaderSM.xml
 		NSmoothFilterSM.xml
@@ -68,18 +63,14 @@ ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.1"
 		MomentsOfInertiaFilter.xml 
 		VirialRadiusFilter.xml
 		AddAdditionalAttribute.xml 
-<<<<<<< .mine
 		FriendsOfFriendsHaloFinder.xml
 		RamsesReaderSM.xml
-=======
-		FriendsOfFriendsHaloFinder.xml	
 		#PointDisplaySM.xml
-		SQLiteReaderSM.xml
-		SQLiteReader2SM.xml
-		TrackFilterSM.xml
-		TrackFilterSM2.xml
-		SimpleBinSM.xml
->>>>>>> .r1279
+		#SQLiteReaderSM.xml
+		#SQLiteReader2SM.xml
+		#TrackFilterSM.xml
+		#TrackFilterSM2.xml
+		#SimpleBinSM.xml
 	GUI_RESOURCES
 		TipsyReader.qrc
 		PointDisplay.qrc

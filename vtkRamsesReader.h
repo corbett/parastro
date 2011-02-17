@@ -93,8 +93,12 @@ protected:
   vtkSmartPointer<vtkFloatArray>   Temperature;
   vtkSmartPointer<vtkFloatArray>   Metals;
   vtkSmartPointer<vtkFloatArray>   Tform;
+	vtkSmartPointer<vtkFloatArray>		 Type;
+	
+	vtkSmartPointer<vtkFloatArray>		 Age;
   vtkSmartPointer<vtkFloatArray>   Velocity;
 
+	
   //
   int           UpdatePiece;
   int           UpdateNumPieces;
