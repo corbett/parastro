@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.4)
 FIND_PACKAGE(ParaView REQUIRED)
 INCLUDE(${PARAVIEW_USE_FILE})
+
+#THIS IS A TEST OF WHERE THIS FILE IS SAVED!!!
 ###############
 # AstroViz plugin
 # INCLUDES
@@ -12,6 +14,12 @@ INCLUDE(${PARAVIEW_USE_FILE})
 #   o profile filter
 #   o add additional attribute filter
 #   o friends-of-friends halo finder filter
+# Author: Christine Corbett Moran, contributions by Rafael Kueng and John Biddiscombe
+###
+
+###############
+# StrangeAttractors plugin
+# o strange attractors random/binary visualization
 # Author: Christine Corbett Moran
 ###
 
@@ -32,7 +40,7 @@ ADD_PARAVIEW_OBJECT_PANEL(
 	XML_GROUP filters)
 
 #Defines the AstroViz plugin
-ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.0"
+ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.1"
 	SERVER_MANAGER_SOURCES 
 		vtkTipsyReader.cxx
 		vtkNSmoothFilter.cxx
@@ -42,12 +50,16 @@ ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.0"
 		vtkVirialRadiusFilter.cxx
 		vtkAddAdditionalAttribute.cxx 
 		vtkFriendsOfFriendsHaloFinder.cxx 
+<<<<<<< .mine
+		vtkRamsesReader.cxx
+=======
 		#vtkPointDisplay.cxx
 		vtkSQLiteReader.cxx
 		vtkSQLiteReader2.cxx
 		vtkTrackFilter.cxx
 		vtkTrackFilter2.cxx
 		vtkSimpleBin.cxx
+>>>>>>> .r1279
 	SERVER_MANAGER_XML
 		TipsyReaderSM.xml
 		NSmoothFilterSM.xml
@@ -56,6 +68,10 @@ ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.0"
 		MomentsOfInertiaFilter.xml 
 		VirialRadiusFilter.xml
 		AddAdditionalAttribute.xml 
+<<<<<<< .mine
+		FriendsOfFriendsHaloFinder.xml
+		RamsesReaderSM.xml
+=======
 		FriendsOfFriendsHaloFinder.xml	
 		#PointDisplaySM.xml
 		SQLiteReaderSM.xml
@@ -63,18 +79,29 @@ ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.0"
 		TrackFilterSM.xml
 		TrackFilterSM2.xml
 		SimpleBinSM.xml
+>>>>>>> .r1279
 	GUI_RESOURCES
 		TipsyReader.qrc
-		#PointDisplay.qrc
-		SQLiteReader.qrc
-		SQLiteReader2.qrc
+		PointDisplay.qrc
+		RamsesReader.qrc
 	GUI_RESOURCE_FILES
 		AstroVizFilterMenu.xml
 	GUI_INTERFACES ${IFACES} 
-	#	SOURCES pqSQLiteReaderPanel.cxx ${MOC_SRCS} ${RCS_SRCS} ${IFACE_SRCS}
 	SOURCES ${MOC_SRCS} ${IFACE_SRCS}
 	)
+	
+#Defines the StrangeAttractors plugin
 
+#ADD_PARAVIEW_PLUGIN(StrangeAttractorsPlugin "1.0"
+#	SERVER_MANAGER_SOURCES 
+#		vtkStrangeAttractors.cxx
+#	SERVER_MANAGER_XML
+#		StrangeAttractorsSM.xml
+#	GUI_RESOURCES
+#		StrangeAttractors.qrc 
+#	GUI_INTERFACES ${IFACES} 
+#	SOURCES ${MOC_SRCS} ${IFACE_SRCS}
+#	)
 	
 # For helper functions often used, will later include these in a single
 # VTK class.
@@ -94,7 +121,6 @@ ADD_LIBRARY(
 	
 SET_TARGET_PROPERTIES(TipsyHelpers PROPERTIES COMPILE_FLAGS "-fPIC")	
 # add the winsock2 library for net lookup names
-
 IF (WIN32)
   TARGET_LINK_LIBRARIES(TipsyHelpers ws2_32)  
 ENDIF (WIN32)
@@ -108,4 +134,6 @@ ADD_LIBRARY(
 TARGET_LINK_LIBRARIES(
 	AstroVizPlugin
 	TipsyHelpers
-	SQLitelib)
+	SQLitelib
+	gmp
+	)

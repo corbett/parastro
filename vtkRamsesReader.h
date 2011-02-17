@@ -21,7 +21,7 @@
 #include "vtkPolyDataAlgorithm.h" // superclass
 
 #include "vtkSmartPointer.h"
-#include "Ramseslib/fRamses.hpp" // functions take Ramses particle objects
+#include "tipsylib/ftipsy.hpp" // functions take Ramses particle objects
 #include <vtkstd/vector>
 
 class vtkPolyData;
@@ -74,7 +74,6 @@ protected:
   vtkRamsesReader();
   ~vtkRamsesReader();
 	char* FileName;
-	int DistributeDataOn;
 	int RequestInformation(vtkInformation*,	vtkInformationVector**,
 		vtkInformationVector*);
 
@@ -106,21 +105,12 @@ protected:
 private:
   vtkRamsesReader(const vtkRamsesReader&);  // Not implemented.
   void operator=(const vtkRamsesReader&);  // Not implemented.
-	/* Help functions for reading */
+	/* Helper functions for storing data in output vector*/
 	// Description:
-	// Reads the Ramses header. 
-	RamsesHeader ReadRamsesHeader(ifRamses& RamsesInfile);
-	// Description:
-	// Reads all particles of this piece from the Ramses file
-	void ReadAllParticles(RamsesHeader& RamsesHeader,
-		ifRamses& RamsesInfile,int piece,int numPieces,vtkPolyData* output);
-	// Description:
-	// reads in a particle (either gas, dark or star as appropriate) 
-	//from the Ramses in file of this class
-	vtkIdType ReadParticle(unsigned long index, RamsesHeader& RamsesHeader,
-		ifRamses& RamsesInfile, vtkPolyData* output);
+	// allocates all vtk arrays for Tipsy variables and places them 
+	// in the output vector
 	void AllocateAllRamsesVariableArrays(vtkIdType numBodies,
-		vtkPolyData* output);
+																			vtkPolyData* output);
 //ETX
 
 };

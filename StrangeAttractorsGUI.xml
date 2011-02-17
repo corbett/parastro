@@ -1,0 +1,5 @@
+<ParaViewReaders>
+	<Reader name="StrangeAttractors"
+			file_description="Strange Attractors Binary">
+	</Reader>
+</ParaViewReaders>

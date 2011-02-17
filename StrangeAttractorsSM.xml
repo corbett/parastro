@@ -1,0 +1,31 @@
+<ServerManagerConfiguration>
+  <ProxyGroup name="sources">
+    <SourceProxy name="StrangeAttractors"
+					 class="vtkStrangeAttractors">
+      <!--named Aaa as currently ParaView decides which file is the
+		      main data file by that file with the name which is alphabetically
+		      first -->
+      <StringVectorProperty
+        name="AaaFileName"
+        command="SetFileName"
+        number_of_elements="1">
+        <FileListDomain name="files"/>
+        <Documentation>
+          Reads in points from a binary file to visualize randomness.
+        </Documentation>
+      </StringVectorProperty>
+			
+			<IntVectorProperty name="PrimesOnly"
+			command="SetPrimesOnly"
+			number_of_elements="1"
+			default_values="1">
+			<BooleanDomain name="bool" />
+			<Documentation>
+			
+			</Documentation>
+			</IntVectorProperty>
+
+    </SourceProxy>
+  </ProxyGroup>
+</ServerManagerConfiguration>
+
