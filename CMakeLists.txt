@@ -54,7 +54,7 @@ ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.1"
 		vtkSQLiteReader2.cxx
 		vtkTrackFilter.cxx
 		vtkSimpleBin.cxx
-		vtkRamsesReader.cxx
+		#vtkRamsesReader.cxx
 
 	SERVER_MANAGER_XML
 		TipsyReaderSM.xml
@@ -65,19 +65,19 @@ ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.1"
 		VirialRadiusFilter.xml
 		AddAdditionalAttribute.xml 
 		FriendsOfFriendsHaloFinder.xml	
-		RamsesReaderSM.xml
 		#PointDisplaySM.xml
 		SQLiteReaderSM.xml
 		SQLiteReader2SM.xml
 		TrackFilterSM.xml
 		SimpleBinSM.xml
+		#RamsesReaderSM.xml
 
 	GUI_RESOURCES
 		TipsyReader.qrc
 		#PointDisplay.qrc
 		SQLiteReader.qrc
 		SQLiteReader2.qrc
-		RamsesReader.qrc
+		#RamsesReader.qrc
 
 	GUI_RESOURCE_FILES
 		AstroVizFilterMenu.xml
@@ -113,7 +113,8 @@ ADD_LIBRARY(
 		tipsylib/binner.cpp 
 		tipsylib/ftipsy.cpp tipsylib/native.cpp 
 		tipsylib/standard.cpp
-		tipsylib/vtipsy.cpp)
+		tipsylib/vtipsy.cpp
+	)
 	
 SET_TARGET_PROPERTIES(TipsyHelpers PROPERTIES COMPILE_FLAGS "-fPIC")	
 
@@ -125,12 +126,13 @@ ENDIF (WIN32)
 # For SQLiteReader Plugin, SQLite lib
 ADD_LIBRARY(
 	SQLitelib
-	STATIC sqlitelib/sqlite3.c
+	STATIC
+		sqlitelib/sqlite3.c
 	)
 
 TARGET_LINK_LIBRARIES(
 	AstroVizPlugin
 	TipsyHelpers
 	SQLitelib
-	gmp
+	#gmp
 	)
