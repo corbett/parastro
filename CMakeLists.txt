@@ -125,8 +125,8 @@ ENDIF (WIN32)
 # For SQLiteReader Plugin, SQLite lib
 ADD_LIBRARY(
 	SQLitelib
-	STATIC
-		sqlitelib/sqlite3.c)
+	STATIC sqlitelib/sqlite3.c
+	)
 
 TARGET_LINK_LIBRARIES(
 	AstroVizPlugin
