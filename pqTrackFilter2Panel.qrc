@@ -1,0 +1,5 @@
+<RCC>
+	<qresource prefix="/ParaViewResources">
+		<file>pqTrackFilter2Panel.ui</file>
+	</qresource>
+</RCC>
