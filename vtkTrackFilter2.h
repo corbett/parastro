@@ -36,6 +36,14 @@ public:
 
 	void PrintSelf(ostream& os, vtkIndent indent);
 
+	vtkSetMacro(FilterLow,double);
+	vtkGetMacro(FilterLow,double);
+
+	vtkSetMacro(FilterHi,double);
+	vtkGetMacro(FilterHi,double);
+
+
+
 protected:
 	vtkTrackFilter2();
 	~vtkTrackFilter2();
@@ -48,6 +56,9 @@ protected:
 private:
 	vtkTrackFilter2(const vtkTrackFilter2&);  // Not implemented.
 	void operator=(const vtkTrackFilter2&);  // Not implemented.
+
+	double FilterLow;
+	double FilterHi;
 
 };
 

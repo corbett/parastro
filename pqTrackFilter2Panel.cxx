@@ -6,13 +6,14 @@
 #include <QLabel>
 #include <QLayout>
 
+#include "pqDoubleRangeWidget.h"
+
 /*
 #include "vtkSMProperty.h"
 
 
 
 //#include <pqPropertyHelper.h>
-#include "pqDoubleRangeWidget.h"
 #include "pqSMAdaptor.h"
 
 
@@ -30,7 +31,9 @@ pqTrackFilter2Panel::pqTrackFilter2Panel(pqProxy* proxy, QWidget* p) :
 {
 
 	this->layout()->addWidget(new QLabel("This is from a plugin", this));
-	//this->linkServerManagerProperties();
+	this->layout()->addWidget(new pqDoubleRangeWidget(this));
+
+	this->linkServerManagerProperties();
 
 }
 

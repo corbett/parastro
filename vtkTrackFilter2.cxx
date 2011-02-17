@@ -83,6 +83,8 @@ int vtkTrackFilter2::RequestData(vtkInformation*,
 	vtkPolyData* output = vtkPolyData::GetData(outputVector);
 	vtkPolyData* input = vtkPolyData::GetData(inputVector[0]);
 
+	vtkErrorMacro("sdf"<<this->FilterHi);
+
 
 	timer->StopTimer();
 	vtkErrorMacro(" track selection took: " << timer->GetElapsedTime() << " s");

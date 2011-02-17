@@ -25,6 +25,17 @@
 				</InputArrayDomain>
 			</InputProperty>
 			
+			<DoubleVectorProperty
+				name="FilterHi"
+				label="FilterHi"
+				command="SetFilterHi"
+				number_of_elements="1"
+				animateable="0"
+				default_values="0" >
+				<Documentation>
+					uuuu
+				</Documentation>
+			</DoubleVectorProperty>
 			
 		</SourceProxy>
 	</ProxyGroup>
