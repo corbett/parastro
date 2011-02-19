@@ -24,19 +24,70 @@
 						</RequiredProperties>
 				</InputArrayDomain>
 			</InputProperty>
+
+			
 			
 			<DoubleVectorProperty
-				name="FilterHi"
-				label="FilterHi"
-				command="SetFilterHi"
-				number_of_elements="1"
+				name="Filter"
+				label="Filter"
+				command="SetFilter"
+				number_of_elements="2"
 				animateable="0"
-				default_values="0" >
+				default_values="0 0" >
 				<Documentation>
 					uuuu
 				</Documentation>
 			</DoubleVectorProperty>
+
+			<DoubleVectorProperty
+				name="Restriction"
+				label="Restriction"
+				command="SetRestriction"
+				number_of_elements="2"
+				animateable="0"
+				default_values="0 0" >
+				<Documentation>
+					uuuu
+				</Documentation>
+			</DoubleVectorProperty>			
 			
+
+			<IntVectorProperty
+				name="FilterArray"
+				label="FilterArray"
+				command="SetFilterArray"
+				element_types="0"
+				number_of_elements="1"
+				default_values="0" >
+				<Documentation>
+					uuuu
+				</Documentation>
+			</IntVectorProperty>
+
+			<IntVectorProperty
+				name="ModeSelection"
+				label="ModeSelection"
+				command="SetModeSelection"
+				element_types="2"
+				number_of_elements="1"
+				default_values="0" >
+				<Documentation>
+					uuuu
+				</Documentation>
+			</IntVectorProperty>
+
+			<StringVectorProperty
+				name="RestrictionArray"
+				label="RestrictionArray"
+				command="SetRestrictionArray"
+				element_types="2"
+				number_of_elements="1"
+				default_values="0" >
+				<Documentation>
+					uuuu
+				</Documentation>
+			</StringVectorProperty>
+
 		</SourceProxy>
 	</ProxyGroup>
 </ServerManagerConfiguration>

@@ -35,7 +35,7 @@
     <widget class="QComboBox" name="ModeSelection"/>
    </item>
    <item row="4" column="0">
-    <layout class="QHBoxLayout" name="horizontalLayout">
+    <layout class="QHBoxLayout" name="restrictionlayout1">
      <item>
       <widget class="Line" name="line">
        <property name="orientation">
@@ -53,7 +53,7 @@
         </widget>
        </item>
        <item>
-        <layout class="QGridLayout" name="gridLayout_2">
+        <layout class="QGridLayout" name="restrictionlayout">
          <item row="0" column="0">
           <widget class="QLabel" name="label_4">
            <property name="enabled">
@@ -75,24 +75,10 @@
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="pqDoubleRangeWidget" name="RestrictionLow" native="true">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-          </widget>
+          <widget class="QLineEdit" name="Restriction_0"/>
          </item>
          <item row="2" column="1">
-          <widget class="pqDoubleRangeWidget" name="RestrictionHi" native="true">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="1">
-          <widget class="QLineEdit" name="RestrictionHi_2"/>
-         </item>
-         <item row="1" column="1">
-          <widget class="QLineEdit" name="RestrictionLow_2"/>
+          <widget class="QLineEdit" name="Restriction_1"/>
          </item>
         </layout>
        </item>
@@ -101,13 +87,7 @@
     </layout>
    </item>
    <item row="5" column="0">
-    <layout class="QGridLayout" name="gridLayout_3">
-     <item row="0" column="1">
-      <widget class="pqDoubleRangeWidget" name="FilterLow" native="true"/>
-     </item>
-     <item row="2" column="1">
-      <widget class="pqDoubleRangeWidget" name="FilterHi" native="true"/>
-     </item>
+    <layout class="QGridLayout" name="filterlayout">
      <item row="0" column="0">
       <widget class="QLabel" name="label_3">
        <property name="text">
@@ -122,11 +102,11 @@
        </property>
       </widget>
      </item>
-     <item row="3" column="1">
-      <widget class="QLineEdit" name="FilterHi_2"/>
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="Filter_0"/>
      </item>
-     <item row="1" column="1">
-      <widget class="QLineEdit" name="FilterLow_2"/>
+     <item row="2" column="1">
+      <widget class="QLineEdit" name="Filter_1"/>
      </item>
     </layout>
    </item>
@@ -145,13 +125,6 @@
    </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>pqDoubleRangeWidget</class>
-   <extends>QWidget</extends>
-   <header location="global">pqDoubleRangeWidget.h</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>

@@ -36,13 +36,26 @@ public:
 
 	void PrintSelf(ostream& os, vtkIndent indent);
 
-	vtkSetMacro(FilterLow,double);
-	vtkGetMacro(FilterLow,double);
+	void SetFilterArray(int);
+	void SetModeSelection(int);
+	void SetRestrictionArray(const char *);
+	//vtkSetMacro(FilterArray,int);
+	//vtkGetMacro(FilterArray,int);
+	//vtkSetMacro(ModeSelection,int);
+	//vtkGetMacro(ModeSelection,int);
+	//vtkSetMacro(RestrictionArray,char);
+	//vtkGetMacro(RestrictionArray,char*);
 
-	vtkSetMacro(FilterHi,double);
-	vtkGetMacro(FilterHi,double);
 
+	void SetFilter(double,double);
+/*	vtkSetMacro(Filter_0,double);
+	vtkGetMacro(Filter_0,double);
+	vtkSetMacro(Filter_1,double);
+	vtkGetMacro(Filter_1,double);*/
+	//vtkSetMacro(Filter,double);
+	//vtkGetMacro(Filter,double);
 
+	void SetRestriction(double, double);
 
 protected:
 	vtkTrackFilter2();
@@ -51,14 +64,22 @@ protected:
 	virtual int FillInputPortInformation(int port, vtkInformation* info);
 	virtual int FillOutputPortInformation(int vtkNotUsed(port),	vtkInformation* info);
 	virtual int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*);
+	virtual int RequestInformation(vtkInformation*, vtkInformationVector**, vtkInformationVector*);
 
 
 private:
 	vtkTrackFilter2(const vtkTrackFilter2&);  // Not implemented.
 	void operator=(const vtkTrackFilter2&);  // Not implemented.
 
-	double FilterLow;
-	double FilterHi;
+
+	int FilterArray;
+	const char * ModeSelection;
+	const char * RestrictionArray;
+
+	double Filter[2];
+	double Restriction[2];
+
+
 
 };
 
