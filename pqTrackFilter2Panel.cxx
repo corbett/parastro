@@ -8,12 +8,13 @@
 #include "pqDoubleRangeWidget.h"
 #include "pqSMAdaptor.h"
 
-/*
 #include "vtkSMProperty.h"
+#include "vtkSMPropertyHelper.h"
+/*
 
 
 
-//#include <pqPropertyHelper.h>
+//
 
 
 
@@ -41,53 +42,53 @@ pqTrackFilter2Panel::pqTrackFilter2Panel(pqProxy* proxy, QWidget* p) :
 
 	widget = this->findChild<QWidget*>("Filter_0");
 	widget->hide();
-	this->Filter_0 = new pqDoubleRangeWidget();
-	this->Filter_0->setObjectName(QString::fromUtf8("Filter_0"));
+	this->FilterBounds_0 = new pqDoubleRangeWidget();
+	this->FilterBounds_0->setObjectName(QString::fromUtf8("FilterBounds_0"));
 	QObject::connect(
-		this->Filter_0,
+		this->FilterBounds_0,
 		SIGNAL(valueEdited(double)),
 		this,
 		SLOT(lowerFChanged(double))
 		);
-	gridlayoutF->addWidget(this->Filter_0,0,1,1,1);
+	gridlayoutF->addWidget(this->FilterBounds_0,0,1,1,1);
 
 
 	widget = this->findChild<QWidget*>("Filter_1");
 	widget->hide();
-	this->Filter_1 = new pqDoubleRangeWidget();
-	this->Filter_1->setObjectName(QString::fromUtf8("Filter_1"));
+	this->FilterBounds_1 = new pqDoubleRangeWidget();
+	this->FilterBounds_1->setObjectName(QString::fromUtf8("FilterBounds_1"));
 	QObject::connect(
-		this->Filter_1,
+		this->FilterBounds_1,
 		SIGNAL(valueEdited(double)),
 		this,
 		SLOT(upperFChanged(double))
 		);
-	gridlayoutF->addWidget(this->Filter_1,2,1,1,1);
+	gridlayoutF->addWidget(this->FilterBounds_1,2,1,1,1);
 
 
 	widget = this->findChild<QWidget*>("Restriction_0");
 	widget->hide();
-	this->Restriction_0 = new pqDoubleRangeWidget();
-	this->Restriction_0->setObjectName(QString::fromUtf8("Restriction_0"));
+	this->RestrictionBounds_0 = new pqDoubleRangeWidget();
+	this->RestrictionBounds_0->setObjectName(QString::fromUtf8("RestrictionBounds_0"));
 	QObject::connect(
-		this->Restriction_0,
+		this->RestrictionBounds_0,
 		SIGNAL(valueEdited(double)),
 		this,
 		SLOT(lowerRChanged(double))
 		);
-	gridlayoutR->addWidget(this->Restriction_0,0,1,1,1);
+	gridlayoutR->addWidget(this->RestrictionBounds_0,0,1,1,1);
 
 	widget = this->findChild<QWidget*>("Restriction_1");
 	widget->hide();
-	this->Restriction_1 = new pqDoubleRangeWidget();
-	this->Restriction_1->setObjectName(QString::fromUtf8("Restriction_1"));
+	this->RestrictionBounds_1 = new pqDoubleRangeWidget();
+	this->RestrictionBounds_1->setObjectName(QString::fromUtf8("RestrictionBounds_1"));
 	QObject::connect(
-		this->Restriction_1,
+		this->RestrictionBounds_1,
 		SIGNAL(valueEdited(double)),
 		this,
 		SLOT(upperRChanged(double))
 		);
-	gridlayoutR->addWidget(this->Restriction_1,2,1,1,1);
+	gridlayoutR->addWidget(this->RestrictionBounds_1,2,1,1,1);
 
 
 	comboB = this->findChild<QComboBox*>("ModeSelection");
@@ -131,8 +132,8 @@ pqTrackFilter2Panel::~pqTrackFilter2Panel()
 {
 }
 
-/*
-void pqTrackFilter2Panel::accept()
+
+/*void pqTrackFilter2Panel::accept()
 {
 	Superclass::accept();    
 }
@@ -140,43 +141,44 @@ void pqTrackFilter2Panel::accept()
 void pqTrackFilter2Panel::reset()
 {
 	Superclass::reset();
-}
-*/
+}*/
+
 void pqTrackFilter2Panel::lowerFChanged(double val)
 {
-  // clamp the lower threshold if we need to
-	if(this->Filter_1->value() < val)
+  // clamp the lower threshold
+	if(this->FilterBounds_1->value() < val)
 	{
-		this->Filter_1->setValue(val);
+		this->FilterBounds_1->setValue(val);
 	}
 }
 
 void pqTrackFilter2Panel::upperFChanged(double val)
 {
-  // clamp the lower threshold if we need to
-	if(this->Filter_0->value() > val)
+  // clamp the lower threshold
+	if(this->FilterBounds_0->value() > val)
     {
-		this->Filter_0->setValue(val);
+		this->FilterBounds_0->setValue(val);
     }
 }
 
 void pqTrackFilter2Panel::lowerRChanged(double val)
 {
 	// clamp the lower threshold if we need to
-	if(this->Restriction_1->value() < val)
+	if(this->RestrictionBounds_1->value() < val)
 	{
-		this->Restriction_1->setValue(val);
+		this->RestrictionBounds_1->setValue(val);
 	}
 }
 
 void pqTrackFilter2Panel::upperRChanged(double val)
 {
 	// clamp the lower threshold if we need to
-	if(this->Restriction_0->value() > val)
+	if(this->RestrictionBounds_0->value() > val)
 	{
-		this->Restriction_0->setValue(val);
+		this->RestrictionBounds_0->setValue(val);
 	}
 }
+/*
 void pqTrackFilter2Panel::variableChanged()
 {
 	// when the user changes the variable, adjust the ranges on the ThresholdBetween
@@ -188,21 +190,22 @@ void pqTrackFilter2Panel::variableChanged()
 		this->Filter_1->setValue(range[1].toDouble());
 	}
 }
+*/
 
 void pqTrackFilter2Panel::selectionModeChanged(int selection)
 {
 	if (selection==2)
 	{
-		this->Restriction_0->setEnabled(true);
-		this->Restriction_1->setEnabled(true);
+		this->RestrictionBounds_0->setEnabled(true);
+		this->RestrictionBounds_1->setEnabled(true);
 		this->RestrictionArray->setEnabled(true);
 		this->label4->setEnabled(true);
 		this->label5->setEnabled(true);
 	}
 	else
 	{
-		this->Restriction_0->setEnabled(false);
-		this->Restriction_1->setEnabled(false);
+		this->RestrictionBounds_0->setEnabled(false);
+		this->RestrictionBounds_1->setEnabled(false);
 		this->RestrictionArray->setEnabled(false);
 		this->label4->setEnabled(false);
 		this->label5->setEnabled(false);

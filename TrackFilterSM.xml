@@ -17,37 +17,54 @@
 				<DataTypeDomain name="input_type">
 					<DataType value="vtkPolyData"/>
 				</DataTypeDomain>
-				<InputArrayDomain name="input_array">
-					<RequiredProperties>
-						<Property name="SelectInputArray" 
-							function="FieldDataSelection"/>
-						</RequiredProperties>
-				</InputArrayDomain>
+				<InputArrayDomain
+					name="input_array1"
+					attribute_type="point"
+					number_of_components="1"/>
+				
+				<InputArrayDomain
+					name="input_array2"
+					attribute_type="point"
+					number_of_components="1"/>
+
 			</InputProperty>
 			
 			<StringVectorProperty
-				name="SelectInputArray" 
+				name="SelectFilterArray" 
 				command="SetInputArrayToProcess" 
 				label="Select all Tracks, where"
 				number_of_elements="5" 
-				element_types="0 0 0 0 2" 
-				animateable="0"> 
+				element_types="0 0 0 0 2">
 				<ArrayListDomain name="array_list" 
-					attribute_type="Scalars">
+					attribute_type="Scalars"
+					input_domain_name="input_array1">
 					<RequiredProperties>
 						<Property name="Input" function="Input"/>
 					</RequiredProperties>
 				</ArrayListDomain>
-				<FieldDataDomain name="field_list">
-					<RequiredProperties>
-						<Property name="Input" function="Input"/>
-					</RequiredProperties>
-				</FieldDataDomain>
 				<Documentation>
 				This property indicates which array to filter for.
 				</Documentation>
 			</StringVectorProperty>	  
 
+			<StringVectorProperty
+				name="SelectRestrictionArray" 
+				command="SetInputArrayToProcess" 
+				label="with restriction"
+				number_of_elements="5" 
+				element_types="0 0 0 0 2" 
+				default_values="1"> 
+				<ArrayListDomain name="array_list" 
+					attribute_type="Scalars"
+					input_domain_name="input_array2">
+					<RequiredProperties>
+						<Property name="Input" function="Input"/>
+					</RequiredProperties>
+				</ArrayListDomain>
+				<Documentation>
+				This property indicates which array to filter for.
+				</Documentation>
+			</StringVectorProperty>	  
 			
 			<IntVectorProperty 
 				name="Mode" 
@@ -58,6 +75,7 @@
 				<EnumerationDomain name="enum">
 					<Entry value="0" text="some point on the track"/>
 					<Entry value="1" text="every point on the track"/>
+					<Entry value="2" text="the points on the track where restriction criteria"/>
 				</EnumerationDomain>
 			</IntVectorProperty>
 <!--

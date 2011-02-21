@@ -33,6 +33,11 @@
 
 #include <vector>
 
+#include "vtkSMProperty.h"
+#include "vtkSMProxy.h"
+#include "vtkSMProxyManager.h"
+#include "vtkSMPropertyHelper.h"
+
 
 vtkCxxRevisionMacro(vtkTrackFilter2, "$Revision: 0.1 $");
 vtkStandardNewMacro(vtkTrackFilter2);
@@ -43,6 +48,21 @@ vtkTrackFilter2::vtkTrackFilter2()
 	this->SetNumberOfInputPorts(1);
 	this->SetNumberOfOutputPorts(1);
 
+	//this->ModeSelection.assign("");
+
+	this->SetInputArrayToProcess(
+		0,
+		0,
+		0,
+		vtkDataObject::FIELD_ASSOCIATION_POINTS_THEN_CELLS,
+		vtkDataSetAttributes::SCALARS);
+	
+	this->SetInputArrayToProcess(
+		1,
+		0,
+		0,
+		vtkDataObject::FIELD_ASSOCIATION_POINTS_THEN_CELLS,
+		vtkDataSetAttributes::SCALARS);
 }
 
 //----------------------------------------------------------------------------
@@ -71,26 +91,15 @@ int vtkTrackFilter2::FillOutputPortInformation(
 	return 1;
 }
 
-
+/*
 //----------------------------------------------------------------------------
 int vtkTrackFilter2::RequestInformation(
 		vtkInformation* vtkNotUsed(request),
 		vtkInformationVector** inputVector,
 		vtkInformationVector* outputVector)
 {
-
-	vtkPolyData* input = vtkPolyData::GetData(inputVector[0]);
-
-	int nArr = input->GetPointData()->GetNumberOfArrays();
-	vtkstd::vector<vtkstd::string> names;
-	names.resize(nArr,"");
-	for (int i = 0; i<nArr;++i)
-	{
-		names.at(i) = input->GetPointData()->GetArrayName(i);
-	}
-
 	return 1;
-}
+}*/
 
 //----------------------------------------------------------------------------
 int vtkTrackFilter2::RequestData(vtkInformation*,
@@ -104,15 +113,29 @@ int vtkTrackFilter2::RequestData(vtkInformation*,
 	vtkPolyData* output = vtkPolyData::GetData(outputVector);
 	vtkPolyData* input = vtkPolyData::GetData(inputVector[0]);
 
+	vtkDataArray* filterArray = this->GetInputArrayToProcess(0, inputVector);
+	vtkDataArray* restrictionArray = this->GetInputArrayToProcess(1, inputVector);
+
+	vtkErrorMacro("FilterArray: "<<filterArray->GetName());
+	vtkErrorMacro("RestrictionArray: "<<restrictionArray->GetName());
+
+
+	vtkErrorMacro("Filter_0: "<<this->FilterBounds[0]);
+	vtkErrorMacro("Filter_1: "<<this->FilterBounds[1]);
+
+	vtkErrorMacro("Restriction_0: "<<this->RestrictionBounds[0]);
+	vtkErrorMacro("Restriction_1: "<<this->RestrictionBounds[1]);
+
+	/*
 	vtkErrorMacro("Filter_0: "<<this->Filter[0]);
 	vtkErrorMacro("Filter_1: "<<this->Filter[1]);
 
 	vtkErrorMacro("Restriction_0: "<<this->Restriction[0]);
 	vtkErrorMacro("Restriction_1: "<<this->Restriction[1]);
+	*/
 
-	vtkErrorMacro("FilterArray: "<<this->FilterArray);
-	//vtkErrorMacro("ModeSelection: "<<this->ModeSelection);
-	vtkErrorMacro("RestrictionArray: "<<this->RestrictionArray);
+	//vtkErrorMacro("ModeSelection: "<<this->ModeSelection.c_str());
+
 
 
 
@@ -199,31 +222,41 @@ int vtkTrackFilter2::RequestData(vtkInformation*,
 }
 
 
-
-void vtkTrackFilter2::SetFilterArray(int index)
+/*
+void vtkTrackFilter2::SetFilterArray(const char * sel)
 {
-	vtkErrorMacro("FilterArray sub: "<<index);
+	//vtkErrorMacro("FilterArray sub: "<<index);
+	this->FilterArray = vtkstd::string(sel);
+	this->Modified();
 }
 
-void vtkTrackFilter2::SetModeSelection(int sel)
+void vtkTrackFilter2::SetModeSelection(const char * sel)
 {
-	vtkErrorMacro("SetModeSelection sub: "<<sel);
+	//vtkErrorMacro("SetModeSelection sub: "<<sel);
+	this->ModeSelection = vtkstd::string(sel);
+	this->Modified();
 }
 
 void vtkTrackFilter2::SetRestrictionArray(const char * sel)
 {
-	vtkErrorMacro("RestrictionArray sub: "<<sel);
-	this->RestrictionArray = sel;
+	//vtkErrorMacro("RestrictionArray sub: "<<sel);
+	this->RestrictionArray = vtkstd::string(sel);
+	//vtkErrorMacro("RestrictionArray sub: " << this->RestrictionArray.c_str());
+	this->Modified();
 }
-
+*/
+/*
 void vtkTrackFilter2::SetFilter(double f0, double f1)
 {
 	this->Filter[0] = f0;
 	this->Filter[1] = f1;
+	this->Modified();
 }
 
 void vtkTrackFilter2::SetRestriction(double f0, double f1)
 {
 	this->Restriction[0] = f0;
 	this->Restriction[1] = f1;
+	this->Modified();
 }
+*/

@@ -26,6 +26,8 @@
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
 #include <vtkstd/vector>
+#include "vtkStdString.h"
+
 
 class VTK_EXPORT vtkTrackFilter2 :  public vtkPolyDataAlgorithm
 {
@@ -36,26 +38,15 @@ public:
 
 	void PrintSelf(ostream& os, vtkIndent indent);
 
-	void SetFilterArray(int);
-	void SetModeSelection(int);
-	void SetRestrictionArray(const char *);
-	//vtkSetMacro(FilterArray,int);
-	//vtkGetMacro(FilterArray,int);
-	//vtkSetMacro(ModeSelection,int);
-	//vtkGetMacro(ModeSelection,int);
-	//vtkSetMacro(RestrictionArray,char);
-	//vtkGetMacro(RestrictionArray,char*);
+	vtkSetVectorMacro(FilterBounds, double, 2);
+	vtkGetVectorMacro(FilterBounds, double, 2);
+
+	vtkSetVectorMacro(RestrictionBounds, double, 2);
+	vtkGetVectorMacro(RestrictionBounds, double, 2);
 
 
-	void SetFilter(double,double);
-/*	vtkSetMacro(Filter_0,double);
-	vtkGetMacro(Filter_0,double);
-	vtkSetMacro(Filter_1,double);
-	vtkGetMacro(Filter_1,double);*/
-	//vtkSetMacro(Filter,double);
-	//vtkGetMacro(Filter,double);
-
-	void SetRestriction(double, double);
+	//void SetFilter(double,double);
+	//void SetRestriction(double, double);
 
 protected:
 	vtkTrackFilter2();
@@ -64,7 +55,7 @@ protected:
 	virtual int FillInputPortInformation(int port, vtkInformation* info);
 	virtual int FillOutputPortInformation(int vtkNotUsed(port),	vtkInformation* info);
 	virtual int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*);
-	virtual int RequestInformation(vtkInformation*, vtkInformationVector**, vtkInformationVector*);
+	//virtual int RequestInformation(vtkInformation*, vtkInformationVector**, vtkInformationVector*);
 
 
 private:
@@ -72,12 +63,15 @@ private:
 	void operator=(const vtkTrackFilter2&);  // Not implemented.
 
 
-	int FilterArray;
-	const char * ModeSelection;
-	const char * RestrictionArray;
+	//vtkStdString FilterArray;
+	//vtkStdString ModeSelection;
+	//vtkStdString RestrictionArray;
 
-	double Filter[2];
-	double Restriction[2];
+	//double Filter[2];
+	//double Restriction[2];
+
+	double FilterBounds[2];
+	double RestrictionBounds[2];
 
 
 

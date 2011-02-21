@@ -17,15 +17,54 @@
 				<DataTypeDomain name="input_type">
 					<DataType value="vtkPolyData"/>
 				</DataTypeDomain>
-				<InputArrayDomain name="input_array">
-					<RequiredProperties>
-						<Property name="SelectInputArray" 
-							function="FieldDataSelection"/>
-						</RequiredProperties>
-				</InputArrayDomain>
+				<InputArrayDomain
+					name="input_array1"
+					attribute_type="point"
+					number_of_components="1"/>
+					
+				<InputArrayDomain
+					name="input_array2"
+					attribute_type="point"
+					number_of_components="1"/>
 			</InputProperty>
 
 			
+			<StringVectorProperty
+				name="SelectFilterArray" 
+				command="SetInputArrayToProcess" 
+				label="Select all Tracks, where"
+				number_of_elements="5" 
+				element_types="0 0 0 0 2">
+				<ArrayListDomain name="array_list" 
+					attribute_type="Scalars"
+					input_domain_name="input_array1">
+					<RequiredProperties>
+						<Property name="Input" function="Input"/>
+					</RequiredProperties>
+				</ArrayListDomain>
+				<Documentation>
+				This property indicates which array to filter for.
+				</Documentation>
+			</StringVectorProperty>	  
+
+			<StringVectorProperty
+				name="SelectRestrictionArray" 
+				command="SetInputArrayToProcess" 
+				label="with restriction"
+				number_of_elements="5" 
+				element_types="0 0 0 0 2" 
+				default_values="1"> 
+				<ArrayListDomain name="array_list" 
+					attribute_type="Scalars"
+					input_domain_name="input_array2">
+					<RequiredProperties>
+						<Property name="Input" function="Input"/>
+					</RequiredProperties>
+				</ArrayListDomain>
+				<Documentation>
+				filter under what restrictions...
+				</Documentation>
+			</StringVectorProperty>	  
 			
 			<DoubleVectorProperty
 				name="Filter"
@@ -34,6 +73,11 @@
 				number_of_elements="2"
 				animateable="0"
 				default_values="0 0" >
+				<DoubleRangeDomain name="range">
+					<RequiredProperties>
+						<Property name="Input" function="Input"/>
+					</RequiredProperties>
+				</DoubleRangeDomain>
 				<Documentation>
 					uuuu
 				</Documentation>
@@ -46,43 +90,20 @@
 				number_of_elements="2"
 				animateable="0"
 				default_values="0 0" >
+				
 				<Documentation>
 					uuuu
 				</Documentation>
 			</DoubleVectorProperty>			
 			
 
-			<IntVectorProperty
-				name="FilterArray"
-				label="FilterArray"
-				command="SetFilterArray"
-				element_types="0"
-				number_of_elements="1"
-				default_values="0" >
-				<Documentation>
-					uuuu
-				</Documentation>
-			</IntVectorProperty>
-
-			<IntVectorProperty
+			<StringVectorProperty
 				name="ModeSelection"
 				label="ModeSelection"
 				command="SetModeSelection"
 				element_types="2"
 				number_of_elements="1"
-				default_values="0" >
-				<Documentation>
-					uuuu
-				</Documentation>
-			</IntVectorProperty>
-
-			<StringVectorProperty
-				name="RestrictionArray"
-				label="RestrictionArray"
-				command="SetRestrictionArray"
-				element_types="2"
-				number_of_elements="1"
-				default_values="0" >
+				default_values="" >
 				<Documentation>
 					uuuu
 				</Documentation>

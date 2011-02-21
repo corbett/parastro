@@ -33,7 +33,7 @@ protected slots:
 	void upperFChanged(double);
 	void lowerRChanged(double);
 	void upperRChanged(double);
-	void variableChanged();
+	//void variableChanged();
 	void selectionModeChanged(int);
 
 private slots:
@@ -41,10 +41,10 @@ private slots:
 	//virtual void reset();
 
 protected:
-	pqDoubleRangeWidget* Filter_0;
-	pqDoubleRangeWidget* Filter_1;
-	pqDoubleRangeWidget* Restriction_0;
-	pqDoubleRangeWidget* Restriction_1;
+	pqDoubleRangeWidget* FilterBounds_0;
+	pqDoubleRangeWidget* FilterBounds_1;
+	pqDoubleRangeWidget* RestrictionBounds_0;
+	pqDoubleRangeWidget* RestrictionBounds_1;
 	QComboBox *RestrictionArray;
 	QLabel *label4;
 	QLabel *label5;

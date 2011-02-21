@@ -52,6 +52,13 @@ vtkTrackFilter::vtkTrackFilter()
 		0,
 		vtkDataObject::FIELD_ASSOCIATION_POINTS_THEN_CELLS,
 		vtkDataSetAttributes::SCALARS);
+	
+	this->SetInputArrayToProcess(
+		1,
+		0,
+		0,
+		vtkDataObject::FIELD_ASSOCIATION_POINTS_THEN_CELLS,
+		vtkDataSetAttributes::SCALARS);
 }
 
 //----------------------------------------------------------------------------
@@ -95,8 +102,13 @@ int vtkTrackFilter::RequestData(vtkInformation*,
 	vtkSmartPointer<vtkCellArray> tracks = input->GetLines();
 	vtkErrorMacro(" anz lines: " << tracks->GetNumberOfCells());
 
-	vtkDataArray* filterArray = this->GetInputArrayToProcess(0, inputVector);
+	vtkDataArray* filterArray1 = this->GetInputArrayToProcess(0, inputVector);
+	vtkDataArray* filterArray2 = this->GetInputArrayToProcess(1, inputVector);
 
+	vtkErrorMacro(" array1: "<<filterArray1->GetName());
+	vtkErrorMacro(" array2: "<<filterArray2->GetName());
+
+	/*
 	vtkIdType * pts;
 	vtkIdType  npts;
 	bool savetrack;
@@ -163,6 +175,6 @@ int vtkTrackFilter::RequestData(vtkInformation*,
 
 	timer->StopTimer();
 	vtkErrorMacro(" track selection took: " << timer->GetElapsedTime() << " s");
-	
+	*/
 	return 1;
 }
