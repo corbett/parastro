@@ -43,8 +43,10 @@ vtkTrackFilter::vtkTrackFilter()
 	this->SetNumberOfInputPorts(1);
 	this->SetNumberOfOutputPorts(1);
 
-	this->LowPoint = 0;
-	this->HighPoint = 0;
+	this->FilterHi = 0;
+	this->FilterLow = 0;
+	this->RestrictionHi = 0;
+	this->RestrictionLow = 0;
 
 	this->SetInputArrayToProcess(
 		0,
@@ -102,11 +104,155 @@ int vtkTrackFilter::RequestData(vtkInformation*,
 	vtkSmartPointer<vtkCellArray> tracks = input->GetLines();
 	vtkErrorMacro(" anz lines: " << tracks->GetNumberOfCells());
 
-	vtkDataArray* filterArray1 = this->GetInputArrayToProcess(0, inputVector);
-	vtkDataArray* filterArray2 = this->GetInputArrayToProcess(1, inputVector);
+	vtkDataArray* filterArray = this->GetInputArrayToProcess(0, inputVector);
+	vtkDataArray* restrictionArray = this->GetInputArrayToProcess(1, inputVector);
 
-	vtkErrorMacro(" array1: "<<filterArray1->GetName());
-	vtkErrorMacro(" array2: "<<filterArray2->GetName());
+	vtkErrorMacro(" array1: "<<filterArray->GetName());
+	vtkErrorMacro(" array2: "<<restrictionArray->GetName());
+
+	vtkErrorMacro(" mode  : "<<this->Mode);
+
+	vtkErrorMacro(" FiltB0: "<<this->FilterLow);
+	vtkErrorMacro(" FiltB1: "<<this->FilterHi);
+	vtkErrorMacro(" RestB0: "<<this->RestrictionLow);
+	vtkErrorMacro(" RestB1: "<<this->RestrictionHi);
+
+
+
+
+
+
+
+	bool savetrack;
+
+	vtkSmartPointer<vtkIdList> selectedPoints = vtkSmartPointer<vtkIdList>::New();
+	vtkSmartPointer<vtkCellArray> selectedTracks = vtkSmartPointer<vtkCellArray>::New();
+	selectedPoints->Initialize();
+
+	vtkIdType * pts;
+	vtkIdType npts;
+
+	tracks->InitTraversal();
+
+	// select tracks where one point meets criteria
+	if (this->Mode==0)
+	{
+		for (int i = 0; i<tracks->GetNumberOfCells(); ++i)
+		{
+			savetrack = false;
+			tracks->GetNextCell(npts, pts);
+			for (int j = 0; j < npts; ++j)
+			{
+				if (filterArray->GetTuple1(*(pts+j)) >= this->FilterLow &&
+					filterArray->GetTuple1(*(pts+j)) <= this->FilterHi)
+				{
+					savetrack=true;
+					break;
+				}
+			}
+			
+			if (savetrack)
+			{
+				vtkSmartPointer<vtkPolyLine> nextLine = vtkSmartPointer<vtkPolyLine>::New();
+				for (int j =0;j<npts;j++)
+				{
+					vtkIdType newId = selectedPoints->InsertNextId(*(pts+j));
+					nextLine->GetPointIds()->InsertNextId(newId);
+				}
+				selectedTracks->InsertNextCell(nextLine);
+			}
+
+		}
+	}
+	// select tracks where every point meets critria
+	else if (this->Mode == 1)
+	{
+		for (int i = 0; i<tracks->GetNumberOfCells(); ++i)
+		{
+			savetrack = true;
+			tracks->GetNextCell(npts, pts);
+			for (int j = 0; j < npts; ++j)
+			{
+				if (!(filterArray->GetTuple1(*(pts+j)) >= this->FilterLow &&
+					filterArray->GetTuple1(*(pts+j)) <= this->FilterHi))
+				{
+					savetrack=false;
+					break;
+				}
+			}
+			
+			if (savetrack)
+			{
+				vtkSmartPointer<vtkPolyLine> nextLine = vtkSmartPointer<vtkPolyLine>::New();
+				for (int j =0;j<npts;j++)
+				{
+					vtkIdType newId = selectedPoints->InsertNextId(*(pts+j));
+					nextLine->GetPointIds()->InsertNextId(newId);
+				}
+				selectedTracks->InsertNextCell(nextLine);
+			}
+
+		}
+	}
+
+	//select tracks where any point within restriction meets criteria
+	else if (this->Mode == 2)
+	{
+		for (int i = 0; i<tracks->GetNumberOfCells(); ++i)
+		{
+			tracks->GetNextCell(npts, pts);
+			for (int j = 0; j < npts; ++j)
+			{
+				savetrack = false;
+				if (restrictionArray->GetTuple1(*(pts+j)) >= this->RestrictionLow &&
+					restrictionArray->GetTuple1(*(pts+j)) <= this->RestrictionHi)
+				{
+					if (filterArray->GetTuple1(*(pts+j)) >= this->FilterLow &&
+						filterArray->GetTuple1(*(pts+j)) <= this->FilterHi)
+					{
+						savetrack = true;
+						break;
+					}
+
+				}
+			}
+
+			if (savetrack)
+			{
+				vtkSmartPointer<vtkPolyLine> nextLine = vtkSmartPointer<vtkPolyLine>::New();
+				for (int j =0;j<npts;j++)
+				{
+					vtkIdType newId = selectedPoints->InsertNextId(*(pts+j));
+					nextLine->GetPointIds()->InsertNextId(newId);
+				}
+				selectedTracks->InsertNextCell(nextLine);
+			}
+
+		}		
+	}
+	// something strange went wrong...
+	else
+	{
+		vtkErrorMacro("some nasty error occured...");
+		return 0;
+	}
+
+
+	output->DeepCopy(CopyPointsAndData(input,selectedPoints));
+	output->SetLines(selectedTracks);
+
+/*	vtkPolyData* newDataSet = CopyPointsAndData(input,selectedPoints);
+	output->Initialize();
+	output->DeepCopy(newDataSet);
+	output->SetLines(newTracks);
+	newDataSet->Delete();*/
+
+	timer->StopTimer();
+	vtkErrorMacro(" track selection took: " << timer->GetElapsedTime() << " s");
+
+
+
+
 
 	/*
 	vtkIdType * pts;

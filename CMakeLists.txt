@@ -25,16 +25,16 @@ INCLUDE(${PARAVIEW_USE_FILE})
 INCLUDE_DIRECTORIES(AstroVizHelpersLib)
 
 # for special gui
-QT4_WRAP_CPP(MOC_SRCS pqTrackFilter2Panel.h)
+#QT4_WRAP_CPP(MOC_SRCS pqTrackFilter2Panel.h)
 
-QT4_ADD_RESOURCES(RCS_SRCS pqTrackFilter2Panel.qrc)
+#QT4_ADD_RESOURCES(RCS_SRCS pqTrackFilter2Panel.qrc)
 
-ADD_PARAVIEW_OBJECT_PANEL(
-	IFACES IFACE_SRCS
-	CLASS_NAME pqTrackFilter2Panel
-	XML_NAME TrackFilter2
-	XML_GROUP filters
-	)
+#ADD_PARAVIEW_OBJECT_PANEL(
+#	IFACES IFACE_SRCS
+#	CLASS_NAME pqTrackFilter2Panel
+#	XML_NAME TrackFilter2
+#	XML_GROUP filters
+#	)
 
 
 #Defines the AstroViz plugin
@@ -52,7 +52,7 @@ ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.1"
 		vtkSQLiteReader.cxx
 		vtkSQLiteReader2.cxx
 		vtkTrackFilter.cxx
-		vtkTrackFilter2.cxx
+		#vtkTrackFilter2.cxx
 		vtkSimpleBin.cxx
 		#vtkRamsesReader.cxx
 
@@ -69,7 +69,7 @@ ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.1"
 		SQLiteReaderSM.xml
 		SQLiteReader2SM.xml
 		TrackFilterSM.xml
-		TrackFilter2SM.xml
+		#TrackFilter2SM.xml
 		SimpleBinSM.xml
 		#RamsesReaderSM.xml
 
@@ -84,8 +84,8 @@ ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.1"
 		AstroVizFilterMenu.xml
 		
 	GUI_INTERFACES ${IFACES} 
-		SOURCES pqTrackFilter2Panel.cxx ${MOC_SRCS} ${RCS_SRCS} ${IFACE_SRCS}
-		#SOURCES ${MOC_SRCS} ${IFACE_SRCS}
+		#SOURCES pqTrackFilter2Panel.cxx ${MOC_SRCS} ${RCS_SRCS} ${IFACE_SRCS}
+		SOURCES ${MOC_SRCS} ${IFACE_SRCS}
 	)
 	
 #Defines the StrangeAttractors plugin

@@ -20,7 +20,13 @@
 				<InputArrayDomain
 					name="input_array1"
 					attribute_type="point"
-					number_of_components="1"/>
+					number_of_components="1">
+					<RequiredProperties>
+            <Property
+							name="SelectInputScalars" 
+              function="FieldDataSelection"/>
+					</RequiredProperties>
+				</InputArrayDomain>
 				
 				<InputArrayDomain
 					name="input_array2"
@@ -47,6 +53,19 @@
 				</Documentation>
 			</StringVectorProperty>	  
 
+			<IntVectorProperty 
+				name="Mode" 
+				command="SetMode"
+				label="is at"
+				number_of_elements="1"
+				default_values="0" >
+				<EnumerationDomain name="enum">
+					<Entry value="0" text="some point on the track"/>
+					<Entry value="1" text="every point on the track"/>
+					<Entry value="2" text="the points on the track where restriction criteria"/>
+				</EnumerationDomain>
+			</IntVectorProperty>
+
 			<StringVectorProperty
 				name="SelectRestrictionArray" 
 				command="SetInputArrayToProcess" 
@@ -66,54 +85,8 @@
 				</Documentation>
 			</StringVectorProperty>	  
 			
-			<IntVectorProperty 
-				name="Mode" 
-				command="SetMode"
-				label="is at "
-				number_of_elements="1"
-				default_values="0" >
-				<EnumerationDomain name="enum">
-					<Entry value="0" text="some point on the track"/>
-					<Entry value="1" text="every point on the track"/>
-					<Entry value="2" text="the points on the track where restriction criteria"/>
-				</EnumerationDomain>
-			</IntVectorProperty>
-<!--
-			<IntVectorProperty
-				name="SelectMode"
-				command="SetMode"
-				label=""
-				number_of_elements="1"
-				default_values="0"
-				animateable="0">
-				<EnumerationDomain
-					name="enum">
-					<Entry value="0" text="at some point on the track"/>
-					<Entry value="1" text="at any point on the track"/>
-				</EnumerationDomain>
-				<Documentation>
-					Choose the filtering mode
-				</Documentation>
-			</IntVectorProperty>	
-			-->
 
-			<DoubleVectorProperty
-				name="LowPoint"
-				label="between"
-				command="SetLowPoint"
-				number_of_elements="1"
-				animateable="1"
-				default_values="0" >
-				<BoundsDomain name="range" mode="normal" default_mode="min" >
-					<RequiredProperties>
-						<Property name="Input" function="Input" />
-					</RequiredProperties>
-				</BoundsDomain>
-				<Documentation>
-					uuuu
-				</Documentation>
-			</DoubleVectorProperty>
-
+			<!--
 			<DoubleVectorProperty
 				name="HighPoint"
 				label="and"
@@ -130,7 +103,94 @@
 					uuuuu
 				</Documentation>
 			</DoubleVectorProperty>
+			-->
+			<DoubleVectorProperty
+				name="RestrictionLow"
+				label="between"
+				command="SetRestrictionLow"
+				number_of_elements="1"
+				animateable="0"
+				default_values="0" >
+				
+				<ArrayRangeDomain name="range">
+					<RequiredProperties>
+						<Property name="Input" function="Input"/>
+						<Property name="SelectInputScalars" function="ArraySelection"/>
+					</RequiredProperties>
+				</ArrayRangeDomain>  
+				
+				
+				<!--
+				<BoundsDomain name="range" mode="normal" default_mode="min" >
+					<RequiredProperties>
+						<Property name="Input" function="Input" />
+					</RequiredProperties>
+				</BoundsDomain>
+				-->
+				<Documentation>
+					uuuu
+				</Documentation>
+			</DoubleVectorProperty>
 
+			
+			<DoubleVectorProperty
+				name="RestrictionHi"
+				label="and"
+				command="SetRestrictionHi"
+				number_of_elements="1"
+				animateable="0"
+				default_values="0" >
+				<!--
+				<BoundsDomain name="range" mode="normal" default_mode="min" >
+					<RequiredProperties>
+						<Property name="Input" function="Input" />
+					</RequiredProperties>
+				</BoundsDomain>
+				-->
+				<Documentation>
+					uuuu
+				</Documentation>
+			</DoubleVectorProperty>
+			
+			<DoubleVectorProperty
+				name="FilterLow"
+				label="between"
+				command="SetFilterLow"
+				number_of_elements="1"
+				animateable="0"
+				default_values="0" >
+				<!--
+				<BoundsDomain name="range" mode="normal" default_mode="min" >
+					<RequiredProperties>
+						<Property name="Input" function="Input" />
+					</RequiredProperties>
+				</BoundsDomain>
+				-->
+				<Documentation>
+					uuuu
+				</Documentation>
+			</DoubleVectorProperty>
+
+			<DoubleVectorProperty
+				name="FilterHi"
+				label="and"
+				command="SetFilterHi"
+				number_of_elements="1"
+				animateable="0"
+				default_values="0" >
+				<!--
+				<BoundsDomain name="range" mode="normal" default_mode="min" >
+					<RequiredProperties>
+						<Property name="Input" function="Input" />
+					</RequiredProperties>
+				</BoundsDomain>
+				-->
+				<Documentation>
+					uuuu
+				</Documentation>
+			</DoubleVectorProperty>
+
+			
 		</SourceProxy>
 	</ProxyGroup>
 </ServerManagerConfiguration>

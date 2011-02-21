@@ -39,11 +39,21 @@ public:
 	vtkSetMacro(Mode,int);
 	vtkGetMacro(Mode,int);
 
-	vtkSetMacro(HighPoint,double);
-	vtkGetMacro(HighPoint,double);
+/*	vtkSetVectorMacro(FilterBound, double, 2);
+	vtkGetVectorMacro(FilterBound, double, 2);
+	vtkSetVectorMacro(RestrictionBound, double, 2);
+	vtkGetVectorMacro(RestrictionBound, double, 2);
+*/
+	
+	vtkSetMacro(FilterHi,double);
+	vtkGetMacro(FilterHi,double);
+	vtkSetMacro(FilterLow,double);
+	vtkGetMacro(FilterLow,double);
 
-	vtkSetMacro(LowPoint,double);
-	vtkGetMacro(LowPoint,double);
+	vtkSetMacro(RestrictionHi,double);
+	vtkGetMacro(RestrictionHi,double);
+	vtkSetMacro(RestrictionLow,double);
+	vtkGetMacro(RestrictionLow,double);
 
 
 protected:
@@ -60,8 +70,15 @@ private:
 	void operator=(const vtkTrackFilter&);  // Not implemented.
 
 	int Mode;
-	double HighPoint;
-	double LowPoint;
+/*	double FilterBound[2];
+	double RestrictionBound[2];
+*/
+
+	double FilterHi;
+	double FilterLow;
+
+	double RestrictionHi;
+	double RestrictionLow;
 };
 
 #endif

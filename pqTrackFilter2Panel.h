@@ -53,7 +53,6 @@ protected:
 private:
 	//Ui::pqTrackFilter2Panel Widgets;
 
-
 };
 
 #endif
