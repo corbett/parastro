@@ -26,6 +26,7 @@ INCLUDE_DIRECTORIES(AstroVizHelpersLib)
 
 # for special gui
 #QT4_WRAP_CPP(MOC_SRCS pqTrackFilter2Panel.h)
+QT4_WRAP_CPP(MOC_SRCS pqTrackFilterPanel.h)
 
 #QT4_ADD_RESOURCES(RCS_SRCS pqTrackFilter2Panel.qrc)
 
@@ -35,7 +36,12 @@ INCLUDE_DIRECTORIES(AstroVizHelpersLib)
 #	XML_NAME TrackFilter2
 #	XML_GROUP filters
 #	)
-
+ADD_PARAVIEW_OBJECT_PANEL(
+	IFACES IFACE_SRCS
+	CLASS_NAME pqTrackFilterPanel
+	XML_NAME TrackFilter
+	XML_GROUP filters
+	)
 
 #Defines the AstroViz plugin
 ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.1"
@@ -85,7 +91,7 @@ ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.1"
 		
 	GUI_INTERFACES ${IFACES} 
 		#SOURCES pqTrackFilter2Panel.cxx ${MOC_SRCS} ${RCS_SRCS} ${IFACE_SRCS}
-		SOURCES ${MOC_SRCS} ${IFACE_SRCS}
+		SOURCES pqTrackFilterPanel.cxx ${MOC_SRCS} ${IFACE_SRCS}
 	)
 	
 #Defines the StrangeAttractors plugin

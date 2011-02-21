@@ -62,14 +62,52 @@
 				<EnumerationDomain name="enum">
 					<Entry value="0" text="some point on the track"/>
 					<Entry value="1" text="every point on the track"/>
-					<Entry value="2" text="the points on the track where restriction criteria"/>
+					<Entry value="2" text="points that meet restriction criteria"/>
 				</EnumerationDomain>
 			</IntVectorProperty>
+
+			<DoubleVectorProperty
+				name="FilterLow"
+				label="between"
+				command="SetFilterLow"
+				number_of_elements="1"
+				animateable="0"
+				default_values="0" >
+				<!--
+				<BoundsDomain name="range" mode="normal" default_mode="min" >
+					<RequiredProperties>
+						<Property name="Input" function="Input" />
+					</RequiredProperties>
+				</BoundsDomain>
+				-->
+				<Documentation>
+					uuuu
+				</Documentation>
+			</DoubleVectorProperty>
+
+			<DoubleVectorProperty
+				name="FilterHi"
+				label="and"
+				command="SetFilterHi"
+				number_of_elements="1"
+				animateable="0"
+				default_values="0" >
+				<!--
+				<BoundsDomain name="range" mode="normal" default_mode="min" >
+					<RequiredProperties>
+						<Property name="Input" function="Input" />
+					</RequiredProperties>
+				</BoundsDomain>
+				-->
+				<Documentation>
+					uuuu
+				</Documentation>
+			</DoubleVectorProperty>
 
 			<StringVectorProperty
 				name="SelectRestrictionArray" 
 				command="SetInputArrayToProcess" 
-				label="with restriction"
+				label="Restriction Criteria:"
 				number_of_elements="5" 
 				element_types="0 0 0 0 2" 
 				default_values="1"> 
@@ -86,27 +124,9 @@
 			</StringVectorProperty>	  
 			
 
-			<!--
-			<DoubleVectorProperty
-				name="HighPoint"
-				label="and"
-				command="SetHighPoint"
-				number_of_elements="1"
-				animateable="1"
-				default_values="0" >
-				<BoundsDomain name="range" mode="normal" default_mode="max" >
-					<RequiredProperties>
-						<Property name="Input" function="Input" />
-					</RequiredProperties>
-				</BoundsDomain>
-				<Documentation>
-					uuuuu
-				</Documentation>
-			</DoubleVectorProperty>
-			-->
 			<DoubleVectorProperty
 				name="RestrictionLow"
-				label="between"
+				label="has to be between"
 				command="SetRestrictionLow"
 				number_of_elements="1"
 				animateable="0"
@@ -137,44 +157,6 @@
 				name="RestrictionHi"
 				label="and"
 				command="SetRestrictionHi"
-				number_of_elements="1"
-				animateable="0"
-				default_values="0" >
-				<!--
-				<BoundsDomain name="range" mode="normal" default_mode="min" >
-					<RequiredProperties>
-						<Property name="Input" function="Input" />
-					</RequiredProperties>
-				</BoundsDomain>
-				-->
-				<Documentation>
-					uuuu
-				</Documentation>
-			</DoubleVectorProperty>
-			
-			<DoubleVectorProperty
-				name="FilterLow"
-				label="between"
-				command="SetFilterLow"
-				number_of_elements="1"
-				animateable="0"
-				default_values="0" >
-				<!--
-				<BoundsDomain name="range" mode="normal" default_mode="min" >
-					<RequiredProperties>
-						<Property name="Input" function="Input" />
-					</RequiredProperties>
-				</BoundsDomain>
-				-->
-				<Documentation>
-					uuuu
-				</Documentation>
-			</DoubleVectorProperty>
-
-			<DoubleVectorProperty
-				name="FilterHi"
-				label="and"
-				command="SetFilterHi"
 				number_of_elements="1"
 				animateable="0"
 				default_values="0" >
