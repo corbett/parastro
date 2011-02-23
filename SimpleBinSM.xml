@@ -49,47 +49,70 @@
           </Documentation>
      </StringVectorProperty>	  
 	
-	
+	<!--
       <IntVectorProperty
          name="DoStdDerr"
-         label="Calculate Standart derrivation?"
+         label="Calculate Standart derrivation? (dont even try, doesnt work)"
          command="SetDoStdDerr"
          number_of_elements="1"
          animateable="0"
          default_values="0">
-		 <BooleanDomain name="bool" />
+				<BooleanDomain name="bool" />
          
          <Documentation>
            uuuu
          </Documentation>
       </IntVectorProperty>
-		<!--
-      <DoubleVectorProperty
-         name="HighPoint"
-         label=""
-         command="SetHighPoint"
-         number_of_elements="1"
-         animateable="1"
-         default_values="0" >
-         <BoundsDomain name="range" mode="normal" default_mode="max" >
-           <RequiredProperties>
-             <Property name="Input" function="Input" />
-           </RequiredProperties>
-         </BoundsDomain>
-         <Documentation>
-           uuuuu
-         </Documentation>
-      </DoubleVectorProperty>
-	-->
+			-->
+			
+			<IntVectorProperty
+        name="IntBin"
+        label="Binning int values? (range and nBins are autoset)"
+        command="SetIntBin"
+        number_of_elements="1"
+        animateable="0"
+        default_values="0">
+				<BooleanDomain name="bool" />
+        <Documentation>
+           uuuu
+        </Documentation>
+      </IntVectorProperty>
+			
+			<IntVectorProperty
+        name="LogScale"
+        label="Use Log scaling? (not yet implemented)"
+        command="SetLogScale"
+        number_of_elements="1"
+        animateable="0"
+        default_values="0">
+				<BooleanDomain name="bool" />
+        <Documentation>
+           uuuu
+        </Documentation>
+      </IntVectorProperty>
+			
+			<IntVectorProperty
+        name="BinCount"
+        label="Set #Bins"
+        command="SetBinCount"
+        number_of_elements="1"
+        animateable="0"
+        default_values="10">
+        <Documentation>
+          uuuu
+        </Documentation>
+      </IntVectorProperty>
+
 	
-	<Hints>
-        <!-- View can be used to specify the preferred view for the proxy -->
+			<Hints>
+				<!-- View can be used to specify the preferred view for the proxy -->
         <View type="SpreadSheetView" />
 
         <!-- Temporary hint to allow the output of this filter to be plotted -->
         <Plotable />
-     </Hints>
-    </SourceProxy>
- </ProxyGroup>
+			</Hints>
+			
+		</SourceProxy>
+	</ProxyGroup>
 </ServerManagerConfiguration>
 

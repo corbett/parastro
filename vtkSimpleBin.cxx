@@ -1,6 +1,8 @@
 /*=========================================================================
 
-TODO: implement better binning
+TODO:
+	- this->bincount isnt updated when switching set #bins manually
+	- implement better binning (workinprogress)
 
 
   Program:   
@@ -38,6 +40,7 @@ TODO: implement better binning
 #include "vtkTable.h"
 #include "vtkVariantArray.h"
 #include "vtkMultiBlockDataSet.h"
+#include "vtkMath.h"
 
 #include <vector>
 
@@ -58,7 +61,10 @@ vtkSimpleBin::vtkSimpleBin()
 		vtkDataObject::FIELD_ASSOCIATION_POINTS_THEN_CELLS,
 		vtkDataSetAttributes::SCALARS);
 
-	this->DoStdDerr = false;
+	//this->DoStdDerr = false;
+	this->IntBin = false;
+	this->LogScale = false;
+	this->BinCount = 10;
 }
 
 //----------------------------------------------------------------------------
@@ -102,135 +108,167 @@ int vtkSimpleBin::RequestData(vtkInformation*,
 	vtkPolyData* input = vtkPolyData::GetData(inputVector[0]);
 
 	vtkDataArray* filterArray = this->GetInputArrayToProcess(0, inputVector);
+	vtkstd::string filterArrayName = filterArray->GetName();
 	vtkPointData * pData = input->GetPointData();
 	int nArr = pData->GetNumberOfArrays();
+	
+	// find id of filter array
+	int filterArrayId=-1;
+	for (int i = 0; i<nArr; ++i)
+	{
+		vtkstd::string name = pData->GetArray(i)->GetName();
+		if (name.compare(filterArrayName)==0)
+		{
+			filterArrayId = i;
+			break;
+		}
+	}
+	if (filterArrayId==-1){vtkErrorMacro("Filterarray not found");return 0;}
+	
+	output->Initialize();
 
-	vtkstd::vector<int> counter; // stores, how many entries a bin has
+	vtkAbstractArray * arr;
+	vtkDataArray * countArr;
+	vtkDataArray * valueArr;
 
-	// calculate nBin (simple, only works for int values..
-	double range [2];
-	filterArray->GetRange(range);
-	int nBin = range[1] - range[0] +1;
+	// init counter column
+	arr = vtkAbstractArray::CreateArray(VTK_UNSIGNED_INT);
+	arr->SetName("NumberOfEntriesInBin");
+	output->AddColumn(arr);
+	//countArr->Delete();
+	countArr = vtkDataArray::SafeDownCast(output->GetColumn(0));
 
+	// init bin column
+	arr = vtkAbstractArray::CreateArray(filterArray->GetDataType());
+	arr->SetName(filterArrayName.c_str());
+	output->AddColumn(arr);
+	//valueArr->Delete();
+	valueArr = vtkDataArray::SafeDownCast(output->GetColumn(1));
 
-
-	// create table structre
-	// mean values
+	// init the other columns (mean values)
 	for (int i = 0; i<nArr; i++)
 	{
 		vtkAbstractArray * inArr = pData->GetArray(i);
-		vtkAbstractArray * arr_mean = vtkAbstractArray::CreateArray(inArr->GetDataType());
-		vtkstd::string name = inArr->GetName();
-		name.append("_mean");
-		arr_mean->SetName(name.c_str());
-		output->AddColumn(arr_mean);
-		arr_mean->Delete();
+		vtkstd::string arrayName = inArr->GetName();
+		arr = vtkAbstractArray::CreateArray(inArr->GetDataType());
+		arrayName.append("_mean");
+		arr->SetName(arrayName.c_str());
+		output->AddColumn(arr);
+		//arr->Delete();
 	}
-	// Standart derrivation fields
-	if (this->DoStdDerr)
+
+	// get range
+	double rangeV[2];
+	filterArray->GetRange(rangeV);
+	//define shortcuts
+	double range = rangeV[1]-rangeV[0];
+	double min = rangeV[0];
+	double max = rangeV[1];
+
+
+	// calculate this->BinCount
+	if(this->IntBin)
+	//(simple, only works for int values..
 	{
-		for (int i = 0; i<nArr; i++)
-		{
-			vtkAbstractArray * inArr = pData->GetArray(i);
-			vtkAbstractArray * arr_StdDerr = vtkDoubleArray::New();
-			vtkstd::string name = inArr->GetName();
-			name.append("_StdDerr");
-			arr_StdDerr->SetName(name.c_str());
-			output->AddColumn(arr_StdDerr);
-			arr_StdDerr->Delete();
-		}
+		++range;
+		this->BinCount = range;
 	}
+	// else: bincount is set in gui
+	int nBin = this->BinCount; //define shortcut
+
 
 	// init every field to 0
-	counter.resize(nBin,0);
-	output->SetNumberOfRows(nBin);
+	for (int i = 0; i<nBin;i++){output->InsertNextBlankRow(0.0);}
+	output->Update();
+
+
+	// set up binned value
+	double val;
 	for (int i = 0; i<nBin;i++)
 	{
-		counter.at(i) = 0;
-		for (int j = 0; j<nArr; j++)
+		if(this->IntBin)
 		{
-			output->SetValue(i,j,0.0);
+			val = min+range/(double)nBin*i;
 		}
-	}
-	if(this->DoStdDerr)
-	{
-		for (int i = 0; i<nBin;i++)
+		else
 		{
-			for (int j = nArr; j<2*nArr;j++)
-			{
-				output->SetValue(i,j,0.0);
-			}
+			val = min+range/(double)nBin*((double)i+0.5);
 		}
+		valueArr->SetTuple1(i,val);
 	}
-
+	output->Update();
 
 
 	// sum up the values
-	for (int i = 0; i<input->GetNumberOfPoints(); i++)
+	int binnr;
+	for (int i = 0; i<input->GetNumberOfPoints(); ++i)
 	{
-		int bin = range[0] + *filterArray->GetTuple(i);
-
 		//check for arrays with mass = 0, dont count them
 		if(pData->GetArray("Mvir")->GetTuple1(i) == 0){continue;}
-		
-		counter.at(bin)++;
 
-		for (int j = 0; j<nArr; j++)
+		double value = filterArray->GetTuple1(i);
+		
+		if(this->IntBin)
 		{
-			double oldval = output->GetValue(bin,j).ToDouble();
+			double binnrd = ( value - min )/range*nBin;
+			binnr = binnrd;
+		}
+		else
+		{
+			double binnrd = ( value - min )/range*(nBin-1);
+			binnr = vtkMath::Round(binnrd);
+		}
+		countArr->SetTuple1(binnr, countArr->GetTuple1(binnr)+1);
+
+		//sum up the other arrays
+		for (int j = 0; j<nArr; ++j)
+		{
+			double oldval = output->GetValue(binnr,j+2).ToDouble();
 			double orgval = *pData->GetArray(j)->GetTuple(i);
-			output->SetValue(bin,j, oldval + orgval);
+			output->SetValue(binnr,j+2, oldval + orgval);
 		}
 	}
-
-	output->Update();
 
 	// get the average
-	for (int bin = 0; bin<nBin; bin++)
+	for (int row = 0; row<nBin; ++row)
 	{
-		for (int j = 0; j<nArr; j++)
+		int num = output->GetValue(row,0).ToInt(); //get number of values in this bin
+		if (num == 0)
 		{
-			double oldval = output->GetValue(bin,j).ToDouble();
-			output->SetValue(bin,j, oldval / (double)counter.at(bin));
+			for (int j = 0; j<nArr; ++j)
+			{
+				output->SetValue(row,j+2, 0);
+			}
+		}
+		else
+		{
+			for (int j = 0; j<nArr; ++j)
+			{
+				double val = output->GetValue(row,j+2).ToDouble() / (double)num;
+				output->SetValue(row,j+2, val);
+			}
 		}
 	}
 
 	output->Update();
 
-	// calculate stdderr
-	if(this->DoStdDerr)
-	{
-		for (int i = 0; i<input->GetNumberOfPoints(); i++)
-		{
-			int bin = range[0] + *filterArray->GetTuple(i);
-			if(pData->GetArray("Mvir")->GetTuple1(i) == 0){continue;}
-
-			for (int j = nArr; j<2*nArr; j++)
-			{
-				double oldval = output->GetValue(bin,j).ToDouble();
-				double newval = *pData->GetArray(j-nArr)->GetTuple(i);
-				double mean = output->GetValue(bin,j-nArr).ToDouble();
-				output->SetValue(bin,j, oldval + (newval - mean)*(newval - mean));
-			}
-		}
-
-		output->Update();
-
-		for (int bin = 0; bin<nBin; bin++)
-		{
-			for (int j = nArr; j<2*nArr; j++)
-			{
-				double oldval = output->GetValue(bin,j).ToDouble();
-				output->SetValue(bin,j, sqrt(oldval / (double)(counter.at(bin)-1)));
-			}
-		}
-
-		output->Update();
-	}
-
-
 	timer->StopTimer();
-	vtkErrorMacro(" binning took: " << timer->GetElapsedTime() << " s");
-	
+
+	vtkstd::stringstream ss;
+	ss<<"\n\nSimpleBin run successfully!\n";
+	ss<<"   No of Input Points: ";
+	ss<<input->GetNumberOfPoints()<<"\n";
+	ss<<"   No of Input Arrays: ";
+	ss<<nArr<<"\n";
+	ss<<"   Integer Bins?     : ";
+	ss<<this->IntBin<<"\n";
+	ss<<"   Log Scale?        : ";
+	ss<<this->LogScale<<"\n";
+	ss<<"   No of Bins        : ";
+	ss<<nBin<<"\n";
+	ss<<"   Time taken        : ";
+	ss<<timer->GetElapsedTime()<<" s\n";
+	vtkErrorMacro(<<ss.str());
+
 	return 1;
 }

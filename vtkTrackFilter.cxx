@@ -102,26 +102,20 @@ int vtkTrackFilter::RequestData(vtkInformation*,
 	vtkPolyData* input = vtkPolyData::GetData(inputVector[0]);
 
 	vtkSmartPointer<vtkCellArray> tracks = input->GetLines();
-	vtkErrorMacro(" anz lines: " << tracks->GetNumberOfCells());
+	//vtkErrorMacro(" anz lines: " << tracks->GetNumberOfCells());
 
 	vtkDataArray* filterArray = this->GetInputArrayToProcess(0, inputVector);
 	vtkDataArray* restrictionArray = this->GetInputArrayToProcess(1, inputVector);
 
+	/*
 	vtkErrorMacro(" array1: "<<filterArray->GetName());
 	vtkErrorMacro(" array2: "<<restrictionArray->GetName());
-
 	vtkErrorMacro(" mode  : "<<this->Mode);
-
 	vtkErrorMacro(" FiltB0: "<<this->FilterLow);
 	vtkErrorMacro(" FiltB1: "<<this->FilterHi);
 	vtkErrorMacro(" RestB0: "<<this->RestrictionLow);
 	vtkErrorMacro(" RestB1: "<<this->RestrictionHi);
-
-
-
-
-
-
+	*/
 
 	bool savetrack;
 
@@ -248,10 +242,30 @@ int vtkTrackFilter::RequestData(vtkInformation*,
 	newDataSet->Delete();*/
 
 	timer->StopTimer();
-	vtkErrorMacro(" track selection took: " << timer->GetElapsedTime() << " s");
 
-
-
+	vtkstd::stringstream ss;
+	ss<<"\n\nTrackFilter run successfully!\n";
+	ss<<"   SelectionMode      : ";
+	ss<<this->Mode<<"\n";
+	ss<<"   FilterArray        : ";
+	ss<<filterArray->GetName()<<"\n";
+	ss<<"   FilterHi           : ";
+	ss<<this->FilterHi<<"\n";
+	ss<<"   FilterLow          : ";
+	ss<<this->FilterLow<<"\n";
+	ss<<"   RestrictionArray   : ";
+	ss<<restrictionArray->GetName()<<"\n";
+	ss<<"   RestrictionHi      : ";
+	ss<<this->RestrictionHi<<"\n";
+	ss<<"   RestrictionLow     : ";
+	ss<<this->RestrictionLow<<"\n\n";
+	ss<<"   No of Input Tracks : ";
+	ss<<tracks->GetNumberOfCells()<<"\n";
+	ss<<"   No of Output Tracks: ";
+	ss<<selectedTracks->GetNumberOfCells()<<"\n";
+	ss<<"   Time taken         : ";
+	ss<<timer->GetElapsedTime()<<" s\n";
+	vtkErrorMacro(<<ss.str());
 
 
 	/*

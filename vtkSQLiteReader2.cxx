@@ -255,8 +255,19 @@ int vtkSQLiteReader2::RequestInformation(
 		this->EmptyData->DeepCopy(this->AllData);
 		
 		this->dataInfo.InitComplete = true;
+
+		//init timers
+		this->timing.tot = 0;
+		this->timing.read = 0;
+		this->timing.calc = 0;
+		this->timing.refresh = 0;
+		this->timing.generateSelect = 0;
+		this->timing.executeSelect = 0;
+
+
 		inittimer->StopTimer();
-		vtkErrorMacro("Initialisation took: " << inittimer->GetElapsedTime() << " s");
+		//vtkErrorMacro("Initialisation took: " << inittimer->GetElapsedTime() << " s");
+		this->timing.init = inittimer->GetElapsedTime();
 
 	}
 	return 1;
@@ -269,7 +280,6 @@ int vtkSQLiteReader2::RequestData(vtkInformation*,
 								 vtkInformationVector**,
 								 vtkInformationVector* outputVector)
 {
-
 	vtkSmartPointer<vtkTimerLog> tottimer = vtkSmartPointer<vtkTimerLog>::New();
 	tottimer->StartTimer();
 
@@ -291,7 +301,8 @@ int vtkSQLiteReader2::RequestData(vtkInformation*,
 		this->dataInfo.dataIsRead = true;
 
 		readtimer->StopTimer();
-		vtkErrorMacro(" reading data took: " << readtimer->GetElapsedTime() << " s");
+		//vtkErrorMacro(" reading data took: " << readtimer->GetElapsedTime() << " s");
+		this->timing.read = readtimer->GetElapsedTime();
 	}
 
 	if (this->collisionCalc.MergingTolerance != *this->Gui.LowerLimit ||
@@ -313,7 +324,8 @@ int vtkSQLiteReader2::RequestData(vtkInformation*,
 		this->collisionCalc.CalcIsDone = true;
 
 		calctimer->StopTimer();
-		vtkErrorMacro(" calculations took: " << calctimer->GetElapsedTime() << " s");
+		//vtkErrorMacro(" calculations took: " << calctimer->GetElapsedTime() << " s");
+		this->timing.calc = calctimer->GetElapsedTime();
 	}
 
 	// refresh the ouput
@@ -334,31 +346,87 @@ int vtkSQLiteReader2::RequestData(vtkInformation*,
 	{
 		vtkSmartPointer<vtkTimerLog> genStimer = vtkSmartPointer<vtkTimerLog>::New();
 		genStimer->StartTimer();
+
 		generateSelection(&this->collisionCalc, &this->selection);
+
 		genStimer->StopTimer();
-		vtkErrorMacro(" generating selection: " << genStimer->GetElapsedTime() << " s");
+		//vtkErrorMacro(" generating selection: " << genStimer->GetElapsedTime() << " s");
+		this->timing.generateSelect = genStimer->GetElapsedTime();
 
 
 		vtkSmartPointer<vtkTimerLog> seldtimer = vtkSmartPointer<vtkTimerLog>::New();
 		seldtimer->StartTimer();
+
 		generateSelectedData(this->SelectedData, &this->selection);
+
 		seldtimer->StopTimer();
-		vtkErrorMacro(" generating selected data: " << seldtimer->GetElapsedTime() << " s");
+		//vtkErrorMacro(" generating selected data: " << seldtimer->GetElapsedTime() << " s");
+		this->timing.executeSelect = seldtimer->GetElapsedTime();
 
 
 		out->DeepCopy(this->SelectedData);
 	}
 	
 	refreshtimer->StopTimer();
-	vtkErrorMacro(" refreshing took: " << refreshtimer->GetElapsedTime() << " s");
+	//vtkErrorMacro(" refreshing took: " << refreshtimer->GetElapsedTime() << " s");
+	this->timing.refresh = refreshtimer->GetElapsedTime();
 
 	// set additional data output
 	snapshotout->DeepCopy(this->SnapshotData);
 	trackout->DeepCopy(this->TrackData);
 
-
 	tottimer->StopTimer();
-	vtkErrorMacro("Total elapsed time: " << tottimer->GetElapsedTime() << " s");
+	//vtkErrorMacro("Total elapsed time: " << tottimer->GetElapsedTime() << " s");
+	this->timing.main = tottimer->GetElapsedTime();
+	this->timing.tot = this->timing.main + this->timing.init;
+
+
+		vtkstd::stringstream ss;
+		ss<<"\n\nSQLite2Reader was successful!\n\n";
+		ss<<"   Headerdata looked like\n";
+		ss<<"      Points                  : ";
+		ss<<this->initData.nPoints<<"\n";
+		ss<<"      Tracks                  : ";
+		ss<<this->initData.nTracks<<"\n";
+		ss<<"      Snapshots               : ";
+		ss<<this->initData.nSnapshots<<"\n\n";
+		ss<<"   actually read in\n";
+		ss<<"      Points                  : ";
+		ss<<this->dataInfo.nPoints<<"\n";
+		ss<<"      Tracks                  : ";
+		ss<<this->dataInfo.nTracks<<"\n";
+		ss<<"      Snapshots               : ";
+		ss<<this->dataInfo.nSnapshots<<"\n\n";
+	if(this->collisionCalc.CalcIsDone){
+		ss<<"   calculated\n";
+		ss<<"      colliding tracks        : ";
+		ss<<this->collisionCalc.CollisionTrackIds->GetNumberOfIds()<<"\n";
+		ss<<"      merging tracks          : ";
+		ss<<this->collisionCalc.MergingTrackIds->GetNumberOfIds()<<"\n\n";
+		ss<<"   selected\n";
+		ss<<"      selected points         : ";
+		ss<<this->selection.Points->GetNumberOfIds()<<"\n\n";
+	}
+		ss<<"   Timings\n";
+		ss<<"        Init                  : ";
+		ss<<this->timing.init<<" s\n";
+		ss<<"        Runtime mainmodule    : ";
+		ss<<this->timing.main<<" s\n\n";
+		ss<<"          Reading             : ";
+		ss<<this->timing.read<<" s\n";
+		ss<<"          Calculations        : ";
+		ss<<this->timing.calc<<" s\n";
+		ss<<"          generating Selection: ";
+		ss<<this->timing.generateSelect<<" s\n";
+		ss<<"          executing Selection : ";
+		ss<<this->timing.executeSelect<<" s\n";
+		ss<<"          refreshing Output   : ";
+		ss<<this->timing.refresh<<" s\n";
+		ss<<"      TOTAL TIME TAKEN        : ";
+		ss<<this->timing.tot<<" s\n";
+
+	vtkErrorMacro(<<ss.str());
+
 
 	return 1;
 }
@@ -647,10 +715,13 @@ int vtkSQLiteReader2::ReadHeader()
 
 	//------------------------------------------------------
 	// cleaning up
-	vtkErrorMacro(" ready to read: " <<
+	/*vtkErrorMacro(" ready to read: " <<
 		this->dataInfo.nPoints << " Points in "<<
 		this->dataInfo.nSnapshots << " Snapshots, on "<<
-		this->dataInfo.nTracks << " tracks.");
+		this->dataInfo.nTracks << " tracks.");*/
+	this->initData.nPoints = this->dataInfo.nPoints;
+	this->initData.nSnapshots = this->dataInfo.nSnapshots;
+	this->initData.nTracks = this->dataInfo.nTracks;
 	return 1;
 }
 
@@ -1137,7 +1208,7 @@ int vtkSQLiteReader2::readTracks(){
 	
 */
 
-	vtkErrorMacro("track count: " << this->dataInfo.nTracks);
+	//vtkErrorMacro("track count: " << this->dataInfo.nTracks);
 	return 1;
 
 }
@@ -1789,11 +1860,13 @@ int vtkSQLiteReader2::findCollisions(CollisionCalculation* pCollCalc){
 	for (int i = 0; i<CollisionPoints->GetNumberOfIds(); ++i)
 	{vtkErrorMacro(" " << i << ": " << CollisionPoints->GetId(i));}
 	*/
+	
+	/*
 	vtkErrorMacro("No Merging Tracks: " << MergingTracks->GetNumberOfIds());
 	vtkErrorMacro("No Collision Tracks: " << CollisionTracks->GetNumberOfIds());
 	vtkErrorMacro("No Merging Points: " << MergingPoints->GetNumberOfIds());
 	vtkErrorMacro("No Collision Points: " << CollisionPoints->GetNumberOfIds());
-
+	*/
 
 
 	

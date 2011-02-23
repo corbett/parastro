@@ -25,7 +25,8 @@
 #include "vtkFloatArray.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
-#include <vtkstd/vector>
+#include <vtkstd/string>
+
 
 class VTK_EXPORT vtkSimpleBin :  public vtkPolyDataAlgorithm
 {
@@ -36,8 +37,14 @@ public:
 
 	void PrintSelf(ostream& os, vtkIndent indent);
 
-	vtkSetMacro(DoStdDerr,bool);
-	vtkGetMacro(DoStdDerr,bool);
+	//vtkSetMacro(DoStdDerr,bool);
+	//vtkGetMacro(DoStdDerr,bool);
+	vtkSetMacro(IntBin,bool);
+	vtkGetMacro(IntBin,bool);
+	vtkSetMacro(LogScale,bool);
+	vtkGetMacro(LogScale,bool);
+	vtkSetMacro(BinCount,int);
+	vtkGetMacro(BinCount,int);
 
 
 protected:
@@ -52,7 +59,14 @@ private:
 	vtkSimpleBin(const vtkSimpleBin&);  // Not implemented.
 	void operator=(const vtkSimpleBin&);  // Not implemented.
 
-	bool DoStdDerr;
+	//bool DoStdDerr;
+	bool IntBin;
+	bool LogScale;
+	int BinCount;
+
 };
 
 #endif
+
+
+

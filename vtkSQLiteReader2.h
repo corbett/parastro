@@ -401,7 +401,22 @@ private:
 
 	int InitAllArrays(vtkDataSet *output, unsigned long numTuples);
 
-	// old stuff - not yet, or not anymore needed
+	struct timings{
+		double tot;
+		double main;
+		double init;
+		double read;
+		double calc;
+		double refresh;
+		double generateSelect;
+		double executeSelect;
+	} timing;
+
+	struct initData{
+		int nPoints;
+		int nTracks;
+		int nSnapshots;
+	} initData;
 
 
 //ETX
