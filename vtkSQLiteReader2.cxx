@@ -2203,7 +2203,9 @@ assumes:
 	returns:
 		int errorcode
 */
-int vtkSQLiteReader2::generateSelection(CollisionCalculation * collCalc, SelectionStruct* select)
+int vtkSQLiteReader2::generateSelection(
+										CollisionCalculation * collCalc,
+										SelectionStruct* select)
 {
 	select->Points = vtkSmartPointer<vtkIdList>::New();
 	select->Tracks = vtkSmartPointer<vtkIdList>::New();
@@ -2221,24 +2223,24 @@ int vtkSQLiteReader2::generateSelection(CollisionCalculation * collCalc, Selecti
 		allTrackIds->SetId(i,i);
 	}
 	
-	/*
+	
+	vtkErrorMacro("Printing collisiontracks:");
+	for (int i = 0; i<collCalc->CollisionTrackIds->GetNumberOfIds(); ++i)
+	{vtkErrorMacro(" " << i << ": " << collCalc->CollisionTrackIds->GetId(i)<<"\n");}
+
 	vtkErrorMacro("Printing the selected track ids (be4 union):");
 	for (int i = 0; i<select->Tracks->GetNumberOfIds(); ++i)
 	{vtkErrorMacro(" " << i << ": " << select->Tracks->GetId(i)<<"\n");}
 	
-	vtkErrorMacro("Printing the selected track ids (be4 union):");
-	for (int i = 0; i<collCalc->CollisionTrackIds->GetNumberOfIds(); ++i)
-	{vtkErrorMacro(" " << i << ": " << collCalc->CollisionTrackIds->GetId(i)<<"\n");}
-	*/
 
 	if(*this->Gui.DisplayColliding)
 	{
 		select->Tracks = this->IdListUnionUnique(select->Tracks, collCalc->CollisionTrackIds);
 	}
 
-	/*vtkErrorMacro("Printing the selected track ids (after union):");
+	vtkErrorMacro("Printing the selected track ids (after union w colliding):");
 	for (int i = 0; i<select->Tracks->GetNumberOfIds(); ++i)
-	{vtkErrorMacro(" " << i << ": " << select->Tracks->GetId(i)<<"\n");}*/
+	{vtkErrorMacro(" " << i << ": " << select->Tracks->GetId(i)<<"\n");}
 
 
 	if(*this->Gui.DisplayMerging)
@@ -2246,14 +2248,18 @@ int vtkSQLiteReader2::generateSelection(CollisionCalculation * collCalc, Selecti
 		select->Tracks = this->IdListUnionUnique(select->Tracks, collCalc->MergingTrackIds);
 	}
 
+	vtkErrorMacro("Printing the selected track ids (after union w merging):");
+	for (int i = 0; i<select->Tracks->GetNumberOfIds(); ++i)
+	{vtkErrorMacro(" " << i << ": " << select->Tracks->GetId(i)<<"\n");}
+
 	if(*this->Gui.DisplayInverted)
 	{
-		select->Tracks = this->IdListComplement(select->Tracks, allTrackIds);
+		select->Tracks = this->IdListComplement(allTrackIds, select->Tracks);
 	}
 
-	/*vtkErrorMacro("Printing the selected track ids (after invert):");
+	vtkErrorMacro("Printing the selected track ids (after invert):");
 	for (int i = 0; i<select->Tracks->GetNumberOfIds(); ++i)
-	{vtkErrorMacro(" " << i << ": " << select->Tracks->GetId(i));}*/
+	{vtkErrorMacro(" " << i << ": " << select->Tracks->GetId(i));}
 
 
 	// collect the points, corresponding to the selected tracks
