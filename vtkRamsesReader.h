@@ -27,7 +27,7 @@
 class vtkPolyData;
 class vtkCharArray;
 class vtkIdTypeArray;
-class vtkFloatArray;
+class vtkDoubleArray;
 class vtkPoints;
 class vtkCellArray;
 class vtkDataArraySelection;
@@ -85,18 +85,18 @@ protected:
   vtkSmartPointer<vtkPoints>      Positions;
   vtkSmartPointer<vtkCellArray>   Vertices;
 
-  vtkSmartPointer<vtkFloatArray>   Potential;
-  vtkSmartPointer<vtkFloatArray>   Mass;
-  vtkSmartPointer<vtkFloatArray>   EPS;
-  vtkSmartPointer<vtkFloatArray>   RHO;
-  vtkSmartPointer<vtkFloatArray>   Hsmooth;
-  vtkSmartPointer<vtkFloatArray>   Temperature;
-  vtkSmartPointer<vtkFloatArray>   Metals;
-  vtkSmartPointer<vtkFloatArray>   Tform;
-	vtkSmartPointer<vtkFloatArray>		 Type;
+  vtkSmartPointer<vtkDoubleArray>   Potential;
+  vtkSmartPointer<vtkDoubleArray>   Mass;
+  vtkSmartPointer<vtkDoubleArray>   EPS;
+  vtkSmartPointer<vtkDoubleArray>   RHO;
+  vtkSmartPointer<vtkDoubleArray>   Hsmooth;
+  vtkSmartPointer<vtkDoubleArray>   Temperature;
+  vtkSmartPointer<vtkDoubleArray>   Metals;
+  vtkSmartPointer<vtkDoubleArray>   Tform;
+	vtkSmartPointer<vtkDoubleArray>		 Type;
 	
-	vtkSmartPointer<vtkFloatArray>		 Age;
-  vtkSmartPointer<vtkFloatArray>   Velocity;
+	vtkSmartPointer<vtkDoubleArray>		 Age;
+  vtkSmartPointer<vtkDoubleArray>   Velocity;
 
 	
   //

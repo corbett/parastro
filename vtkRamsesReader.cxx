@@ -10,7 +10,7 @@
 #include "vtkPolyData.h"
 #include "vtkPoints.h"
 #include "vtkCellArray.h"
-#include "vtkFloatArray.h" 
+#include "vtkDoubleArray.h" 
 #include "vtkIntArray.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include "vtkDistributedDataFilter.h"
@@ -72,10 +72,10 @@ enum RamsesParticleTypes
 
 
 //----------------------------------------------------------------------------
-vtkSmartPointer<vtkFloatArray> AllocateRamsesDataArray(
+vtkSmartPointer<vtkDoubleArray> AllocateRamsesDataArray(
   vtkDataSet *output, const char* arrayName, int numComponents, unsigned long numTuples)
 {
-  vtkSmartPointer<vtkFloatArray> dataArray=vtkSmartPointer<vtkFloatArray>::New();
+  vtkSmartPointer<vtkDoubleArray> dataArray=vtkSmartPointer<vtkDoubleArray>::New();
 	dataArray->SetNumberOfComponents(numComponents);
 	dataArray->SetNumberOfTuples(numTuples);
 	dataArray->SetName(arrayName);
