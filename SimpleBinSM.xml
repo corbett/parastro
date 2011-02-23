@@ -16,6 +16,7 @@
            </ProxyGroupDomain>
            <DataTypeDomain name="input_type">
              <DataType value="vtkPolyData"/>
+             <DataType value="vtkUnstructuredGrid"/>
            </DataTypeDomain>
            <InputArrayDomain name="input_array">
              <RequiredProperties>
@@ -29,7 +30,7 @@
      <StringVectorProperty
          name="SelectInputArray" 
          command="SetInputArrayToProcess" 
-		 label="Array to Bin for"
+				label="Array to Bin for"
          number_of_elements="5" 
          element_types="0 0 0 0 2" 
          animateable="0"> 
@@ -103,7 +104,19 @@
         </Documentation>
       </IntVectorProperty>
 
-	
+			<IntVectorProperty
+        name="Del0Row"
+        label="Delete NaN Rows from Output?"
+        command="SetDel0Row"
+        number_of_elements="1"
+        animateable="0"
+        default_values="1">
+				<BooleanDomain name="bool" />
+        <Documentation>
+           uuuu
+        </Documentation>
+      </IntVectorProperty>
+			
 			<Hints>
 				<!-- View can be used to specify the preferred view for the proxy -->
         <View type="SpreadSheetView" />

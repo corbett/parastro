@@ -20,6 +20,7 @@ TODO:
 #include "AstroVizHelpersLib/AstroVizHelpers.h"
 
 #include "vtkPolyData.h"
+#include "vtkPointSet.h"
 
 #include "vtkObjectFactory.h"
 #include "vtkInformation.h"
@@ -65,6 +66,7 @@ vtkSimpleBin::vtkSimpleBin()
 	this->IntBin = false;
 	this->LogScale = false;
 	this->BinCount = 10;
+	this->Del0Row = true;
 }
 
 //----------------------------------------------------------------------------
@@ -82,7 +84,10 @@ void vtkSimpleBin::PrintSelf(ostream& os, vtkIndent indent)
 int vtkSimpleBin::FillInputPortInformation(int port, vtkInformation* info)
 {
 	this->Superclass::FillInputPortInformation(port, info);
-	info->Set(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), "vtkPolyData");
+	info->Remove(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE());
+	info->Append(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), "vtkPolyData");
+	info->Append(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), "vtkUnstructuredGrid");
+	info->Append(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), "vtkStructuredGrid");
 	return 1;
 }
 //----------------------------------------------------------------------------
@@ -105,7 +110,8 @@ int vtkSimpleBin::RequestData(vtkInformation*,
 	vtkTable* output = vtkTable::GetData(outputVector);
 	//vtkMultiBlockDataSet * multiOutput = vtkMultiBlockDataSet::GetData(outputVector);
 
-	vtkPolyData* input = vtkPolyData::GetData(inputVector[0]);
+	//vtkPolyData* input = vtkPolyData::GetData(inputVector[0]);
+	vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
 
 	vtkDataArray* filterArray = this->GetInputArrayToProcess(0, inputVector);
 	vtkstd::string filterArrayName = filterArray->GetName();
@@ -230,14 +236,24 @@ int vtkSimpleBin::RequestData(vtkInformation*,
 	}
 
 	// get the average
+	vtkstd::vector<int> remrow; //saves the rows with later are deleted
+	remrow.clear();
+
 	for (int row = 0; row<nBin; ++row)
 	{
 		int num = output->GetValue(row,0).ToInt(); //get number of values in this bin
 		if (num == 0)
 		{
-			for (int j = 0; j<nArr; ++j)
+			if (this->Del0Row)
 			{
-				output->SetValue(row,j+2, 0);
+				remrow.push_back(row);
+			}
+			else
+			{
+				for (int j = 0; j<nArr; ++j)
+				{
+					output->SetValue(row,j+2, 0);
+				}
 			}
 		}
 		else
@@ -250,22 +266,35 @@ int vtkSimpleBin::RequestData(vtkInformation*,
 		}
 	}
 
+	if (this->Del0Row)
+	{
+		for (vtkstd::vector<int>::reverse_iterator rit = remrow.rbegin(); rit!=remrow.rend(); ++rit) {
+			output->RemoveRow(*rit);
+		}
+	}
+
 	output->Update();
 
 	timer->StopTimer();
 
 	vtkstd::stringstream ss;
-	ss<<"\n\nSimpleBin run successfully!\n";
+	ss<<"\n\nSimpleBin run successfully!\n\n";
 	ss<<"   No of Input Points: ";
 	ss<<input->GetNumberOfPoints()<<"\n";
 	ss<<"   No of Input Arrays: ";
-	ss<<nArr<<"\n";
+	ss<<nArr<<"\n\n";
 	ss<<"   Integer Bins?     : ";
 	ss<<this->IntBin<<"\n";
 	ss<<"   Log Scale?        : ";
 	ss<<this->LogScale<<"\n";
+	ss<<"   delete NaN Bins?  : ";
+	ss<<this->Del0Row<<"\n\n";
 	ss<<"   No of Bins        : ";
 	ss<<nBin<<"\n";
+	ss<<"   deleted NaN Bins  : ";
+	ss<<remrow.size()<<"\n\n";
+	ss<<"   Remaining Bins    : ";
+	ss<<nBin-remrow.size()<<"\n";
 	ss<<"   Time taken        : ";
 	ss<<timer->GetElapsedTime()<<" s\n";
 	vtkErrorMacro(<<ss.str());

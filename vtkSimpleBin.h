@@ -43,6 +43,8 @@ public:
 	vtkGetMacro(IntBin,bool);
 	vtkSetMacro(LogScale,bool);
 	vtkGetMacro(LogScale,bool);
+	vtkSetMacro(Del0Row,bool);
+	vtkGetMacro(Del0Row,bool);
 	vtkSetMacro(BinCount,int);
 	vtkGetMacro(BinCount,int);
 
@@ -63,6 +65,7 @@ private:
 	bool IntBin;
 	bool LogScale;
 	int BinCount;
+	bool Del0Row;
 
 };
 
