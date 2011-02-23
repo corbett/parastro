@@ -44,6 +44,7 @@ TODO:
 #include "vtkMath.h"
 
 #include <vector>
+#include <math.h>
 
 
 vtkCxxRevisionMacro(vtkSimpleBin, "$Revision: 0.1 $");
@@ -170,6 +171,14 @@ int vtkSimpleBin::RequestData(vtkInformation*,
 	double range = rangeV[1]-rangeV[0];
 	double min = rangeV[0];
 	double max = rangeV[1];
+	if(this->LogScale)
+	{
+		if (range == 0 || min == 0 || max == 0)
+			{vtkErrorMacro("Error, log10(0) in range, min, max");return 0;}
+		min = log10(min);
+		max = log10(max);
+		range = max - min;
+	}
 
 
 	// calculate this->BinCount
@@ -200,6 +209,7 @@ int vtkSimpleBin::RequestData(vtkInformation*,
 		{
 			val = min+range/(double)nBin*((double)i+0.5);
 		}
+		if(this->LogScale){val = pow(10,val);}
 		valueArr->SetTuple1(i,val);
 	}
 	output->Update();
@@ -211,9 +221,10 @@ int vtkSimpleBin::RequestData(vtkInformation*,
 	{
 		//check for arrays with mass = 0, dont count them
 		if(pData->GetArray("Mvir")->GetTuple1(i) == 0){continue;}
-
-		double value = filterArray->GetTuple1(i);
 		
+		double value = filterArray->GetTuple1(i);
+		if(this->LogScale) {value = log10(value);}
+
 		if(this->IntBin)
 		{
 			double binnrd = ( value - min )/range*nBin;
@@ -224,12 +235,14 @@ int vtkSimpleBin::RequestData(vtkInformation*,
 			double binnrd = ( value - min )/range*(nBin-1);
 			binnr = vtkMath::Round(binnrd);
 		}
+
 		countArr->SetTuple1(binnr, countArr->GetTuple1(binnr)+1);
 
 		//sum up the other arrays
+		// reminder: +2 offset because of 2 additional arrays in output
 		for (int j = 0; j<nArr; ++j)
 		{
-			double oldval = output->GetValue(binnr,j+2).ToDouble();
+			double oldval = output->GetValue(binnr,j+2).ToDouble(); 
 			double orgval = *pData->GetArray(j)->GetTuple(i);
 			output->SetValue(binnr,j+2, oldval + orgval);
 		}
@@ -244,15 +257,12 @@ int vtkSimpleBin::RequestData(vtkInformation*,
 		int num = output->GetValue(row,0).ToInt(); //get number of values in this bin
 		if (num == 0)
 		{
-			if (this->Del0Row)
-			{
-				remrow.push_back(row);
-			}
+			if (this->Del0Row){remrow.push_back(row);}
 			else
 			{
 				for (int j = 0; j<nArr; ++j)
 				{
-					output->SetValue(row,j+2, 0);
+					output->SetValue(row,j+2, 0); // +2 offset because +2 arrays
 				}
 			}
 		}
@@ -261,14 +271,17 @@ int vtkSimpleBin::RequestData(vtkInformation*,
 			for (int j = 0; j<nArr; ++j)
 			{
 				double val = output->GetValue(row,j+2).ToDouble() / (double)num;
-				output->SetValue(row,j+2, val);
+				output->SetValue(row,j+2, val); // +2 offset because +2 arrays
 			}
 		}
 	}
 
 	if (this->Del0Row)
 	{
-		for (vtkstd::vector<int>::reverse_iterator rit = remrow.rbegin(); rit!=remrow.rend(); ++rit) {
+		for (vtkstd::vector<int>::reverse_iterator rit = remrow.rbegin();
+			rit!=remrow.rend();
+			++rit)
+		{
 			output->RemoveRow(*rit);
 		}
 	}

@@ -81,7 +81,7 @@
 			
 			<IntVectorProperty
         name="LogScale"
-        label="Use Log scaling? (not yet implemented)"
+        label="Use Log scaling? (log10)"
         command="SetLogScale"
         number_of_elements="1"
         animateable="0"
