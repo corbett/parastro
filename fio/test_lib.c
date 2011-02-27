@@ -27,54 +27,39 @@ int main(int narg, char **args)
   fprintf(stdout,"nTot: %llu\n",nTot);
   fprintf(stdout,"nGas: %llu\n",nGas);
   fprintf(stdout,"nDark: %llu\n",nDark);
-  fprintf(stdout,"nStar: %llu\n",nStar);
+  fprintf(stdout,"nStar: %llu\n",nStar);    
   
-  
-  
-  // reserve enough data for vx, vy, and vz!!!
-  // WHEEEEEEEEEEEEEEEE
-  double *ic_velcx = malloc(nTot*sizeof(double));
-  double *ic_velcy = malloc(nTot*sizeof(double));
-  double *ic_velcz = malloc(nTot*sizeof(double));
-  
-  fioGetAttr(grafic,"ic_velcx",FIO_TYPE_DOUBLE,ic_velcx);
-  fioGetAttr(grafic,"ic_velcy",FIO_TYPE_DOUBLE,ic_velcy);
-  fioGetAttr(grafic,"ic_velcz",FIO_TYPE_DOUBLE,ic_velcz);
-    
   uint64_t i;
   // particle variables
   uint64_t piOrder;
-  double pdPos[3];
-  double pdVel[3];
-  float pfMass;
-  float pfSoft;
-  float pfPot;
-  /*
+  double pdPos[3],pdVel[3];
+  float pfMass,pfSoft,pfPot,pfRho,pfTemp,pfMetals,pfTform;
 
   for(i=0; i<nStar; i++) {
-    fioSeek(grafic,i,FIO_SPECIES_STAR);
-    fioReadDark(grafic,&piOrder,pdPos,pdVel,&pfMass,&pfSoft,&pfPot);
-    // all the variables we just read!
-    // these will be stored in the array!
-    fprintf(stdout,"%llu\n",piOrder);
-    fprintf(stdout,"%f\t%f\t%f\n",pdPos[0],pdPos[1],pdPos[2]);
-    fprintf(stdout,"%f\t%f\t%f\n",pdVel[0],pdVel[1],pdVel[2]);
-    fprintf(stdout,"%f\t%f\t%f\n",pfMass,pfSoft,pfPot);
+    fioSeek(grafic,i,FIO_SPECIES_STAR);    
+    fioReadStar(grafic,
+      &piOrder,pdPos,pdVel,&pfMass,&pfSoft,&pfPot,&pfMetals,&pfTform);
+      fprintf(stdout,"%llu\n",piOrder);
   }
   for(i=0; i<nDark; i++) {
     fioSeek(grafic,i,FIO_SPECIES_DARK);
-    fioReadDark(grafic,&piOrder,pdPos,pdVel,&pfMass,&pfSoft,&pfPot);
+    fioReadDark(grafic,
+      &piOrder,pdPos,pdVel,&pfMass,&pfSoft,&pfPot);
+      fprintf(stdout,"%llu\n",piOrder);
+      
   }
-  */
-  for(i=nDark; i<nDark+nGas; i++) {
+  for(i=0; i<nGas; i++) {
     fioSeek(grafic,i,FIO_SPECIES_SPH);
-    fioReadDark(grafic,&piOrder,pdPos,pdVel,&pfMass,&pfSoft,&pfPot);
+    fioReadSph(grafic,
+      &piOrder,pdPos,pdVel,&pfMass,&pfSoft,&pfPot,&pfRho,&pfTemp,&pfMetals);
     // all the variables we just read!
     // these will be stored in the array!
+    /*
     fprintf(stdout,"%llu\n",piOrder);
     fprintf(stdout,"%f\t%f\t%f\n",pdPos[0],pdPos[1],pdPos[2]);
     fprintf(stdout,"%f\t%f\t%f\n",pdVel[0],pdVel[1],pdVel[2]);
     fprintf(stdout,"%f\t%f\t%f\n",pfMass,pfSoft,pfPot);
+    */
   }
 
 
