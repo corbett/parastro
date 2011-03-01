@@ -34,7 +34,6 @@ int main(int argc, char **argv)
   nDark = fioGetN(grafic,FIO_SPECIES_DARK);
   nStar = fioGetN(grafic,FIO_SPECIES_STAR);
     
-	
   // particle variables
   uint64_t piOrder;
   double pdPos[3],pdVel[3];
