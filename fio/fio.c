@@ -1112,7 +1112,7 @@ static int tipsyDetectHeader(fioTipsy *tio, int bDouble) {
 	tipsySussHeader(&h,&N,&nDark,&nSph,&nStar);
 	if ( nDark + nSph + nStar != N ) {
 	    fprintf(stderr,"Tipsy Header mismatch:"
-		    " nDim=%u nDark=%lu nSph=%lu nStar=%lu nBodies=%lu\n",
+		    " nDim=%u nDark=%llu nSph=%llu nStar=%llu nBodies=%llu\n",
 		    h.nDim, nDark, nSph, nStar, N);
 	    return 0;
 	    }
@@ -1132,7 +1132,7 @@ static int tipsyDetectHeader(fioTipsy *tio, int bDouble) {
 
 	if (h.nDim<1 || h.nDim>3 || nDark + nSph + nStar != N ) {
 	    fprintf(stderr,"Tipsy Header mismatch:"
-		    " nDim=%u nDark=%lu nSph=%lu nStar=%lu nBodies=%lu\n",
+		    " nDim=%u nDark=%llu nSph=%llu nStar=%llu nBodies=%llu\n",
 		    h.nDim, nDark, nSph, nStar, N);
 	    xdr_destroy(&tio->xdr);
 	    return 0;
