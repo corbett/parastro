@@ -1,4 +1,8 @@
-cmake_minimum_required(VERSION 2.4)
+cmake_minimum_required(VERSION 2.8)
+if(COMMAND cmake_policy)
+      cmake_policy(SET CMP0003 OLD)
+endif(COMMAND cmake_policy)
+
 FIND_PACKAGE(ParaView REQUIRED)
 INCLUDE(${PARAVIEW_USE_FILE})
 
@@ -22,7 +26,10 @@ INCLUDE(${PARAVIEW_USE_FILE})
 # Author: Christine Corbett Moran
 ###
 
+
+
 INCLUDE_DIRECTORIES(AstroVizHelpersLib)
+#INCLUDE_DIRECTORIES(fio)
 
 # for special gui
 #QT4_WRAP_CPP(MOC_SRCS pqTrackFilter2Panel.h)
@@ -55,6 +62,8 @@ ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.1"
 		vtkAddAdditionalAttribute.cxx 
 		vtkFriendsOfFriendsHaloFinder.cxx 
 		#vtkPointDisplay.cxx
+		vtkRamsesReader.cxx
+		vtkGraficReader.cxx		
 		vtkSQLiteReader.cxx
 		vtkSQLiteReader2.cxx
 		vtkTrackFilter.cxx
@@ -71,6 +80,7 @@ ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.1"
 		VirialRadiusFilter.xml
 		AddAdditionalAttribute.xml 
 		FriendsOfFriendsHaloFinder.xml	
+		GraficReaderSM.xml
 		#PointDisplaySM.xml
 		SQLiteReaderSM.xml
 		SQLiteReader2SM.xml
@@ -86,6 +96,7 @@ ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.1"
 		SQLiteReader2.qrc
 		#RamsesReader.qrc
 
+		GraficReader.qrc		
 	GUI_RESOURCE_FILES
 		AstroVizFilterMenu.xml
 		
@@ -93,7 +104,7 @@ ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.1"
 		#SOURCES pqTrackFilter2Panel.cxx ${MOC_SRCS} ${RCS_SRCS} ${IFACE_SRCS}
 		SOURCES pqTrackFilterPanel.cxx ${MOC_SRCS} ${IFACE_SRCS}
 	)
-	
+#PARAVIEW_INCLUDE_WRAPPED_SOURCES(fio/fio.c fio/romberg.c)
 #Defines the StrangeAttractors plugin
 
 #ADD_PARAVIEW_PLUGIN(StrangeAttractorsPlugin "1.0"
@@ -110,8 +121,9 @@ ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.1"
 # For helper functions often used, will later include these in a single
 # VTK class.
 ADD_LIBRARY(AstroVizHelpers AstroVizHelpersLib/AstroVizHelpers.cxx)
+
 SET_TARGET_PROPERTIES(AstroVizHelpers PROPERTIES COMPILE_FLAGS "-fPIC")
-TARGET_LINK_LIBRARIES(AstroVizPlugin AstroVizHelpers) 
+TARGET_LINK_LIBRARIES(AstroVizPlugin AstroVizHelpers ) 
 
 # For the Tipsy reader plugin I use some of Doug Potter's Tipsy lib.
 ADD_LIBRARY(
@@ -131,6 +143,7 @@ IF (WIN32)
   TARGET_LINK_LIBRARIES(TipsyHelpers ws2_32)  
 ENDIF (WIN32)
 
+
 # For SQLiteReader Plugin, SQLite lib
 ADD_LIBRARY(
 	SQLitelib
@@ -138,9 +151,23 @@ ADD_LIBRARY(
 		sqlitelib/sqlite3.c
 	)
 
+#For the Grafic reader plugin (and later) integrated tipsy HDF, tipsy binary, and grafic reader I use some of Doug Potter's/Joachim Stadel's fio
+# For the Tipsy reader plugin I use some of Doug Potter's Tipsy lib.
+# TODO: this is not working, hardcoding library path for now
+ADD_LIBRARY(
+	fio
+	STATIC
+	fio/fio.c
+	fio/romberg.c
+)
+SET_TARGET_PROPERTIES(fio PROPERTIES LINKER_LANGUAGE C)
+SET_TARGET_PROPERTIES(fio PROPERTIES COMPILE_FLAGS "-fPIC")
+
 TARGET_LINK_LIBRARIES(
 	AstroVizPlugin
+	fio
 	TipsyHelpers
 	SQLitelib
 	#gmp
 	)
+#TARGET_LINK_LIBRARIES(AstroVizPlugin #/Users/corbett/Documents/Projects/pvaddons/ParaViz/ParaViz_src/fio/libFio.so)

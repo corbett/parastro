@@ -1,0 +1,19 @@
+<ServerManagerConfiguration>
+  <ProxyGroup name="sources">
+    <SourceProxy name="GraficReader"
+					 class="vtkGraficReader">
+
+
+		<StringVectorProperty name="Directory"
+															command="SetFileName"
+															number_of_elements="1">
+			 <FileListDomain name="files"/>
+			 <Hints>
+					 <UseDirectoryName />
+			 </Hints>
+		 </StringVectorProperty>
+	 
+		</SourceProxy>
+  </ProxyGroup>
+</ServerManagerConfiguration>
+

@@ -185,7 +185,13 @@ typedef struct fioInfo {
 /*
 ** Auto-detects the file format by looking at header information.
 */
-FIO fioOpen(const char *fileName,double dOmega0,double dOmegab);
+
+#ifdef __cplusplus 
+extern "C" {
+	FIO fioOpen(const char *fileName,double dOmega0,double dOmegab);
+}
+#endif
+
 FIO fioOpenMany(int nFiles, const char * const *fileNames,double dOmega0,double dOmegab);
 
 /*
@@ -323,4 +329,6 @@ FIO fioHDF5Create(const char *fileName,int mFlags);
 ** GRAFIC FORMAT
 \******************************************************************************/
 
+
 #endif
+	

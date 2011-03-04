@@ -1,0 +1,6 @@
+<ParaViewReaders>
+	<Reader name="GraficReader"
+			extensions="graf"
+			file_description="Grafic Binary">
+	</Reader>
+</ParaViewReaders>
