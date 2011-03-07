@@ -40,7 +40,8 @@
 				command="SetInputArrayToProcess" 
 				label="Select all Tracks, where"
 				number_of_elements="5" 
-				element_types="0 0 0 0 2">
+				element_types="0 0 0 0 2"
+				animateable="0">
 				<ArrayListDomain name="array_list" 
 					attribute_type="Scalars"
 					input_domain_name="input_array1">
@@ -58,7 +59,8 @@
 				command="SetMode"
 				label="is at"
 				number_of_elements="1"
-				default_values="0" >
+				default_values="0"
+				animateable="0">
 				<EnumerationDomain name="enum">
 					<Entry value="0" text="some point on the track"/>
 					<Entry value="1" text="every point on the track"/>
@@ -71,15 +73,15 @@
 				label="between"
 				command="SetFilterLow"
 				number_of_elements="1"
-				animateable="0"
+				animateable="1"
 				default_values="0" >
-				<!--
+				
 				<BoundsDomain name="range" mode="normal" default_mode="min" >
 					<RequiredProperties>
 						<Property name="Input" function="Input" />
 					</RequiredProperties>
 				</BoundsDomain>
-				-->
+				
 				<Documentation>
 					uuuu
 				</Documentation>
@@ -90,15 +92,15 @@
 				label="and"
 				command="SetFilterHi"
 				number_of_elements="1"
-				animateable="0"
+				animateable="1"
 				default_values="0" >
-				<!--
+
 				<BoundsDomain name="range" mode="normal" default_mode="min" >
 					<RequiredProperties>
 						<Property name="Input" function="Input" />
 					</RequiredProperties>
 				</BoundsDomain>
-				-->
+
 				<Documentation>
 					uuuu
 				</Documentation>
@@ -110,7 +112,8 @@
 				label="Restriction Criteria:"
 				number_of_elements="5" 
 				element_types="0 0 0 0 2" 
-				default_values="1"> 
+				default_values="1" 
+				animateable="0">
 				<ArrayListDomain name="array_list" 
 					attribute_type="Scalars"
 					input_domain_name="input_array2">
@@ -129,24 +132,22 @@
 				label="has to be between"
 				command="SetRestrictionLow"
 				number_of_elements="1"
-				animateable="0"
+				animateable="1"
 				default_values="0" >
-				
+				<!--
 				<ArrayRangeDomain name="range">
 					<RequiredProperties>
 						<Property name="Input" function="Input"/>
 						<Property name="SelectInputScalars" function="ArraySelection"/>
 					</RequiredProperties>
 				</ArrayRangeDomain>  
-				
-				
-				<!--
-				<BoundsDomain name="range" mode="normal" default_mode="min" >
+				-->
+				<BoundsDomain name="rangeRes" mode="normal" default_mode="min" >
 					<RequiredProperties>
 						<Property name="Input" function="Input" />
 					</RequiredProperties>
 				</BoundsDomain>
-				-->
+
 				<Documentation>
 					uuuu
 				</Documentation>
@@ -158,15 +159,15 @@
 				label="and"
 				command="SetRestrictionHi"
 				number_of_elements="1"
-				animateable="0"
+				animateable="1"
 				default_values="0" >
-				<!--
-				<BoundsDomain name="range" mode="normal" default_mode="min" >
+
+				<BoundsDomain name="rangeRes" mode="normal" default_mode="max" >
 					<RequiredProperties>
 						<Property name="Input" function="Input" />
 					</RequiredProperties>
 				</BoundsDomain>
-				-->
+
 				<Documentation>
 					uuuu
 				</Documentation>

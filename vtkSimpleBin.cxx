@@ -115,6 +115,7 @@ int vtkSimpleBin::RequestData(vtkInformation*,
 	vtkPointSet* input = vtkPointSet::GetData(inputVector[0]);
 
 	vtkDataArray* filterArray = this->GetInputArrayToProcess(0, inputVector);
+	if(filterArray==0){return 0;}
 	vtkstd::string filterArrayName = filterArray->GetName();
 	vtkPointData * pData = input->GetPointData();
 	int nArr = pData->GetNumberOfArrays();
