@@ -2524,6 +2524,8 @@ typedef struct {
     graficFile fp_velbx;
     graficFile fp_velby;
     graficFile fp_velbz;
+		graficFile fp_refmap;
+
     } graficLevel;
 
 typedef struct {

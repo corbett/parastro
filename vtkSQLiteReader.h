@@ -332,36 +332,36 @@ private:
 	bool dataIsRead;
 
 	//functions
-	int vtkSQLiteReader::ReadHeader(); // reads the database header information
+	int ReadHeader(); // reads the database header information
 
-	int vtkSQLiteReader::readSnapshots(); // reads the snapshots
-	int vtkSQLiteReader::readSnapshotInfo(); 
-	int vtkSQLiteReader::readTracks();
-	int vtkSQLiteReader::calculateAdditionalData();
-	int vtkSQLiteReader::generateColors();
+	int readSnapshots(); // reads the snapshots
+	int readSnapshotInfo(); 
+	int readTracks();
+	int calculateAdditionalData();
+	int generateColors();
 
-	int vtkSQLiteReader::findCollisions(CollisionCalculationStruct*);
-	//int vtkSQLiteReader::doCalculations(double,int);
-	int vtkSQLiteReader::calcTolerance();
+	int findCollisions(CollisionCalculationStruct*);
+	//int doCalculations(double,int);
+	int calcTolerance();
 
-	int vtkSQLiteReader::generateSelection(CollisionCalculationStruct*, SelectionStruct*);
-	int vtkSQLiteReader::fillIdList(std::vector<int>*, int*,
+	int generateSelection(CollisionCalculationStruct*, SelectionStruct*);
+	int fillIdList(std::vector<int>*, int*,
 		std::vector<int>*, int*,
 		CollisionResultStruct*, int);
-	int vtkSQLiteReader::generateIdMap();
-	int vtkSQLiteReader::generatePoints(SelectionStruct*, Data*);
-	int vtkSQLiteReader::generateTracks(SelectionStruct*, Data*);
-	int vtkSQLiteReader::reset();
+	int generateIdMap();
+	int generatePoints(SelectionStruct*, Data*);
+	int generateTracks(SelectionStruct*, Data*);
+	int reset();
 
 	// helper
 	int openDB(char*);
-	vtkStdString vtkSQLiteReader::Int2Str(int);
+	vtkStdString Int2Str(int);
 	double getDistance2(int, int);
 	double getDistanceToO(int);
 
 	// old stuff - not yet, or not anymore needed
 	int RequestDataDemo(vtkInformationVector*);
-	int vtkSQLiteReader::SQLQuery(vtkStdString, sqlite3_stmt*);
+	int SQLQuery(vtkStdString, sqlite3_stmt*);
 
 
 //ETX

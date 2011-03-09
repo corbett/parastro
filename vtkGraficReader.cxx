@@ -35,11 +35,11 @@
 #include "RAMSES_particle_data.hh"
 #include "RAMSES_amr_data.hh"
 #include "RAMSES_hydro_data.hh"
-
+#include <libgen.h> 
 vtkCxxRevisionMacro(vtkGraficReader, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkGraficReader);
 
-
+// TODO: re-put these in helper library, rather than JB's separated out 1 per file awkward
 
 //----------------------------------------------------------------------------
 vtkSmartPointer<vtkDoubleArray> AllocateDoubleDataArray(
@@ -194,8 +194,17 @@ int vtkGraficReader::RequestData(vtkInformation*,
     vtkErrorMacro("A FileName must be specified.");
     return 0;
     }
-  FIO grafic = \
-  	  fioOpen(this->FileName, 0.01, 0.01);
+	FIO grafic;
+	if(this->ReadEntireDirectory){
+		char * fileDir = (char *)malloc(strlen(this->FileName) + 1);
+    strcpy(fileDir,this->FileName);
+		grafic = fioOpen(dirname(fileDir), 0.01, 0.01);
+		free(fileDir);
+	}
+	else{
+		grafic = \
+			fioOpen(this->FileName, 0.01, 0.01);
+	}
 
 	
 	vtkInformation* outInfo = outputVector->GetInformationObject(0);
@@ -223,9 +232,11 @@ int vtkGraficReader::RequestData(vtkInformation*,
   uint64_t nTot,nGas,nDark,nStar;
   
   if(!fioGetAttr(grafic,"dTime",FIO_TYPE_DOUBLE,&dExpansion)) dExpansion=0.0;
+
   if (!fioGetAttr(grafic,"dEcosmo",FIO_TYPE_DOUBLE,&dEcosmo)) dEcosmo = 0.0;
   if (!fioGetAttr(grafic,"dTimeOld",FIO_TYPE_DOUBLE,&dTimeOld)) dTimeOld = 0.0;
   if (!fioGetAttr(grafic,"dUOld",FIO_TYPE_DOUBLE,&dUOld)) dUOld = 0.0;
+
   nTot = fioGetN(grafic,FIO_SPECIES_ALL);
   nGas  = fioGetN(grafic,FIO_SPECIES_SPH);
   nDark = fioGetN(grafic,FIO_SPECIES_DARK);
@@ -233,7 +244,6 @@ int vtkGraficReader::RequestData(vtkInformation*,
 	
 	// Allocate the arrays
 	this->AllocateAllGraficVariableArrays(nTot, output);
-	
   // particle variables
   uint64_t piOrder;
   double pdPos[3],pdVel[3];

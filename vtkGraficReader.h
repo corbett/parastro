@@ -43,6 +43,12 @@ public:
   // Set/Get the name of the file from which to read points.
 	vtkSetStringMacro(FileName);
  	vtkGetStringMacro(FileName);
+	
+	// Description:
+  // Get/Set whether to distribute data
+	vtkSetMacro(ReadEntireDirectory,int);
+	vtkGetMacro(ReadEntireDirectory,int);
+	
 // The BTX, ETX comments bracket the portion of the code which should not be
 // attempted to wrap for use by python, specifically the code which uses
 // C++ templates as this code is unable to be wrapped. DO NOT REMOVE. 
@@ -51,6 +57,7 @@ protected:
   vtkGraficReader();
   ~vtkGraficReader();
 	char* FileName;
+	int ReadEntireDirectory;
 	int RequestInformation(vtkInformation*,	vtkInformationVector**,
 		vtkInformationVector*);
 
