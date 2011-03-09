@@ -761,7 +761,7 @@ int vtkSQLiteReader2::readSnapshots()
 	vtkIdTypeArray		*GIdA = this->dataInfo.pGIdArray;// pointer to GId array
 	int					offsetA = this->dataInfo.dataArrayOffset; // wich is the first of the dataarrays.
 
-	vtkstd::vector<vtkSmartPointer<vtkIdList>> * snapI = &this->SnapInfo2;
+	vtkstd::vector< vtkSmartPointer<vtkIdList> > * snapI = &this->SnapInfo2;
 	vtkPointData		*pData = this->AllData->GetPointData();
 	vtkPoints			*pnts = this->AllData->GetPoints();
 
@@ -969,8 +969,8 @@ int vtkSQLiteReader2::readTracks(){
 	int GidC = this->dataInfo.TracksGidColumn;
 
 	vtkIdTypeArray * TracksA = this->dataInfo.pTrackIdArray;
-	vtkstd::vector<vtkSmartPointer<vtkIdList>> * ti = &this->TrackInfo2;
-	vtkstd::vector<vtkSmartPointer<vtkIdList>> * si = &this->SnapInfo2;
+	vtkstd::vector< vtkSmartPointer<vtkIdList> > * ti = &this->TrackInfo2;
+	vtkstd::vector< vtkSmartPointer<vtkIdList> > * si = &this->SnapInfo2;
 
 	//init
 	vtkSmartPointer<vtkCellArray> Tracks = vtkSmartPointer<vtkCellArray>::New();

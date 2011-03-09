@@ -54,7 +54,7 @@ ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.1"
 		vtkFriendsOfFriendsHaloFinder.cxx 
 		vtkRamsesReader.cxx
 		vtkGraficReader.cxx		
-		vtkSQLiteReader.cxx
+		vtkSQLiteReader2.cxx
 		vtkTrackFilter.cxx
 		vtkSimpleBin.cxx
 	SERVER_MANAGER_XML
@@ -67,14 +67,14 @@ ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.1"
 		AddAdditionalAttribute.xml 
 		FriendsOfFriendsHaloFinder.xml	
 		GraficReaderSM.xml
-		SQLiteReaderSM.xml
+		SQLiteReader2SM.xml
 		TrackFilterSM.xml
 		SimpleBinSM.xml
 		RamsesReaderSM.xml
 
 	GUI_RESOURCES
 		TipsyReader.qrc
-		SQLiteReader.qrc
+		SQLiteReader2.qrc
 		RamsesReader.qrc
 		GraficReader.qrc		
 	GUI_RESOURCE_FILES
@@ -123,7 +123,7 @@ IF (WIN32)
 ENDIF (WIN32)
 
 
-# For SQLiteReader Plugin, SQLite lib
+# For SQLiteReader2 Plugin, SQLite lib
 ADD_LIBRARY(
 	SQLitelib
 	STATIC

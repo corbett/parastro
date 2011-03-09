@@ -95,8 +95,8 @@ protected:
 	vtkstd::vector<Snap2> SnapInfo2;
 	vtkstd::vector<Track2> TrackInfo2;
 	*/
-	vtkstd::vector<vtkSmartPointer<vtkIdList>> SnapInfo2;
-	vtkstd::vector<vtkSmartPointer<vtkIdList>> TrackInfo2;
+	vtkstd::vector< vtkSmartPointer<vtkIdList> > SnapInfo2;
+	vtkstd::vector< vtkSmartPointer<vtkIdList> > TrackInfo2;
 
 
 	//structs
@@ -347,32 +347,32 @@ private:
 	vtkSmartPointer<vtkPolyData>	SnapshotData;
 
 	//functions
-	int vtkSQLiteReader2::ReadHeader(); // reads the database header information
+	int ReadHeader(); // reads the database header information
 
-	int vtkSQLiteReader2::readSnapshots(); // reads the snapshots
-	int vtkSQLiteReader2::readSnapshotInfo(); 
-	int vtkSQLiteReader2::readTracks();
-	int vtkSQLiteReader2::calculatePointData();
-	//int vtkSQLiteReader2::generateColors();
+	int readSnapshots(); // reads the snapshots
+	int readSnapshotInfo(); 
+	int readTracks();
+	int calculatePointData();
+	//int generateColors();
 
-	int vtkSQLiteReader2::findCollisions(CollisionCalculation*);
+	int findCollisions(CollisionCalculation*);
 	
-	//int vtkSQLiteReader2::doCalculations(double,int);
-	int vtkSQLiteReader2::calcTolerance();
+	//int doCalculations(double,int);
+	int calcTolerance();
 
 
-	int vtkSQLiteReader2::generateSelection(
+	int generateSelection(
 		CollisionCalculation*, SelectionStruct*);
-	int vtkSQLiteReader2::generateSelectedData(
+	int generateSelectedData(
 		vtkSmartPointer<vtkPolyData>, SelectionStruct*);
 	
-	/*int vtkSQLiteReader2::fillIdList(std::vector<int>*, int*,
+	/*int fillIdList(std::vector<int>*, int*,
 		std::vector<int>*, int*,
 		CollisionResultStruct*, int);
-	int vtkSQLiteReader2::generateIdMap();
-	int vtkSQLiteReader2::generatePoints(SelectionStruct*, Data*);
-	int vtkSQLiteReader2::generateTracks(SelectionStruct*, Data*);
-	int vtkSQLiteReader2::reset();
+	int generateIdMap();
+	int generatePoints(SelectionStruct*, Data*);
+	int generateTracks(SelectionStruct*, Data*);
+	int reset();
 	*/
 
 	// helper
@@ -388,7 +388,7 @@ private:
 	int IdTypeArray2IdList(vtkIdList* destination, vtkIdTypeArray* source);
 
 	int openDB(char*);
-	vtkStdString vtkSQLiteReader2::Int2Str(int);
+	vtkStdString Int2Str(int);
 	double getDistance2(int, int);
 	//double getDistanceToO(int);
 
