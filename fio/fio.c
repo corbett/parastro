@@ -2524,7 +2524,6 @@ typedef struct {
     graficFile fp_velby;
     graficFile fp_velbz;
 		graficFile fp_refmap;
-
     } graficLevel;
 
 typedef struct {
@@ -2787,7 +2786,9 @@ static int graficSeek(FIO fio,uint64_t iPart,FIO_SPECIES eSpecies) {
     gio->iOrder = iPart;
 
     /* Now seek within the appropriate files */
+
     if (iPart>=gio->fio.nSpecies[FIO_SPECIES_SPH]) {
+	
 	iPart -= gio->fio.nSpecies[FIO_SPECIES_SPH];
 	graficSeekFile(&gio->level[0].fp_velcx,iPart);
 	graficSeekFile(&gio->level[0].fp_velcy,iPart);
@@ -2797,7 +2798,12 @@ static int graficSeek(FIO fio,uint64_t iPart,FIO_SPECIES eSpecies) {
 	graficSeekFile(&gio->level[0].fp_velbx,iPart);
 	graficSeekFile(&gio->level[0].fp_velby,iPart);
 	graficSeekFile(&gio->level[0].fp_velbz,iPart);
+			
 	}
+	if(gio->level[0].fp_refmap.fp!=NULL){
+		graficSeekFile(&gio->level[0].fp_refmap,iPart);
+	}			
+	
     return 0;
     }
 
@@ -2830,6 +2836,13 @@ static int graficReadDark(FIO fio,
     assert(fio->eFormat == FIO_FORMAT_GRAFIC);
     assert(gio->iOrder >= gio->fio.nSpecies[FIO_SPECIES_SPH]);
     *piOrder = gio->iOrder++;
+		if(gio->level[0].fp_refmap.fp!=NULL){
+			double includeParticle=graficRead(&gio->level[0].fp_refmap);
+			if(!includeParticle){
+				return 0;
+			}
+		}			
+	
     graficSetPV(fio,pdPos,pdVel,
 		graficRead(&gio->level[0].fp_velcx),
 		graficRead(&gio->level[0].fp_velcy),
@@ -2870,6 +2883,8 @@ static void graficClose(FIO fio) {
     if ( gio->level[0].fp_velbx.fp!=NULL ) fclose(gio->level[0].fp_velbx.fp);
     if ( gio->level[0].fp_velby.fp!=NULL ) fclose(gio->level[0].fp_velby.fp);
     if ( gio->level[0].fp_velbz.fp!=NULL ) fclose(gio->level[0].fp_velbz.fp);
+		if ( gio->level[0].fp_refmap.fp!=NULL ) fclose(gio->level[0].fp_refmap.fp);
+
     free(gio);
     }
 
@@ -2961,6 +2976,7 @@ static FIO graficOpenDirectory(const char *dirName,double dOmega0,double dOmegab
     gio->level = malloc(sizeof(graficLevel));
     gio->level[0].fp_velcx.fp = gio->level[0].fp_velcy.fp = gio->level[0].fp_velcz.fp = NULL;
     gio->level[0].fp_velbx.fp = gio->level[0].fp_velby.fp = gio->level[0].fp_velbz.fp = NULL;
+		gio->level[0].fp_refmap.fp = NULL;
 
     for( i=0; i<FIO_SPECIES_LAST; i++)
 	gio->fio.nSpecies[i] = 0;
@@ -3018,6 +3034,10 @@ static FIO graficOpenDirectory(const char *dirName,double dOmega0,double dOmegab
 	    graficClose(&gio->fio);
 	    return NULL;
 	    }
+	// this will only exist in some cases, simply try to open it and if it doesn't exist don't worry about it
+	strcpy(fileName+n,"ic_refmap");
+	graficOpen(&gio->level[0].fp_refmap,fileName);
+			
 	gio->fio.nSpecies[FIO_SPECIES_SPH] = gio->fio.nSpecies[FIO_SPECIES_DARK];
 
 	assert(graficCompare(&gio->level[0].fp_velbx,&gio->level[0].fp_velby));
