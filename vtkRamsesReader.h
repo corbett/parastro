@@ -43,6 +43,12 @@ public:
 	vtkSetStringMacro(FileName);
  	vtkGetStringMacro(FileName);
 
+	
+	// Description:
+  // Set/Get the name of the file from which to read points.
+	vtkSetMacro(ParticleMassGuess,double);
+ 	vtkGetMacro(ParticleMassGuess,double);
+	
   // Description:
   // An H5Part file may contain multiple arrays
   // a GUI (eg Paraview) can provide a mechanism for selecting which data arrays
@@ -74,6 +80,7 @@ protected:
   vtkRamsesReader();
   ~vtkRamsesReader();
 	char* FileName;
+	double ParticleMassGuess;
 	int RequestInformation(vtkInformation*,	vtkInformationVector**,
 		vtkInformationVector*);
 

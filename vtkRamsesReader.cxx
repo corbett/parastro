@@ -422,15 +422,20 @@ int vtkRamsesReader::RequestData(vtkInformation*,
 		// mdm=min dark matter particle mass*conversion factor
 		//   particle_number_guess=int(partmass/mdm)+1
 		double average_density = total_mass/total_volume;
-		double conversion_factor = rsnap.m_header.omega_b / (rsnap.m_header.omega_m-rsnap.m_header.omega_b);
-		unsigned particle_number_guess = floor(total_mass/(min_darkparticle_mass*conversion_factor))+1;
-		double particle_mass = total_mass/particle_number_guess;// ndm=mdm*omegab/(omegam-omegab), valid for cosmorun, otherwise m_sph, otherwise request from user
+
 		
-		std::cout << " conversion factor=" << conversion_factor << std::endl;
+		double particle_mass = this->ParticleMassGuess;
+		if(particle_mass==0) {
+			double conversion_factor = rsnap.m_header.omega_b / (rsnap.m_header.omega_m-rsnap.m_header.omega_b);
+			unsigned particle_number_guess = floor(total_mass/(min_darkparticle_mass*conversion_factor))+1;
+			particle_mass = total_mass/particle_number_guess;// ndm=mdm*omegab/(omegam-omegab), valid for cosmorun, otherwise m_sph, otherwise request from user
+			std::cout << "Number of gas dummy particles = " << particle_number_guess << std::endl;
+			std::cout << " conversion factor=" << conversion_factor << std::endl;
+			std::cout << "Mdm =" << min_darkparticle_mass*conversion_factor<< std::endl;
+			
+		}		
 		std::cout << "Total gas mass = " << total_mass << std::endl;
-		std::cout << "Number of gas dummy particles = " << particle_number_guess << std::endl;
 		std::cout << "Gas particle mass = " << particle_mass << std::endl;
-		std::cout << "Mdm =" << min_darkparticle_mass*conversion_factor<< std::endl;
 		std::cout << "averdens =" << average_density << std::endl;
 		std::cout <<"volume =" << total_volume << std::endl;
 		

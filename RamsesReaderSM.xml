@@ -39,6 +39,19 @@
         </Documentation>
       </StringVectorProperty>
 
+	  <DoubleVectorProperty
+			name="ParticleMassGuess"
+			command="SetParticleMassGuess"
+			number_of_elements="1"
+			default_values="0">
+			
+			<Documentation>
+			If this run includes hydro, it is necessary to have a guess at the gas particle mass. If this is a cosmo run, a decent guess for the guess particle mass can be automatically determined from the total mass, the minimum dark matter particle mass, and omegab/(omegam-omegab). If another guess is desired (required in the case of a non-cosmo run) please specify a non-zero positive value here.
+
+			</Documentation>
+	  </DoubleVectorProperty>
+
+
 
     </SourceProxy>
   </ProxyGroup>
