@@ -1,0 +1,12 @@
+# Building from separate directory:
+# ccmake /path/to/AstroViz/src
+# fill in ParaView dir to be /Path/To/ParaView/Built/From/Source
+# configure (c) until generate (g) option is available, generate, then type make from command line
+
+# Creating an Xcode Project for easy development on MacOSX (from separate directory)
+# ccmake -G Xcode /path/to/AstroViz/src
+# fill in ParaView dir to be /Path/To/ParaView/Built/From/Source
+# configure (c) until generate (g) option is available, generate, then open Project.xcodeproj.  This will build
+# NOTE: if you change Cmakelists.txt you should go through this whole procedure again to regenerate a project, otherwise your changes will not propogate.
+
+
