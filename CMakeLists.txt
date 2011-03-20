@@ -32,8 +32,17 @@ INCLUDE_DIRECTORIES(AstroVizHelpersLib)
 #INCLUDE_DIRECTORIES(fio)
 
 # for special gui
+#QT4_WRAP_CPP(MOC_SRCS pqTrackFilter2Panel.h)
 QT4_WRAP_CPP(MOC_SRCS pqTrackFilterPanel.h)
 
+#QT4_ADD_RESOURCES(RCS_SRCS pqTrackFilter2Panel.qrc)
+
+#ADD_PARAVIEW_OBJECT_PANEL(
+#	IFACES IFACE_SRCS
+#	CLASS_NAME pqTrackFilter2Panel
+#	XML_NAME TrackFilter2
+#	XML_GROUP filters
+#	)
 ADD_PARAVIEW_OBJECT_PANEL(
 	IFACES IFACE_SRCS
 	CLASS_NAME pqTrackFilterPanel
@@ -52,11 +61,16 @@ ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.1"
 		vtkVirialRadiusFilter.cxx
 		vtkAddAdditionalAttribute.cxx 
 		vtkFriendsOfFriendsHaloFinder.cxx 
+		#vtkPointDisplay.cxx
 		vtkRamsesReader.cxx
 		vtkGraficReader.cxx		
-		vtkSQLiteReader2.cxx
-		vtkTrackFilter.cxx
+		#vtkSQLiteReader.cxx
+		#vtkSQLiteReader2.cxx
+		#vtkTrackFilter.cxx
+		#vtkTrackFilter2.cxx
 		vtkSimpleBin.cxx
+		#vtkRamsesReader.cxx
+
 	SERVER_MANAGER_XML
 		TipsyReaderSM.xml
 		NSmoothFilterSM.xml
@@ -67,20 +81,27 @@ ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.1"
 		AddAdditionalAttribute.xml 
 		FriendsOfFriendsHaloFinder.xml	
 		GraficReaderSM.xml
-		SQLiteReader2SM.xml
-		TrackFilterSM.xml
+		#PointDisplaySM.xml
+		#SQLiteReaderSM.xml
+		#SQLiteReader2SM.xml
+		#TrackFilterSM.xml
+		#TrackFilter2SM.xml
 		SimpleBinSM.xml
-		RamsesReaderSM.xml
+		#RamsesReaderSM.xml
 
 	GUI_RESOURCES
 		TipsyReader.qrc
+		#PointDisplay.qrc
+		SQLiteReader.qrc
 		SQLiteReader2.qrc
-		RamsesReader.qrc
+		#RamsesReader.qrc
+
 		GraficReader.qrc		
 	GUI_RESOURCE_FILES
 		AstroVizFilterMenu.xml
 		
 	GUI_INTERFACES ${IFACES} 
+		#SOURCES pqTrackFilter2Panel.cxx ${MOC_SRCS} ${RCS_SRCS} ${IFACE_SRCS}
 		SOURCES pqTrackFilterPanel.cxx ${MOC_SRCS} ${IFACE_SRCS}
 	)
 #PARAVIEW_INCLUDE_WRAPPED_SOURCES(fio/fio.c fio/romberg.c)
@@ -123,13 +144,13 @@ IF (WIN32)
 ENDIF (WIN32)
 
 
-# For SQLiteReader2 Plugin, SQLite lib
+# For SQLiteReader Plugin, SQLite lib
 ADD_LIBRARY(
 	SQLitelib
 	STATIC
 		sqlitelib/sqlite3.c
 	)
-SET_TARGET_PROPERTIES(SQLitelib PROPERTIES COMPILE_FLAGS "-fPIC")
+
 #For the Grafic reader plugin (and later) integrated tipsy HDF, tipsy binary, and grafic reader I use some of Doug Potter's/Joachim Stadel's fio
 # For the Tipsy reader plugin I use some of Doug Potter's Tipsy lib.
 # TODO: this is not working, hardcoding library path for now
