@@ -69,7 +69,7 @@ ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.1"
 		#vtkTrackFilter.cxx
 		#vtkTrackFilter2.cxx
 		vtkSimpleBin.cxx
-		#vtkRamsesReader.cxx
+		vtkRamsesReader.cxx
 
 	SERVER_MANAGER_XML
 		TipsyReaderSM.xml
@@ -87,14 +87,14 @@ ADD_PARAVIEW_PLUGIN(AstroVizPlugin "1.1"
 		#TrackFilterSM.xml
 		#TrackFilter2SM.xml
 		SimpleBinSM.xml
-		#RamsesReaderSM.xml
+		RamsesReaderSM.xml
 
 	GUI_RESOURCES
 		TipsyReader.qrc
 		#PointDisplay.qrc
 		SQLiteReader.qrc
 		SQLiteReader2.qrc
-		#RamsesReader.qrc
+		RamsesReader.qrc
 
 		GraficReader.qrc		
 	GUI_RESOURCE_FILES
