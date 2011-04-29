@@ -26,9 +26,13 @@ namespace RAMSES{
 
 inline void mpi_distribute_domains( int ndomains, std::vector<int>& mycpus, bool silent=false )
 {
+  int rank=0;
+  int size=1;
   //... determine meta-domain-decomposition ...//
-  int rank = vtkMultiProcessController::GetGlobalController()->GetLocalProcessId();
-  int size= vtkMultiProcessController::GetGlobalController()->GetNumberOfProcesses();
+  if(vtkMultiprocessController::GetGlobalController()!=NULL){
+     rank = vtkMultiProcessController::GetGlobalController()->GetLocalProcessId();
+     size= vtkMultiProcessController::GetGlobalController()->GetNumberOfProcesses();
+  }    
 
   //... determine meta-domain-decomposition ...//
   int npp = (int)((float)ndomains/size);
@@ -42,8 +46,9 @@ inline void mpi_distribute_domains( int ndomains, std::vector<int>& mycpus, bool
   
 	for( int i=1+npp*rank; i<=npp*(rank+1); ++i )
       mycpus.push_back(i);
-	
-	vtkMultiProcessController::GetGlobalController()->Barrier();
+  if(vtkMultiprocessController::GetGlobalController()!=NULL){
+    vtkMultiProcessController::GetGlobalController()->Barrier();
+  }
 }
 	
 class compound_data{
@@ -186,7 +191,7 @@ public:
 	{
 		if( R_CHECK_BIT( m_type, 0 ) )
 		{
-			if( vtkMultiProcessController::GetGlobalController()->GetLocalProcessId()==0 )
+			if(vtkMultiProcessController::GetGlobalController()==NULL || vtkMultiProcessController::GetGlobalController()->GetLocalProcessId()==0 )
 				std::cout << "* Reading particle data..." << std::endl;
 			
 			m_part_pos_x.get_var("position_x");
@@ -246,7 +251,7 @@ public:
 		
 		if( R_CHECK_BIT( m_type, 1 ) )
 		{
-			if( vtkMultiProcessController::GetGlobalController()->GetLocalProcessId()==0 )
+			if(vtkMultiProcessController::GetGlobalController()==NULL ||vtkMultiProcessController::GetGlobalController()->GetLocalProcessId()==0 )
 				std::cout << "* Reading mesh data..." << std::endl;
 			
 			m_gas_rho.get_var("density");
@@ -260,10 +265,11 @@ public:
 				m_bhave_metals = true;
 
 		}
-			
-		vtkMultiProcessController::GetGlobalController()->Barrier();
+    if(vtkMultiProcessController::GetGlobalController()!=NULL){
+      vtkMultiProcessController::GetGlobalController()->Barrier();
+    }
 
-		if( vtkMultiProcessController::GetGlobalController()->GetLocalProcessId()==0 )
+		if(vtkMultiProcessController::GetGlobalController()==NULL || vtkMultiProcessController::GetGlobalController()->GetLocalProcessId()==0 )
 			std::cout << "* Finished reading data." << std::endl;
 	}
 	
