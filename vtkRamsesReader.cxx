@@ -111,12 +111,8 @@ vtkRamsesReader::vtkRamsesReader()
   this->Tform       = NULL;
   this->Velocity    = NULL;
   this->Controller = NULL;
-  /*
   this->Controller=vtkMultiProcessController::GetGlobalController();
   
-  int args = 0;
-  this->Controller->Initialize(&args, NULL);
-   */
 }
 
 //----------------------------------------------------------------------------
@@ -327,15 +323,12 @@ int vtkRamsesReader::RequestData(vtkInformation*,
 		}
 		
     
-    //..... THIS IS HOW YOU'D LOOP OVER PARTICLES:
-    //......
+    // reading particles!
     multi_part pdata( rsnap, *trees );    
     multi_part_int pdataint( rsnap, *trees );    
 
     for(unsigned i=0; i<mydomains.size(); ++i) 
       {
-
-
         double data;
         // particle id
         pdataint.get_var("particle_ID");
@@ -438,7 +431,13 @@ int vtkRamsesReader::RequestData(vtkInformation*,
 				}
 			}
 		}
-		
+    // Finally syncronizing the min_darkparticle_mass accross all processors
+		if(this->Controller!=NULL) {
+      double min_darkparticle_mass_local[1] = {min_darkparticle_mass};
+      double min_darkparticle_mass_global[1];      
+      this->Controller->AllReduce(min_darkparticle_mass_local, min_darkparticle_mass_global, 1, vtkCommunicator::MIN_OP);
+      min_darkparticle_mass=min_darkparticle_mass_global[0];
+    }
 	}	
 
 	// GAS PARTICLE CONVERSION
