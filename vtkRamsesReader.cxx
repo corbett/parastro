@@ -50,6 +50,8 @@ typedef RAMSES::AMR::tree< RAMSES_cell, RAMSES::AMR::level< RAMSES_cell > > RAMS
 typedef RAMSES::AMR::multi_domain_tree< RAMSES_cell, RAMSES::AMR::level< RAMSES_cell > > multi_tree;
 typedef RAMSES::HYDRO::multi_domain_data< RAMSES_tree, RAMSES::HYDRO::data<RAMSES_tree,double>, double > multi_amr;
 typedef RAMSES::PART::multi_domain_data< RAMSES_tree, double > multi_part; 
+typedef RAMSES::PART::multi_domain_data< RAMSES_tree, int > multi_part_int; 
+
 
 
 //----------------------------------------------------------------------------
@@ -312,7 +314,7 @@ int vtkRamsesReader::RequestData(vtkInformation*,
 		dark_only=true;
 		// so reading all particles
 		// Open particle data source for first cpu
-    // just to get the var names....
+    // just to get the var names..... TODO: only need to do this on one cpu
 		RAMSES::PART::data local_data(filename, 1 );
 		// Retrieve the available variable names from the file
 		std::vector< std::string > varnames;
@@ -327,79 +329,101 @@ int vtkRamsesReader::RequestData(vtkInformation*,
     
     //..... THIS IS HOW YOU'D LOOP OVER PARTICLES:
     //......
-    multi_part pdata( rsnap, *trees );
-    pdata.get_var("position_x");
+    multi_part pdata( rsnap, *trees );    
+    multi_part_int pdataint( rsnap, *trees );    
 
-  
-    //pdata.get_var("position_y");
-    //pdata.get_var("position_z");
-    
     for(unsigned i=0; i<mydomains.size(); ++i) 
       {
-      pdata.get_var("position_x");
 
-    	for(unsigned ip=0; ip < pdata.size(i); ++ip)
+
+        double data;
+        // particle id
+        pdataint.get_var("particle_ID");
+        for(unsigned ip=0; ip < pdataint.size(i); ++ip)
         {
-
-          double posx = pdata(i,ip);
-          
-          int id = 0;
-          //      ... do something with posx
-          // TODO: do something with something besides posx
-          x.push_back(posx);
-          vx.push_back(posx);
-          vy.push_back(posx);
-          vz.push_back(posx);
-          mass.push_back(posx);
-          ids.push_back(id);
+          int dataint = pdataint(i,ip);
+          // invariant, one particle per particle id
           type.push_back(RAMSES_DARK);
-          //age.push_back(posx);
-          //metals.push_back(posx);
+          ids.push_back(dataint);        
+        }
+        // pos x
+        pdata.get_var("position_x");
+        for(unsigned ip=0; ip < pdata.size(i); ++ip)
+        {
+          data = pdata(i,ip);          
+          x.push_back(data);
         }
         
+        // pos y
         pdata.get_var("position_y");
         for(unsigned ip=0; ip < pdata.size(i); ++ip)
         {
-          double posy = pdata(i,ip);
-          y.push_back(posy);
+          data = pdata(i,ip);
+          y.push_back(data);
         }
+        
+        //pos z
         pdata.get_var("position_z");
         for(unsigned ip=0; ip < pdata.size(i); ++ip)
         {
-          double posz = pdata(i,ip); 
-          z.push_back(posz);
+          data = pdata(i,ip); 
+          z.push_back(data);
         }
         
+
+        //velocity x
+        pdata.get_var("velocity_x");
+        for(unsigned ip=0; ip < pdata.size(i); ++ip)
+        {
+          data = pdata(i,ip); 
+          vx.push_back(data);
+        }
+
+        
+        //velocity y
+        pdata.get_var("velocity_y");
+        for(unsigned ip=0; ip < pdata.size(i); ++ip)
+        {
+          data = pdata(i,ip); 
+          vy.push_back(data);
+        }
+
+        //velocity z
+        pdata.get_var("velocity_z");
+        for(unsigned ip=0; ip < pdata.size(i); ++ip)
+        {
+          data = pdata(i,ip); 
+          vz.push_back(data);
+        }
+
+        //pos z
+        pdata.get_var("mass");
+        for(unsigned ip=0; ip < pdata.size(i); ++ip)
+        {
+          data = pdata(i,ip); 
+          mass.push_back(data);
+        }
+        
+        if(!dark_only) {
+          pdata.get_var("age");
+          for(unsigned ip=0; ip < pdata.size(i); ++ip)
+          {
+            data = pdata(i,ip); 
+            age.push_back(data);
+          }
+          pdata.get_var("metallicity");
+          for(unsigned ip=0; ip < pdata.size(i); ++ip)
+          {
+            data = pdata(i,ip); 
+            metals.push_back(data);
+          }
+
+        }
+      
+      
       }
 
     vtkErrorMacro("finished reading and x is of size " << x.size() );
-		// TODO: removing in favor of new scheme
-		/*
-		// TODO: testing to remove dark particles
-		// Actually reading the data looping over all domains
-		for( unsigned int icpu=1; icpu<=rsnap.m_header.ncpu; ++icpu ) {
-			// Open particle data source
-			RAMSES::PART::data local_data(rsnap, icpu);	
-			try {
-				local_data.get_var<double>("position_x",std::back_inserter(x));
-				local_data.get_var<double>("position_y",std::back_inserter(y));
-				local_data.get_var<double>("position_z",std::back_inserter(z));
-				local_data.get_var<double>("velocity_x",std::back_inserter(vx));
-				local_data.get_var<double>("velocity_y",std::back_inserter(vy));
-				local_data.get_var<double>("velocity_z",std::back_inserter(vz));
-				local_data.get_var<double>("mass",std::back_inserter(mass));
-				local_data.get_var<int>("particle_ID",std::back_inserter(ids));
-				if(!dark_only) {
-					local_data.get_var<double>("age",std::back_inserter(age)); 
-					local_data.get_var<double>("metallicity",std::back_inserter(metals)); 
-				}
-			} catch(...){
-				std::cerr << "something bad happened in reading the variable.\n";
-				throw;
-			}	
-			
-		}
-     */
 
     // TODOCRIT: add this *back* in when we are ready with MPI
     /*			
