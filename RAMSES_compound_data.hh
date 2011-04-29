@@ -15,29 +15,35 @@
 #include "RAMSES_amr_data.hh"
 #include "RAMSES_hydro_data.hh"
 #include "RAMSES_particle_data.hh"
-
+#include "vtkMultiprocessController.h"
 #include "lattice_RAMSES.hh"
 
 #define R_CHECK_BIT(var,pos) ((var) & (1<<(pos)))
 
 namespace RAMSES{
 
+
+
 inline void mpi_distribute_domains( int ndomains, std::vector<int>& mycpus, bool silent=false )
 {
   //... determine meta-domain-decomposition ...//
-  int npp = (int)((float)ndomains/MPI::COMM_WORLD.Get_size());
+  int rank = vtkMultiProcessController::GetGlobalController()->GetLocalProcessId();
+  int size= vtkMultiProcessController::GetGlobalController()->GetNumberOfProcesses();
+
+  //... determine meta-domain-decomposition ...//
+  int npp = (int)((float)ndomains/size);
   
-	if( MPI::COMM_WORLD.Get_rank() == MPI::COMM_WORLD.Get_size()-1 )
-    npp = ndomains-(MPI::COMM_WORLD.Get_rank()*npp);
+	if( rank == size-1 )
+    npp = ndomains-(rank*npp);
 	
 	if(!silent)
-		std::cout << "* Task " << MPI::COMM_WORLD.Get_rank() << ": working on domains "
-      << 1+npp*MPI::COMM_WORLD.Get_rank() << " - " << npp*(MPI::COMM_WORLD.Get_rank()+1) << std::endl;
+		std::cout << "* Task " << rank << ": working on domains "
+      << 1+npp*rank << " - " << npp*(rank+1) << std::endl;
   
-	for( int i=1+npp*MPI::COMM_WORLD.Get_rank(); i<=npp*(MPI::COMM_WORLD.Get_rank()+1); ++i )
+	for( int i=1+npp*rank; i<=npp*(rank+1); ++i )
       mycpus.push_back(i);
 	
-	MPI::COMM_WORLD.Barrier();
+	vtkMultiProcessController::GetGlobalController()->Barrier();
 }
 	
 class compound_data{
@@ -180,7 +186,7 @@ public:
 	{
 		if( R_CHECK_BIT( m_type, 0 ) )
 		{
-			if( MPI::COMM_WORLD.Get_rank()==0 )
+			if( vtkMultiProcessController::GetGlobalController()->GetLocalProcessId()==0 )
 				std::cout << "* Reading particle data..." << std::endl;
 			
 			m_part_pos_x.get_var("position_x");
@@ -240,7 +246,7 @@ public:
 		
 		if( R_CHECK_BIT( m_type, 1 ) )
 		{
-			if( MPI::COMM_WORLD.Get_rank()==0 )
+			if( vtkMultiProcessController::GetGlobalController()->GetLocalProcessId()==0 )
 				std::cout << "* Reading mesh data..." << std::endl;
 			
 			m_gas_rho.get_var("density");
@@ -255,8 +261,9 @@ public:
 
 		}
 			
-		MPI::COMM_WORLD.Barrier();
-		if( MPI::COMM_WORLD.Get_rank()==0 )
+		vtkMultiProcessController::GetGlobalController()->Barrier();
+
+		if( vtkMultiProcessController::GetGlobalController()->GetLocalProcessId()==0 )
 			std::cout << "* Finished reading data." << std::endl;
 	}
 	

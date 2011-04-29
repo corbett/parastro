@@ -31,7 +31,7 @@ class vtkDoubleArray;
 class vtkPoints;
 class vtkCellArray;
 class vtkDataArraySelection;
-
+class   vtkMultiProcessController;
 class VTK_EXPORT vtkRamsesReader : public vtkPolyDataAlgorithm
 {
 public:
@@ -45,11 +45,17 @@ public:
 
 	
 	// Description:
-  // Set/Get the name of the file from which to read points.
+  // Set/Get the optional particle mass guess 
 	vtkSetMacro(ParticleMassGuess,double);
  	vtkGetMacro(ParticleMassGuess,double);
 	
-  // Description:
+
+	// Description:
+  // Set/Get the optional particle mass guess 
+	vtkSetMacro(HasParticleData,bool);
+ 	vtkGetMacro(HasParticleData,bool);
+	
+	// Description:
   // An H5Part file may contain multiple arrays
   // a GUI (eg Paraview) can provide a mechanism for selecting which data arrays
   // are to be read from the file. The PointArray variables and members can
@@ -81,6 +87,7 @@ protected:
   ~vtkRamsesReader();
 	char* FileName;
 	double ParticleMassGuess;
+	bool HasParticleData;
 	int RequestInformation(vtkInformation*,	vtkInformationVector**,
 		vtkInformationVector*);
 
@@ -107,6 +114,7 @@ protected:
 
 	
   //
+  vtkMultiProcessController *Controller;
   int           UpdatePiece;
   int           UpdateNumPieces;
 

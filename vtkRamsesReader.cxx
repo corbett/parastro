@@ -19,6 +19,7 @@
 #include "vtkInformationVector.h"
 #include "vtkSmartPointer.h"
 #include "vtkDataArraySelection.h"
+#include "vtkMultiProcessController.h"
 #include <cmath>
 #include <assert.h>
 #include <string>
@@ -33,27 +34,23 @@
 #include "RAMSES_particle_data.hh"
 #include "RAMSES_amr_data.hh"
 #include "RAMSES_hydro_data.hh"
-
+#include "RAMSES_mpi.hh"
+#include "mpi.h"
 vtkCxxRevisionMacro(vtkRamsesReader, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkRamsesReader);
 
-
-// NOTE: this is a simple port from inefficient Fortran code, needs to be optimized for memory and speed
-// putting a baseline in place, however.
-
-//----------------------------------------------------------------------------
 //... define the RAMSES base cell type to be of cell_locally_essential type
 //... - this type allows moving between refinement levels
 typedef RAMSES::AMR::cell_locally_essential<> RAMSES_cell;
 
-//----------------------------------------------------------------------------
 //... define the tree type to be of the standard RAMSES::AMR:level type
 //... with cells as defined above
 typedef RAMSES::AMR::tree< RAMSES_cell, RAMSES::AMR::level< RAMSES_cell > > RAMSES_tree;
 
-//----------------------------------------------------------------------------
-//... associate hydro data with the tree type defined above
-typedef RAMSES::HYDRO::data< RAMSES_tree > RAMSES_hydro_data;
+typedef RAMSES::AMR::multi_domain_tree< RAMSES_cell, RAMSES::AMR::level< RAMSES_cell > > multi_tree;
+typedef RAMSES::HYDRO::multi_domain_data< RAMSES_tree, RAMSES::HYDRO::data<RAMSES_tree,double>, double > multi_amr;
+typedef RAMSES::PART::multi_domain_data< RAMSES_tree, double > multi_part; 
+
 
 //----------------------------------------------------------------------------
 double dRandInRange(double min, double max) {
@@ -111,6 +108,13 @@ vtkRamsesReader::vtkRamsesReader()
   this->Metals      = NULL;
   this->Tform       = NULL;
   this->Velocity    = NULL;
+  this->Controller = NULL;
+  /*
+  this->Controller=vtkMultiProcessController::GetGlobalController();
+  
+  int args = 0;
+  this->Controller->Initialize(&args, NULL);
+   */
 }
 
 //----------------------------------------------------------------------------
@@ -247,6 +251,7 @@ int vtkRamsesReader::RequestInformation(
 int vtkRamsesReader::RequestData(vtkInformation*,
 	vtkInformationVector**,vtkInformationVector* outputVector)
 {
+
   //
 	// Make sure we have a file to read.
   //
@@ -257,15 +262,19 @@ int vtkRamsesReader::RequestData(vtkInformation*,
     }
 
 	// TODO: Open the Ramses standard file and abort if there is an error.
+	// Get output information
+	vtkInformation* outInfo = outputVector->GetInformationObject(0);
+    // get this->UpdatePiece information
 
-	
+
+  this->UpdatePiece = outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_PIECE_NUMBER());
+	this->UpdateNumPieces =outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_NUMBER_OF_PIECES());
+
 	//  Open the snapshot info file
 	std::string filename(this->FileName);
 	RAMSES::snapshot rsnap(filename , RAMSES::version3);    
 	vtkDebugMacro("simulation has " << rsnap.m_header.ncpu << " domains");
-	
-  // Get output information
-	vtkInformation* outInfo = outputVector->GetInformationObject(0);
+  
 
   // get the output polydata
   vtkPolyData *output = \
@@ -273,89 +282,155 @@ int vtkRamsesReader::RequestData(vtkInformation*,
   vtkSmartPointer<vtkPolyData> RamsesReadInitialOutput = \
       vtkSmartPointer<vtkPolyData>::New();
 
-  // get this->UpdatePiece information
-  this->UpdatePiece = \
-      outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_PIECE_NUMBER());
-	this->UpdateNumPieces = \
-	    outInfo->Get(
-	    vtkStreamingDemandDrivenPipeline::UPDATE_NUMBER_OF_PIECES());
 
+  
+  int args=0;
+  MPI_Init(&args, NULL);
+  
+	int mympirank;
+	MPI_Comm_rank( MPI_COMM_WORLD, &mympirank );
+    
+  //... distribute the domain among the available MPI tasks
+  //... each task will have to deal with the domains stored in the 'mycpus' array inside compound_data
+
+  std::vector<int> mydomains;
+  RAMSES::mpi_distribute_domains(rsnap.m_header.ncpu, mydomains);
+  
+ 
   // reset counter before reading
   this->ParticleIndex = 0;
 
-  // so reading all particles
-	// Open particle data source for first cpu
-	RAMSES::PART::data local_data(filename, 1 );
-	// Retrieve the available variable names from the file
-	std::vector< std::string > varnames;
-	local_data.get_var_names( std::back_inserter(varnames));
-	
-	bool dark_only = true;
-	for(unsigned i=0; i<varnames.size(); i++) {
-		if(varnames[i]=="age" || varnames[i]=="metallicity") {
-			dark_only=false;
-		}
-	}
-	
-	std::cout 
-	<< "file contains the following variables:"
-	<<"\n----------------------------------\n";
-	std::copy( varnames.begin(), varnames.end(), std::ostream_iterator<std::string>(std::cout,"\n"));
-	std::cout << "----------------------------------\n";
-	
-	
+	bool dark_only=true;
+	double min_darkparticle_mass=this->ParticleMassGuess;
 	std::vector<double> x, y, z, vx,vy,vz,  mass;
 	std::vector<double> age, metals;
 	std::vector<int> type;
 	// TODO: use bigger numbers
 	std::vector<int> ids;
-	
-	// Actually reading the data looping over all domains
-	for( unsigned int icpu=1; icpu<=rsnap.m_header.ncpu; ++icpu ) {
-		std::cout << "reading star/dark if app from domain " << icpu << std::endl;
-		// Open particle data source
-		RAMSES::PART::data local_data(rsnap, icpu);	
-		try {
-			local_data.get_var<double>("position_x",std::back_inserter(x));
-			local_data.get_var<double>("position_y",std::back_inserter(y));
-			local_data.get_var<double>("position_z",std::back_inserter(z));
-			local_data.get_var<double>("velocity_x",std::back_inserter(vx));
-			local_data.get_var<double>("velocity_y",std::back_inserter(vy));
-			local_data.get_var<double>("velocity_z",std::back_inserter(vz));
-			local_data.get_var<double>("mass",std::back_inserter(mass));
-			local_data.get_var<int>("particle_ID",std::back_inserter(ids));
-			if(!dark_only) {
-				local_data.get_var<double>("age",std::back_inserter(age)); 
-				local_data.get_var<double>("metallicity",std::back_inserter(metals)); 
-			}
-		} catch(...){
-			std::cerr << "something bad happened in reading the variable.\n";
-			throw;
-		}	
+  
+ 
+	/** Reading in Particle Data if available **/
+	if(this->HasParticleData) {
+    //... read tree structure for multiple domains
+    multi_tree trees(rsnap, mydomains);
+   
+ 
+		dark_only=true;
+		// so reading all particles
+		// Open particle data source for first cpu
+		RAMSES::PART::data local_data(filename, 1 );
+		// Retrieve the available variable names from the file
+		std::vector< std::string > varnames;
+		local_data.get_var_names( std::back_inserter(varnames));
 		
-	}
-	
-	// computing minimum_darkparticle_mass and separating dark, star (later gas)
-	double min_darkparticle_mass=DBL_MAX;
-	for(unsigned i=0;i< x.size();i++) {
-		// IDs > 0: star or dark
-		// IDs < 0: gas(used) or sink(thrownaway) 
-		if(ids[i] > 0) {
-			if(!dark_only && age[i]!=0 ){
-				type.push_back(RAMSES_STAR);
-			}
-			else {
-				type.push_back(RAMSES_DARK);
-				min_darkparticle_mass = std::min(min_darkparticle_mass,mass[i]);
+		for(unsigned i=0; i<varnames.size(); i++) {
+			if(varnames[i]=="age" || varnames[i]=="metallicity") {
+				dark_only=false;
 			}
 		}
-	}
-	
-	
-	/*** GAS PARTICLE CONVERSION ***/
+		
+    
+    //..... THIS IS HOW YOU'D LOOP OVER PARTICLES:
+    //......
+    multi_part pdata( rsnap, *trees );
+    pdata.get_var("position_x");
+
+    /*
+    pdata.get_var("position_y");
+    pdata.get_var("position_z");
+     */
+    for(unsigned i=0; i<mydomains.size(); ++i) 
+      {
+      pdata.get_var("position_x");
+
+    	for(unsigned ip=0; ip < pdata.size(i); ++ip)
+        {
+
+          double posx = pdata(i,ip);
+          
+          int id = 0;
+          //      ... do something with posx
+          // TODO: do something with something besides posx
+          x.push_back(posx);
+          vx.push_back(posx);
+          vy.push_back(posx);
+          vz.push_back(posx);
+          mass.push_back(posx);
+          ids.push_back(id);
+          type.push_back(RAMSES_DARK);
+          //age.push_back(posx);
+          //metals.push_back(posx);
+        }
+        
+        pdata.get_var("position_y");
+        for(unsigned ip=0; ip < pdata.size(i); ++ip)
+        {
+          double posy = pdata(i,ip);
+          y.push_back(posy);
+        }
+        pdata.get_var("position_z");
+        for(unsigned ip=0; ip < pdata.size(i); ++ip)
+        {
+          double posz = pdata(i,ip); 
+          z.push_back(posz);
+        }
+        
+      }
+    vtkErrorMacro("finished reading and x is of size " << x.size() );
+		// TODO: removing in favor of new scheme
+		/*
+		// TODO: testing to remove dark particles
+		// Actually reading the data looping over all domains
+		for( unsigned int icpu=1; icpu<=rsnap.m_header.ncpu; ++icpu ) {
+			// Open particle data source
+			RAMSES::PART::data local_data(rsnap, icpu);	
+			try {
+				local_data.get_var<double>("position_x",std::back_inserter(x));
+				local_data.get_var<double>("position_y",std::back_inserter(y));
+				local_data.get_var<double>("position_z",std::back_inserter(z));
+				local_data.get_var<double>("velocity_x",std::back_inserter(vx));
+				local_data.get_var<double>("velocity_y",std::back_inserter(vy));
+				local_data.get_var<double>("velocity_z",std::back_inserter(vz));
+				local_data.get_var<double>("mass",std::back_inserter(mass));
+				local_data.get_var<int>("particle_ID",std::back_inserter(ids));
+				if(!dark_only) {
+					local_data.get_var<double>("age",std::back_inserter(age)); 
+					local_data.get_var<double>("metallicity",std::back_inserter(metals)); 
+				}
+			} catch(...){
+				std::cerr << "something bad happened in reading the variable.\n";
+				throw;
+			}	
+			
+		}
+     */
+
+    // TODOCRIT: add this *back* in when we are ready with MPI
+    /*			
+		// computing minimum_darkparticle_mass and separating dark, star (later gas)
+		double min_darkparticle_mass=DBL_MAX;
+		for(unsigned i=0;i< x.size();i++) {
+			// IDs > 0: star or dark
+			// IDs < 0: gas(used) or sink(thrownaway) 
+			if(ids[i] > 0) {
+				if(!dark_only && age[i]!=0 ){
+					type.push_back(RAMSES_STAR);
+				}
+				else {
+					type.push_back(RAMSES_DARK);
+					min_darkparticle_mass = std::min(min_darkparticle_mass,mass[i]);
+				}
+			}
+		}
+     */
+		
+	}	
+	// GAS PARTICLE CONVERSION
 	// Here's where we want to extract gas particles. Perhaps take in a flag whether we should bother here, or not.
-	
 	double gas_mass_correction = 0.0;
+  // TODOCRIT: add this *back* in when we are ready with MPI
+  /*	
+   
 	if(!dark_only) {
 		
 		// static variables 
@@ -429,16 +504,8 @@ int vtkRamsesReader::RequestData(vtkInformation*,
 			double conversion_factor = rsnap.m_header.omega_b / (rsnap.m_header.omega_m-rsnap.m_header.omega_b);
 			unsigned particle_number_guess = floor(total_mass/(min_darkparticle_mass*conversion_factor))+1;
 			particle_mass = total_mass/particle_number_guess;// ndm=mdm*omegab/(omegam-omegab), valid for cosmorun, otherwise m_sph, otherwise request from user
-			std::cout << "Number of gas dummy particles = " << particle_number_guess << std::endl;
-			std::cout << " conversion factor=" << conversion_factor << std::endl;
-			std::cout << "Mdm =" << min_darkparticle_mass*conversion_factor<< std::endl;
 			
-		}		
-		std::cout << "Total gas mass = " << total_mass << std::endl;
-		std::cout << "Gas particle mass = " << particle_mass << std::endl;
-		std::cout << "averdens =" << average_density << std::endl;
-		std::cout <<"volume =" << total_volume << std::endl;
-		
+		}
 		double mass_leftover = 0.0;
 		
 		unsigned number_local_particles = 0;
@@ -469,7 +536,6 @@ int vtkRamsesReader::RequestData(vtkInformation*,
 				g_x=dRandInRange(pos.x-dx,pos.x+dx);
 				g_y=dRandInRange(pos.y-dx,pos.y+dx);
 				g_z=dRandInRange(pos.z-dx,pos.z+dx);
-				//std::cout << "inserting new gas particle at " << g_x << "," << g_y << "," << g_z << std::endl;
 				x.push_back(g_x);
 				y.push_back(g_y);
 				z.push_back(g_z);
@@ -488,7 +554,6 @@ int vtkRamsesReader::RequestData(vtkInformation*,
 		
 		
 		
-		std::cout << "total particles were created " << total_particles << std::endl;		
 		
 		// finally we want to distribute leftover_particles = floor(mass_leftover/particle_mass) over entire volume
 		unsigned leftover_particles =floor(mass_leftover/particle_mass);
@@ -518,10 +583,8 @@ int vtkRamsesReader::RequestData(vtkInformation*,
 		double final_mass_leftover=mass_leftover-leftover_particles*particle_mass;
 		gas_mass_correction = final_mass_leftover/(-1*gas_id-1); // correct every gas particle by adding this much mass
 		
-		std::cout << " mass leftover " << mass_leftover << " vs. particle_mass " << particle_mass << " so finally there are some leftover particles to dist over entire volue: " << leftover_particles << std::endl;
-		std::cout << "finally there is some leftover mass to distribute over all gas particles: " << final_mass_leftover << " with a mass correction of " << gas_mass_correction <<   std::endl;
-		
-	}		
+	}	
+	*/
 	//--------------------------------
 	// here's where the ParaView specific code comes in
 	
@@ -534,7 +597,6 @@ int vtkRamsesReader::RequestData(vtkInformation*,
 	double rho[3] = {0.0,0.0,0.0};
 	double pmass;
 	
-	
 	// TODO: ignoring age and metals for now.
 	for(unsigned i=0;i< x.size();i++) {
 		pos[0]=x[i];
@@ -546,25 +608,25 @@ int vtkRamsesReader::RequestData(vtkInformation*,
 		if(type[i]==RAMSES_GAS) {
 			pmass+=gas_mass_correction;
 		}
-
 		// all particle types have this
 		this->Positions->SetPoint(i, pos);
 		if (this->Velocity)  this->Velocity->SetTuple(i, vel);
 		if (this->Mass)      this->Mass->SetTuple1(i, mass[i]);
 		if (this->Type)      this->Type->SetTuple1(i, type[i]);
-		
+
 		//
 		if(!dark_only) {
 			if (this->Metals)      this->Metals->SetTuple1(i, metals[i]);
 			if (this->Age)      this->Age->SetTuple1(i, age[i]);
 		}
-		
+
 		// These currently are unused, should be removed
 		if (this->Potential) this->Potential->SetTuple1(i,0.0);		
 	  if (this->RHO)         this->RHO->SetTuple(i, rho);
 		if (this->Temperature) this->Temperature->SetTuple1(i, 0.0);
 		if (this->Hsmooth)     this->Hsmooth->SetTuple1(i, 0.0);
 		if (this->EPS)    this->EPS->SetTuple1(i, 0.0);
+
 	}
 	
 	
