@@ -274,21 +274,16 @@ int vtkRamsesReader::RequestData(vtkInformation*,
 	std::string filename(this->FileName);
 	RAMSES::snapshot rsnap(filename , RAMSES::version3);    
 	vtkDebugMacro("simulation has " << rsnap.m_header.ncpu << " domains");
+
+  
   
 
   // get the output polydata
   vtkPolyData *output = \
       vtkPolyData::SafeDownCast(outInfo->Get(vtkDataObject::DATA_OBJECT()));
   vtkSmartPointer<vtkPolyData> RamsesReadInitialOutput = \
-      vtkSmartPointer<vtkPolyData>::New();
-
-
-  
-  int args=0;
-  MPI_Init(&args, NULL);
-  
-	int mympirank;
-	MPI_Comm_rank( MPI_COMM_WORLD, &mympirank );
+      vtkSmartPointer<vtkPolyData>::New();  
+	int mympirank=vtkMultiProcessController::GetGlobalController()->GetLocalProcessId();
     
   //... distribute the domain among the available MPI tasks
   //... each task will have to deal with the domains stored in the 'mycpus' array inside compound_data
@@ -308,16 +303,16 @@ int vtkRamsesReader::RequestData(vtkInformation*,
 	// TODO: use bigger numbers
 	std::vector<int> ids;
   
- 
-	/** Reading in Particle Data if available **/
+	// Reading in Particle Data if available 
 	if(this->HasParticleData) {
     //... read tree structure for multiple domains
     multi_tree trees(rsnap, mydomains);
-   
- 
+    vtkErrorMacro("read multi trees");
+    
 		dark_only=true;
 		// so reading all particles
 		// Open particle data source for first cpu
+    // just to get the var names....
 		RAMSES::PART::data local_data(filename, 1 );
 		// Retrieve the available variable names from the file
 		std::vector< std::string > varnames;
@@ -335,10 +330,10 @@ int vtkRamsesReader::RequestData(vtkInformation*,
     multi_part pdata( rsnap, *trees );
     pdata.get_var("position_x");
 
-    /*
-    pdata.get_var("position_y");
-    pdata.get_var("position_z");
-     */
+  
+    //pdata.get_var("position_y");
+    //pdata.get_var("position_z");
+    
     for(unsigned i=0; i<mydomains.size(); ++i) 
       {
       pdata.get_var("position_x");
@@ -376,6 +371,7 @@ int vtkRamsesReader::RequestData(vtkInformation*,
         }
         
       }
+
     vtkErrorMacro("finished reading and x is of size " << x.size() );
 		// TODO: removing in favor of new scheme
 		/*
@@ -425,6 +421,7 @@ int vtkRamsesReader::RequestData(vtkInformation*,
      */
 		
 	}	
+
 	// GAS PARTICLE CONVERSION
 	// Here's where we want to extract gas particles. Perhaps take in a flag whether we should bother here, or not.
 	double gas_mass_correction = 0.0;
