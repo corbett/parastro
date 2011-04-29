@@ -342,8 +342,6 @@ int vtkRamsesReader::RequestData(vtkInformation*,
         for(unsigned ip=0; ip < pdataint.size(i); ++ip)
         {
           int dataint = pdataint(i,ip);
-          // invariant, one particle per particle id
-          type.push_back(RAMSES_DARK);
           ids.push_back(dataint);        
         }
         // pos x
@@ -425,8 +423,6 @@ int vtkRamsesReader::RequestData(vtkInformation*,
 
     vtkErrorMacro("finished reading and x is of size " << x.size() );
 
-    // TODOCRIT: add this *back* in when we are ready with MPI
-    /*			
 		// computing minimum_darkparticle_mass and separating dark, star (later gas)
 		double min_darkparticle_mass=DBL_MAX;
 		for(unsigned i=0;i< x.size();i++) {
@@ -442,7 +438,6 @@ int vtkRamsesReader::RequestData(vtkInformation*,
 				}
 			}
 		}
-     */
 		
 	}	
 
