@@ -645,7 +645,7 @@ int vtkRamsesReader::RequestData(vtkInformation*,
 			type.push_back(RAMSES_GAS);
 		}
     
-    // syncronizing the total number of gas particele
+    // syncronizing the total number of gas particles if necessary
     if(this->Controller!=NULL) {
       double total_gaspart_local[1] = {gas_id};
       double total_gaspart_global[1];      
@@ -657,9 +657,7 @@ int vtkRamsesReader::RequestData(vtkInformation*,
 		// over all particles 
 		double final_mass_leftover=mass_leftover-leftover_particles*particle_mass;
 		gas_mass_correction = final_mass_leftover/(gas_id-1); // correct every gas particle by adding this much mass
-     vtkErrorMacro(" mass leftover " << mass_leftover << " vs. particle_mass " << particle_mass << " so finally there are some leftove\
-     r particles to dist over entire volue: " << leftover_particles << "finally there is some leftover mass to distribute over all gas particles: " << final_mass_leftover << " with a mas\
-     s correction of " << gas_mass_correction);
+     vtkErrorMacro(" mass leftover " << mass_leftover << " vs. particle_mass " << particle_mass << " so finally there are some leftover particles to dist over entire volue: " << leftover_particles << "finally there is some leftover mass to distribute over all gas particles: " << final_mass_leftover << " with a mass correction of " << gas_mass_correction);
 		
 	}	
 
