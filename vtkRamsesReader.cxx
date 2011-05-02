@@ -294,18 +294,19 @@ int vtkRamsesReader::RequestData(vtkInformation*,
   this->ParticleIndex = 0;
 
 	bool dark_only=true;
-	double min_darkparticle_mass=this->ParticleMassGuess;
+	double min_darkparticle_mass;
 	std::vector<double> x, y, z, vx,vy,vz,  mass;
 	std::vector<double> age, metals;
 	std::vector<int> type;
 	// TODO: use bigger numbers
 	std::vector<int> ids;
   
+  //... read tree structure for multiple domains; need this for particle and AMR
+  multi_tree trees(rsnap, mydomains);
+  vtkErrorMacro("read multi trees");
+
 	// Reading in Particle Data if available 
 	if(this->HasParticleData) {
-    //... read tree structure for multiple domains
-    multi_tree trees(rsnap, mydomains);
-    vtkErrorMacro("read multi trees");
     
 		dark_only=true;
 		// so reading all particles
@@ -417,7 +418,7 @@ int vtkRamsesReader::RequestData(vtkInformation*,
     vtkErrorMacro("finished reading and x is of size " << x.size() );
 
 		// computing minimum_darkparticle_mass and separating dark, star (later gas)
-		double min_darkparticle_mass=DBL_MAX;
+    min_darkparticle_mass=DBL_MAX;
 		for(unsigned i=0;i< x.size();i++) {
 			// IDs > 0: star or dark
 			// IDs < 0: gas(used) or sink(thrownaway) 
@@ -431,23 +432,26 @@ int vtkRamsesReader::RequestData(vtkInformation*,
 				}
 			}
 		}
-    // Finally syncronizing the min_darkparticle_mass accross all processors
+    // Finally syncronizing the min_darkparticle_mass accross all processors if necessary
 		if(this->Controller!=NULL) {
       double min_darkparticle_mass_local[1] = {min_darkparticle_mass};
       double min_darkparticle_mass_global[1];      
       this->Controller->AllReduce(min_darkparticle_mass_local, min_darkparticle_mass_global, 1, vtkCommunicator::MIN_OP);
       min_darkparticle_mass=min_darkparticle_mass_global[0];
     }
+    vtkErrorMacro("minimum darkparticle mass is"<< min_darkparticle_mass)
 	}	
 
 	// GAS PARTICLE CONVERSION
 	// Here's where we want to extract gas particles. Perhaps take in a flag whether we should bother here, or not.
 	double gas_mass_correction = 0.0;
   // TODOCRIT: add this *back* in when we are ready with MPI
-  /*	
    
 	if(!dark_only) {
-		
+    //... read hydro data for multiple domains
+    multi_amr data( rsnap, *trees );    
+    //... actually read a field from disk
+    data.get_var("density");
 		// static variables 
 		static int minlvl = 1, maxlvl = rsnap.m_header.levelmax;	
 		
@@ -466,27 +470,28 @@ int vtkRamsesReader::RequestData(vtkInformation*,
 		
 		std::vector<double> leaf_cell_density;
 		std::vector<double> leaf_cell_size;
-		for( unsigned idomain=1; idomain<=rsnap.m_header.ncpu; ++idomain ) {
-			RAMSES_tree local_tree( rsnap, idomain, maxlvl, minlvl );
-			local_tree.read();		
-			// Create a new hydro data object for same domain and ref. level
-			// This HAS TO BE compatible with the corresponding AMR object
-			RAMSES_hydro_data local_hydro_data( local_tree );
-			local_hydro_data.read( "density" );
-			// cumulative variables
+
+    
+    //... loop over all domains that we hold
+    for( unsigned i=0; i<mydomains.size(); ++i ) {
+      //... this is the actual domain ID
+      int current_domain = mydomains[i];
+      //... loop over all levels
 			for(int ilevel = minlvl; ilevel < maxlvl; ++ilevel ) {
-				RAMSES_tree::iterator grid_it = local_tree.begin(ilevel), temp_it;
-				while( grid_it!=local_tree.end(ilevel) ){
-					// Is current grid a local grid? ...
-					if((unsigned)grid_it.get_domain() == idomain){
-						// loop over its cells 
-						for(int i=0; i<8; i++){
-							// are they further refined or have we reached the max. refinement level?
-							if(!grid_it.is_refined(i) || ilevel == maxlvl-1) {
-								// determine its position ...
-								RAMSES::AMR::vec<double> pos = local_tree.cell_pos<double>( grid_it, i );
-								rho = local_hydro_data.cell_value( grid_it, i );  // I presume this is density: TODO: verify -corbett
-								dx = pow(0.5,ilevel); 
+        RAMSES_tree::iterator grid_it = trees[i].begin(ilevel);
+        //... loop over grids on current level
+        while( grid_it!=trees[i].end(ilevel)){
+          //... real cell or boundary cell?
+          if( grid_it.get_domain() == current_domain ){
+            //... loop over cells in grid				
+            for( int k=0; k<8; k++ ){
+              //... are they further refined or have we reached the max. refinement level?
+              if( !grid_it.is_refined(k) ||  ilevel == maxlvl-1){
+                RAMSES::AMR::vec<double> pos;
+                pos = trees[i].cell_pos<double>( grid_it, k );
+                //.. obey periodic boundary conditions of box
+                rho = data(i, grid_it, k );
+                dx = pow(0.5,ilevel); 
 								// It's a leaf
 								leaf_cell_pos.push_back(pos);
 								leaf_cell_density.push_back(rho);
@@ -495,16 +500,38 @@ int vtkRamsesReader::RequestData(vtkInformation*,
 								dx3=pow(dx,3);
 								total_volume += dx3;
 								total_mass += rho*dx3;
-							}
-						}
-					}
-					++grid_it;
-				}
-			}
-		}	
+                
+              }
+							//++leaf_count;
+            }
+          }
+          ++grid_it;
+        }
+      }
+    }
+    
+    // Finally summing the total_mass and total_volume accross all processors if necessary
+		if(this->Controller!=NULL) {
+      double total_mass_local[1] = {total_mass};
+      double total_mass_global[1];      
+      
+      double total_volume_local[1] = {total_volume};
+      double total_volume_global[1];      
+
+      this->Controller->AllReduce(total_mass_local, total_mass_global, 1, vtkCommunicator::SUM_OP);
+      this->Controller->AllReduce(total_volume_local, total_volume_global, 1, vtkCommunicator::SUM_OP);
+
+      total_mass=total_mass_global[0];
+      total_volume=total_volume_global[0];
+    }
+    
+    
 		float CORRECTIONFACTOR=8.0;
 		total_mass=total_mass/CORRECTIONFACTOR;
 		total_volume=total_volume/CORRECTIONFACTOR;
+    vtkErrorMacro("total mass="<<total_mass<<" total volume="<<total_volume);
+
+    // TODO: add back in the second loop
 		// Second loop:
 		// we convert to particle via above calculation, and randomly distribute them over a cell 
 		// keeping track of the remainder for a final distribution
@@ -516,6 +543,7 @@ int vtkRamsesReader::RequestData(vtkInformation*,
 		
 		double particle_mass = this->ParticleMassGuess;
 		if(particle_mass==0) {
+      // TODO: here we should check if these exist at all in the header
 			double conversion_factor = rsnap.m_header.omega_b / (rsnap.m_header.omega_m-rsnap.m_header.omega_b);
 			unsigned particle_number_guess = floor(total_mass/(min_darkparticle_mass*conversion_factor))+1;
 			particle_mass = total_mass/particle_number_guess;// ndm=mdm*omegab/(omegam-omegab), valid for cosmorun, otherwise m_sph, otherwise request from user
@@ -526,12 +554,10 @@ int vtkRamsesReader::RequestData(vtkInformation*,
 		unsigned number_local_particles = 0;
 		unsigned total_particles = 0;
 		
+    // TODO: here the gas_id will not be consistent across processors
 		int gas_id=x.size();
 		
-		for(unsigned leaf_idx = 0; leaf_idx < leaf_cell_pos.size(); leaf_idx++) {
-			// TODO TODO: where to put the conversion factor
-			
-			
+		for(unsigned leaf_idx = 0; leaf_idx < leaf_cell_pos.size(); leaf_idx++) {			
 			rho=leaf_cell_density[leaf_idx]/CORRECTIONFACTOR;
 			dx=leaf_cell_size[leaf_idx];
 			RAMSES::AMR::vec<double> pos=leaf_cell_pos[leaf_idx];
@@ -567,13 +593,39 @@ int vtkRamsesReader::RequestData(vtkInformation*,
 			}
 		}
 		
+    // Finally summing the total_particles and mass_leftover accross all processors if necessary
+		if(this->Controller!=NULL) {
+      double total_mass_leftover_local[1] = {mass_leftover};
+      double total_mass_leftover_global[1];      
+      
+      double total_particles_local[1] = {total_particles};
+      double total_particles_global[1];      
+      
+      this->Controller->AllReduce(total_mass_leftover_local, total_mass_leftover_global, 1, vtkCommunicator::SUM_OP);
+      this->Controller->AllReduce(total_particles_local, total_particles_global, 1, vtkCommunicator::SUM_OP);
+      
+      mass_leftover=total_mass_leftover_global[0];
+      total_particles=total_particles_global[0];
+    }
+    
+    
 		
 		
-		
-		// finally we want to distribute leftover_particles = floor(mass_leftover/particle_mass) over entire volume
+		// finally we want to distribute leftover_particles = floor(mass_leftover/particle_mass) over entire volume. Have only processor zero do this, for now
 		unsigned leftover_particles =floor(mass_leftover/particle_mass);
+    unsigned leftover_particles_thisproc = leftover_particles;
 		double g_x,g_y,g_z=0;
-		for(unsigned i=0; i < leftover_particles; i++) {
+		if(this->Controller!=NULL) {
+      int size=this->Controller->GetNumberOfProcesses();
+      int rank=this->Controller->GetLocalProcessId();
+      leftover_particles_thisproc = floor(leftover_particles/size);
+      if(rank==0){
+        // process 0 takes the extra particles
+        leftover_particles_thisproc+=(leftover_particles-leftover_particles_thisproc*size);
+      }      
+    }    
+    
+    for(unsigned i=0; i < leftover_particles_thisproc; i++) {
 			gas_id+=1;
 			g_x=dRandInRange(0,1);
 			g_y=dRandInRange(0,1);
@@ -592,14 +644,25 @@ int vtkRamsesReader::RequestData(vtkInformation*,
 			ids.push_back(gas_id);
 			type.push_back(RAMSES_GAS);
 		}
-		
+    
+    // syncronizing the total number of gas particele
+    if(this->Controller!=NULL) {
+      double total_gaspart_local[1] = {gas_id};
+      double total_gaspart_global[1];      
+      
+      this->Controller->AllReduce(total_gaspart_local, total_gaspart_global, 1, vtkCommunicator::SUM_OP);      
+      gas_id=total_gaspart_global[0];
+    }    
 		// finally we may have a very small amount of mass leftover which we will in principle want to distribute
 		// over all particles 
 		double final_mass_leftover=mass_leftover-leftover_particles*particle_mass;
-		gas_mass_correction = final_mass_leftover/(-1*gas_id-1); // correct every gas particle by adding this much mass
+		gas_mass_correction = final_mass_leftover/(gas_id-1); // correct every gas particle by adding this much mass
+     vtkErrorMacro(" mass leftover " << mass_leftover << " vs. particle_mass " << particle_mass << " so finally there are some leftove\
+     r particles to dist over entire volue: " << leftover_particles << "finally there is some leftover mass to distribute over all gas particles: " << final_mass_leftover << " with a mas\
+     s correction of " << gas_mass_correction);
 		
 	}	
-	*/
+
 	//--------------------------------
 	// here's where the ParaView specific code comes in
 	
@@ -609,7 +672,7 @@ int vtkRamsesReader::RequestData(vtkInformation*,
 	// Loop through and add to PV arrays
 	double pos[3];
 	double vel[3];
-	double rho[3] = {0.0,0.0,0.0};
+	double den[3] = {0.0,0.0,0.0};
 	double pmass;
 	
 	// TODO: ignoring age and metals for now.
@@ -637,7 +700,7 @@ int vtkRamsesReader::RequestData(vtkInformation*,
 
 		// These currently are unused, should be removed
 		if (this->Potential) this->Potential->SetTuple1(i,0.0);		
-	  if (this->RHO)         this->RHO->SetTuple(i, rho);
+	  if (this->RHO)         this->RHO->SetTuple(i, den);
 		if (this->Temperature) this->Temperature->SetTuple1(i, 0.0);
 		if (this->Hsmooth)     this->Hsmooth->SetTuple1(i, 0.0);
 		if (this->EPS)    this->EPS->SetTuple1(i, 0.0);
@@ -685,8 +748,7 @@ int vtkRamsesReader::RequestData(vtkInformation*,
 //----------------------------------------------------------------------------
 // Below : Boiler plate code to handle selection of point arrays
 //----------------------------------------------------------------------------
-const char* vtkRamsesReader::GetPointArrayName(int index)
-{
+const char* vtkRamsesReader::GetPointArrayName(int index) {
   return this->PointDataArraySelection->GetArrayName(index);
 }
 //----------------------------------------------------------------------------
