@@ -21,6 +21,7 @@
 #include <vtkstd/vector>
 class vtkPointSet;
 class vtkMultiProcessController;
+class vtkPlane;
 //----------------------------------------------------------------------------
 
 enum ProfileMPIData 
@@ -58,6 +59,18 @@ public:
   // Get/Set the number of bins
   vtkSetMacro(BinNumber,int);
   vtkGetMacro(BinNumber,int);
+  
+  
+  // Description:
+  // Get/Set the Profile Axis
+  vtkSetVector3Macro(ProfileAxis,double);
+  vtkGetVectorMacro(ProfileAxis,double,3);
+
+  // Description:
+  // Get/Set the number of bins
+  vtkSetMacro(ProfileHeight,double);
+  vtkGetMacro(ProfileHeight,double);
+
   // Description:
   // Specify the point locations used to probe input. Any geometry
   // can be used. New style. Equivalent to SetInputConnection(1, algOutput).
@@ -136,6 +149,16 @@ protected:
   // Description:
 	// Center around which to compute radial bins
 	double Center[3];
+  
+  // Description:
+	// If non-zero specified, cylindrical profiles are computed about this axis
+	double ProfileAxis[3];
+
+  // Description:
+  // if specified and non zero, items above this height from center are ignored in profile
+	// user intput, with default
+	double ProfileHeight;
+
   // Description:
 	// Number of bins to use
 	// user intput, with default

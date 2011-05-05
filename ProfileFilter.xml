@@ -74,6 +74,29 @@
           The value of this property specifies the number of bins for the histogram.
         </Documentation>
      </IntVectorProperty>
+     
+     <DoubleVectorProperty name="ProfileAxis" 
+       command="SetProfileAxis" 
+       number_of_elements="3" 
+       default_values="0 0 0">
+       <Documentation>
+
+        If this is set to value other than 0,0,0 then a cylindrical profile instead of spherical profile is undertaken about the profile axis specified here.
+       </Documentation>
+     </DoubleVectorProperty>
+
+     
+     
+     <DoubleVectorProperty name="ProfileHeight" 
+       command="SetProfileHeight" 
+       number_of_elements="1" 
+       default_values="0">
+       <Documentation>
+         
+         If this is set to value other than 0, then all points beyond this radius are ignored for the spherical profile or above this height from the plane perpendicular to the normal vector are ignored for a cylindrical profile.
+       </Documentation>
+     </DoubleVectorProperty>
+
       <Hints>
 	  	<View type="SpreadSheetView" />
       	<Visibility replace_input="0" />

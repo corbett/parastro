@@ -20,6 +20,8 @@
 #include "vtkMultiProcessController.h"
 #include "vtkSmartPointer.h"
 #include "vtkPointData.h"
+#include "vtkLine.h"
+#include "vtkPlane.h"
 #include <cmath>
 using vtkstd::string;
 
@@ -272,9 +274,31 @@ void vtkProfileFilter::SetBoundsAndBinExtents(vtkPointSet* input,
 //----------------------------------------------------------------------------
 int vtkProfileFilter::GetBinNumber(double x[])
 {
-	double distanceToCenter = \
-		sqrt(vtkMath::Distance2BetweenPoints(this->Center,x));
-	return floor(distanceToCenter/this->BinSpacing);
+  double distanceToCenter;
+  if(this->ProfileAxis[0]==0 && this->ProfileAxis[1]==0 && this->ProfileAxis[2]==0) {// spherical profile
+		distanceToCenter = sqrt(vtkMath::Distance2BetweenPoints(this->Center,x));
+  }	
+  else {
+    distanceToCenter = vtkLine::DistanceToLine(x, this->Center, this->ProfileAxis);
+  }
+  
+  if(this->ProfileHeight!=0) {
+    if(this->ProfileAxis[0]==0 && this->ProfileAxis[1]==0 && this->ProfileAxis[2]==0){ //spherical profile
+      if(distanceToCenter > this->ProfileHeight){
+        return -1;
+      }
+    }
+    else {
+      double projectedPoint[3];
+      vtkPlane::ProjectPoint(x, this->Center, this->ProfileAxis, projectedPoint); // TODO: this ProfileAxis is not the correct normal vector 
+      if( sqrt(vtkMath::Distance2BetweenPoints(x,projectedPoint)) > this->ProfileHeight) {
+        return -1;
+      }
+    }
+    
+  }  
+    
+  return floor(distanceToCenter/this->BinSpacing);
 }
 
 
@@ -352,6 +376,10 @@ void vtkProfileFilter::UpdateBinStatistics(vtkPointSet* input,
 	// Many of the quantities explicitely require the velocity
 	double* v=GetDataValue(input,"velocity",pointGlobalId);
 	int binNum=this->GetBinNumber(x);
+  if(binNum < 0){
+    // This indicates the point is not to be included.
+    return;
+  }
 	this->UpdateBin(binNum,ADD,"number in bin",TOTAL,1.0,output);	
 	this->UpdateCumulativeBins(binNum,ADD,
 		"number in bin",CUMULATIVE,1.0,output);	
