@@ -222,7 +222,7 @@ protected:
 	// Description:
 	// returns the bin number in which this point lies.
 	int GetBinNumber(double x[]);
-	
+	  
 	// Description:
 	// Updates the data values of attribute specified in attributeName
 	// in the bin specified by binNum, either additively or 	

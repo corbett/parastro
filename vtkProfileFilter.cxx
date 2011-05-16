@@ -315,7 +315,12 @@ void vtkProfileFilter::InitializeBins(vtkPointSet* input,
 		{
 		this->UpdateBin(binNum,SET,
 			"bin radius",TOTAL,(binNum+1)*this->BinSpacing,output);
+    this->UpdateBin(binNum,SET,
+       "bin radius min",TOTAL,binNum*this->BinSpacing,output);
+      
 		}
+  
+  
 	// always need this for averages
 	AllocateDataArray(output,GetColumnName("number in bin",TOTAL).c_str(),
 		1,this->BinNumber);
