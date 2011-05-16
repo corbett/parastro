@@ -306,10 +306,15 @@ int vtkProfileFilter::GetBinNumber(double x[])
 void vtkProfileFilter::InitializeBins(vtkPointSet* input,
 	vtkTable* output)
 {
-	// the first column will be the bin radius
+	// the first column will be the bin radius (max)
 	string binRadiusColumnName=this->GetColumnName("bin radius",
 		TOTAL);
+  // the second column will  be the bin radius (min)
+  string binRadiusMinColumnName=this->GetColumnName("bin radius min",
+                                                 TOTAL);
 	AllocateDataArray(output,binRadiusColumnName.c_str(),1,this->BinNumber);
+  AllocateDataArray(output,binRadiusMinColumnName.c_str(),1,this->BinNumber);
+
 	// setting the bin radii in the output
 	for(int binNum = 0; binNum < this->BinNumber; ++binNum)
 		{
