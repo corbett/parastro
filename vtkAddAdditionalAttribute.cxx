@@ -20,6 +20,9 @@
 #include "vtkMultiProcessController.h"
 #include <vtkstd/string>
 #include "vtkMath.h"
+#include <stdio.h>
+#include <stdlib.h>
+
 
 vtkCxxRevisionMacro(vtkAddAdditionalAttribute, "$Revision: 1.72 $");
 vtkStandardNewMacro(vtkAddAdditionalAttribute);
@@ -68,23 +71,25 @@ int vtkAddAdditionalAttribute::FillInputPortInformation(int,
 int vtkAddAdditionalAttribute::ReadAdditionalAttributeFile(
 	vtkDataArray* globalIdArray, vtkPointSet* output)
 {
-	// open file
-	ifstream attributeInFile(this->AttributeFile);
-	if(strcmp(this->AttributeFile,"")==0||!attributeInFile)
- 		{
- 		vtkErrorMacro("Error opening attribute file: " << this->AttributeFile);
-		return 0;
- 		}
-	if(strcmp(this->AttributeName,"")==0)	
-		{
-		vtkErrorMacro("Please specify an attribute name.");
-		return 0;
-		}
+  if(strcmp(this->AttributeName,"")==0)	
+  {
+    vtkErrorMacro("Please specify an attribute name.");
+    return 0;
+  }
+
 	// this algorithm only works if we first sort the globalIdArray
 	// in increasing order of ids. then only the first
 	// call to SeekInAsciiAttribute has the possibility to involve a long seek.
   if(this->AttributeFileFormatType==FORMAT_SKID_ASCII)
   {
+    // open file
+    ifstream attributeInFile(this->AttributeFile);
+    if(strcmp(this->AttributeFile,"")==0||!attributeInFile)
+ 		{
+      vtkErrorMacro("Error opening attribute file: " << this->AttributeFile);
+      return 0;
+ 		}
+
     vtkSortDataArray::Sort(globalIdArray);
     if(globalIdArray->GetNumberOfTuples() == \
       output->GetPoints()->GetNumberOfPoints())
@@ -110,30 +115,31 @@ int vtkAddAdditionalAttribute::ReadAdditionalAttributeFile(
           &attributeData);			
         }
       }
+    // closing file
+    attributeInFile.close();
+
   }
   else if(this->AttributeFileFormatType==FORMAT_HOP_DENSITY_BIN)
   {
-    // This part not yet supported in Parallel!
-    int numberParticles;
-    int attributeData;
-    double dAttributeData;
-    attributeInFile >> numberParticles;
-    vtkErrorMacro("Number Particles" << numberParticles);
-    for(int localId=0; localId < numberParticles; localId++) 
-    {
-      attributeInFile >> attributeData;
-      dAttributeData = (double)attributeData;
-      SetDataValue(output,this->AttributeName,localId,&dAttributeData);	      
-    }
+     // This part not yet supported in Parallel!
+    // TODO: check file opens correctly
+     FILE *infile = fopen(this->AttributeFile, "r");
+     int numberParticles[1];
+     int error = fread(numberParticles, sizeof(int),1, infile);
+     float attributeData[1];
+     for(int localId=0; localId < numberParticles[0]; localId++)
+     {
+       error = fread(attributeData, sizeof(float),1, infile);
+       SetDataValue(output,this->AttributeName,localId,
+                    &attributeData[0]);			
+       
+     }
     return 1;
     
   }
   else {
     return 0;
   }
-  // closing file
-  attributeInFile.close();
-  return 1;
 }
 
 //----------------------------------------------------------------------------
