@@ -83,35 +83,57 @@ int vtkAddAdditionalAttribute::ReadAdditionalAttributeFile(
 	// this algorithm only works if we first sort the globalIdArray
 	// in increasing order of ids. then only the first
 	// call to SeekInAsciiAttribute has the possibility to involve a long seek.
-	vtkSortDataArray::Sort(globalIdArray);
-	if(globalIdArray->GetNumberOfTuples() == \
-		output->GetPoints()->GetNumberOfPoints())
-		{
-		// read additional attribute for all particles
-		AllocateDataArray(output,this->AttributeName,1,
-			output->GetPoints()->GetNumberOfPoints());		
-		double attributeData;
-		//always skip the header, which is the total number of bodies
-		attributeInFile >> attributeData;
-		unsigned long formerGlobalId = -1;
-		for(unsigned long localId=0; 
-			localId < globalIdArray->GetNumberOfTuples(); 
-			localId++)
-			{
-			vtkIdType globalId = globalIdArray->GetComponent(localId,0);
-			// seeking to next data id
-			attributeData = SeekInAsciiAttributeFile(attributeInFile,
-				globalId-formerGlobalId);
-			formerGlobalId=globalId;
-			// place attribute data in output
-			SetDataValue(output,this->AttributeName,localId,
-				&attributeData);			
-			}
-		// closing file
-		attributeInFile.close();
-		return 1;
-		}
- 	return 0;
+  if(this->AttributeFileFormatType==FORMAT_SKID_ASCII)
+  {
+    vtkSortDataArray::Sort(globalIdArray);
+    if(globalIdArray->GetNumberOfTuples() == \
+      output->GetPoints()->GetNumberOfPoints())
+      {
+      // read additional attribute for all particles
+      AllocateDataArray(output,this->AttributeName,1,
+        output->GetPoints()->GetNumberOfPoints());		
+      double attributeData;
+      //always skip the header, which is the total number of bodies
+      attributeInFile >> attributeData;
+      unsigned long formerGlobalId = -1;
+      for(unsigned long localId=0; 
+        localId < globalIdArray->GetNumberOfTuples(); 
+        localId++)
+        {
+        vtkIdType globalId = globalIdArray->GetComponent(localId,0);
+        // seeking to next data id
+        attributeData = SeekInAsciiAttributeFile(attributeInFile,
+          globalId-formerGlobalId);
+        formerGlobalId=globalId;
+        // place attribute data in output
+        SetDataValue(output,this->AttributeName,localId,
+          &attributeData);			
+        }
+      }
+  }
+  else if(this->AttributeFileFormatType==FORMAT_HOP_DENSITY_BIN)
+  {
+    // This part not yet supported in Parallel!
+    int numberParticles;
+    int attributeData;
+    double dAttributeData;
+    attributeInFile >> numberParticles;
+    vtkErrorMacro("Number Particles" << numberParticles);
+    for(int localId=0; localId < numberParticles; localId++) 
+    {
+      attributeInFile >> attributeData;
+      dAttributeData = (double)attributeData;
+      SetDataValue(output,this->AttributeName,localId,&dAttributeData);	      
+    }
+    return 1;
+    
+  }
+  else {
+    return 0;
+  }
+  // closing file
+  attributeInFile.close();
+  return 1;
 }
 
 //----------------------------------------------------------------------------

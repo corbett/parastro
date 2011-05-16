@@ -53,7 +53,18 @@
 	    Additional attribute files set are merged into existing input. Only works in serial.
 		</Documentation>
 	  </StringVectorProperty>
-	  <StringVectorProperty
+     
+     
+     <IntVectorProperty name="AttributeFileFormatType" command="SetAttributeFileFormatType"
+       number_of_elements="1" default_values="0">
+       <EnumerationDomain name="enum">
+         <Entry value="0" text="SKID ascii"/>
+         <Entry value="1" text="HOP density binary"/>
+       </EnumerationDomain>
+     </IntVectorProperty>
+
+     
+     <StringVectorProperty
 		name="AttributeName"
 		command="SetAttributeName"
 		number_of_elements="1"

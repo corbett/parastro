@@ -22,6 +22,12 @@
 #define __vtkAddAdditionalAttribute_h
 #include "vtkPointSetAlgorithm.h"
 
+enum FileFormat 
+{
+  FORMAT_SKID_ASCII=0,
+  FORMAT_HOP_DENSITY_BIN=1
+};
+
 class VTK_EXPORT vtkAddAdditionalAttribute : public vtkPointSetAlgorithm
 {
 public:
@@ -36,6 +42,12 @@ public:
   // Set/Get the name of the additional attribute
   vtkSetStringMacro(AttributeName);
   vtkGetStringMacro(AttributeName);
+  
+  // Description:
+  // Set/Get the name of the additional attribute
+  vtkSetMacro(AttributeFileFormatType,int);
+  vtkGetMacro(AttributeFileFormatType,int);
+
 
 //BTX
 protected:
@@ -51,7 +63,7 @@ protected:
                           vtkInformationVector*);
 	char* AttributeFile;
 	char* AttributeName;
-
+  int AttributeFileFormatType;
 private:
   vtkAddAdditionalAttribute(const vtkAddAdditionalAttribute&);  // Not implemented.
   void operator=(const vtkAddAdditionalAttribute&);  // Not implemented.
