@@ -127,14 +127,26 @@ int vtkAddAdditionalAttribute::ReadAdditionalAttributeFile(
      int numberParticles[1];
      int error = fread(numberParticles, sizeof(int),1, infile);
      float attributeData[1];
-     for(int localId=0; localId < numberParticles[0]; localId++)
-     {
-       error = fread(attributeData, sizeof(float),1, infile);
-       SetDataValue(output,this->AttributeName,localId,
-                    &attributeData[0]);			
+		 vtkErrorMacro("number hop particles: "<< numberParticles[0]);
+    // read additional attribute for all particles
+    if(numberParticles[0] == \
+			 output->GetPoints()->GetNumberOfPoints()) 
+			{
+				AllocateDataArray(output,this->AttributeName,1,
+													output->GetPoints()->GetNumberOfPoints());		
+
+				for(int localId=0; localId < numberParticles[0]; localId++)
+					{
+						error = fread(attributeData, sizeof(float),1, infile);
+						SetDataValue(output,this->AttributeName,localId,
+												 &attributeData[0]);			
        
-     }
-    return 1;
+					}
+		    return 1;
+			}
+		else {
+			vtkErrorMacro("number of points in input must be equal to number of points in HOP file " << numberParticles[0]);
+		}
     
   }
   else {
