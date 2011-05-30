@@ -273,6 +273,7 @@ int vtkRamsesReader::RequestData(vtkInformation*,
 	RAMSES::snapshot rsnap(filename , RAMSES::version3);    
 	vtkDebugMacro("simulation has " << rsnap.m_header.ncpu << " domains");
 
+
   
   
 
@@ -283,6 +284,133 @@ int vtkRamsesReader::RequestData(vtkInformation*,
       vtkSmartPointer<vtkPolyData>::New();  
 	int mympirank=vtkMultiProcessController::GetGlobalController()->GetLocalProcessId();
     
+
+  /*
+   Storing meta data
+   */
+  
+  vtkFieldData* fd = vtkFieldData::New();
+
+
+
+  
+ 
+  vtkIntArray* nCpuArray = vtkIntArray::New();
+  nCpuArray->SetName("ncpu");  
+  nCpuArray->InsertNextValue(rsnap.m_header.ncpu);
+  fd->AddArray(nCpuArray);
+  
+  vtkIntArray* nDimArray = vtkIntArray::New();
+  nDimArray->SetName("ndim");  
+  nDimArray->InsertNextValue(rsnap.m_header.ndim);
+  fd->AddArray(nDimArray);
+
+  vtkIntArray* levelmaxArray= vtkIntArray::New();
+  levelmaxArray->SetName("levelmax");
+  levelmaxArray->InsertNextValue(rsnap.m_header.levelmax);
+  fd->AddArray(levelmaxArray);
+  
+  vtkIntArray* levelMinArray = vtkIntArray::New();
+  levelMinArray->SetName("levelmin");
+  levelMinArray->InsertNextValue(rsnap.m_header.levelmin);
+  fd->AddArray(levelMinArray);
+
+  
+  vtkIntArray* ngridMaxArray = vtkIntArray::New();
+  ngridMaxArray->SetName("ngridmax");
+  ngridMaxArray->InsertNextValue((int)rsnap.m_header.ngridmax);
+  fd->AddArray(ngridMaxArray);
+
+  
+  vtkIntArray* nstepcoarseArray = vtkIntArray::New();
+  nstepcoarseArray->SetName("nstep_coarse");
+  nstepcoarseArray->InsertNextValue(rsnap.m_header.nstep_coarse);
+  fd->AddArray(nstepcoarseArray);
+  
+  
+  vtkDoubleArray* h0Array = vtkDoubleArray::New();
+  h0Array->SetName("h0");
+  h0Array->InsertNextValue(rsnap.m_header.H0);
+  fd->AddArray(h0Array);
+  
+  vtkDoubleArray* boxlenArray = vtkDoubleArray::New();
+  boxlenArray->SetName("boxlen");
+  boxlenArray->InsertNextValue(rsnap.m_header.boxlen);
+  fd->AddArray(boxlenArray);
+  
+  vtkDoubleArray* aexpArray = vtkDoubleArray::New();
+  aexpArray->SetName("aexp");
+  aexpArray->InsertNextValue(rsnap.m_header.aexp);
+  fd->AddArray(aexpArray);
+  
+  // TODO:
+  vtkDoubleArray* omega_bArray = vtkDoubleArray::New();
+  omega_bArray->SetName("omega_b");
+  omega_bArray->InsertNextValue(rsnap.m_header.omega_b);
+  fd->AddArray(omega_bArray);
+
+  vtkDoubleArray* omega_kArray = vtkDoubleArray::New();
+  omega_kArray->SetName("omega_k");
+  omega_kArray->InsertNextValue(rsnap.m_header.omega_k);
+  fd->AddArray(omega_kArray);
+
+  vtkDoubleArray* omega_lArray = vtkDoubleArray::New();
+  omega_lArray->SetName("omega_l");
+  omega_lArray->InsertNextValue(rsnap.m_header.omega_l);
+  fd->AddArray(omega_lArray);
+
+  
+  vtkDoubleArray* omega_mArray = vtkDoubleArray::New();
+  omega_mArray->SetName("omega_m");
+  omega_mArray->InsertNextValue(rsnap.m_header.omega_m);
+  fd->AddArray(omega_mArray);
+  
+  
+  vtkDoubleArray* unit_dArray = vtkDoubleArray::New();
+  unit_dArray->SetName("unit_d");
+  unit_dArray->InsertNextValue(rsnap.m_header.unit_d);
+  fd->AddArray(unit_dArray);
+
+  vtkDoubleArray* unit_lArray = vtkDoubleArray::New();
+  unit_lArray->SetName("unit_l");
+  unit_lArray->InsertNextValue(rsnap.m_header.unit_l);
+  fd->AddArray(unit_lArray);
+
+  vtkDoubleArray* unit_tArray = vtkDoubleArray::New();
+  unit_tArray->SetName("unit_t");
+  unit_tArray->InsertNextValue(rsnap.m_header.unit_t);
+  fd->AddArray(unit_tArray);
+
+  
+  vtkDoubleArray* timeArray = vtkDoubleArray::New();
+  timeArray->SetName("time");
+  timeArray->InsertNextValue(rsnap.m_header.time);
+  fd->AddArray(timeArray);
+  
+  
+  output->SetFieldData(fd);
+  
+  nCpuArray->Delete();
+  nDimArray->Delete();
+  levelmaxArray->Delete();
+  levelMinArray->Delete();
+  ngridMaxArray->Delete();
+  nstepcoarseArray->Delete();
+  h0Array->Delete();
+  boxlenArray->Delete();
+  aexpArray->Delete();
+  omega_bArray->Delete();
+  omega_kArray->Delete();
+  omega_lArray->Delete();
+  omega_mArray->Delete();
+  unit_dArray->Delete();
+  unit_lArray->Delete();
+  unit_tArray->Delete();
+  timeArray->Delete();
+
+  fd->Delete();
+
+  
   //... distribute the domain among the available MPI tasks
   //... each task will have to deal with the domains stored in the 'mycpus' array inside compound_data
 
@@ -303,7 +431,7 @@ int vtkRamsesReader::RequestData(vtkInformation*,
   
   //... read tree structure for multiple domains; need this for particle and AMR
   multi_tree trees(rsnap, mydomains);
-  vtkErrorMacro("read multi trees");
+  vtkDebugMacro("read multi trees");
 
 	// Reading in Particle Data if available 
 	if(this->HasParticleData) {
@@ -415,7 +543,7 @@ int vtkRamsesReader::RequestData(vtkInformation*,
       
       }
 
-    vtkErrorMacro("finished reading and x is of size " << x.size() );
+    vtkDebugMacro("finished reading and x is of size " << x.size() );
 
 		// computing minimum_darkparticle_mass and separating dark, star (later gas)
     min_darkparticle_mass=DBL_MAX;
@@ -439,7 +567,7 @@ int vtkRamsesReader::RequestData(vtkInformation*,
       this->Controller->AllReduce(min_darkparticle_mass_local, min_darkparticle_mass_global, 1, vtkCommunicator::MIN_OP);
       min_darkparticle_mass=min_darkparticle_mass_global[0];
     }
-    vtkErrorMacro("minimum darkparticle mass is"<< min_darkparticle_mass)
+    vtkDebugMacro("minimum darkparticle mass is"<< min_darkparticle_mass)
 	}	
 
 	// GAS PARTICLE CONVERSION
@@ -448,6 +576,7 @@ int vtkRamsesReader::RequestData(vtkInformation*,
   // TODOCRIT: add this *back* in when we are ready with MPI
    
 	if(!dark_only) {
+    vtkErrorMacro("reading amr data");
     //... read hydro data for multiple domains
     multi_amr data( rsnap, *trees );    
     //... actually read a field from disk
@@ -470,7 +599,7 @@ int vtkRamsesReader::RequestData(vtkInformation*,
 		
 		std::vector<double> leaf_cell_density;
 		std::vector<double> leaf_cell_size;
-
+    vtkErrorMacro("looping over all domains that we hold");
     
     //... loop over all domains that we hold
     for( unsigned i=0; i<mydomains.size(); ++i ) {
@@ -510,6 +639,8 @@ int vtkRamsesReader::RequestData(vtkInformation*,
       }
     }
     
+    vtkErrorMacro("Finally summing the total_mass and total_volume accross all processors if necessary");
+
     // Finally summing the total_mass and total_volume accross all processors if necessary
 		if(this->Controller!=NULL) {
       double total_mass_local[1] = {total_mass};
@@ -543,6 +674,7 @@ int vtkRamsesReader::RequestData(vtkInformation*,
 		
 		double particle_mass = this->ParticleMassGuess;
 		if(particle_mass==0) {
+      vtkErrorMacro("getting information out of the header about the conversion factor and the particle mass");
       // TODO: here we should check if these exist at all in the header
 			double conversion_factor = rsnap.m_header.omega_b / (rsnap.m_header.omega_m-rsnap.m_header.omega_b);
 			unsigned particle_number_guess = floor(total_mass/(min_darkparticle_mass*conversion_factor))+1;
@@ -556,7 +688,6 @@ int vtkRamsesReader::RequestData(vtkInformation*,
 		
     // TODO: here the gas_id will not be consistent across processors
 		int gas_id=x.size();
-		
 		for(unsigned leaf_idx = 0; leaf_idx < leaf_cell_pos.size(); leaf_idx++) {			
 			rho=leaf_cell_density[leaf_idx]/CORRECTIONFACTOR;
 			dx=leaf_cell_size[leaf_idx];
@@ -592,7 +723,6 @@ int vtkRamsesReader::RequestData(vtkInformation*,
 				type.push_back(RAMSES_GAS);
 			}
 		}
-		
     // Finally summing the total_particles and mass_leftover accross all processors if necessary
 		if(this->Controller!=NULL) {
       double total_mass_leftover_local[1] = {mass_leftover};
@@ -609,7 +739,7 @@ int vtkRamsesReader::RequestData(vtkInformation*,
     }
     
     
-		
+    vtkErrorMacro("finally we want to distribute leftover_particles = floor(mass_leftover/particle_mass) over entire volume. Have only processor zero do this, for now");
 		
 		// finally we want to distribute leftover_particles = floor(mass_leftover/particle_mass) over entire volume. Have only processor zero do this, for now
 		unsigned leftover_particles =floor(mass_leftover/particle_mass);
