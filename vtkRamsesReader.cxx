@@ -559,6 +559,9 @@ int vtkRamsesReader::RequestData(vtkInformation*,
 					min_darkparticle_mass = std::min(min_darkparticle_mass,mass[i]);
 				}
 			}
+      else{
+        type.push_back(RAMSES_SINK);
+      }
 		}
     // Finally syncronizing the min_darkparticle_mass accross all processors if necessary
 		if(this->Controller!=NULL) {
