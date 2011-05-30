@@ -421,7 +421,7 @@ int vtkRamsesReader::RequestData(vtkInformation*,
   // reset counter before reading
   this->ParticleIndex = 0;
 
-	bool dark_only=true;
+	bool dark_only=false;
 	double min_darkparticle_mass;
 	std::vector<double> x, y, z, vx,vy,vz,  mass;
 	std::vector<double> age, metals;
@@ -431,11 +431,8 @@ int vtkRamsesReader::RequestData(vtkInformation*,
   
   //... read tree structure for multiple domains; need this for particle and AMR
   multi_tree trees(rsnap, mydomains);
-  vtkDebugMacro("read multi trees");
-
 	// Reading in Particle Data if available 
 	if(this->HasParticleData) {
-    
 		dark_only=true;
 		// so reading all particles
 		// Open particle data source for first cpu
@@ -682,7 +679,6 @@ int vtkRamsesReader::RequestData(vtkInformation*,
 			double conversion_factor = rsnap.m_header.omega_b / (rsnap.m_header.omega_m-rsnap.m_header.omega_b);
 			unsigned particle_number_guess = floor(total_mass/(min_darkparticle_mass*conversion_factor))+1;
 			particle_mass = total_mass/particle_number_guess;// ndm=mdm*omegab/(omegam-omegab), valid for cosmorun, otherwise m_sph, otherwise request from user
-			
 		}
 		double mass_leftover = 0.0;
 		
