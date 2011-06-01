@@ -35,7 +35,6 @@
 #include "RAMSES_amr_data.hh"
 #include "RAMSES_hydro_data.hh"
 #include "RAMSES_mpi.hh"
-#include "mpi.h"
 vtkCxxRevisionMacro(vtkRamsesReader, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkRamsesReader);
 
